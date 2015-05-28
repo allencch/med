@@ -28,11 +28,13 @@ Scanning & filtering
 Manage address
 --------------
 The scanned or stored memory addresses, you can
+
 1. edit the data type.
 2. modify the memory address.
 3. edit the value.
 
 At the right pane, you can
+
 1. add **new** memory address and edit manually.
 2. **delete** the selected memory address.
 3. **shift** all the memory address in the right pane to a target position. For example, one of the item, namely Gold, memory address is 0x20de9b94, after you restart the game, the memory address is changed to 0x20c3cb80. In order to shift the memory together with other items (in the right pane), copy paste 0x20de9b94 to the entry after the **Delete** button, and 0x20c3cb80 to the entry before **Shift** button. Then click **Shift**, all the address wil be shifted.
