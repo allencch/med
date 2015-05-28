@@ -238,7 +238,7 @@ void scan(GtkButton *button,gpointer data) {
   
   //Show the results at the scanTreeView
   GtkListStore* store = GTK_LIST_STORE(gtk_builder_get_object(builder, "scanStore"));
-  if(scanner.addresses.size() <= 1000) {
+  if(scanner.addresses.size() <= 800) {
     addressToScanStore(scanner,pid,scanType,store);
   }
   updateNumberOfAddresses(builder);
@@ -285,7 +285,7 @@ void filter(GtkButton *button,gpointer data) {
   
   //Show the results at the scanTreeView
   GtkListStore* store = GTK_LIST_STORE(gtk_builder_get_object(builder, "scanStore"));
-  if(scanner.addresses.size() <= 100) {
+  if(scanner.addresses.size() <= 800) {
     addressToScanStore(scanner,pid,scanType,store);
   }
   
@@ -711,21 +711,31 @@ void refreshScanTreeView(GtkBuilder* builder) {
   
   GValue value = G_VALUE_INIT;
   while(gtk_list_store_iter_is_valid(model,&iter)) {
+    long address;
     try {
       gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 0, &value);
-      long address = hexToInt(string(g_value_get_string(&value)));
+      address = hexToInt(string(g_value_get_string(&value)));
       g_value_unset(&value);
       
-      gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 1, &value);
-      string scanType = string(g_value_get_string(&value));
-      g_value_unset(&value);
+    } catch(string e) {
+      cerr << e <<endl;
+      gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter); //Continue next
+    }
+    
+    
+    gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 1, &value);
+    string scanType = string(g_value_get_string(&value));
+    g_value_unset(&value);
       
+    try {
       string value2 = memValue(pid, address, scanType);
       gtk_list_store_set(model, &iter, 2, value2.c_str(), -1);
-      
       gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter);
-    } catch(string e) { }
-    
+      
+    } catch(string e) { 
+      gtk_list_store_set(model, &iter, 2, "Error memory", -1);
+      gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter);
+    }
   }
 }
 
@@ -746,21 +756,28 @@ void refreshAddressTreeView(GtkBuilder* builder) throw(string) {
   
   GValue value = G_VALUE_INIT;
   while(gtk_list_store_iter_is_valid(model,&iter)) {
+    long address;
     try {
       gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 1, &value);
-      long address = hexToInt(string(g_value_get_string(&value)));
+      address = hexToInt(string(g_value_get_string(&value)));
       g_value_unset(&value);
       
-      gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 2, &value);
-      string scanType = string(g_value_get_string(&value));
-      g_value_unset(&value);
+    } catch(string e) {
+      cerr << e <<endl;
+      gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter); //Continue next
+    }
       
+    gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 2, &value);
+    string scanType = string(g_value_get_string(&value));
+    g_value_unset(&value);
+      
+    try {
       string value2 = memValue(pid, address, scanType);
       gtk_list_store_set(model, &iter, 3, value2.c_str(), -1);
-      
       gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter);
     } catch(string e) {
-      throw e;
+      gtk_list_store_set(model, &iter, 3, "Error memory", -1);
+      gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter);
     }
     
   }
