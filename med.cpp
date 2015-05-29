@@ -747,15 +747,13 @@ string memValue(long pid, unsigned long address, string scanType) throw (string)
   
   
   if(lseek(memFd,address,SEEK_SET)==-1) {
-    //printf("lseek error: %p, %s\n", address, strerror(errno));
-		free(buf);
+    free(buf);
 		close(memFd);
 		pidDetach(pid);
 		throw string("Address seek fail");
   }
   if(read(memFd,buf,size) == -1) {
-    //printf("read error: %p, %s\n",address, strerror(errno));
-		free(buf);
+    free(buf);
 		close(memFd);
 		pidDetach(pid);
 		throw string("Address read fail");
