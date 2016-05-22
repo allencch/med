@@ -115,7 +115,7 @@ long hexToInt(string str) throw(string) {
  */
 string intToHex(long hex) {
 	char str[64];
-	sprintf(str,"%p",hex);
+	sprintf(str,"%p",(void*)hex);
 	return string(str);
 }
 
@@ -181,7 +181,7 @@ int stringToRaw(string str, ScanType type, uint8_t **buffer) {
 	vector<string> tokens(iit,eos);
 	
 	int size = tokens.size();
-	int retsize;
+	int retsize = 0;
 	uint8_t* buf;
 	
 	switch(type) {
@@ -205,9 +205,12 @@ int stringToRaw(string str, ScanType type, uint8_t **buffer) {
 			retsize = sizeof(double) * size;
 			buf = (uint8_t*)malloc(sizeof(double) * size);
 			break;
+		case Unknown:
+			retsize = 0;
+			break;
 	}
 	
-	for(int i=0;i<tokens.size();i++) {
+	for(unsigned int i=0;i<tokens.size();i++) {
 		stringstream ss(tokens[i]);
 		
 		int temp;
@@ -227,6 +230,8 @@ int stringToRaw(string str, ScanType type, uint8_t **buffer) {
 				break;
 			case Float64:
 				ss >> dec >> *(double*)buf;
+				break;
+			case Unknown:
 				break;
 		}
 		if(ss.fail()) {
@@ -273,7 +278,7 @@ ProcMaps getMaps(pid_t pid) {
 	unsigned long start,end;
 	char rd,wr;
 	int inode;
-	int ret;
+	//int ret;
 	char sp; //shared or private
 	char fname[128];
 	
@@ -283,10 +288,10 @@ ProcMaps getMaps(pid_t pid) {
 	while(fgets(line,255,file)) {
 		//parse line
 		//the empty pathname has to be scan also
-		if(sscanf(line,"%lx-%lx %c%c%c%c %lx %s %u %s",
+		if(sscanf(line,"%lx-%lx %c%c%c%c %s %s %u %s",
 			&start,&end,
 			&rd,&wr,useless,&sp,
-			useless,useless,&inode,filename) <9) {
+			useless,useless,&inode,fname) <9) {
 			continue;
 		}
 		
@@ -354,10 +359,10 @@ int memDump2(pid_t pid,unsigned long address,int size) {
 	for(int i=0;i<size;i+=sizeof(long)) {
 		word = ptrace(PTRACE_PEEKDATA,pid,(void*)(address + i),NULL);
 		if(errno) {
-			printf("Error: 0x%08x, %s\n",address,strerror(errno));
+			printf("Error: %p, %s\n",(void*)address,strerror(errno));
 			return 0;
 		}
-		for(int j=0;j<sizeof(long);j++) {
+		for(unsigned int j=0;j<sizeof(long);j++) {
 			printf("%02x ",*(byteptr+j));
 		}
 	}
@@ -376,12 +381,12 @@ int memDump(pid_t pid,unsigned long address,int size) {
 	uint8_t* buf = (uint8_t*)malloc(size);
 	//for(int i=0;i<size;i++) {
 		if(lseek(memFd,address,SEEK_SET) == -1) {
-			printf("lseek error: 0x%08x, %s\n",address,strerror(errno));
+			printf("lseek error: %p, %s\n",(void*)address,strerror(errno));
 			//continue;
 		}
 		
 		if(read(memFd,buf,size) == -1) {
-			printf("read error: 0x%08x, %s\n",address,strerror(errno));
+			printf("read error: %p, %s\n",(void*)address,strerror(errno));
 			//continue;
 		}
 	//}
@@ -415,7 +420,7 @@ void memWrite2(pid_t pid,unsigned long address,uint8_t* data,int size) {
 		errno = 0;
 		word = ptrace(PTRACE_PEEKDATA,pid,(uint8_t*)(address)+i,NULL);
 		if(errno) {
-			printf("PEEKDATA error: 0x%08x, %s\n",address,strerror(errno));
+			printf("PEEKDATA error: %p, %s\n",(void*)address,strerror(errno));
 			//exit(1);
 		}
 		
@@ -464,7 +469,7 @@ void memWrite(pid_t pid,unsigned long address,uint8_t* data,int size) {
 		word = ptrace(PTRACE_PEEKDATA,pid,(uint8_t*)(address)+i,NULL);
 		
 		if(errno) {
-			printf("PEEKDATA error: 0x%08x, %s\n",address,strerror(errno));
+			printf("PEEKDATA error: %p, %s\n",(void*)address,strerror(errno));
 			//exit(1);
 		}
 		
@@ -502,14 +507,14 @@ void memWriteList(Scanner scanner,pid_t pid,uint8_t* data,int size) {
 	pidAttach(pid);
 	uint8_t* buf = (uint8_t*)malloc(size+sizeof(long)); //plus 8 bytes, to avoid WORD problem, seems like "long" can represent "word"
 	
-	for(int j=0;j<scanner.addresses.size();j++) {
+	for(unsigned int j=0;j<scanner.addresses.size();j++) {
 		
 		long word;
 		for(int i=0;i<size;i+=sizeof(long)) {
 			errno = 0;
 			word = ptrace(PTRACE_PEEKDATA,pid,scanner.addresses[j]+i,NULL);
 			if(errno) {
-				printf("PEEKDATA error: 0x%08x, %s\n",scanner.addresses[j]+i,strerror(errno));
+				printf("PEEKDATA error: %p, %s\n",(void*)(scanner.addresses[j]+i),strerror(errno));
 				//exit(1);
 			}
 			
@@ -541,7 +546,7 @@ void memWriteList2(Scanner scanner,pid_t pid,uint8_t* data,int size) {
 	
 	uint8_t* buf = (uint8_t*)malloc(size+sizeof(long)); //plus 8 bytes, to avoid WORD problem, seems like "long" can represent "word"
 	
-	for(int j=0;j<scanner.addresses.size();j++) {
+	for(unsigned int j=0;j<scanner.addresses.size();j++) {
 		
 		
 		
@@ -550,7 +555,7 @@ void memWriteList2(Scanner scanner,pid_t pid,uint8_t* data,int size) {
 			errno = 0;
 			word = ptrace(PTRACE_PEEKDATA,pid,(void*)(scanner.addresses[j]+i),NULL);
 			if(errno) {
-				printf("PEEKDATA error: 0x%08x, %s\n",scanner.addresses[j]+i,strerror(errno));
+				printf("PEEKDATA error: %p, %s\n",(void*)(scanner.addresses[j]+i),strerror(errno));
 				//exit(1);
 			}
 			
@@ -604,7 +609,7 @@ int memCopy(pid_t pid,unsigned long address,unsigned char* out,int size,bool sho
 		out[i] = ptrace(PTRACE_PEEKDATA,pid,(void*)(address + i),NULL);
 		if(errno) {
 			if(showError) {
-				printf("Error: 0x%08x, %s\n",address,strerror(errno));
+				printf("Error: %p, %s\n",(void*)address,strerror(errno));
 				//exit(1);
 			}
 			return 0;
@@ -632,10 +637,10 @@ void memScanEqual(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
 	int memFd = getMem(pid);
 	
 	//Loop through maps
-	for(int i=0;i<maps.starts.size();i++) {
+	for(unsigned int i=0;i<maps.starts.size();i++) {
 		//printf("maps: %p\t%p\n", maps.starts[i],maps.ends[i]);
 		//Loop each maps to get the "page"
-		for(long int j=maps.starts[i];j<maps.ends[i];j+=getpagesize()) {
+		for(unsigned long int j=maps.starts[i];j<maps.ends[i];j+=getpagesize()) {
 			//printf("address: 0x%08x\n",j);
 			//printf("\t\tAddress: %p\n", j);
 			if(lseek(memFd,j,SEEK_SET) == -1) {
@@ -658,7 +663,7 @@ void memScanEqual(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
 		}
 	}
 	
-	printf("Found %d results\n",scanner.addresses.size());
+	printf("Found %lu results\n",scanner.addresses.size());
 	free(page);
 	close(memFd);
 	
@@ -677,7 +682,7 @@ void memScanFilter(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
 	
 	uint8_t* buf = (uint8_t*)malloc(size);
 	
-	for(int i=0;i<scanner.addresses.size();i++) {
+	for(unsigned int i=0;i<scanner.addresses.size();i++) {
 		if(lseek(memFd,scanner.addresses[i],SEEK_SET) == -1) {
 			//printf("lseek error: 0x%08x, %s\n",scanner.addresses[i],strerror(errno));
 			continue;
@@ -697,7 +702,7 @@ void memScanFilter(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
 	
 	//Remove old one
 	scanner.addresses = addresses;
-	printf("Filtered %d results\n",scanner.addresses.size());
+	printf("Filtered %lu results\n",scanner.addresses.size());
 	close(memFd);
 	pidDetach(pid);
 }
@@ -721,7 +726,7 @@ void memReverse(uint8_t* buf,int size) {
  */ 
 bool addrInMaps(pid_t pid, unsigned long address) {
 	ProcMaps maps = getMaps(pid);
-	for(int i=0;i<maps.starts.size();i++) {
+	for(unsigned int i=0;i<maps.starts.size();i++) {
 		if(address < maps.starts[i] || address > maps.ends[i]) {
 			return false;
 		}
@@ -745,20 +750,19 @@ string memValue(long pid, unsigned long address, string scanType) throw (string)
   uint8_t* buf = (uint8_t*)malloc(size + 1); //+1 for the NULL
   memset(buf,0,size+1);
   
-  
   if(lseek(memFd,address,SEEK_SET)==-1) {
-    free(buf);
+		free(buf);
 		close(memFd);
 		pidDetach(pid);
 		throw string("Address seek fail");
   }
   if(read(memFd,buf,size) == -1) {
-    free(buf);
+		free(buf);
 		close(memFd);
 		pidDetach(pid);
 		throw string("Address read fail");
   }
-  
+	
 	char str[32];
   switch(stringToScanType(scanType)) {
     case Int8:
@@ -776,6 +780,11 @@ string memValue(long pid, unsigned long address, string scanType) throw (string)
     case Float64:
     sprintf(str,"%lf", *(double*)buf);
     break;
+		case Unknown:
+		free(buf);
+		close(memFd);
+	  pidDetach(pid);
+		throw string("Error Type");
   }
   
   free(buf);
