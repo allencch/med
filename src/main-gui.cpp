@@ -39,6 +39,7 @@ using namespace std;
 
 
 Scanner scanner; //Global
+Med med; //Global to replace scanner.
 
 
 static GMutex mutex;

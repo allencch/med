@@ -9,7 +9,14 @@
  * it to C++.
  * By default, all the search is little endian.
  *
- * Todo:
+ * TODO: 2016-05-22
+ * Re-design into object, so that can work smoothly with the GUI.
+ * Previously, I focused on the scanner only. Then modify the value or whatever
+ * happened at the GUI. Now I plan to move every thing to the object, then the frontend
+ * will be designed based on the object.
+ * But I don't intend to put mutex here.
+ *
+ * TODO: (old)
  * Scan integer, float, little endian, big endian, arrays
  * Edit integer, float, little endian, big endian, arrays
  * Dump with hex position
@@ -41,26 +48,26 @@
 using namespace std;
 
 struct ProcMaps {
-	vector<unsigned long> starts;
-	vector<unsigned long> ends;
+  vector<unsigned long> starts;
+  vector<unsigned long> ends;
 };
 
 struct Process {
-	string pid;
-	string cmdline;
+  string pid;
+  string cmdline; //aka "process" in GUI
 };
 
 struct Scanner {
-	vector<unsigned long> addresses;
+  vector<unsigned long> addresses;
 };
 
 enum ScanType {
-	Int8,
-	Int16,
-	Int32,
-	Float32,
-	Float64,
-	Unknown
+  Int8,
+  Int16,
+  Int32,
+  Float32,
+  Float64,
+  Unknown
 };
 
 
@@ -159,5 +166,51 @@ string pidName(string pid);
  * Get the value from the address as string based on the scanType (string)
  */
 string memValue(long pid, unsigned long address, string scanType) throw (string);
+
+
+/**
+ * This is the Scanner replacement
+ */
+class MedScan {
+public:
+  MedScan();
+  unsigned long address;
+
+  string getScanType();
+  void setScanType(string s);
+
+  //No value, because value is calculated based on scan type
+  string getValue(long pid);
+  void setValue(long pid, string val);
+
+private:
+  ScanType scanType;
+
+};
+
+/**
+ * This is the address will be saved, re-use, lock, etc.
+ */
+class MedAddress : MedScan {
+public:
+  MedAddress();
+  string description;
+  bool lock; /**< Not using mutex */
+};
+
+/**
+ * This is the core scanner. Only one scanner
+ */
+class Med {
+public:
+  Med();
+  virtual ~Med();
+
+  vector<Process> processes; /**< This is the list of processes */
+  vector<MedScan> scanner; /**< The memory scanner, replace the Scanner*/
+  vector<MedAddress> addresses;
+
+  Process* selectedProcess;
+};
 
 #endif
