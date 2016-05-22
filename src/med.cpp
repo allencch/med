@@ -857,6 +857,10 @@ string MedScan::getValue(long pid) {
   return memValue(pid, this->address, this->getScanType());
 }
 
+string MedScan::getValue(long pid, string scanType) {
+  return memValue(pid, this->address, scanType);
+}
+
 void MedScan::setValue(long pid, string v) {
   uint8_t* buffer;
   int size = stringToRaw(v, this->scanType, &buffer);
@@ -870,6 +874,22 @@ MedAddress::MedAddress(unsigned long address) : MedScan(address) {}
 Med::Med() {}
 Med::~Med() {}
 
+
+void Med::scanEqual(string v, string t) {
+  uint8_t* buffer = NULL;
+  int size = stringToRaw(v, t, &buffer);
+  Med::memScanEqual(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size);
+  if(buffer)
+    free(buffer);
+}
+
+void Med::scanFilter(string v, string t) {
+  uint8_t* buffer = NULL;
+  int size = stringToRaw(v, t, &buffer);
+  Med::memScanFilter(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size);
+  if(buffer)
+    free(buffer);
+}
 
 /**
  * Scan memory, using procfs mem
@@ -951,4 +971,25 @@ void Med::memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* 
   printf("Filtered %lu results\n",scanAddresses.size());
   close(memFd);
   pidDetach(pid);
+}
+
+vector<Process> Med::listProcesses() {
+  this->processes = pidList();
+  return this->processes;
+}
+
+string Med::getScanAddressValueByIndex(int ind, string scanType) {
+  return this->scanAddresses[ind].getValue(stoi(this->selectedProcess.pid), scanType);
+}
+
+string Med::getValueByAddress(unsigned long address, string scanType) {
+  return memValue(stol(this->selectedProcess.pid), address, scanType);
+}
+
+void Med::setValueByAddress(unsigned long address, string value, string scanType) {
+  uint8_t* buffer = NULL;
+  int size = stringToRaw(string(value), scanType, &buffer);
+  memWrite(stoi(this->selectedProcess.pid), address, buffer, size);
+  if(buffer)
+    free(buffer);
 }

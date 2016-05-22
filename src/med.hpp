@@ -14,7 +14,7 @@
  * Previously, I focused on the scanner only. Then modify the value or whatever
  * happened at the GUI. Now I plan to move every thing to the object, then the frontend
  * will be designed based on the object.
- * But I don't intend to put mutex here.
+ * But I don't intend to put mutex here. (Will think about it)
  *
  * TODO: (old)
  * Scan integer, float, little endian, big endian, arrays
@@ -182,6 +182,7 @@ public:
 
   //No value, because value is calculated based on scan type
   string getValue(long pid);
+  string getValue(long pid, string scanType);
   void setValue(long pid, string val);
 
 private:
@@ -212,11 +213,22 @@ public:
   vector<MedScan> scanAddresses; /**< The memory scanner, replace the Scanner*/
   vector<MedAddress> addresses;
 
-  Process* selectedProcess;
+  Process selectedProcess; /**< Not using pointer yet */
 
-  //TODO: remove parameters
-  void memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size);
-  void memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size);
+
+  void scanEqual(string scanValue, string scanType);
+  void scanFilter(string scanValue, string scanType);
+
+  vector<Process> listProcesses();
+
+  string getScanAddressValueByIndex(int ind, string scanType);
+
+  string getValueByAddress(unsigned long address, string scanType);
+  void setValueByAddress(unsigned long address, string value, string scanType);
+
+private:
+  static void memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size);
+  static void memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size);
 
 };
 

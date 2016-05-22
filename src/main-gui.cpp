@@ -38,7 +38,6 @@
 using namespace std;
 
 
-//Scanner scanner; //Global
 Med med; //Global to replace scanner.
 
 
@@ -50,7 +49,9 @@ static string guiStatus;
 //Prototype
 gpointer refreshAll(gpointer data);
 
-
+/**
+ * @deprecated because the selected process in the Med already has the record.
+ */
 int builderGetPid(GtkBuilder* builder) throw(string) {
   //Get PID
   GtkEntry* entry = GTK_ENTRY(gtk_builder_get_object(builder,"selectedProc"));
@@ -58,8 +59,6 @@ int builderGetPid(GtkBuilder* builder) throw(string) {
   if(! sscanf(gtk_entry_get_text(entry),"%d",&pid)) {
     throw string("no pid");
   }
-
-
   return pid;
 }
 
@@ -71,12 +70,12 @@ void refreshProc(GtkListStore* pidStore) {
   gtk_list_store_clear(pidStore);
   //Add in item
   GtkTreeIter iter;
-  vector<Process> pids = pidList();
-  for(int i=pids.size()-1;i>=0;i--) {
+  med.listProcesses();
+  for(int i=med.processes.size()-1;i>=0;i--) {
     gtk_list_store_append(pidStore, &iter);
-    gtk_list_store_set(pidStore,&iter,
-                       0, pids[i].pid.c_str(),
-                       1, pids[i].cmdline.c_str(),
+    gtk_list_store_set(pidStore, &iter,
+                       0, med.processes[i].pid.c_str(),
+                       1, med.processes[i].cmdline.c_str(),
                        -1
                        );
   }
@@ -93,7 +92,6 @@ void showProc(GtkButton *button, gpointer data) {
   GtkListStore *  pidStore = GTK_LIST_STORE(gtk_builder_get_object(builder,"pidStore"));
   refreshProc(pidStore);
 
-
   gtk_widget_show_all(chooseProc);
 }
 
@@ -109,7 +107,6 @@ gboolean chooseProcDelete(GtkWidget *window, GdkEvent *event, gpointer data) {
  * Called when a process is double clicked
  */
 void procChosen(GtkTreeView *tv, GtkTreePath *path, GtkTreeViewColumn *col, gpointer data) {
-  Process process;
 
   GtkBuilder* builder = (GtkBuilder*) data;
   //Model
@@ -124,29 +121,29 @@ void procChosen(GtkTreeView *tv, GtkTreePath *path, GtkTreeViewColumn *col, gpoi
   GValue value = G_VALUE_INIT;
 
   gtk_tree_model_get_value(model,&iter,0,&value);
-  process.pid = g_value_get_string (&value);
+  med.selectedProcess.pid = g_value_get_string (&value);
   g_value_unset(&value);
 
   gtk_tree_model_get_value(model,&iter,1,&value);
-  process.cmdline = g_value_get_string (&value);
+  med.selectedProcess.cmdline = g_value_get_string (&value);
   g_value_unset(&value);
 
   //make the changes to the selectedProc, and hide the window
   GtkWidget *selectedProc = GTK_WIDGET(gtk_builder_get_object(builder,"selectedProc"));
-  gtk_entry_set_text(GTK_ENTRY(selectedProc), (process.pid +" "+ process.cmdline).c_str());
+  gtk_entry_set_text(GTK_ENTRY(selectedProc), (med.selectedProcess.pid +" "+ med.selectedProcess.cmdline).c_str());
 
   GtkWidget *procWindow = GTK_WIDGET(gtk_builder_get_object(builder,"chooseProc"));
   gtk_widget_hide(procWindow);
 }
 
-void addressToScanStore(Med med, pid_t pid, string scanType,GtkListStore *store) {
+void addressToScanStore(Med med, string scanType,GtkListStore *store) {
   GtkTreeIter iter;
   for(int i=0;i<med.scanAddresses.size();i++) {
     char address[32];
     sprintf(address,"%p",(void*)(med.scanAddresses[i].address));
 
     //Get the value from address and type
-    string value = memValue(pid, med.scanAddresses[i].address, scanType);
+    string value = med.getScanAddressValueByIndex(i, scanType);
 
     gtk_list_store_append(store, &iter);
     gtk_list_store_set(store,&iter,
@@ -194,26 +191,14 @@ void scan(GtkButton *button,gpointer data) {
   GtkEntry *entry = GTK_ENTRY(gtk_builder_get_object(builder,"scanEntry"));
   string scanValue = gtk_entry_get_text(entry);
 
-  //Get PID
-  pid_t pid;
-  try {
-    pid = builderGetPid(builder);;
-  } catch(string e) {
-    cerr<< e<<endl;
+  if(med.selectedProcess.pid == "") { //Default is no string
+    cerr << "No process selected" <<endl;
+    g_mutex_unlock(&mutex);
     return;
   }
 
   try {
-    //Process with scanning
-    uint8_t *buffer = NULL;
-    int size = stringToRaw(scanValue,scanType,&buffer);
-
-    //memScanEqual(med.scanAddresses,pid,buffer, size);
-    med.memScanEqual(med.scanAddresses, pid, buffer, size);
-
-    if(buffer) {
-      free(buffer);
-    }
+    med.scanEqual(scanValue, scanType);
   } catch(string e) {
     cerr<< "scan: "<< e<<endl;
   }
@@ -222,7 +207,7 @@ void scan(GtkButton *button,gpointer data) {
   //Show the results at the scanTreeView
   GtkListStore* store = GTK_LIST_STORE(gtk_builder_get_object(builder, "scanStore"));
   if(med.scanAddresses.size() <= 800) {
-    addressToScanStore(med,pid,scanType,store);
+    addressToScanStore(med,scanType,store);
   }
   updateNumberOfAddresses(builder);
   g_mutex_unlock(&mutex);
@@ -254,22 +239,13 @@ void filter(GtkButton *button,gpointer data) {
   GtkEntry *entry = GTK_ENTRY(gtk_builder_get_object(builder,"scanEntry"));
   string scanValue = gtk_entry_get_text(entry);
 
-  //Get PID
-  int pid = builderGetPid(builder);
-
   //Process with scanning
-  uint8_t *buffer = NULL;
-  int size = stringToRaw(scanValue,scanType,&buffer);
-  med.memScanFilter(med.scanAddresses,pid,buffer, size);
-
-  if(buffer) {
-    free(buffer);
-  }
+  med.scanFilter(scanValue, scanType);
 
   //Show the results at the scanTreeView
   GtkListStore* store = GTK_LIST_STORE(gtk_builder_get_object(builder, "scanStore"));
   if(med.scanAddresses.size() <= 800) {
-    addressToScanStore(med,pid,scanType,store);
+    addressToScanStore(med,scanType,store);
   }
 
   updateNumberOfAddresses(builder);
@@ -333,19 +309,15 @@ void editScanType(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
     return;
   }
 
-  //Get PID
-  pid_t pid;
-  try {
-    pid = builderGetPid(builder);;
-  } catch(string e) {
-    cerr<< e<<endl;
+  if(med.selectedProcess.pid == "") {
+    cerr<< "No PID" <<endl;
     g_mutex_unlock(&mutex);
     return;
   }
 
 
   try {
-    string value2 = memValue(pid, address, text);
+    string value2 = med.getValueByAddress(address, text);
     gtk_list_store_set(model, &iter, 2, value2.c_str(), -1);
   } catch(string e) {
     cerr<< "editScanType(): " << e<<endl;
@@ -382,18 +354,15 @@ void editAddrType(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
 
 
   //Get PID
-  pid_t pid;
-  try {
-    pid = builderGetPid(builder);;
-  } catch(string e) {
-    cerr<< e<<endl;
+  if(med.selectedProcess.pid == "") {
+    cerr<< "No PID" <<endl;
     g_mutex_unlock(&mutex);
     return;
   }
 
 
   try {
-    string value2 = memValue(pid, address, text);
+    string value2 = med.getValueByAddress(address, text);
     gtk_list_store_set(model, &iter, 3, value2.c_str(), -1);
   } catch(string e) {
     cout<<"editAddrType: "<< e <<endl;
@@ -433,31 +402,19 @@ void editScanValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
 
   //Get the scan type
   gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 1, &value);
-  ScanType scanType = stringToScanType(string(g_value_get_string(&value)));
+  string scanType = string(g_value_get_string(&value));
   g_value_unset(&value);
-  if(scanType == Unknown) {
-    g_mutex_unlock(&mutex);
-    return;
-  }
-
 
   //Get PID
-  pid_t pid;
-  try {
-    pid = builderGetPid(builder);;
-  } catch(string e) {
-    cerr<< e<<endl;
+  if(med.selectedProcess.pid == "") {
+    cerr<< "No PID" <<endl;
     g_mutex_unlock(&mutex);
     return;
   }
 
 
   try {
-    uint8_t* buffer;
-    int size = stringToRaw(string(text), scanType, &buffer);
-
-    memWrite(pid,address,buffer, size);
-    free(buffer);
+    med.setValueByAddress(address, text, scanType);
 
     //It is suppose to be locked during start editing
     gtk_list_store_set(model, &iter, 2, text, -1);
@@ -465,9 +422,7 @@ void editScanValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
     cerr << "editScanValue: "<<e <<endl;
   }
 
-
   g_mutex_unlock(&mutex);
-
 }
 
 void editAddrValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *text, gpointer data) {
@@ -495,30 +450,18 @@ void editAddrValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
 
   //Get the scan type
   gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 2, &value);
-  ScanType scanType = stringToScanType(string(g_value_get_string(&value)));
+  string scanType = string(g_value_get_string(&value));
   g_value_unset(&value);
-  if(scanType == Unknown) {
+
+  if(med.selectedProcess.pid == "") {
+    cerr<< "No PID" <<endl;
     g_mutex_unlock(&mutex);
     return;
   }
 
 
-  //Get PID
-  pid_t pid;
   try {
-    pid = builderGetPid(builder);;
-  } catch(string e) {
-    cerr<< e<<endl;
-    g_mutex_unlock(&mutex);
-    return;
-  }
-
-  try {
-    uint8_t* buffer;
-    int size = stringToRaw(string(text), scanType, &buffer);
-
-    memWrite(pid,address,buffer, size);
-    free(buffer);
+    med.setValueByAddress(address, text, scanType);
 
     //It is suppose to be locked during start editing
     gtk_list_store_set(model, &iter, 3, text, -1);
@@ -555,11 +498,8 @@ void editScanAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   //Now check the validity of the memory
 
   //Get PID
-  pid_t pid;
-  try {
-    pid = builderGetPid(builder);;
-  } catch(string e) {
-    cerr<< e<<endl;
+  if(med.selectedProcess.pid == "") {
+    cerr<< "No PID" <<endl;
     g_mutex_unlock(&mutex);
     return;
   }
@@ -571,18 +511,20 @@ void editScanAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   g_value_unset(&value);
 
   try {
-    string value2 = memValue(pid, address, scanType);
+    string value2 = med.getValueByAddress(address, scanType);
     gtk_list_store_set(model, &iter, 2, value2.c_str(), -1);
 
   } catch(string e) {
     gtk_list_store_set(model, &iter, 2, "Error memory", -1);
-    cerr<< "editScanAddr: "<<e<<endl;
+    cerr<< "editScanAddr.getValueByAddress: "<<e<<endl;
   }
 
   g_mutex_unlock(&mutex);
 }
 
-
+/**
+ * Edit address panel's address
+ */
 void editAddrAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *text, gpointer data) {
   GtkBuilder *builder = (GtkBuilder*) data;
   GtkListStore *model = (GtkListStore*) gtk_builder_get_object(builder, "addressStore");
@@ -608,11 +550,8 @@ void editAddrAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
 
 
   //Get PID
-  pid_t pid;
-  try {
-    pid = builderGetPid(builder);;
-  } catch(string e) {
-    cerr<< e<<endl;
+  if(med.selectedProcess.pid == "") {
+    cerr<< "No PID" <<endl;
     g_mutex_unlock(&mutex);
     return;
   }
@@ -627,7 +566,7 @@ void editAddrAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   g_value_unset(&value);
 
   try {
-    string value2 = memValue(pid, address, scanType);
+    string value2 = med.getValueByAddress(address, scanType);
     gtk_list_store_set(model, &iter, 3, value2.c_str(), -1);
 
   } catch(string e) {
@@ -955,6 +894,7 @@ void addScanToAddress(GtkWidget* button, gpointer data) {
                      1, address.c_str(),
                      2, scanType.c_str(),
                      3, scanValue.c_str(),
+                     4, false,
                      -1
                      );
 
@@ -1002,6 +942,7 @@ void newAddr(GtkWidget* button, gpointer data) {
                      0, "Your description",
                      1, "0",
                      2, "int32",
+                     4, false,
                      -1
                      );
 
@@ -1197,11 +1138,8 @@ void shiftAddr(GtkButton* button, gpointer data) {
   GtkListStore *model = GTK_LIST_STORE(gtk_builder_get_object(builder,"addressStore"));
 
   //Get PID
-  pid_t pid;
-  try {
-    pid = builderGetPid(builder);;
-  } catch(string e) {
-    cerr<< e<<endl;
+  if(med.selectedProcess.pid == "") {
+    cerr<< "No PID" <<endl;
     return;
   }
 
@@ -1213,7 +1151,7 @@ void shiftAddr(GtkButton* button, gpointer data) {
 
   g_mutex_lock(&mutex);
   //while(guiStatus == "bg writing")
-  g_cond_wait(&cond,&mutex);
+  //g_cond_wait(&cond,&mutex);
 
 
   GValue value = G_VALUE_INIT;
@@ -1240,7 +1178,7 @@ void shiftAddr(GtkButton* button, gpointer data) {
     g_value_unset(&value);
 
     try {
-      string value2 = memValue(pid, address, scanType);
+      string value2 = med.getValueByAddress(address, scanType);
       gtk_list_store_set(model, &iter, 3, value2.c_str(), -1);
       gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter);
     } catch(string e) {
