@@ -1,31 +1,3 @@
-/*************
-Copyright (c) 2012, Allen Choong
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of the project nor the
-      names 
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE PROJECT OR CONTRIBUTORS BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-***************/
-
 /**
  * @author	Allen Choong
  * @version	0.0.1
@@ -41,19 +13,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Scan integer, float, little endian, big endian, arrays
  * Edit integer, float, little endian, big endian, arrays
  * Dump with hex position
- * In the interactive mode, 
+ * In the interactive mode,
  * try to use solve the keyboard problem, such as moving cursor.
  * Pause and play the process
  *
  *
  * Search by block
- * 
+ *
  *
  * Fixed:
  * Solve the problem of the I/O Error for the large running file
  * On Android, the scan and edit does not work, because of permission limit.
  * Tried the signal.h kill() to SIGSTOP the process during scanning in Android, but still get the EIO
- * (I/O Error). 
+ * (I/O Error).
  *
  * Changelog:
  * 2015-05-20	Because of 64-bit computer, the address must use long int.
@@ -106,7 +78,7 @@ long hexToInt(string str) throw(string) {
 		fprintf(stderr,"Error input: %s\n",str.c_str());
 		throw string("Error input");
 	}
-	
+
 	return ret;
 }
 
@@ -177,13 +149,13 @@ int stringToRaw(string str, ScanType type, uint8_t **buffer) {
 	stringstream ss(str);
 	istream_iterator<string> eos; //end of string
 	istream_iterator<string> iit(ss);
-	
+
 	vector<string> tokens(iit,eos);
-	
+
 	int size = tokens.size();
 	int retsize = 0;
 	uint8_t* buf;
-	
+
 	switch(type) {
 		case Int8:
 			retsize = sizeof(uint8_t) * size;
@@ -209,15 +181,15 @@ int stringToRaw(string str, ScanType type, uint8_t **buffer) {
 			retsize = 0;
 			break;
 	}
-	
+
 	for(unsigned int i=0;i<tokens.size();i++) {
 		stringstream ss(tokens[i]);
-		
+
 		int temp;
 		switch(type) {
 			case Int8:
 				ss >> dec >> temp; //Because it does not handle the uint8_t correctly as integer, but a character.
-				*(uint8_t*)buf = (uint8_t) temp;  
+				*(uint8_t*)buf = (uint8_t) temp;
 				break;
 			case Int16:
 				ss >> dec >> *(uint16_t*)buf;
@@ -238,9 +210,9 @@ int stringToRaw(string str, ScanType type, uint8_t **buffer) {
 			printf("Error input: %s\n",tokens[i].c_str());
 		}
 	}
-	
+
 	*buffer = buf;
-	
+
 	return retsize;
 }
 
@@ -262,7 +234,7 @@ void printHex(FILE* file,void* addr,int size) {
 
 ProcMaps getMaps(pid_t pid) {
 	ProcMaps procMaps;
-	
+
 	//Get the region from /proc/pid/maps
 	char filename[128];
 	sprintf(filename,"/proc/%d/maps",pid);
@@ -272,8 +244,8 @@ ProcMaps getMaps(pid_t pid) {
 		printf("Failed open maps: %s\n",filename);
 		exit(1);
 	}
-	
-	
+
+
 	char useless[64];
 	unsigned long start,end;
 	char rd,wr;
@@ -281,10 +253,10 @@ ProcMaps getMaps(pid_t pid) {
 	//int ret;
 	char sp; //shared or private
 	char fname[128];
-	
+
 	//Get line
 	char line[256];
-	
+
 	while(fgets(line,255,file)) {
 		//parse line
 		//the empty pathname has to be scan also
@@ -294,15 +266,15 @@ ProcMaps getMaps(pid_t pid) {
 			useless,useless,&inode,fname) <9) {
 			continue;
 		}
-		
+
 		if(rd == 'r' && wr == 'w' && ((end - start) > 0)) {
 			procMaps.starts.push_back(start);
 			procMaps.ends.push_back(end);
 		}//*/
 	}
-	
+
 	fclose(file);
-	
+
 	return procMaps;
 }
 
@@ -331,13 +303,13 @@ pid_t pidAttach(pid_t pid) throw(string) {
 		fprintf(stderr,"Failed attach: %s\n",strerror(errno));
 		throw string("Failed attach");
 	}
-	
+
 	int status;
 	if(waitpid(pid,&status,0) == -1 || !WIFSTOPPED(status)) {
 		fprintf(stderr,"Error waiting: %s\n",strerror(errno));
 		throw string("Error waiting");
 	}
-	
+
 	return pid;
 }
 
@@ -353,7 +325,7 @@ pid_t pidDetach(pid_t pid) throw(string){
 
 int memDump2(pid_t pid,unsigned long address,int size) {
 	pidAttach(pid);
-	
+
 	long word;
 	uint8_t* byteptr = (uint8_t*)(&word);
 	for(int i=0;i<size;i+=sizeof(long)) {
@@ -384,14 +356,14 @@ int memDump(pid_t pid,unsigned long address,int size) {
 			printf("lseek error: %p, %s\n",(void*)address,strerror(errno));
 			//continue;
 		}
-		
+
 		if(read(memFd,buf,size) == -1) {
 			printf("read error: %p, %s\n",(void*)address,strerror(errno));
 			//continue;
 		}
 	//}
-	
-	
+
+
 	for(int i=0;i<size;i++) {
 		printf("%02x ",buf[i]);
 	}
@@ -423,31 +395,31 @@ void memWrite2(pid_t pid,unsigned long address,uint8_t* data,int size) {
 			printf("PEEKDATA error: %p, %s\n",(void*)address,strerror(errno));
 			//exit(1);
 		}
-		
+
 		//Write word to the buffer
 		memcpy((uint8_t*)buf+i,&word,sizeof(long));
 	}
-	
-	
+
+
 	memcpy(buf,data,size);
-	
-	
+
+
 	for(int i=0;i<size;i+=sizeof(long)) {
 		//FIXME: This writes as uint32, it should be uint8
 		// According to manual, it read "word". Depend on the CPU.
 		// If the OS is 32bit, then word is 32bit; if 64bit, then 64bit.
 		// Thus, the best solution is peek first, then only over write the position
-		
+
 		// FIXED!!! The problem caused by the 4th parameter, which is the value, instead of address
 		// Therefore, the value should be the WORD size.
-		
+
 		if(ptrace(PTRACE_POKEDATA,pid,(uint8_t*)(address)+i,*(long*)((uint8_t*)data+i) ) == -1L) {
 			printf("POKEDATA error: %s\n",strerror(errno));
 			//exit(1);
 		}
 	}
-	
-	
+
+
 	free(buf);
 	//printf("Success!\n");
 	pidDetach(pid);
@@ -460,43 +432,43 @@ void memWrite2(pid_t pid,unsigned long address,uint8_t* data,int size) {
 void memWrite(pid_t pid,unsigned long address,uint8_t* data,int size) {
 	pidAttach(pid);
 	int psize = padWordSize(size); //padded size
-	
-	uint8_t* buf = (uint8_t*)malloc(psize); 
+
+	uint8_t* buf = (uint8_t*)malloc(psize);
 	long word;
-	
+
 	for(int i=0;i<psize;i+=sizeof(long)) {
 		errno = 0;
 		word = ptrace(PTRACE_PEEKDATA,pid,(uint8_t*)(address)+i,NULL);
-		
+
 		if(errno) {
 			printf("PEEKDATA error: %p, %s\n",(void*)address,strerror(errno));
 			//exit(1);
 		}
-		
+
 		//Write word to the buffer
 		memcpy((uint8_t*)buf+i,&word,sizeof(long));
 	}
-	
+
 	memcpy(buf,data,size); //over-write on top of it, so that the last padding byte will preserved
-	
-	
-	
+
+
+
 	for(int i=0;i<size;i+=sizeof(long)) {
 		//FIXME: This writes as uint32, it should be uint8
 		// According to manual, it read "word". Depend on the CPU.
 		// If the OS is 32bit, then word is 32bit; if 64bit, then 64bit.
 		// Thus, the best solution is peek first, then only over write the position
-		
+
 		// FIXED!!! The problem caused by the 4th parameter, which is the value, instead of address
 		// Therefore, the value should be the WORD size.
-		
+
 		if(ptrace(PTRACE_POKEDATA,pid,(uint8_t*)(address)+i,*(long*)((uint8_t*)buf+i) ) == -1L) {
 			printf("POKEDATA error: %s\n",strerror(errno));
 			//exit(1);
 		}
 	}
-	
-	
+
+
 	free(buf);
 	//printf("Success!\n");
 	pidDetach(pid);
@@ -506,9 +478,9 @@ void memWrite(pid_t pid,unsigned long address,uint8_t* data,int size) {
 void memWriteList(Scanner scanner,pid_t pid,uint8_t* data,int size) {
 	pidAttach(pid);
 	uint8_t* buf = (uint8_t*)malloc(size+sizeof(long)); //plus 8 bytes, to avoid WORD problem, seems like "long" can represent "word"
-	
+
 	for(unsigned int j=0;j<scanner.addresses.size();j++) {
-		
+
 		long word;
 		for(int i=0;i<size;i+=sizeof(long)) {
 			errno = 0;
@@ -517,14 +489,14 @@ void memWriteList(Scanner scanner,pid_t pid,uint8_t* data,int size) {
 				printf("PEEKDATA error: %p, %s\n",(void*)(scanner.addresses[j]+i),strerror(errno));
 				//exit(1);
 			}
-			
+
 			//Write word to the buffer
 			memcpy((uint8_t*)buf+i,&word,sizeof(long));
 		}
-		
+
 		memcpy(buf,data,size);
-		
-		
+
+
 		for(int i=0;i<size;i+=sizeof(long)) {
 			if(ptrace(PTRACE_POKEDATA,pid,scanner.addresses[j]+i,*(long*)((uint8_t*)data+i) ) == -1L) {
 				printf("POKEDATA error: %s\n",strerror(errno));
@@ -532,7 +504,7 @@ void memWriteList(Scanner scanner,pid_t pid,uint8_t* data,int size) {
 			}
 		}
 	}
-	
+
 	free(buf);
 	printf("Success!\n");
 	pidDetach(pid);
@@ -543,13 +515,13 @@ void memWriteList(Scanner scanner,pid_t pid,uint8_t* data,int size) {
 
 void memWriteList2(Scanner scanner,pid_t pid,uint8_t* data,int size) {
 	pidAttach(pid);
-	
+
 	uint8_t* buf = (uint8_t*)malloc(size+sizeof(long)); //plus 8 bytes, to avoid WORD problem, seems like "long" can represent "word"
-	
+
 	for(unsigned int j=0;j<scanner.addresses.size();j++) {
-		
-		
-		
+
+
+
 		long word;
 		for(int i=0;i<size;i+=sizeof(long)) {
 			errno = 0;
@@ -558,32 +530,32 @@ void memWriteList2(Scanner scanner,pid_t pid,uint8_t* data,int size) {
 				printf("PEEKDATA error: %p, %s\n",(void*)(scanner.addresses[j]+i),strerror(errno));
 				//exit(1);
 			}
-			
+
 			//Write word to the buffer
 			memcpy((long*)(buf)+i,&word,sizeof(long));
 		}
-		
+
 		/*printf("Peeked: ");
 		for(int i=0;i<size+sizeof(long);i++) {
 			printf("%02x ",buf[i]);
 		}
 		printf("\n");//*/
-		
+
 		memcpy(buf,data,size);
-		
+
 		/*printf("To write: ");
 		for(int i=0;i<size+sizeof(long);i++) {
 			printf("%02x ",buf[i]);
 		}
 		printf("\n");//*/
-		
-		
+
+
 		for(int i=0;i<size;i+=sizeof(long)) {
 			//FIXME: This writes as uint32, it should be uint8
 			// According to manual, it read "word". Depend on the CPU.
 			// If the OS is 32bit, then word is 32bit; if 64bit, then 64bit.
 			// Thus, the best solution is peek first, then only over write the position
-			
+
 			// FIXED!!! The problem caused by the 4th parameter, which is the value, instead of address
 			// Therefore, the value should be the WORD size.
 			if(ptrace(PTRACE_POKEDATA,pid,(void*)(scanner.addresses[j]+i),(void*) (*((long*)(buf)+i)) ) == -1L) {
@@ -592,7 +564,7 @@ void memWriteList2(Scanner scanner,pid_t pid,uint8_t* data,int size) {
 			}
 		}
 	}
-	
+
 	free(buf);
 	printf("Success!\n");
 	pidDetach(pid);
@@ -628,14 +600,14 @@ int memCopy(pid_t pid,unsigned long address,unsigned char* out,int size,bool sho
 void memScanEqual(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
 	pidAttach(pid);
 	scanner.addresses.clear();
-	
+
 	ProcMaps maps = getMaps(pid);
-	
-	
+
+
 	uint8_t* page = (uint8_t*)malloc(getpagesize()); //For block of memory
-	
+
 	int memFd = getMem(pid);
-	
+
 	//Loop through maps
 	for(unsigned int i=0;i<maps.starts.size();i++) {
 		//printf("maps: %p\t%p\n", maps.starts[i],maps.ends[i]);
@@ -647,12 +619,12 @@ void memScanEqual(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
 				//printf("lseek error: %p, %s\n",j,strerror(errno));
 				continue;
 			}
-			
+
 			if(read(memFd,page,getpagesize()) == -1) {
 				//printf("read error: %p, %s\n",j,strerror(errno));
 				continue;
 			}
-			
+
 			//Once get the page, now can compare the data within the page
 			for(int k=0;k<=getpagesize() - size;k++) {
 				//printf("Data: %p\n", page+k);
@@ -662,11 +634,11 @@ void memScanEqual(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
 			}
 		}
 	}
-	
+
 	printf("Found %lu results\n",scanner.addresses.size());
 	free(page);
 	close(memFd);
-	
+
 	pidDetach(pid);
 }
 
@@ -677,11 +649,11 @@ void memScanEqual(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
 void memScanFilter(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
 	pidAttach(pid);
 	vector<unsigned long> addresses; //New addresses
-	
+
 	int memFd = getMem(pid);
-	
+
 	uint8_t* buf = (uint8_t*)malloc(size);
-	
+
 	for(unsigned int i=0;i<scanner.addresses.size();i++) {
 		if(lseek(memFd,scanner.addresses[i],SEEK_SET) == -1) {
 			//printf("lseek error: 0x%08x, %s\n",scanner.addresses[i],strerror(errno));
@@ -691,15 +663,15 @@ void memScanFilter(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
 			//printf("read error: 0x%08x, %s\n",scanner.addresses[i],strerror(errno));
 			continue;
 		}
-		
+
 		if(memcmp(buf,data,size) == 0) {
 			addresses.push_back(scanner.addresses[i]);
 		}
 	}
-	
-	
+
+
 	free(buf);
-	
+
 	//Remove old one
 	scanner.addresses = addresses;
 	printf("Filtered %lu results\n",scanner.addresses.size());
@@ -713,17 +685,17 @@ void memScanFilter(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
 void memReverse(uint8_t* buf,int size) {
 	uint8_t* temp = (uint8_t*)malloc(size);
 	memcpy(temp,buf,size);
-	
+
 	for(int i=0;i<size;i++) {
 		buf[size-i-1] = temp[i];
 	}
-	
+
 	free(temp);
 }
 
 /**
  * Check whether the address is in the /proc/PID/maps
- */ 
+ */
 bool addrInMaps(pid_t pid, unsigned long address) {
 	ProcMaps maps = getMaps(pid);
 	for(unsigned int i=0;i<maps.starts.size();i++) {
@@ -731,25 +703,25 @@ bool addrInMaps(pid_t pid, unsigned long address) {
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
 bool addrIsValid(pid_t pid,unsigned long address) {
-	
+
 	return true;
 }
 
 
 string memValue(long pid, unsigned long address, string scanType) throw (string) {
 	pidAttach(pid);
-  
+
   int size = scanTypeToSize(stringToScanType(scanType));
-	
+
   int memFd = getMem(pid);
   uint8_t* buf = (uint8_t*)malloc(size + 1); //+1 for the NULL
   memset(buf,0,size+1);
-  
+
   if(lseek(memFd,address,SEEK_SET)==-1) {
 		free(buf);
 		close(memFd);
@@ -762,7 +734,7 @@ string memValue(long pid, unsigned long address, string scanType) throw (string)
 		pidDetach(pid);
 		throw string("Address read fail");
   }
-	
+
 	char str[32];
   switch(stringToScanType(scanType)) {
     case Int8:
@@ -786,13 +758,13 @@ string memValue(long pid, unsigned long address, string scanType) throw (string)
 	  pidDetach(pid);
 		throw string("Error Type");
   }
-  
+
   free(buf);
 	close(memFd);
   pidDetach(pid);
-	
+
 	string ret = string(str);
-	
+
   return ret;
 }
 
@@ -804,7 +776,7 @@ string memValue(long pid, unsigned long address, string scanType) throw (string)
 vector<Process> pidList() {
   //Get directories
   vector<Process> pids;
-  
+
   DIR *d;
   struct dirent *dir;
   d = opendir("/proc");
@@ -818,7 +790,7 @@ vector<Process> pidList() {
 					proc.cmdline = pidName(proc.pid);
 	        pids.push_back(proc);
 				}
-				
+
       }
     }
     closedir(d);
@@ -843,4 +815,3 @@ string pidName(string pid) {
 	\
   return ret;
 }
-
