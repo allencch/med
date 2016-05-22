@@ -733,6 +733,11 @@ void createScanTreeView(GtkBuilder* builder) {
 
 }
 
+void lockItem(GtkCellRendererToggle *cell,
+              gchar *pathStr,
+              gpointer data) {
+}
+
 void createAddressTreeView(GtkBuilder* builder) {
   //Create the list store
   GtkListStore *  scanStore = GTK_LIST_STORE(gtk_builder_get_object(builder,"addressStore"));
@@ -785,6 +790,12 @@ void createAddressTreeView(GtkBuilder* builder) {
   g_signal_connect(renderer,"editing-canceled", G_CALLBACK(editCancel), builder);
   col = gtk_tree_view_column_new_with_attributes("Value",renderer,"text",3,NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW(treeview),col);
+
+  //Create 5th column: Lock
+  renderer = gtk_cell_renderer_toggle_new();
+  g_signal_connect(renderer, "toggled", G_CALLBACK(lockItem), builder);
+  col = gtk_tree_view_column_new_with_attributes("Lock", renderer, "active", 4, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), col);
 
 }
 
