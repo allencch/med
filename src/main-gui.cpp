@@ -38,7 +38,7 @@
 using namespace std;
 
 
-Scanner scanner; //Global
+//Scanner scanner; //Global
 Med med; //Global to replace scanner.
 
 
@@ -139,14 +139,14 @@ void procChosen(GtkTreeView *tv, GtkTreePath *path, GtkTreeViewColumn *col, gpoi
   gtk_widget_hide(procWindow);
 }
 
-void addressToScanStore(Scanner scanner, pid_t pid, string scanType,GtkListStore *store) {
+void addressToScanStore(Med med, pid_t pid, string scanType,GtkListStore *store) {
   GtkTreeIter iter;
-  for(int i=0;i<scanner.addresses.size();i++) {
+  for(int i=0;i<med.scanAddresses.size();i++) {
     char address[32];
-    sprintf(address,"%p",(void*)scanner.addresses[i]);
+    sprintf(address,"%p",(void*)(med.scanAddresses[i].address));
 
     //Get the value from address and type
-    string value = memValue(pid,scanner.addresses[i],scanType);
+    string value = memValue(pid, med.scanAddresses[i].address, scanType);
 
     gtk_list_store_append(store, &iter);
     gtk_list_store_set(store,&iter,
@@ -163,7 +163,7 @@ void updateNumberOfAddresses(GtkBuilder* builder) {
   //Update the status bar
   GtkLabel* status = GTK_LABEL(gtk_builder_get_object(builder, "status"));
   char message[128];
-  sprintf(message,"%ld addresses found", scanner.addresses.size());
+  sprintf(message,"%ld addresses found", med.scanAddresses.size());
   gtk_label_set_text(status, message);
 }
 
@@ -208,7 +208,8 @@ void scan(GtkButton *button,gpointer data) {
     uint8_t *buffer = NULL;
     int size = stringToRaw(scanValue,scanType,&buffer);
 
-    memScanEqual(scanner,pid,buffer, size);
+    //memScanEqual(med.scanAddresses,pid,buffer, size);
+    med.memScanEqual(med.scanAddresses, pid, buffer, size);
 
     if(buffer) {
       free(buffer);
@@ -220,8 +221,8 @@ void scan(GtkButton *button,gpointer data) {
 
   //Show the results at the scanTreeView
   GtkListStore* store = GTK_LIST_STORE(gtk_builder_get_object(builder, "scanStore"));
-  if(scanner.addresses.size() <= 800) {
-    addressToScanStore(scanner,pid,scanType,store);
+  if(med.scanAddresses.size() <= 800) {
+    addressToScanStore(med,pid,scanType,store);
   }
   updateNumberOfAddresses(builder);
   g_mutex_unlock(&mutex);
@@ -259,7 +260,7 @@ void filter(GtkButton *button,gpointer data) {
   //Process with scanning
   uint8_t *buffer = NULL;
   int size = stringToRaw(scanValue,scanType,&buffer);
-  memScanFilter(scanner,pid,buffer, size);
+  med.memScanFilter(med.scanAddresses,pid,buffer, size);
 
   if(buffer) {
     free(buffer);
@@ -267,8 +268,8 @@ void filter(GtkButton *button,gpointer data) {
 
   //Show the results at the scanTreeView
   GtkListStore* store = GTK_LIST_STORE(gtk_builder_get_object(builder, "scanStore"));
-  if(scanner.addresses.size() <= 800) {
-    addressToScanStore(scanner,pid,scanType,store);
+  if(med.scanAddresses.size() <= 800) {
+    addressToScanStore(med,pid,scanType,store);
   }
 
   updateNumberOfAddresses(builder);
@@ -977,7 +978,7 @@ void clearScan(GtkWidget* button, gpointer data) {
 
   gtk_list_store_clear(GTK_LIST_STORE(model));
 
-  scanner.addresses.clear();
+  med.scanAddresses.clear();
 
   GtkLabel* status = GTK_LABEL(gtk_builder_get_object(builder, "status"));
   gtk_label_set_text(status, "Scan cleared");

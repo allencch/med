@@ -842,6 +842,9 @@ string pidName(string pid) {
 Object (though not oriented) solution
 *****************/
 MedScan::MedScan() {}
+MedScan::MedScan(unsigned long address) {
+  this->address = address;
+}
 string MedScan::getScanType() {
   return scanTypeToString(this->scanType);
 }
@@ -863,5 +866,89 @@ void MedScan::setValue(long pid, string v) {
 
 
 MedAddress::MedAddress() {}
+MedAddress::MedAddress(unsigned long address) : MedScan(address) {}
 Med::Med() {}
 Med::~Med() {}
+
+
+/**
+ * Scan memory, using procfs mem
+ */
+void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size) {
+  pidAttach(pid);
+  scanAddresses.clear();
+
+  ProcMaps maps = getMaps(pid);
+
+
+  uint8_t* page = (uint8_t*)malloc(getpagesize()); //For block of memory
+
+  int memFd = getMem(pid);
+
+  //Loop through maps
+  for(unsigned int i=0;i<maps.starts.size();i++) {
+    //printf("maps: %p\t%p\n", maps.starts[i],maps.ends[i]);
+    //Loop each maps to get the "page"
+    for(unsigned long int j=maps.starts[i];j<maps.ends[i];j+=getpagesize()) {
+      //printf("address: 0x%08x\n",j);
+      //printf("\t\tAddress: %p\n", j);
+      if(lseek(memFd,j,SEEK_SET) == -1) {
+        //printf("lseek error: %p, %s\n",j,strerror(errno));
+        continue;
+      }
+
+      if(read(memFd,page,getpagesize()) == -1) {
+        //printf("read error: %p, %s\n",j,strerror(errno));
+        continue;
+      }
+
+      //Once get the page, now can compare the data within the page
+      for(int k=0;k<=getpagesize() - size;k++) {
+        //printf("Data: %p\n", page+k);
+        if(memcmp(page+k, data, size) == 0) {
+          MedScan medScan(j +k);
+          scanAddresses.push_back(medScan);
+        }
+      }
+    }
+  }
+
+  printf("Found %lu results\n",scanAddresses.size());
+  free(page);
+  close(memFd);
+
+  pidDetach(pid);
+}
+
+void Med::memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size) {
+  pidAttach(pid);
+  vector<MedScan> addresses; //New addresses
+
+  int memFd = getMem(pid);
+
+  uint8_t* buf = (uint8_t*)malloc(size);
+
+  for(unsigned int i=0;i<scanAddresses.size();i++) {
+    if(lseek(memFd,scanAddresses[i].address,SEEK_SET) == -1) {
+      //printf("lseek error: 0x%08x, %s\n",scanner.addresses[i],strerror(errno));
+      continue;
+    }
+    if(read(memFd,buf,size) == -1) {
+      //printf("read error: 0x%08x, %s\n",scanner.addresses[i],strerror(errno));
+      continue;
+    }
+
+    if(memcmp(buf,data,size) == 0) {
+      addresses.push_back(scanAddresses[i]);
+    }
+  }
+
+
+  free(buf);
+
+  //Remove old one
+  scanAddresses = addresses;
+  printf("Filtered %lu results\n",scanAddresses.size());
+  close(memFd);
+  pidDetach(pid);
+}

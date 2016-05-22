@@ -174,6 +174,7 @@ string memValue(long pid, unsigned long address, string scanType) throw (string)
 class MedScan {
 public:
   MedScan();
+  MedScan(unsigned long address);
   unsigned long address;
 
   string getScanType();
@@ -194,6 +195,7 @@ private:
 class MedAddress : MedScan {
 public:
   MedAddress();
+  MedAddress(unsigned long address);
   string description;
   bool lock; /**< Not using mutex */
 };
@@ -207,10 +209,15 @@ public:
   virtual ~Med();
 
   vector<Process> processes; /**< This is the list of processes */
-  vector<MedScan> scanner; /**< The memory scanner, replace the Scanner*/
+  vector<MedScan> scanAddresses; /**< The memory scanner, replace the Scanner*/
   vector<MedAddress> addresses;
 
   Process* selectedProcess;
+
+  //TODO: remove parameters
+  void memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size);
+  void memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size);
+
 };
 
 #endif
