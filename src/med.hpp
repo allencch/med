@@ -227,8 +227,11 @@ public:
   void setValueByAddress(unsigned long address, string value, string scanType);
 
 private:
-  static void memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size);
-  static void memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size);
+  /**
+   * @param scanType is just a record.
+   */
+  static void memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType);
+  static void memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType);
 
 };
 

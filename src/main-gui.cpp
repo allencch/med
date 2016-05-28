@@ -3,6 +3,10 @@
  * @version     0.0.1
  * @date        2015-05-25
  *
+ * TODO: 2016-05-28
+ * Move the mutex to the engine.
+ * Add the items to the Med Address
+ *
  * TODO
  * Error checking when PID is not selected: Scan button, memValue()
  * "Add All" button
@@ -48,19 +52,6 @@ static string guiStatus;
 
 //Prototype
 gpointer refreshAll(gpointer data);
-
-/**
- * @deprecated because the selected process in the Med already has the record.
- */
-int builderGetPid(GtkBuilder* builder) throw(string) {
-  //Get PID
-  GtkEntry* entry = GTK_ENTRY(gtk_builder_get_object(builder,"selectedProc"));
-  int pid;
-  if(! sscanf(gtk_entry_get_text(entry),"%d",&pid)) {
-    throw string("no pid");
-  }
-  return pid;
-}
 
 
 /**
@@ -812,7 +803,10 @@ gpointer refreshAll(gpointer data) {
 
     try {
 
-      pid_t pid = builderGetPid(builder); //Get pid first. If no pid, no need continue
+      //pid_t pid = builderGetPid(builder); //Get pid first. If no pid, no need continue
+      pid_t pid;
+      if(med.selectedProcess.pid != "")
+        pid = stol(med.selectedProcess.pid);
 
 
       //Refresh scan
@@ -835,7 +829,11 @@ gpointer refreshAll(gpointer data) {
 gboolean refreshCb(gpointer data) {
   GtkBuilder* builder = (GtkBuilder*) data;
   try {
-    pid_t pid = builderGetPid(builder);
+    //pid_t pid = builderGetPid(builder);
+    pid_t pid;
+    if(med.selectedProcess.pid != "")
+      pid = stol(med.selectedProcess.pid);
+
 
     //Refresh scan
     refreshScanTreeView(builder, pid);

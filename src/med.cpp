@@ -878,7 +878,9 @@ Med::~Med() {}
 void Med::scanEqual(string v, string t) {
   uint8_t* buffer = NULL;
   int size = stringToRaw(v, t, &buffer);
-  Med::memScanEqual(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size);
+  Med::memScanEqual(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t);
+
+
   if(buffer)
     free(buffer);
 }
@@ -886,7 +888,7 @@ void Med::scanEqual(string v, string t) {
 void Med::scanFilter(string v, string t) {
   uint8_t* buffer = NULL;
   int size = stringToRaw(v, t, &buffer);
-  Med::memScanFilter(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size);
+  Med::memScanFilter(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t);
   if(buffer)
     free(buffer);
 }
@@ -894,7 +896,7 @@ void Med::scanFilter(string v, string t) {
 /**
  * Scan memory, using procfs mem
  */
-void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size) {
+void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType = NULL) {
   pidAttach(pid);
   scanAddresses.clear();
 
@@ -927,6 +929,7 @@ void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* d
         //printf("Data: %p\n", page+k);
         if(memcmp(page+k, data, size) == 0) {
           MedScan medScan(j +k);
+          medScan.setScanType(scanType);
           scanAddresses.push_back(medScan);
         }
       }
@@ -940,7 +943,7 @@ void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* d
   pidDetach(pid);
 }
 
-void Med::memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size) {
+void Med::memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType = NULL) {
   pidAttach(pid);
   vector<MedScan> addresses; //New addresses
 
@@ -959,6 +962,7 @@ void Med::memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* 
     }
 
     if(memcmp(buf,data,size) == 0) {
+      scanAddresses[i].setScanType(scanType);
       addresses.push_back(scanAddresses[i]);
     }
   }
@@ -979,7 +983,7 @@ vector<Process> Med::listProcesses() {
 }
 
 string Med::getScanAddressValueByIndex(int ind, string scanType) {
-  return this->scanAddresses[ind].getValue(stoi(this->selectedProcess.pid), scanType);
+  return this->scanAddresses[ind].getValue(stol(this->selectedProcess.pid), scanType);
 }
 
 string Med::getValueByAddress(unsigned long address, string scanType) {
