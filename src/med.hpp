@@ -179,21 +179,18 @@ public:
 
   string getScanType();
   void setScanType(string s);
+  ScanType scanType; //direct access
 
   //No value, because value is calculated based on scan type
   string getValue(long pid);
   string getValue(long pid, string scanType);
   void setValue(long pid, string val);
-
-private:
-  ScanType scanType;
-
 };
 
 /**
  * This is the address will be saved, re-use, lock, etc.
  */
-class MedAddress : MedScan {
+class MedAddress : public MedScan {
 public:
   MedAddress();
   MedAddress(unsigned long address);

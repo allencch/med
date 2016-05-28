@@ -286,6 +286,7 @@ void editScanType(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
 
   gtk_list_store_set(model, &iter, 1, text, -1);
 
+  med.scanAddresses[atoi(pathStr)].setScanType(text);
 
   GValue value = G_VALUE_INIT;
   long address;
@@ -328,6 +329,8 @@ void editAddrType(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   gtk_tree_path_free(path);
 
   gtk_list_store_set(model, &iter, 2, text, -1);
+
+  med.addresses[atoi(pathStr)].setScanType(text);
 
   //Get the address
   GValue value = G_VALUE_INIT;
@@ -470,7 +473,6 @@ void editScanAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   GtkListStore *model = (GtkListStore*) gtk_builder_get_object(builder, "scanStore");
   GtkTreePath* path = gtk_tree_path_new_from_string(pathStr);
 
-
   GtkTreeIter iter;
 
   gtk_tree_model_get_iter(GTK_TREE_MODEL(model),&iter,path);
@@ -481,6 +483,7 @@ void editScanAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   long address;
   try {
     address = hexToInt(text);
+    med.scanAddresses[atoi(pathStr)].address = address;
     gtk_list_store_set(model, &iter, 0, text, -1);
   } catch(string e) {
     cerr<< "editScanAddr: "<< e <<endl;
@@ -532,6 +535,7 @@ void editAddrAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   long address;
   try {
     address = hexToInt(text);
+    med.addresses[atoi(pathStr)].address = address;
     gtk_list_store_set(model, &iter, 1, text, -1);
   } catch(string e) {
     cerr<< "editAddrAddr: "<< e <<endl;
@@ -577,6 +581,8 @@ void editAddrDesc(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   gtk_tree_model_get_iter(GTK_TREE_MODEL(model),&iter,path);
 
   gtk_tree_path_free(path);
+
+  med.addresses[atoi(pathStr)].description = text;
 
   gtk_list_store_set(model, &iter, 0, text, -1);
   g_mutex_unlock(&mutex);
@@ -869,6 +875,12 @@ void addScanToAddress(GtkWidget* button, gpointer data) {
   //while(guiStatus == "bg writing")
   //  g_cond_wait(&cond,&mutex);
 
+  int index = atoi(gtk_tree_model_get_string_from_iter(model, &iter));
+  MedAddress medAddress;
+  medAddress.address = med.scanAddresses[index].address;
+  medAddress.scanType = med.scanAddresses[index].scanType;
+  med.addresses.push_back(medAddress);
+
   GValue value = G_VALUE_INIT;
   gtk_tree_model_get_value(model,&iter,0,&value);
   string address = string(g_value_get_string(&value));
@@ -943,6 +955,12 @@ void newAddr(GtkWidget* button, gpointer data) {
                      4, false,
                      -1
                      );
+  MedAddress address;
+  address.description = "Your description";
+  address.address = 0;
+  address.setScanType("int32");
+  address.lock = false;
+  med.addresses.push_back(address);
 
 
   g_mutex_unlock(&mutex);
@@ -967,6 +985,8 @@ void delAddr(GtkWidget* button, gpointer data) {
   //while(guiStatus == "bg writing")
   //  g_cond_wait(&cond,&mutex);
 
+  int index = atoi(gtk_tree_model_get_string_from_iter(model, &iter));
+  med.addresses.erase(med.addresses.begin() + index);
 
   gtk_list_store_remove(GTK_LIST_STORE(model),&iter);
 
@@ -1170,6 +1190,8 @@ void shiftAddr(GtkButton* button, gpointer data) {
                        -1
                        );
 
+    int index = atoi(gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(model), &iter));
+    med.addresses[index].address = address;
 
     gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 2, &value);
     string scanType = string(g_value_get_string(&value));
