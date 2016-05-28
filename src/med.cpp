@@ -854,17 +854,27 @@ void MedScan::setScanType(string s) {
 }
 
 string MedScan::getValue(long pid) {
-  return memValue(pid, this->address, this->getScanType());
+  string value;
+  medMutex.lock();
+  value = memValue(pid, this->address, this->getScanType());
+  medMutex.unlock();
+  return value;
 }
 
 string MedScan::getValue(long pid, string scanType) {
-  return memValue(pid, this->address, scanType);
+  string value;
+  medMutex.lock();
+  value = memValue(pid, this->address, scanType);
+  medMutex.unlock();
+  return value;
 }
 
 void MedScan::setValue(long pid, string v) {
   uint8_t* buffer;
   int size = stringToRaw(v, this->scanType, &buffer);
+  medMutex.lock();
   memWrite(pid, this->address, buffer, size);
+  medMutex.unlock();
   free(buffer);
 }
 
@@ -878,9 +888,9 @@ Med::~Med() {}
 void Med::scanEqual(string v, string t) {
   uint8_t* buffer = NULL;
   int size = stringToRaw(v, t, &buffer);
+  medMutex.lock();
   Med::memScanEqual(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t);
-
-
+  medMutex.unlock();
   if(buffer)
     free(buffer);
 }
@@ -888,7 +898,9 @@ void Med::scanEqual(string v, string t) {
 void Med::scanFilter(string v, string t) {
   uint8_t* buffer = NULL;
   int size = stringToRaw(v, t, &buffer);
+  medMutex.lock();
   Med::memScanFilter(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t);
+  medMutex.unlock();
   if(buffer)
     free(buffer);
 }
@@ -901,7 +913,6 @@ void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* d
   scanAddresses.clear();
 
   ProcMaps maps = getMaps(pid);
-
 
   uint8_t* page = (uint8_t*)malloc(getpagesize()); //For block of memory
 
@@ -987,13 +998,19 @@ string Med::getScanAddressValueByIndex(int ind, string scanType) {
 }
 
 string Med::getValueByAddress(unsigned long address, string scanType) {
-  return memValue(stol(this->selectedProcess.pid), address, scanType);
+  string value;
+  medMutex.lock();
+  value = memValue(stol(this->selectedProcess.pid), address, scanType);
+  medMutex.unlock();
+  return value;
 }
 
 void Med::setValueByAddress(unsigned long address, string value, string scanType) {
   uint8_t* buffer = NULL;
   int size = stringToRaw(string(value), scanType, &buffer);
+  medMutex.lock();
   memWrite(stoi(this->selectedProcess.pid), address, buffer, size);
+  medMutex.unlock();
   if(buffer)
     free(buffer);
 }

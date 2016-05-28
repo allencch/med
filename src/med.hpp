@@ -44,8 +44,11 @@
 #define MED_H
 
 #include <string>
+#include <mutex>
 
 using namespace std;
+
+static std::mutex medMutex; //One and only one, globally accessible
 
 struct ProcMaps {
   vector<unsigned long> starts;
@@ -229,7 +232,6 @@ private:
    */
   static void memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType);
   static void memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType);
-
 };
 
 #endif
