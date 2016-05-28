@@ -45,8 +45,9 @@ using namespace std;
 Med med; //Global to replace scanner.
 
 
-static GMutex memMutex;
-static GCond cond;
+//static GMutex memMutex;
+static GMutex editMutex;
+//static GCond cond;
 static string guiStatus;
 
 
@@ -165,7 +166,7 @@ void scan(GtkButton *button,gpointer data) {
   GtkBuilder* builder = (GtkBuilder*) data;
 
   //Have to lock the memMutex
-  g_mutex_lock(&memMutex);
+  //g_mutex_lock(&memMutex);
   //while(guiStatus == "bg writing")
   //  g_cond_wait(&cond, &memMutex);
 
@@ -184,7 +185,7 @@ void scan(GtkButton *button,gpointer data) {
 
   if(med.selectedProcess.pid == "") { //Default is no string
     cerr << "No process selected" <<endl;
-    g_mutex_unlock(&memMutex);
+    //g_mutex_unlock(&memMutex);
     return;
   }
 
@@ -201,7 +202,7 @@ void scan(GtkButton *button,gpointer data) {
     addressToScanStore(med,scanType,store);
   }
   updateNumberOfAddresses(builder);
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
 }
 
 
@@ -213,7 +214,7 @@ void scan(GtkButton *button,gpointer data) {
 void filter(GtkButton *button,gpointer data) {
   GtkBuilder* builder = (GtkBuilder*) data;
 
-  g_mutex_lock(&memMutex);
+  //g_mutex_lock(&memMutex);
   //while(guiStatus == "bg writing")
   //  g_cond_wait(&cond, &memMutex);
 
@@ -241,7 +242,7 @@ void filter(GtkButton *button,gpointer data) {
 
   updateNumberOfAddresses(builder);
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
 }
 
 
@@ -297,13 +298,15 @@ void editScanType(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
     g_value_unset(&value);
   } catch(string e) {
     cerr << e <<endl; // no need continue
-    g_mutex_unlock(&memMutex);
+    //g_mutex_unlock(&memMutex);
+    g_mutex_unlock(&editMutex);
     return;
   }
 
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
-    g_mutex_unlock(&memMutex);
+    //g_mutex_unlock(&memMutex);
+    g_mutex_unlock(&editMutex);
     return;
   }
 
@@ -315,7 +318,8 @@ void editScanType(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
     cerr<< "editScanType(): " << e<<endl;
   }
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
+  g_mutex_unlock(&editMutex);
 }
 
 void editAddrType(GtkCellRendererText *cell,const gchar *pathStr, const gchar *text, gpointer data) {
@@ -342,7 +346,8 @@ void editAddrType(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
     g_value_unset(&value);
   } catch(string e) {
     cerr << e <<endl; // no need continue
-    g_mutex_unlock(&memMutex);
+    //g_mutex_unlock(&memMutex);
+    g_mutex_unlock(&editMutex);
     return;
   }
 
@@ -350,7 +355,8 @@ void editAddrType(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   //Get PID
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
-    g_mutex_unlock(&memMutex);
+    //g_mutex_unlock(&memMutex);
+    g_mutex_unlock(&editMutex);
     return;
   }
 
@@ -363,7 +369,8 @@ void editAddrType(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   }
 
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
+  g_mutex_unlock(&editMutex);
 }
 
 
@@ -390,7 +397,8 @@ void editScanValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
     g_value_unset(&value);
   } catch(string e) {
     cerr << e <<endl; // no need continue
-    g_mutex_unlock(&memMutex);
+    //g_mutex_unlock(&memMutex);
+    g_mutex_unlock(&editMutex);
     return;
   }
 
@@ -402,7 +410,8 @@ void editScanValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
   //Get PID
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
-    g_mutex_unlock(&memMutex);
+    //g_mutex_unlock(&memMutex);
+    g_mutex_unlock(&editMutex);
     return;
   }
 
@@ -416,7 +425,8 @@ void editScanValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
     cerr << "editScanValue: "<<e <<endl;
   }
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
+  g_mutex_unlock(&editMutex);
 }
 
 void editAddrValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *text, gpointer data) {
@@ -438,7 +448,8 @@ void editAddrValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
     g_value_unset(&value);
   } catch(string e) {
     cerr << e <<endl; // no need continue
-    g_mutex_unlock(&memMutex);
+    //g_mutex_unlock(&memMutex);
+    g_mutex_unlock(&editMutex);
     return;
   }
 
@@ -449,7 +460,8 @@ void editAddrValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
 
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
-    g_mutex_unlock(&memMutex);
+    //g_mutex_unlock(&memMutex);
+    g_mutex_unlock(&editMutex);
     return;
   }
 
@@ -464,7 +476,8 @@ void editAddrValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
   }
 
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
+  g_mutex_unlock(&editMutex);
 
 }
 
@@ -487,6 +500,8 @@ void editScanAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
     gtk_list_store_set(model, &iter, 0, text, -1);
   } catch(string e) {
     cerr<< "editScanAddr: "<< e <<endl;
+    g_mutex_unlock(&editMutex);
+    return;
   }
 
   //Now check the validity of the memory
@@ -494,7 +509,8 @@ void editScanAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   //Get PID
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
-    g_mutex_unlock(&memMutex);
+    //g_mutex_unlock(&memMutex);
+    g_mutex_unlock(&editMutex);
     return;
   }
 
@@ -513,7 +529,8 @@ void editScanAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
     cerr<< "editScanAddr.getValueByAddress: "<<e<<endl;
   }
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
+  g_mutex_unlock(&editMutex);
 }
 
 /**
@@ -539,7 +556,8 @@ void editAddrAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
     gtk_list_store_set(model, &iter, 1, text, -1);
   } catch(string e) {
     cerr<< "editAddrAddr: "<< e <<endl;
-    g_mutex_unlock(&memMutex);
+    //g_mutex_unlock(&memMutex);
+    g_mutex_unlock(&editMutex);
     return;
   }
 
@@ -547,7 +565,8 @@ void editAddrAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   //Get PID
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
-    g_mutex_unlock(&memMutex);
+    //g_mutex_unlock(&memMutex);
+    g_mutex_unlock(&editMutex);
     return;
   }
 
@@ -569,7 +588,8 @@ void editAddrAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
     cerr<< "editAddrAddr: "<< e <<endl;
   }
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
+  g_mutex_unlock(&editMutex);
 }
 
 void editAddrDesc(GtkCellRendererText *cell,const gchar *pathStr, const gchar *text, gpointer data) {
@@ -585,18 +605,20 @@ void editAddrDesc(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   med.addresses[atoi(pathStr)].description = text;
 
   gtk_list_store_set(model, &iter, 0, text, -1);
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
+  g_mutex_unlock(&editMutex);
 }
 
 void editStart(GtkCellRenderer* renderer, GtkCellEditable* edit, gchar* path, gpointer data) {
-  g_mutex_lock(&memMutex);
+  //g_mutex_lock(&memMutex);
   //while(guiStatus == "bg writing")
   //  g_cond_wait(&cond,&memMutex);
-
+  g_mutex_lock(&editMutex);
 }
 
 void editCancel(GtkCellRenderer* renderer, GtkCellEditable* edit, gchar* path, gpointer data) {
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
+  g_mutex_unlock(&editMutex);
 }
 
 void createScanTreeView(GtkBuilder* builder) {
@@ -804,8 +826,9 @@ gpointer refreshAll(gpointer data) {
   while(1) {
     g_usleep(800*1000);
 
-    g_mutex_lock(&memMutex);
+    //g_mutex_lock(&memMutex);
     //guiStatus = "bg writing";
+    g_mutex_lock(&editMutex);
 
     try {
 
@@ -825,8 +848,8 @@ gpointer refreshAll(gpointer data) {
       cerr<<"refreshAll(): " << e << endl;
     }
     //guiStatus = "bg done";
-    g_mutex_unlock(&memMutex);
-
+    //g_mutex_unlock(&memMutex);
+    g_mutex_unlock(&editMutex);
   }
 
   return NULL;
@@ -871,7 +894,7 @@ void addScanToAddress(GtkWidget* button, gpointer data) {
     return;
   }
 
-  g_mutex_lock(&memMutex);
+  //g_mutex_lock(&memMutex);
   //while(guiStatus == "bg writing")
   //  g_cond_wait(&cond,&memMutex);
 
@@ -908,7 +931,7 @@ void addScanToAddress(GtkWidget* button, gpointer data) {
                      -1
                      );
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
 }
 
 
@@ -918,7 +941,7 @@ void addScanToAddress(GtkWidget* button, gpointer data) {
 void clearScan(GtkWidget* button, gpointer data) {
   GtkBuilder* builder = (GtkBuilder*) data;
 
-  g_mutex_lock(&memMutex);
+  //g_mutex_lock(&memMutex);
   //while(guiStatus == "bg writing")
   //  g_cond_wait(&cond,&memMutex);
 
@@ -933,13 +956,13 @@ void clearScan(GtkWidget* button, gpointer data) {
   GtkLabel* status = GTK_LABEL(gtk_builder_get_object(builder, "status"));
   gtk_label_set_text(status, "Scan cleared");
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
 }
 
 void newAddr(GtkWidget* button, gpointer data) {
   GtkBuilder* builder = (GtkBuilder*) data;
 
-  g_mutex_lock(&memMutex);
+  //g_mutex_lock(&memMutex);
   //while(guiStatus == "bg writing")
   //  g_cond_wait(&cond,&memMutex);
 
@@ -963,7 +986,7 @@ void newAddr(GtkWidget* button, gpointer data) {
   med.addresses.push_back(address);
 
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
 }
 
 void delAddr(GtkWidget* button, gpointer data) {
@@ -981,7 +1004,7 @@ void delAddr(GtkWidget* button, gpointer data) {
     return;
   }
 
-  g_mutex_lock(&memMutex);
+  //g_mutex_lock(&memMutex);
   //while(guiStatus == "bg writing")
   //  g_cond_wait(&cond,&memMutex);
 
@@ -990,7 +1013,7 @@ void delAddr(GtkWidget* button, gpointer data) {
 
   gtk_list_store_remove(GTK_LIST_STORE(model),&iter);
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
 }
 
 bool saveAsFile(GtkBuilder* builder,char* filename) {
@@ -1051,7 +1074,7 @@ void saveAsDialog(GtkMenuItem* item, gpointer data) {
   GtkBuilder* builder = (GtkBuilder*) data;
   GtkWindow* mainWindow = GTK_WINDOW(gtk_builder_get_object(builder,"mainWindow"));
 
-  g_mutex_lock(&memMutex);
+  //g_mutex_lock(&memMutex);
   //while(guiStatus == "bg wrting")
   //  g_cond_wait(&cond,&memMutex);
   GtkWidget* dialog = GTK_WIDGET(gtk_file_chooser_dialog_new("Save As ...",
@@ -1072,7 +1095,7 @@ void saveAsDialog(GtkMenuItem* item, gpointer data) {
   }
   gtk_widget_destroy(dialog);
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
 }
 
 bool openFile(GtkBuilder* builder,char* filename) {
@@ -1112,7 +1135,7 @@ void openFileDialog(GtkMenuItem* item, gpointer data) {
   GtkBuilder* builder = (GtkBuilder*) data;
   GtkWindow* mainWindow = GTK_WINDOW(gtk_builder_get_object(builder,"mainWindow"));
 
-  g_mutex_lock(&memMutex);
+  //g_mutex_lock(&memMutex);
   //while(guiStatus == "bg wrting")
   //  g_cond_wait(&cond,&memMutex);
   GtkWidget* dialog = GTK_WIDGET(gtk_file_chooser_dialog_new("Open ...",
@@ -1132,7 +1155,7 @@ void openFileDialog(GtkMenuItem* item, gpointer data) {
   }
   gtk_widget_destroy(dialog);
 
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
 }
 
 
@@ -1167,7 +1190,7 @@ void shiftAddr(GtkButton* button, gpointer data) {
   gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, path);
   gtk_tree_path_free(path);
 
-  g_mutex_lock(&memMutex);
+  //g_mutex_lock(&memMutex);
   //while(guiStatus == "bg writing")
   //g_cond_wait(&cond,&memMutex);
 
@@ -1206,7 +1229,7 @@ void shiftAddr(GtkButton* button, gpointer data) {
       gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter); //If error, continue
     }
   }
-  g_mutex_unlock(&memMutex);
+  //g_mutex_unlock(&memMutex);
 }
 
 
