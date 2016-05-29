@@ -44,10 +44,7 @@ using namespace std;
 
 Med med; //Global to replace scanner.
 
-
-//static GMutex memMutex;
 static GMutex editMutex;
-//static GCond cond;
 static string guiStatus;
 
 
@@ -110,15 +107,8 @@ void procChosen(GtkTreeView *tv, GtkTreePath *path, GtkTreeViewColumn *col, gpoi
   GtkTreeIter iter;
   gtk_tree_selection_get_selected(select,&model,&iter);
 
-  GValue value = G_VALUE_INIT;
-
-  gtk_tree_model_get_value(model,&iter,0,&value);
-  med.selectedProcess.pid = g_value_get_string (&value);
-  g_value_unset(&value);
-
-  gtk_tree_model_get_value(model,&iter,1,&value);
-  med.selectedProcess.cmdline = g_value_get_string (&value);
-  g_value_unset(&value);
+  int index = atoi(gtk_tree_model_get_string_from_iter(model, &iter));
+  med.selectedProcess = med.processes[med.processes.size() -1 -index];
 
   //make the changes to the selectedProc, and hide the window
   GtkWidget *selectedProc = GTK_WIDGET(gtk_builder_get_object(builder,"selectedProc"));
@@ -165,11 +155,6 @@ void updateNumberOfAddresses(GtkBuilder* builder) {
 void scan(GtkButton *button,gpointer data) {
   GtkBuilder* builder = (GtkBuilder*) data;
 
-  //Have to lock the memMutex
-  //g_mutex_lock(&memMutex);
-  //while(guiStatus == "bg writing")
-  //  g_cond_wait(&cond, &memMutex);
-
   //Clear the list store
   GtkListStore *scanStore = GTK_LIST_STORE(gtk_builder_get_object(builder,"scanStore"));
   gtk_list_store_clear(scanStore);
@@ -185,7 +170,6 @@ void scan(GtkButton *button,gpointer data) {
 
   if(med.selectedProcess.pid == "") { //Default is no string
     cerr << "No process selected" <<endl;
-    //g_mutex_unlock(&memMutex);
     return;
   }
 
@@ -202,7 +186,6 @@ void scan(GtkButton *button,gpointer data) {
     addressToScanStore(med,scanType,store);
   }
   updateNumberOfAddresses(builder);
-  //g_mutex_unlock(&memMutex);
 }
 
 
@@ -213,10 +196,6 @@ void scan(GtkButton *button,gpointer data) {
  */
 void filter(GtkButton *button,gpointer data) {
   GtkBuilder* builder = (GtkBuilder*) data;
-
-  //g_mutex_lock(&memMutex);
-  //while(guiStatus == "bg writing")
-  //  g_cond_wait(&cond, &memMutex);
 
 
   //Clear the list store
@@ -241,8 +220,6 @@ void filter(GtkButton *button,gpointer data) {
   }
 
   updateNumberOfAddresses(builder);
-
-  //g_mutex_unlock(&memMutex);
 }
 
 
@@ -287,38 +264,21 @@ void editScanType(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
 
   gtk_list_store_set(model, &iter, 1, text, -1);
 
-  med.scanAddresses[atoi(pathStr)].setScanType(text);
-
-  GValue value = G_VALUE_INIT;
-  long address;
-  try {
-    //Get the address
-    gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 0, &value);
-    address = hexToInt(string(g_value_get_string(&value)));
-    g_value_unset(&value);
-  } catch(string e) {
-    cerr << e <<endl; // no need continue
-    //g_mutex_unlock(&memMutex);
-    g_mutex_unlock(&editMutex);
-    return;
-  }
-
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
-    //g_mutex_unlock(&memMutex);
     g_mutex_unlock(&editMutex);
     return;
   }
 
 
   try {
-    string value2 = med.getValueByAddress(address, text);
+    med.scanAddresses[atoi(pathStr)].setScanType(text);
+    string value2 = med.getValueByAddress(med.scanAddresses[atoi(pathStr)].address, text);
     gtk_list_store_set(model, &iter, 2, value2.c_str(), -1);
   } catch(string e) {
     cerr<< "editScanType(): " << e<<endl;
   }
 
-  //g_mutex_unlock(&memMutex);
   g_mutex_unlock(&editMutex);
 }
 
@@ -334,42 +294,22 @@ void editAddrType(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
 
   gtk_list_store_set(model, &iter, 2, text, -1);
 
-  med.addresses[atoi(pathStr)].setScanType(text);
-
-  //Get the address
-  GValue value = G_VALUE_INIT;
-  long address;
-  try{
-
-    gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 1, &value);
-    address = hexToInt(string(g_value_get_string(&value)));
-    g_value_unset(&value);
-  } catch(string e) {
-    cerr << e <<endl; // no need continue
-    //g_mutex_unlock(&memMutex);
-    g_mutex_unlock(&editMutex);
-    return;
-  }
-
-
   //Get PID
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
-    //g_mutex_unlock(&memMutex);
     g_mutex_unlock(&editMutex);
     return;
   }
 
 
   try {
-    string value2 = med.getValueByAddress(address, text);
+    med.addresses[atoi(pathStr)].setScanType(text);
+    string value2 = med.getValueByAddress(med.addresses[atoi(pathStr)].address, text);
     gtk_list_store_set(model, &iter, 3, value2.c_str(), -1);
   } catch(string e) {
     cout<<"editAddrType: "<< e <<endl;
   }
 
-
-  //g_mutex_unlock(&memMutex);
   g_mutex_unlock(&editMutex);
 }
 
@@ -387,45 +327,21 @@ void editScanValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
 
   gtk_tree_path_free(path);
 
-  //Get the address
-  GValue value = G_VALUE_INIT;
-  long address;
-  try {
-
-    gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 0, &value);
-    address = hexToInt(string(g_value_get_string(&value)));
-    g_value_unset(&value);
-  } catch(string e) {
-    cerr << e <<endl; // no need continue
-    //g_mutex_unlock(&memMutex);
-    g_mutex_unlock(&editMutex);
-    return;
-  }
-
-  //Get the scan type
-  gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 1, &value);
-  string scanType = string(g_value_get_string(&value));
-  g_value_unset(&value);
-
   //Get PID
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
-    //g_mutex_unlock(&memMutex);
     g_mutex_unlock(&editMutex);
     return;
   }
 
-
   try {
-    med.setValueByAddress(address, text, scanType);
+    med.setValueByAddress(med.scanAddresses[atoi(pathStr)].address, text, med.scanAddresses[atoi(pathStr)].getScanType());
 
     //It is suppose to be locked during start editing
     gtk_list_store_set(model, &iter, 2, text, -1);
   } catch(string e) {
     cerr << "editScanValue: "<<e <<endl;
   }
-
-  //g_mutex_unlock(&memMutex);
   g_mutex_unlock(&editMutex);
 }
 
@@ -439,25 +355,6 @@ void editAddrValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
 
   gtk_tree_path_free(path);
 
-  //Get the address
-  GValue value = G_VALUE_INIT;
-  long address;
-  try {
-    gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 1, &value);
-    address = hexToInt(string(g_value_get_string(&value)));
-    g_value_unset(&value);
-  } catch(string e) {
-    cerr << e <<endl; // no need continue
-    //g_mutex_unlock(&memMutex);
-    g_mutex_unlock(&editMutex);
-    return;
-  }
-
-  //Get the scan type
-  gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 2, &value);
-  string scanType = string(g_value_get_string(&value));
-  g_value_unset(&value);
-
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
     //g_mutex_unlock(&memMutex);
@@ -465,9 +362,8 @@ void editAddrValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
     return;
   }
 
-
   try {
-    med.setValueByAddress(address, text, scanType);
+    med.setValueByAddress(med.addresses[atoi(pathStr)].address, text, med.addresses[atoi(pathStr)].getScanType());
 
     //It is suppose to be locked during start editing
     gtk_list_store_set(model, &iter, 3, text, -1);
@@ -475,8 +371,6 @@ void editAddrValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
     cerr<<"editAddrValue: "<<e <<endl;
   }
 
-
-  //g_mutex_unlock(&memMutex);
   g_mutex_unlock(&editMutex);
 
 }
@@ -509,19 +403,12 @@ void editScanAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   //Get PID
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
-    //g_mutex_unlock(&memMutex);
     g_mutex_unlock(&editMutex);
     return;
   }
 
-  //Get the scan type
-  GValue value = G_VALUE_INIT;
-  gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 1, &value);
-  string scanType = string(g_value_get_string(&value));
-  g_value_unset(&value);
-
   try {
-    string value2 = med.getValueByAddress(address, scanType);
+    string value2 = med.getValueByAddress(med.scanAddresses[atoi(pathStr)].address, med.scanAddresses[atoi(pathStr)].getScanType());
     gtk_list_store_set(model, &iter, 2, value2.c_str(), -1);
 
   } catch(string e) {
@@ -529,7 +416,6 @@ void editScanAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
     cerr<< "editScanAddr.getValueByAddress: "<<e<<endl;
   }
 
-  //g_mutex_unlock(&memMutex);
   g_mutex_unlock(&editMutex);
 }
 
@@ -540,7 +426,6 @@ void editAddrAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   GtkBuilder *builder = (GtkBuilder*) data;
   GtkListStore *model = (GtkListStore*) gtk_builder_get_object(builder, "addressStore");
   GtkTreePath* path = gtk_tree_path_new_from_string(pathStr);
-
 
   GtkTreeIter iter;
 
@@ -561,7 +446,6 @@ void editAddrAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
     return;
   }
 
-
   //Get PID
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
@@ -571,16 +455,8 @@ void editAddrAddr(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   }
 
 
-  //Now check the validity of the memory
-  GValue value = G_VALUE_INIT;
-
-  //Get the scan type
-  gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 2, &value);
-  string scanType = string(g_value_get_string(&value));
-  g_value_unset(&value);
-
   try {
-    string value2 = med.getValueByAddress(address, scanType);
+    string value2 = med.getValueByAddress(med.addresses[atoi(pathStr)].address, med.addresses[atoi(pathStr)].getScanType());
     gtk_list_store_set(model, &iter, 3, value2.c_str(), -1);
 
   } catch(string e) {
@@ -610,14 +486,10 @@ void editAddrDesc(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
 }
 
 void editStart(GtkCellRenderer* renderer, GtkCellEditable* edit, gchar* path, gpointer data) {
-  //g_mutex_lock(&memMutex);
-  //while(guiStatus == "bg writing")
-  //  g_cond_wait(&cond,&memMutex);
   g_mutex_lock(&editMutex);
 }
 
 void editCancel(GtkCellRenderer* renderer, GtkCellEditable* edit, gchar* path, gpointer data) {
-  //g_mutex_unlock(&memMutex);
   g_mutex_unlock(&editMutex);
 }
 
@@ -733,8 +605,6 @@ void createAddressTreeView(GtkBuilder* builder) {
 }
 
 void refreshScanTreeView(GtkBuilder* builder, pid_t pid) {
-  //GtkTreeView *tv = GTK_TREE_VIEW(gtk_builder_get_object(builder,"scanTreeView"));
-
   GtkListStore *model = GTK_LIST_STORE(gtk_builder_get_object(builder,"scanStore"));
 
   GtkTreeIter iter;
@@ -743,27 +613,11 @@ void refreshScanTreeView(GtkBuilder* builder, pid_t pid) {
   gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, path);
   gtk_tree_path_free(path);
 
-  GValue value = G_VALUE_INIT;
   while(gtk_list_store_iter_is_valid(model,&iter)) {
-    long address;
-    try {
-      gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 0, &value);
-      string temp = string(g_value_get_string(&value));
-      g_value_unset(&value);
-      address = hexToInt(temp);
-    } catch(string e) {
-      cerr << e <<endl;
-      gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter); //Continue next
-      continue;
-    }
-
-
-    gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 1, &value);
-    string scanType = string(g_value_get_string(&value));
-    g_value_unset(&value);
 
     try {
-      string value2 = memValue(pid, address, scanType);
+      int index = atoi(gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(model), &iter));
+      string value2 = med.getScanValueByIndex(index);
 
       //Something wrong with this one.
       gtk_list_store_set(model, &iter, 2, value2.c_str(), -1);
@@ -790,24 +644,10 @@ void refreshAddressTreeView(GtkBuilder* builder, pid_t pid) throw(string) {
 
   GValue value = G_VALUE_INIT;
   while(gtk_list_store_iter_is_valid(model,&iter)) {
-    long address;
     try {
-      gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 1, &value);
-      string temp = string(g_value_get_string(&value));
-      g_value_unset(&value);
-      address = hexToInt(temp);
-    } catch(string e) {
-      cerr << e <<endl;
-      gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter); //Continue next
-      continue;
-    }
+      int index = atoi(gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(model), &iter));
+      string value2 = med.getAddressValueByIndex(index);
 
-    gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 2, &value);
-    string scanType = string(g_value_get_string(&value));
-    g_value_unset(&value);
-
-    try {
-      string value2 = memValue(pid, address, scanType);
       gtk_list_store_set(model, &iter, 3, value2.c_str(), -1);
       gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter);
     } catch(string e) {
@@ -825,14 +665,9 @@ gpointer refreshAll(gpointer data) {
 
   while(1) {
     g_usleep(800*1000);
-
-    //g_mutex_lock(&memMutex);
-    //guiStatus = "bg writing";
     g_mutex_lock(&editMutex);
 
     try {
-
-      //pid_t pid = builderGetPid(builder); //Get pid first. If no pid, no need continue
       pid_t pid;
       if(med.selectedProcess.pid != "")
         pid = stol(med.selectedProcess.pid);
@@ -847,22 +682,21 @@ gpointer refreshAll(gpointer data) {
     } catch(string e) {
       cerr<<"refreshAll(): " << e << endl;
     }
-    //guiStatus = "bg done";
-    //g_mutex_unlock(&memMutex);
     g_mutex_unlock(&editMutex);
   }
 
   return NULL;
 }
 
+/**
+ * @deprecated
+ */
 gboolean refreshCb(gpointer data) {
   GtkBuilder* builder = (GtkBuilder*) data;
   try {
-    //pid_t pid = builderGetPid(builder);
     pid_t pid;
     if(med.selectedProcess.pid != "")
       pid = stol(med.selectedProcess.pid);
-
 
     //Refresh scan
     refreshScanTreeView(builder, pid);
@@ -894,28 +728,11 @@ void addScanToAddress(GtkWidget* button, gpointer data) {
     return;
   }
 
-  //g_mutex_lock(&memMutex);
-  //while(guiStatus == "bg writing")
-  //  g_cond_wait(&cond,&memMutex);
-
   int index = atoi(gtk_tree_model_get_string_from_iter(model, &iter));
   MedAddress medAddress;
   medAddress.address = med.scanAddresses[index].address;
   medAddress.scanType = med.scanAddresses[index].scanType;
   med.addresses.push_back(medAddress);
-
-  GValue value = G_VALUE_INIT;
-  gtk_tree_model_get_value(model,&iter,0,&value);
-  string address = string(g_value_get_string(&value));
-  g_value_unset(&value);
-
-  gtk_tree_model_get_value(model,&iter,1,&value);
-  string scanType = string(g_value_get_string(&value));
-  g_value_unset(&value);
-
-  gtk_tree_model_get_value(model,&iter,2,&value);
-  string scanValue = string(g_value_get_string(&value));
-  g_value_unset(&value);
 
 
   //Add to the address panel
@@ -924,14 +741,13 @@ void addScanToAddress(GtkWidget* button, gpointer data) {
   gtk_list_store_append(GTK_LIST_STORE(addrModel), &addrIter);
   gtk_list_store_set(GTK_LIST_STORE(addrModel), &addrIter,
                      0, "Your description",
-                     1, address.c_str(),
-                     2, scanType.c_str(),
-                     3, scanValue.c_str(),
+                     1, intToHex(medAddress.address).c_str(),
+                     2, medAddress.getScanType().c_str(),
+                     3, med.getAddressValueByIndex(med.addresses.size() -1).c_str(),
                      4, false,
                      -1
                      );
 
-  //g_mutex_unlock(&memMutex);
 }
 
 
@@ -940,10 +756,6 @@ void addScanToAddress(GtkWidget* button, gpointer data) {
  */
 void clearScan(GtkWidget* button, gpointer data) {
   GtkBuilder* builder = (GtkBuilder*) data;
-
-  //g_mutex_lock(&memMutex);
-  //while(guiStatus == "bg writing")
-  //  g_cond_wait(&cond,&memMutex);
 
 
   //Get the selected treeview item
@@ -956,18 +768,20 @@ void clearScan(GtkWidget* button, gpointer data) {
   GtkLabel* status = GTK_LABEL(gtk_builder_get_object(builder, "status"));
   gtk_label_set_text(status, "Scan cleared");
 
-  //g_mutex_unlock(&memMutex);
 }
 
 void newAddr(GtkWidget* button, gpointer data) {
   GtkBuilder* builder = (GtkBuilder*) data;
 
-  //g_mutex_lock(&memMutex);
-  //while(guiStatus == "bg writing")
-  //  g_cond_wait(&cond,&memMutex);
-
   GtkTreeModel *model = GTK_TREE_MODEL(gtk_builder_get_object(builder, "addressStore"));
 
+
+  MedAddress address;
+  address.description = "Your description";
+  address.address = 0;
+  address.setScanType("int32");
+  address.lock = false;
+  med.addresses.push_back(address);
 
   GtkTreeIter iter;
   gtk_list_store_append(GTK_LIST_STORE(model), &iter);
@@ -978,15 +792,7 @@ void newAddr(GtkWidget* button, gpointer data) {
                      4, false,
                      -1
                      );
-  MedAddress address;
-  address.description = "Your description";
-  address.address = 0;
-  address.setScanType("int32");
-  address.lock = false;
-  med.addresses.push_back(address);
 
-
-  //g_mutex_unlock(&memMutex);
 }
 
 void delAddr(GtkWidget* button, gpointer data) {
@@ -1004,16 +810,10 @@ void delAddr(GtkWidget* button, gpointer data) {
     return;
   }
 
-  //g_mutex_lock(&memMutex);
-  //while(guiStatus == "bg writing")
-  //  g_cond_wait(&cond,&memMutex);
-
   int index = atoi(gtk_tree_model_get_string_from_iter(model, &iter));
   med.addresses.erase(med.addresses.begin() + index);
 
   gtk_list_store_remove(GTK_LIST_STORE(model),&iter);
-
-  //g_mutex_unlock(&memMutex);
 }
 
 bool saveAsFile(GtkBuilder* builder,char* filename) {
@@ -1190,38 +990,23 @@ void shiftAddr(GtkButton* button, gpointer data) {
   gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, path);
   gtk_tree_path_free(path);
 
-  //g_mutex_lock(&memMutex);
-  //while(guiStatus == "bg writing")
-  //g_cond_wait(&cond,&memMutex);
-
-
-  GValue value = G_VALUE_INIT;
   while(gtk_list_store_iter_is_valid(model,&iter)) {
-    long address;
-    try {
-      gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 1, &value);
-      address = hexToInt(string(g_value_get_string(&value)));
-      g_value_unset(&value);
-    } catch(string e) {
-      cerr << e <<endl;
-      gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter); //Continue next
-    }
+    int index = atoi(gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(model), &iter));
 
+    long address = med.addresses[index].address;
     address += difference;
+    med.addresses[index].address = address;
+
     gtk_list_store_set(model,&iter,
                        1, intToHex(address).c_str(),
                        -1
                        );
 
-    int index = atoi(gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(model), &iter));
-    med.addresses[index].address = address;
 
-    gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 2, &value);
-    string scanType = string(g_value_get_string(&value));
-    g_value_unset(&value);
 
     try {
-      string value2 = med.getValueByAddress(address, scanType);
+      string value2 = med.getValueByAddress(address, med.addresses[index].getScanType());
+
       gtk_list_store_set(model, &iter, 3, value2.c_str(), -1);
       gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter);
     } catch(string e) {
@@ -1229,7 +1014,6 @@ void shiftAddr(GtkButton* button, gpointer data) {
       gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter); //If error, continue
     }
   }
-  //g_mutex_unlock(&memMutex);
 }
 
 

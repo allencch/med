@@ -997,6 +997,14 @@ string Med::getScanAddressValueByIndex(int ind, string scanType) {
   return this->scanAddresses[ind].getValue(stol(this->selectedProcess.pid), scanType);
 }
 
+string Med::getScanValueByIndex(int ind) {
+  return this->scanAddresses[ind].getValue(stol(this->selectedProcess.pid), this->scanAddresses[ind].getScanType());
+}
+
+string Med::getAddressValueByIndex(int ind) {
+  return this->addresses[ind].getValue(stol(this->selectedProcess.pid), this->addresses[ind].getScanType());
+}
+
 string Med::getValueByAddress(unsigned long address, string scanType) {
   string value;
   medMutex.lock();

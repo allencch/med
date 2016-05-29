@@ -223,6 +223,13 @@ public:
 
   string getScanAddressValueByIndex(int ind, string scanType);
 
+  string getScanValueByIndex(int ind);
+
+  /**
+   * The function name is not value significant. It refers to right hand panel stored address.
+   */
+  string getAddressValueByIndex(int ind);
+
   string getValueByAddress(unsigned long address, string scanType);
   void setValueByAddress(unsigned long address, string value, string scanType);
 
