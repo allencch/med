@@ -233,6 +233,9 @@ public:
   string getValueByAddress(unsigned long address, string scanType);
   void setValueByAddress(unsigned long address, string value, string scanType);
 
+  void saveFile(const char* filename) throw(string);
+  void openFile(const char* filename) throw(string);
+
 private:
   /**
    * @param scanType is just a record.

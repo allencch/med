@@ -59,7 +59,7 @@
 #include <fcntl.h> //open, read, lseek
 #include <dirent.h> //read directory
 
-
+#include <json/json.h>
 
 #include "med.hpp"
 
@@ -1021,4 +1021,46 @@ void Med::setValueByAddress(unsigned long address, string value, string scanType
   medMutex.unlock();
   if(buffer)
     free(buffer);
+}
+
+void Med::saveFile(const char* filename) throw(string) {
+  Json::Value root;
+  //Using C++11
+  for(auto address: this->addresses) {
+    Json::Value pairs;
+    pairs["description"] = address.description;
+    pairs["address"] = intToHex(address.address);
+    pairs["type"] = address.getScanType();
+    pairs["value"] = string(address.getValue(stol(this->selectedProcess.pid), address.getScanType()));
+    root.append(pairs);
+  }
+  ofstream ofs;
+  ofs.open(filename);
+  if(ofs.fail()) {
+    throw string("Save JSON: Fail to open file ") + filename;
+  }
+  ofs << root << endl;
+  ofs.close();
+}
+
+void Med::openFile(const char* filename) throw(string) {
+  Json::Value root;
+
+  ifstream ifs;
+  ifs.open(filename);
+  if(ifs.fail()) {
+    throw string("Open JSON: Fail to open file ") + filename;
+  }
+  ifs >> root;
+  ifs.close();
+
+  this->addresses.clear();
+  for(int i=0;i<root.size();i++) {
+    MedAddress address;
+    address.description = root[i]["description"].asString();
+    address.address = hexToInt(root[i]["address"].asString());
+    address.setScanType(root[i]["type"].asString());
+
+    this->addresses.push_back(address);
+  }
 }

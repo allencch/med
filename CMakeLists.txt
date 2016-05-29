@@ -12,4 +12,5 @@ add_executable(testfile src/test.c)
 add_executable(medgui src/med.cpp src/main-gui.cpp)
 
 add_definitions(${GTK3_CFLAGS} ${JSONCPP_CFLAGS})
+target_link_libraries(med ${GTK3_LIBRARIES} ${JSONCPP_LIBRARIES})
 target_link_libraries(medgui ${GTK3_LIBRARIES} ${JSONCPP_LIBRARIES})

@@ -826,47 +826,7 @@ bool saveAsFile(GtkBuilder* builder,char* filename) {
   gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, path);
   gtk_tree_path_free(path);
 
-
-  //Save to JSON file
-  Json::Value root;
-
-  GValue value = G_VALUE_INIT;
-  while(gtk_list_store_iter_is_valid(model,&iter)) {
-    try {
-      Json::Value pairs;
-      gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 0, &value);
-      pairs["description"] = string(g_value_get_string(&value));
-      g_value_unset(&value);
-
-      gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 1, &value);
-      pairs["address"] = string(g_value_get_string(&value));
-      g_value_unset(&value);
-
-      gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 2, &value);
-      pairs["type"] = string(g_value_get_string(&value));
-      g_value_unset(&value);
-
-      gtk_tree_model_get_value(GTK_TREE_MODEL(model), &iter, 3, &value);
-      pairs["value"] = string(g_value_get_string(&value));
-      g_value_unset(&value);
-
-      root.append(pairs);
-
-      gtk_tree_model_iter_next(GTK_TREE_MODEL(model),&iter);
-    } catch(string e) {
-      throw e;
-    }
-
-  }
-  //Save to file
-  ofstream ofs;
-  ofs.open(filename);
-  if(ofs.fail()) {
-    return false;
-  }
-  ofs << root <<endl;
-
-  ofs.close();
+  med.saveFile(filename);
   return true;
 }
 
@@ -900,16 +860,7 @@ void saveAsDialog(GtkMenuItem* item, gpointer data) {
 
 bool openFile(GtkBuilder* builder,char* filename) {
   //Open file
-  Json::Value root;
-
-  ifstream ifs;
-  ifs.open(filename);
-  if(ifs.fail()) {
-    return false;
-  }
-  ifs >> root;
-
-  ifs.close();
+  med.openFile(filename);
 
   //Read the content from the list store
   GtkListStore *model = GTK_LIST_STORE(gtk_builder_get_object(builder,"addressStore"));
@@ -918,13 +869,12 @@ bool openFile(GtkBuilder* builder,char* filename) {
 
 
   GtkTreeIter iter;
-  for(int i=0;i<root.size();i++) {
+  for(int i=0;i<med.addresses.size();i++) {
     gtk_list_store_append(model,&iter);
     gtk_list_store_set(model, &iter,
-                       0, root[i]["description"].asCString(),
-                       1, root[i]["address"].asCString(),
-                       2, root[i]["type"].asCString(),
-                       3, root[i]["value"].asCString(),
+                       0, med.addresses[i].description.c_str(),
+                       1, intToHex(med.addresses[i].address).c_str(),
+                       2, med.addresses[i].getScanType().c_str(),
                        -1);
   }
 
