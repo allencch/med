@@ -357,7 +357,6 @@ void editAddrValue(GtkCellRendererText *cell,const gchar *pathStr, const gchar *
 
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
-    //g_mutex_unlock(&memMutex);
     g_mutex_unlock(&editMutex);
     return;
   }
@@ -481,9 +480,33 @@ void editAddrDesc(GtkCellRendererText *cell,const gchar *pathStr, const gchar *t
   med.addresses[atoi(pathStr)].description = text;
 
   gtk_list_store_set(model, &iter, 0, text, -1);
-  //g_mutex_unlock(&memMutex);
   g_mutex_unlock(&editMutex);
 }
+
+/**
+ * This is to toggle the item
+ */
+void lockItem(GtkCellRendererToggle *cell,
+              gchar *pathStr,
+              gpointer data) {
+  GtkBuilder* builder = (GtkBuilder*) data;
+  GtkListStore *model = (GtkListStore*) gtk_builder_get_object(builder, "addressStore");
+  GtkTreePath* path = gtk_tree_path_new_from_string(pathStr);
+  GtkTreeIter iter;
+  gtk_tree_model_get_iter(GTK_TREE_MODEL(model),&iter,path);
+  gtk_tree_path_free(path);
+
+  int index = atoi(pathStr);
+  med.addresses[index].lock = !med.addresses[index].lock;
+  if(med.addresses[index].lock)
+    med.lockAddressValueByIndex(index);
+  else
+    med.unlockAddressValueByIndex(index);
+
+  //GTK
+  gtk_list_store_set(model, &iter, 4, med.addresses[index].lock, -1);
+}
+
 
 void editStart(GtkCellRenderer* renderer, GtkCellEditable* edit, gchar* path, gpointer data) {
   g_mutex_lock(&editMutex);
@@ -538,10 +561,6 @@ void createScanTreeView(GtkBuilder* builder) {
 
 }
 
-void lockItem(GtkCellRendererToggle *cell,
-              gchar *pathStr,
-              gpointer data) {
-}
 
 void createAddressTreeView(GtkBuilder* builder) {
   //Create the list store

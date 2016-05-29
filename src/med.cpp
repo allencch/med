@@ -49,6 +49,7 @@
 #include <iterator>
 #include <vector>
 #include <cinttypes>
+#include <chrono>
 
 
 #include <sys/ptrace.h> //ptrace()
@@ -879,12 +880,17 @@ void MedScan::setValue(long pid, string v) {
 }
 
 
-MedAddress::MedAddress() {}
-MedAddress::MedAddress(unsigned long address) : MedScan(address) {}
+MedAddress::MedAddress() {
+  this->lock = false;
+  this->lockThread = NULL;
+}
+MedAddress::MedAddress(unsigned long address) : MedScan(address) {
+  this->lock = false;
+  this->lockThread = NULL;
+}
+
 Med::Med() {}
 Med::~Med() {}
-
-
 void Med::scanEqual(string v, string t) {
   uint8_t* buffer = NULL;
   int size = stringToRaw(v, t, &buffer);
@@ -1063,4 +1069,29 @@ void Med::openFile(const char* filename) throw(string) {
 
     this->addresses.push_back(address);
   }
+}
+
+void myTest(Med* med, MedAddress* address) {
+  while(1) {
+    if(!address->lock) {
+      return; //End
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(800));
+    address->setValue(stol(med->selectedProcess.pid), address->lockedValue);
+  }
+}
+
+void Med::lockAddressValueByIndex(int ind) {
+  //Create a thread
+  MedAddress* address = &(this->addresses[ind]);
+  address->lockedValue = address->getValue(stol(this->selectedProcess.pid), address->getScanType());
+  address->lockThread = new std::thread(myTest, this, address);
+}
+
+void Med::unlockAddressValueByIndex(int ind) {
+  MedAddress* address = &(this->addresses[ind]);
+  address->lock = false; //Make sure make it to false.
+  address->lockThread->join();
+  delete address->lockThread;
+  address->lockThread = NULL;
 }

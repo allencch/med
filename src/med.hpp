@@ -45,6 +45,7 @@
 
 #include <string>
 #include <mutex>
+#include <thread>
 
 using namespace std;
 
@@ -194,11 +195,16 @@ public:
  * This is the address will be saved, re-use, lock, etc.
  */
 class MedAddress : public MedScan {
+  friend class Med;
 public:
   MedAddress();
   MedAddress(unsigned long address);
   string description;
   bool lock; /**< Not using mutex */
+  string lockedValue;
+
+private:
+  std::thread* lockThread;
 };
 
 /**
@@ -222,8 +228,8 @@ public:
   vector<Process> listProcesses();
 
   string getScanAddressValueByIndex(int ind, string scanType);
-
   string getScanValueByIndex(int ind);
+
 
   /**
    * The function name is not value significant. It refers to right hand panel stored address.
@@ -232,6 +238,9 @@ public:
 
   string getValueByAddress(unsigned long address, string scanType);
   void setValueByAddress(unsigned long address, string value, string scanType);
+
+  void lockAddressValueByIndex(int ind);
+  void unlockAddressValueByIndex(int ind);
 
   void saveFile(const char* filename) throw(string);
   void openFile(const char* filename) throw(string);
