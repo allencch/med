@@ -25,14 +25,14 @@ private:
   void loadUiFiles() {
     QUiLoader loader;
 
-    QFile file("../main-qt.ui");
+    QFile file("./main-qt.ui");
     file.open(QFile::ReadOnly);
     QWidget* mainWindow = loader.load(&file);
     file.close();
 
     //Cannot put the followings to another method
     dialog = new QDialog(mainWindow); //If put this to another method, then I cannot set the mainWindow as the parent
-    QFile processFile("../process.ui");
+    QFile processFile("./process.ui");
     processFile.open(QFile::ReadOnly);
 
     QWidget* chooseProc = loader.load(&processFile, dialog);
@@ -52,8 +52,6 @@ private:
   }
 
 };
-
-
 
 int main(int argc, char **argv) {
   QApplication app(argc, argv);
