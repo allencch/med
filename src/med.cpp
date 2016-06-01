@@ -1071,7 +1071,7 @@ void Med::openFile(const char* filename) throw(string) {
   }
 }
 
-void myTest(Med* med, MedAddress* address) {
+void lockValue(Med* med, MedAddress* address) {
   while(1) {
     if(!address->lock) {
       return; //End
@@ -1085,7 +1085,7 @@ void Med::lockAddressValueByIndex(int ind) {
   //Create a thread
   MedAddress* address = &(this->addresses[ind]);
   address->lockedValue = address->getValue(stol(this->selectedProcess.pid), address->getScanType());
-  address->lockThread = new std::thread(myTest, this, address);
+  address->lockThread = new std::thread(lockValue, this, address);
 }
 
 void Med::unlockAddressValueByIndex(int ind) {
