@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>400</height>
+    <width>353</width>
+    <height>231</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,18 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <widget class="QTreeView" name="procTreeView"/>
+    <widget class="QTreeWidget" name="procTreeWidget">
+     <column>
+      <property name="text">
+       <string>PID</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Process</string>
+      </property>
+     </column>
+    </widget>
    </item>
    <item>
     <widget class="QLabel" name="label">

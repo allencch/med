@@ -34,9 +34,6 @@
 #include <dirent.h>
 #include <gtk/gtk.h>
 
-#include <json/json.h>
-
-
 #include "med.hpp"
 
 using namespace std;
@@ -45,8 +42,6 @@ using namespace std;
 Med med; //Global to replace scanner.
 
 static GMutex editMutex;
-static string guiStatus;
-
 
 //Prototype
 gpointer refreshAll(gpointer data);
