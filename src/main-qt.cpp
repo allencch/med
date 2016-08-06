@@ -47,6 +47,32 @@ private slots:
     processDialog->hide();
   }
 
+  void onScanClicked() {
+    QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
+    scanTreeWidget->clear();
+
+    //Get scanned type
+    string scanType = mainWindow->findChild<QComboBox*>("scanType")->currentText().toStdString();
+
+    string scanValue = mainWindow->findChild<QLineEdit*>("scanEntry")->text().toStdString();
+
+    if(med.selectedProcess.pid == "") {
+      cerr << "No process seelcted " <<endl;
+      return;
+    }
+    try {
+      med.scanEqual(scanValue, scanType);
+    } catch(string e) {
+      cerr << "scan: "<<e<<endl;
+    }
+
+    if(med.scanAddresses.size() <= 800) {
+      MainUi::addressToScanTreeWidget(med, scanType, scanTreeWidget);
+    }
+
+    MainUi::updateNumberOfAddresses(mainWindow);
+  }
+
 private:
   QWidget* mainWindow;
   QWidget* chooseProc;
@@ -74,6 +100,10 @@ private:
     processDialog->setModal(true);
     processDialog->resize(400, 400);
 
+    //Statusbar meesage
+    QStatusBar* statusBar = mainWindow->findChild<QStatusBar*>("statusbar");
+    statusBar->showMessage("Tips: Left panel is scanned address. Right panel is stored address.");
+
     //Add signal
     QTreeWidget* procTreeWidget = chooseProc->findChild<QTreeWidget*>("procTreeWidget");
     QObject::connect(procTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(onProcItemDblClicked(QTreeWidgetItem*, int)));
@@ -86,6 +116,10 @@ private:
     //Add signal to the process
     QWidget* process = mainWindow->findChild<QWidget*>("process");
     QObject::connect(process, SIGNAL(clicked()), this, SLOT(onProcessClicked()));
+
+    //Add signal to scan
+    QWidget* scanButton = mainWindow->findChild<QWidget*>("scanButton");
+    QObject::connect(scanButton, SIGNAL(clicked()), this, SLOT(onScanClicked()));
   }
 
   bool eventFilter(QObject* obj, QEvent* ev) {
@@ -95,6 +129,25 @@ private:
         onProcItemDblClicked(procTreeWidget->currentItem(), 0); //Just use the first column
       }
     }
+  }
+
+  static void addressToScanTreeWidget(Med med, string scanType, QTreeWidget* scanTreeWidget) {
+    for(int i=0;i<med.scanAddresses.size();i++) {
+      char address[32];
+      sprintf(address, "%p", (void*)(med.scanAddresses[i].address));
+
+      //Get the value from address and type
+      string value = med.getScanAddressValueByIndex(i, scanType);
+
+      QTreeWidgetItem* item = new QTreeWidgetItem(scanTreeWidget);
+      item->setText(0, address);
+      item->setText(1, scanType.c_str());
+      item->setText(2, value.c_str());
+    }
+  }
+
+  static void updateNumberOfAddresses(QWidget* mainWindow) {
+
   }
 
 };

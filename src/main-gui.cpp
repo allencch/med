@@ -176,6 +176,7 @@ void scan(GtkButton *button,gpointer data) {
 
 
   //Show the results at the scanTreeView
+  //TODO: Reuse the above variable
   GtkListStore* store = GTK_LIST_STORE(gtk_builder_get_object(builder, "scanStore"));
   if(med.scanAddresses.size() <= 800) {
     addressToScanStore(med,scanType,store);
