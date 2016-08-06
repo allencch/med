@@ -42,7 +42,7 @@ private slots:
 
     //Make changes to the selectedProc and hide the window
     QLineEdit* line = this->mainWindow->findChild<QLineEdit*>("selectedProc");
-    line->setText(QString::fromLatin1(med.selectedProcess.cmdline.c_str())); //Do not use fromStdString(), it will append with some unknown characters
+    line->setText(QString::fromLatin1((med.selectedProcess.pid + " " + med.selectedProcess.cmdline).c_str())); //Do not use fromStdString(), it will append with some unknown characters
 
     processDialog->hide();
   }
@@ -78,6 +78,7 @@ private:
     QTreeWidget* procTreeWidget = chooseProc->findChild<QTreeWidget*>("procTreeWidget");
     QObject::connect(procTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(onProcItemDblClicked(QTreeWidgetItem*, int)));
 
+    procTreeWidget->installEventFilter(this);
 
     //TODO: center
     mainWindow->show();
@@ -85,7 +86,15 @@ private:
     //Add signal to the process
     QWidget* process = mainWindow->findChild<QWidget*>("process");
     QObject::connect(process, SIGNAL(clicked()), this, SLOT(onProcessClicked()));
+  }
 
+  bool eventFilter(QObject* obj, QEvent* ev) {
+    QTreeWidget* procTreeWidget = chooseProc->findChild<QTreeWidget*>("procTreeWidget");
+    if(obj == procTreeWidget && ev->type() == QEvent::KeyRelease) {
+      if(static_cast<QKeyEvent*>(ev)->key() == Qt::Key_Return) { //Use Return instead of Enter
+        onProcItemDblClicked(procTreeWidget->currentItem(), 0); //Just use the first column
+      }
+    }
   }
 
 };

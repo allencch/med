@@ -31,7 +31,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Tips: Type to search process. Double-click to select.</string>
+      <string>Tips: Click the Process column and type to search process. Double-click to select.</string>
      </property>
     </widget>
    </item>
