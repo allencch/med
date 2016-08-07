@@ -98,10 +98,23 @@ private slots:
 
   void onScanItemChanged(QTreeWidgetItem* item, int column) {
     switch(column) {
+    case 1: //Not available, because the 2nd column is combobox
+      break;
     case 2:
       editScanValue(item, column);
       break;
     }
+  }
+
+  void onScanTypeChanged(QString text) {
+    QComboBox* combo = qobject_cast<QComboBox*>(sender());
+
+    QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
+
+    QTreeWidgetItem* item = scanTreeWidget->topLevelItem(combo->property("tree-row").toInt());
+    scanTreeWidget->setCurrentItem(item);
+
+    editScanType(item, text.toStdString());
   }
 
 private:
@@ -131,7 +144,7 @@ private:
     processDialog->setModal(true);
     processDialog->resize(400, 400);
 
-    //Statusbar meesage
+    //Statusbar message
     QStatusBar* statusBar = mainWindow->findChild<QStatusBar*>("statusbar");
     statusBar->showMessage("Tips: Left panel is scanned address. Right panel is stored address.");
 
@@ -189,10 +202,28 @@ private:
 
       QTreeWidgetItem* item = new QTreeWidgetItem(scanTreeWidget);
       item->setText(0, address);
-      item->setText(1, scanType.c_str());
       item->setText(2, value.c_str());
 
       item->setFlags(item->flags() | (Qt::ItemIsEditable));
+    }
+
+    //This is how to add combobox to the item
+    QTreeWidgetItemIterator it(scanTreeWidget);
+    while(*it) {
+      QComboBox* combo = createTypeComboBox(scanTreeWidget, scanType);
+
+      //Add property to the combobox, so that can be used to select the tree widget's row
+      // http://stackoverflow.com/questions/30484784/how-to-work-with-signals-from-qtablewidget-cell-with-cellwidget-set
+      combo->setProperty("tree-row", scanTreeWidget->indexOfTopLevelItem(*it));
+
+      scanTreeWidget->setItemWidget(*it, 1, combo);
+
+      //Add signal
+      QObject::connect(combo,
+                       SIGNAL(currentTextChanged(QString)),
+                       this,
+                       SLOT(onScanTypeChanged(QString)));
+      it++;
     }
   }
 
@@ -217,6 +248,38 @@ private:
     } catch(string e) {
       cerr << "editScanValue: "<<e<<endl;
     }
+  }
+
+  void editScanType(QTreeWidgetItem* item, string type) {
+    int index = item->treeWidget()->indexOfTopLevelItem(item);
+    string text = type;
+    if(med.selectedProcess.pid == "") {
+      cerr<< "No PID" <<endl;
+      return;
+    }
+
+    try {
+      med.scanAddresses[index].setScanType(text);
+      string value2 = med.getValueByAddress(med.scanAddresses[index].address, text);
+      item->setText(2, value2.c_str());
+    } catch(string e) {
+      cerr << "editScanType: "<<e<<endl;
+    }
+  }
+
+
+
+  QComboBox* createTypeComboBox(QTreeWidget* widget, string type) {
+    QComboBox* combo = new QComboBox(widget);
+    combo->addItems(QStringList() <<
+                    "int8" <<
+                    "int16" <<
+                    "int32" <<
+                    "float32" <<
+                    "float64");
+
+    combo->setCurrentText(type.c_str());
+    return combo;
   }
 
 };
