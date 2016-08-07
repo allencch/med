@@ -96,7 +96,13 @@ private slots:
     mainWindow->findChild<QStatusBar*>("statusbar")->showMessage("Scan cleared");
   }
 
-
+  void onScanItemChanged(QTreeWidgetItem* item, int column) {
+    switch(column) {
+    case 2:
+      editScanValue(item, column);
+      break;
+    }
+  }
 
 private:
   QWidget* mainWindow;
@@ -149,12 +155,19 @@ private:
     QWidget* filterButton = mainWindow->findChild<QWidget*>("filterButton");
     QObject::connect(filterButton, SIGNAL(clicked()), this, SLOT(onFilterClicked()));
 
-    QObject::connect(
-                     mainWindow->findChild<QWidget*>("scanClear"),
+    QObject::connect(mainWindow->findChild<QWidget*>("scanClear"),
                      SIGNAL(clicked()),
                      this,
                      SLOT(onClearClicked())
                      );
+
+    //Add signal
+    QObject::connect(mainWindow->findChild<QTreeWidget*>("scanTreeWidget"),
+                     SIGNAL(itemChanged(QTreeWidgetItem*, int)),
+                     this,
+                     SLOT(onScanItemChanged(QTreeWidgetItem*, int))
+                     );
+
   }
 
   bool eventFilter(QObject* obj, QEvent* ev) {
@@ -178,6 +191,8 @@ private:
       item->setText(0, address);
       item->setText(1, scanType.c_str());
       item->setText(2, value.c_str());
+
+      item->setFlags(item->flags() | (Qt::ItemIsEditable));
     }
   }
 
@@ -185,6 +200,23 @@ private:
     char message[128];
     sprintf(message, "%ld addresses found", med.scanAddresses.size());
     mainWindow->findChild<QStatusBar*>("statusbar")->showMessage(message);
+  }
+
+  void editScanValue(QTreeWidgetItem* item, int column) {
+    int index = item->treeWidget()->indexOfTopLevelItem(item);
+    string text = item->text(column).toStdString();
+    if(med.selectedProcess.pid == "") {
+      cerr<< "No PID" <<endl;
+      return;
+    }
+
+    try {
+      med.setValueByAddress(med.scanAddresses[index].address,
+                            text,
+                            med.scanAddresses[index].getScanType());
+    } catch(string e) {
+      cerr << "editScanValue: "<<e<<endl;
+    }
   }
 
 };
