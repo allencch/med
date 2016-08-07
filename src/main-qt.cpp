@@ -67,11 +67,36 @@ private slots:
     }
 
     if(med.scanAddresses.size() <= 800) {
-      MainUi::addressToScanTreeWidget(med, scanType, scanTreeWidget);
+      addressToScanTreeWidget(med, scanType, scanTreeWidget);
     }
 
-    MainUi::updateNumberOfAddresses(mainWindow);
+    updateNumberOfAddresses(mainWindow);
   }
+
+  void onFilterClicked() {
+    QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
+    scanTreeWidget->clear();
+
+    //Get scanned type
+    string scanType = mainWindow->findChild<QComboBox*>("scanType")->currentText().toStdString();
+
+    string scanValue = mainWindow->findChild<QLineEdit*>("scanEntry")->text().toStdString();
+
+    med.scanFilter(scanValue, scanType);
+
+    if(med.scanAddresses.size() <= 800)
+      addressToScanTreeWidget(med, scanType, scanTreeWidget);
+
+    updateNumberOfAddresses(mainWindow);
+  }
+
+  void onClearClicked() {
+    mainWindow->findChild<QTreeWidget*>("scanTreeWidget")->clear();
+    med.scanAddresses.clear();
+    mainWindow->findChild<QStatusBar*>("statusbar")->showMessage("Scan cleared");
+  }
+
+
 
 private:
   QWidget* mainWindow;
@@ -120,6 +145,16 @@ private:
     //Add signal to scan
     QWidget* scanButton = mainWindow->findChild<QWidget*>("scanButton");
     QObject::connect(scanButton, SIGNAL(clicked()), this, SLOT(onScanClicked()));
+
+    QWidget* filterButton = mainWindow->findChild<QWidget*>("filterButton");
+    QObject::connect(filterButton, SIGNAL(clicked()), this, SLOT(onFilterClicked()));
+
+    QObject::connect(
+                     mainWindow->findChild<QWidget*>("scanClear"),
+                     SIGNAL(clicked()),
+                     this,
+                     SLOT(onClearClicked())
+                     );
   }
 
   bool eventFilter(QObject* obj, QEvent* ev) {
@@ -131,7 +166,7 @@ private:
     }
   }
 
-  static void addressToScanTreeWidget(Med med, string scanType, QTreeWidget* scanTreeWidget) {
+  void addressToScanTreeWidget(Med med, string scanType, QTreeWidget* scanTreeWidget) {
     for(int i=0;i<med.scanAddresses.size();i++) {
       char address[32];
       sprintf(address, "%p", (void*)(med.scanAddresses[i].address));
@@ -146,8 +181,10 @@ private:
     }
   }
 
-  static void updateNumberOfAddresses(QWidget* mainWindow) {
-
+  void updateNumberOfAddresses(QWidget* mainWindow) {
+    char message[128];
+    sprintf(message, "%ld addresses found", med.scanAddresses.size());
+    mainWindow->findChild<QStatusBar*>("statusbar")->showMessage(message);
   }
 
 };

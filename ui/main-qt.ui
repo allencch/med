@@ -124,21 +124,21 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
-           <widget class="QPushButton" name="pushButton_6">
+           <widget class="QPushButton" name="scanAdd">
             <property name="text">
              <string>Add</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_5">
+           <widget class="QPushButton" name="scanAddAll">
             <property name="text">
              <string>Add All</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_3">
+           <widget class="QPushButton" name="scanClear">
             <property name="text">
              <string>Clear</string>
             </property>
@@ -182,14 +182,14 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="QPushButton" name="newButton">
+           <widget class="QPushButton" name="addressNew">
             <property name="text">
              <string>New</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="deleteButton">
+           <widget class="QPushButton" name="addressDelete">
             <property name="text">
              <string>Delete</string>
             </property>
@@ -210,7 +210,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="shiftButton">
+           <widget class="QPushButton" name="addressShift">
             <property name="text">
              <string>Shift</string>
             </property>
@@ -230,7 +230,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>23</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
