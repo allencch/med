@@ -96,6 +96,42 @@ private slots:
     mainWindow->findChild<QStatusBar*>("statusbar")->showMessage("Scan cleared");
   }
 
+  void onScanAddClicked() {
+    QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
+    QTreeWidgetItem* item = scanTreeWidget->currentItem();
+    int index = scanTreeWidget->indexOfTopLevelItem(item);
+
+    //TODO: Write this to a function
+    MedAddress medAddress;
+    medAddress.address = med.scanAddresses[index].address;
+    medAddress.scanType = med.scanAddresses[index].scanType;
+    med.addresses.push_back(medAddress);
+
+    //Add to AddressTreeWidget
+    QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
+    QTreeWidgetItem* itemToAdd = new QTreeWidgetItem(addressTreeWidget);
+    itemToAdd->setText(0, "Your description");
+    itemToAdd->setText(1, intToHex(medAddress.address).c_str());
+    itemToAdd->setText(3, med.getAddressValueByIndex(med.addresses.size()-1).c_str());
+    itemToAdd->setText(4, "false");
+    itemToAdd->setFlags(itemToAdd->flags() | Qt::ItemIsEditable);
+
+    //Add combo box
+    QComboBox* combo = createTypeComboBox(addressTreeWidget, medAddress.getScanType());
+    combo->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
+    addressTreeWidget->setItemWidget(itemToAdd, 2, combo);
+
+    //Add signal
+    QObject::connect(combo,
+                     SIGNAL(currentTextChanged(QString)),
+                     this,
+                     SLOT(onAddressTypeChanged(QString)));
+  }
+
+  //TODO: Complete this one
+  void onScanAddAllClicked() {
+  }
+
   void onScanItemChanged(QTreeWidgetItem* item, int column) {
     switch(column) {
     case 1: //Not available, because the 2nd column is combobox
@@ -115,6 +151,17 @@ private slots:
     scanTreeWidget->setCurrentItem(item);
 
     editScanType(item, text.toStdString());
+  }
+
+  void onAddressTypeChanged(QString text) {
+    QComboBox* combo = qobject_cast<QComboBox*>(sender());
+
+    QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
+
+    QTreeWidgetItem* item = addressTreeWidget->topLevelItem(combo->property("tree-row").toInt());
+    addressTreeWidget->setCurrentItem(item);
+
+    editAddressType(item, text.toStdString());
   }
 
 private:
@@ -180,6 +227,18 @@ private:
                      this,
                      SLOT(onScanItemChanged(QTreeWidgetItem*, int))
                      );
+
+    QObject::connect(mainWindow->findChild<QPushButton*>("scanAddAll"),
+                     SIGNAL(clicked()),
+                     this,
+                     SLOT(onScanAddAllClicked())
+                     );
+
+    QObject:: connect(mainWindow->findChild<QPushButton*>("scanAdd"),
+                      SIGNAL(clicked()),
+                      this,
+                      SLOT(onScanAddClicked())
+                      );
 
   }
 
@@ -262,6 +321,23 @@ private:
       med.scanAddresses[index].setScanType(text);
       string value2 = med.getValueByAddress(med.scanAddresses[index].address, text);
       item->setText(2, value2.c_str());
+    } catch(string e) {
+      cerr << "editScanType: "<<e<<endl;
+    }
+  }
+
+  void editAddressType(QTreeWidgetItem* item, string type) {
+    int index = item->treeWidget()->indexOfTopLevelItem(item);
+    string text = type;
+    if(med.selectedProcess.pid == "") {
+      cerr<< "No PID" <<endl;
+      return;
+    }
+
+    try {
+      med.addresses[index].setScanType(text);
+      string value2 = med.getValueByAddress(med.addresses[index].address, text);
+      item->setText(3, value2.c_str());
     } catch(string e) {
       cerr << "editScanType: "<<e<<endl;
     }
