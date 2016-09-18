@@ -166,6 +166,12 @@ private slots:
 
   void onAddressItemChanged(QTreeWidgetItem* item, int column) {
     switch(column) {
+    case 0:
+      editAddressDescription(item, column);
+      break;
+    case 1:
+      editAddressAddress(item, column);
+      break;
     case 2: //Not available, because the 2nd column is combobox
       break;
     case 3:
@@ -383,6 +389,34 @@ private:
     } catch(string e) {
       cerr << "editAddressValue: "<<e<<endl;
     }
+  }
+
+  void editAddressAddress(QTreeWidgetItem* item, int column) {
+    int index = item->treeWidget()->indexOfTopLevelItem(item);
+    string text = item->text(column).toStdString();
+    if(med.selectedProcess.pid == "") {
+      cerr<< "No PID" <<endl;
+      return;
+    }
+
+    long address;
+    try {
+      address = hexToInt(text);
+      if(address == 0) //Do not read
+        return;
+      med.addresses[index].address = address;
+      string value2 = med.getValueByAddress(med.addresses[index].address, med.addresses[index].getScanType());
+      item->setText(3, value2.c_str());
+    } catch(string e) {
+      cerr << "editAddressAddress: "<<e<<endl;
+    }
+  }
+
+  void editAddressDescription(QTreeWidgetItem* item, int column) {
+    int index = item->treeWidget()->indexOfTopLevelItem(item);
+    string text = item->text(column).toStdString();
+
+    med.addresses[index].description = text;
   }
 
   void editScanType(QTreeWidgetItem* item, string type) {

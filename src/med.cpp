@@ -1013,9 +1013,11 @@ string Med::getAddressValueByIndex(int ind) {
 
 string Med::getValueByAddress(unsigned long address, string scanType) {
   string value;
-  medMutex.lock();
+  if(address != 0) //In case adding the address manually
+    medMutex.lock();
   value = memValue(stol(this->selectedProcess.pid), address, scanType);
-  medMutex.unlock();
+  if(address != 0)
+    medMutex.unlock();
   return value;
 }
 
