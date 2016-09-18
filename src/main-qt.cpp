@@ -115,13 +115,18 @@ private slots:
     itemToAdd->setText(0, "Your description");
     itemToAdd->setText(1, intToHex(medAddress.address).c_str());
     itemToAdd->setText(3, med.getAddressValueByIndex(med.addresses.size()-1).c_str());
-    itemToAdd->setText(4, "false");
     itemToAdd->setFlags(itemToAdd->flags() | Qt::ItemIsEditable);
 
     //Add combo box
     QComboBox* combo = createTypeComboBox(addressTreeWidget, medAddress.getScanType());
     combo->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
     addressTreeWidget->setItemWidget(itemToAdd, 2, combo);
+
+    //Add checkbox
+    QCheckBox* checkbox = new QCheckBox(addressTreeWidget);
+    checkbox->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
+    checkbox->setCheckState(Qt::Unchecked);
+    addressTreeWidget->setItemWidget(itemToAdd, 4, checkbox);
 
     //Add signal
     QObject::connect(combo,
@@ -192,11 +197,19 @@ private slots:
     }
   }
 
+  void onAddressLockChanged(int state) {
+    QCheckBox* checkbox = qobject_cast<QCheckBox*>(sender());
+    QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
+    QTreeWidgetItem* item = addressTreeWidget->topLevelItem(checkbox->property("tree-row").toInt());
+    int index = item->treeWidget()->indexOfTopLevelItem(item);
+    med.addresses[index].lock = state == Qt::Checked ? true : false;
+  }
+
   void onAddressNewClicked() {
     MedAddress medAddress;
     medAddress.description = "Your description";
     medAddress.address = 0;
-    medAddress.setScanType("int8");
+    medAddress.setScanType("int16");
     medAddress.lock = false;
     med.addresses.push_back(medAddress);
 
@@ -205,7 +218,6 @@ private slots:
     QTreeWidgetItem* itemToAdd = new QTreeWidgetItem(addressTreeWidget);
     itemToAdd->setText(0, medAddress.description.c_str());
     itemToAdd->setText(1, "0");
-    itemToAdd->setText(4, "false");
     itemToAdd->setFlags(itemToAdd->flags() | Qt::ItemIsEditable);
 
     //Add combo box
@@ -213,11 +225,20 @@ private slots:
     combo->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
     addressTreeWidget->setItemWidget(itemToAdd, 2, combo);
 
+    QCheckBox* checkbox = new QCheckBox(addressTreeWidget);
+    checkbox->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
+    checkbox->setCheckState(Qt::Unchecked);
+    addressTreeWidget->setItemWidget(itemToAdd, 4, checkbox);
+
     //Add signal
     QObject::connect(combo,
                      SIGNAL(currentTextChanged(QString)),
                      this,
                      SLOT(onAddressTypeChanged(QString)));
+    QObject::connect(checkbox,
+                     SIGNAL(stateChanged(int)),
+                     this,
+                     SLOT(onAddressLockChanged(int)));
   }
 
   void onAddressDeleteClicked() {
@@ -254,6 +275,10 @@ private slots:
   }
 
   void onSaveAsTriggered() {
+    if(med.selectedProcess.pid == "") {
+      cerr<< "No PID" <<endl;
+      return;
+    }
     QString filename = QFileDialog::getSaveFileName(mainWindow,
                                                     QString("Save JSON"),
                                                     "./",
@@ -263,6 +288,10 @@ private slots:
   }
 
   void onOpenTriggered() {
+    if(med.selectedProcess.pid == "") {
+      cerr<< "No PID" <<endl;
+      return;
+    }
     QString filename = QFileDialog::getOpenFileName(mainWindow,
                                                     QString("Open JSON"),
                                                     "./",
@@ -278,17 +307,25 @@ private slots:
       itemToAdd->setText(0, med.addresses[i].description.c_str());
       itemToAdd->setText(1, intToHex(med.addresses[i].address).c_str());
       itemToAdd->setText(3, med.getAddressValueByIndex(i).c_str());
-      itemToAdd->setText(4, "false");
       itemToAdd->setFlags(itemToAdd->flags() | Qt::ItemIsEditable);
 
       QComboBox* combo = createTypeComboBox(addressTreeWidget, med.addresses[i].getScanType());
       combo->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
       addressTreeWidget->setItemWidget(itemToAdd, 2, combo);
+
+      QCheckBox* checkbox = new QCheckBox(addressTreeWidget);
+      checkbox->setCheckState(med.addresses[i].lock ? Qt::Checked : Qt::Unchecked);
+      addressTreeWidget->setItemWidget(itemToAdd, 4, checkbox);
+
       //Add signal
       QObject::connect(combo,
                        SIGNAL(currentTextChanged(QString)),
                        this,
                        SLOT(onAddressTypeChanged(QString)));
+      QObject::connect(checkbox,
+                       SIGNAL(stateChanged(int)),
+                       this,
+                       SLOT(onAddressLockChanged(int)));
     }
   }
 
@@ -329,8 +366,12 @@ private:
 
     procTreeWidget->installEventFilter(this);
 
+    //Set default scan type
+    mainWindow->findChild<QComboBox*>("scanType")->setCurrentIndex(1);
+
     //TODO: center
     mainWindow->show();
+
 
     //Add signal to the process
     QWidget* process = mainWindow->findChild<QWidget*>("process");

@@ -1040,6 +1040,7 @@ void Med::saveFile(const char* filename) throw(string) {
     pairs["address"] = intToHex(address.address);
     pairs["type"] = address.getScanType();
     pairs["value"] = string(address.getValue(stol(this->selectedProcess.pid), address.getScanType()));
+    pairs["lock"] = address.lock;
     root.append(pairs);
   }
   ofstream ofs;
@@ -1068,6 +1069,7 @@ void Med::openFile(const char* filename) throw(string) {
     address.description = root[i]["description"].asString();
     address.address = hexToInt(root[i]["address"].asString());
     address.setScanType(root[i]["type"].asString());
+    address.lock = root[i]["lock"].asBool();
 
     this->addresses.push_back(address);
   }
