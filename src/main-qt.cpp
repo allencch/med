@@ -142,6 +142,16 @@ private slots:
     }
   }
 
+  void onScanItemDblClicked(QTreeWidgetItem* item, int column) {
+    if(column == 0) {
+      //Change to disable
+      item->setFlags(item->flags() & (~Qt::ItemIsEditable)); //Set editable to 0. Do not use XOR
+    }
+    else {
+      item->setFlags(item->flags() | Qt::ItemIsEditable);
+    }
+  }
+
   void onScanTypeChanged(QString text) {
     QComboBox* combo = qobject_cast<QComboBox*>(sender());
 
@@ -275,6 +285,11 @@ private:
                      SIGNAL(itemChanged(QTreeWidgetItem*, int)),
                      this,
                      SLOT(onScanItemChanged(QTreeWidgetItem*, int))
+                     );
+    QObject::connect(mainWindow->findChild<QTreeWidget*>("scanTreeWidget"),
+                     SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
+                     this,
+                     SLOT(onScanItemDblClicked(QTreeWidgetItem*, int))
                      );
 
     QObject::connect(mainWindow->findChild<QPushButton*>("scanAddAll"),
