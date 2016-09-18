@@ -100,6 +100,8 @@ private slots:
     QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
     QTreeWidgetItem* item = scanTreeWidget->currentItem();
     int index = scanTreeWidget->indexOfTopLevelItem(item);
+    if (index == -1)
+      return;
 
     //TODO: Write this to a function
     MedAddress medAddress;
@@ -200,7 +202,8 @@ private slots:
 
      //Add to AddressTreeWidget
     QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
-    QTreeWidgetItem* itemToAdd = new QTreeWidgetItem(addressTreeWidget);    itemToAdd->setText(0, medAddress.description.c_str());
+    QTreeWidgetItem* itemToAdd = new QTreeWidgetItem(addressTreeWidget);
+    itemToAdd->setText(0, medAddress.description.c_str());
     itemToAdd->setText(1, "0");
     itemToAdd->setText(4, "false");
     itemToAdd->setFlags(itemToAdd->flags() | Qt::ItemIsEditable);
@@ -221,6 +224,72 @@ private slots:
     QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
     QTreeWidgetItem* item = addressTreeWidget->currentItem();
     delete item;
+  }
+
+  void onAddressShiftClicked() {
+    //Get the from and to
+    long shiftFrom, shiftTo, difference;
+    try {
+      shiftFrom = hexToInt(mainWindow->findChild<QLineEdit*>("shiftFrom")->text().toStdString());
+      shiftTo = hexToInt(mainWindow->findChild<QLineEdit*>("shiftTo")->text().toStdString());
+      difference = shiftTo - shiftFrom;
+    } catch(string e) {
+      throw e;
+    }
+
+    //Get PID
+    if(med.selectedProcess.pid == "") {
+      cerr<< "No PID" <<endl;
+      return;
+    }
+
+    QTreeWidget* addressTree = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
+    for(int i=0;i<med.addresses.size();i++) {
+      long address = med.addresses[i].address;
+      address += difference;
+      med.addresses[i].address = address;
+      QTreeWidgetItem* item = addressTree->topLevelItem(i);
+      item->setText(1, intToHex(address).c_str());
+    }
+  }
+
+  void onSaveAsTriggered() {
+    QString filename = QFileDialog::getSaveFileName(mainWindow,
+                                                    QString("Save JSON"),
+                                                    "./",
+                                                    QString("Save JSON (*.json)"));
+
+    med.saveFile(filename.toStdString().c_str());
+  }
+
+  void onOpenTriggered() {
+    QString filename = QFileDialog::getOpenFileName(mainWindow,
+                                                    QString("Open JSON"),
+                                                    "./",
+                                                    QString("Open JSON (*.json)"));
+    med.openFile(filename.toStdString().c_str());
+
+    //Load the data to the address panel
+    QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
+    addressTreeWidget->clear();
+
+    for(int i=0;i<med.addresses.size();i++) {
+      QTreeWidgetItem* itemToAdd = new QTreeWidgetItem(addressTreeWidget);
+      itemToAdd->setText(0, med.addresses[i].description.c_str());
+      itemToAdd->setText(1, intToHex(med.addresses[i].address).c_str());
+      itemToAdd->setText(3, med.getAddressValueByIndex(i).c_str());
+      itemToAdd->setText(4, "false");
+      itemToAdd->setFlags(itemToAdd->flags() | Qt::ItemIsEditable);
+
+      QComboBox* combo = createTypeComboBox(addressTreeWidget, med.addresses[i].getScanType());
+      combo->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
+      addressTreeWidget->setItemWidget(itemToAdd, 2, combo);
+      //Add signal
+      QObject::connect(combo,
+                       SIGNAL(currentTextChanged(QString)),
+                       this,
+                       SLOT(onAddressTypeChanged(QString)));
+    }
   }
 
 private:
@@ -319,6 +388,19 @@ private:
                      this,
                      SLOT(onAddressDeleteClicked()));
 
+    QObject::connect(mainWindow->findChild<QPushButton*>("addressShift"),
+                     SIGNAL(clicked()),
+                     this,
+                     SLOT(onAddressShiftClicked()));
+
+    QObject::connect(mainWindow->findChild<QAction*>("actionSaveAs"),
+                     SIGNAL(triggered()),
+                     this,
+                     SLOT(onSaveAsTriggered()));
+    QObject::connect(mainWindow->findChild<QAction*>("actionOpen"),
+                     SIGNAL(triggered()),
+                     this,
+                     SLOT(onOpenTriggered()));
   }
 
   bool eventFilter(QObject* obj, QEvent* ev) {
