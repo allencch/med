@@ -103,6 +103,9 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
+         <widget class="QTreeView" name="scanTreeView"/>
+        </item>
+        <item>
          <widget class="QTreeWidget" name="scanTreeWidget">
           <column>
            <property name="text">

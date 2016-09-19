@@ -61,11 +61,13 @@ private:
 class TreeModel : public QAbstractItemModel {
   Q_OBJECT
 public:
-  explicit TreeModel(const QString &data, QObject* parent = 0) {
+  explicit TreeModel(QObject* parent = 0) {
     QList<QVariant> rootData;
-    rootData << "Title" << "Summary";
+    rootData << "Address" << "Type" << "Value";
     rootItem = new TreeItem(rootData);
-    setupModelData(data.split(QString("\n")), rootItem);
+    //QStringList qstr = QStringList() << "hello" << "world";
+
+    //setupModelData(qstr, rootItem);
   }
   ~TreeModel() {
     delete rootItem;
@@ -137,7 +139,9 @@ public:
   }
 
 private:
-  void setupModelData(const QStringList &lines, TreeItem* parent);
+  void setupModelData(const QStringList &lines, TreeItem* parent) {
+    //parent->appendChild(new TreeItem(lines), parent);
+  }
   TreeItem* rootItem;
 };
 
@@ -558,6 +562,9 @@ private:
 
     qRegisterMetaType<QVector<int>>(); //For multithreading.
 
+
+    TreeModel* model = new TreeModel(mainWindow);
+    mainWindow->findChild<QTreeView*>("scanTreeView")->setModel(model);
 
     //Add signal to the process
     QWidget* process = mainWindow->findChild<QWidget*>("process");
