@@ -1,12 +1,19 @@
+/**
+ * 2016-09-19
+ * Try to use QThread, but it involves signal and slot. So, I choose C++11 thread instead, for simpler implementation
+ * TODO: Need to redesign the "read" and "write" when item change. Not every time it is "write".
+ */
 #include <iostream>
 #include <cstdio>
+#include <chrono>
+#include <thread>
+#include <mutex>
 #include <QApplication>
 #include <QtUiTools>
 
 #include "med.hpp"
 
 using namespace std;
-
 
 class MainUi : public QObject {
   Q_OBJECT
@@ -16,6 +23,51 @@ public:
     loadUiFiles();
   }
   Med med;
+  std::thread* refreshThread;
+  std::mutex scanUpdateMutex;
+  std::mutex addressUpdateMutex;
+
+  static void refresh(MainUi* mainUi) {
+    while(1) {
+      //mainUi->refreshScanTreeWidget();
+      //mainUi->refreshAddressTreeWidget();
+      std::this_thread::sleep_for(chrono::milliseconds(800));
+    }
+  }
+
+  void refreshScanTreeWidget() {
+    QTreeWidget* scanTreeWidget = this->mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
+    QTreeWidgetItemIterator it(scanTreeWidget);
+    scanUpdateMutex.lock();
+    while(*it) {
+      try {
+        int index = scanTreeWidget->indexOfTopLevelItem(*it);
+        string value = med.getScanValueByIndex(index);
+        (*it)->setText(2, value.c_str());
+      } catch(string e) {
+        (*it)->setText(2, "Error memory");
+      }
+      it++;
+    }
+    scanUpdateMutex.unlock();
+  }
+
+  void refreshAddressTreeWidget() {
+    QTreeWidget* addressTreeWidget = this->mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
+    QTreeWidgetItemIterator it(addressTreeWidget);
+    addressUpdateMutex.lock();
+    while(*it) {
+      try {
+        int index = addressTreeWidget->indexOfTopLevelItem(*it);
+        string value = med.getAddressValueByIndex(index);
+        (*it)->setText(3, value.c_str());
+      } catch(string e) {
+        (*it)->setText(3, "Error memory");
+      }
+      it++;
+    }
+    addressUpdateMutex.unlock();
+  }
 
 private slots:
   void onProcessClicked() {
@@ -48,6 +100,7 @@ private slots:
   }
 
   void onScanClicked() {
+    scanUpdateMutex.lock();
     QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
     scanTreeWidget->clear();
 
@@ -71,9 +124,11 @@ private slots:
     }
 
     updateNumberOfAddresses(mainWindow);
+    scanUpdateMutex.unlock();
   }
 
   void onFilterClicked() {
+    scanUpdateMutex.lock();
     QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
     scanTreeWidget->clear();
 
@@ -88,6 +143,7 @@ private slots:
       addressToScanTreeWidget(med, scanType, scanTreeWidget);
 
     updateNumberOfAddresses(mainWindow);
+    scanUpdateMutex.unlock();
   }
 
   void onClearClicked() {
@@ -372,6 +428,8 @@ private:
     //TODO: center
     mainWindow->show();
 
+    qRegisterMetaType<QVector<int>>(); //For multithreading.
+
 
     //Add signal to the process
     QWidget* process = mainWindow->findChild<QWidget*>("process");
@@ -442,6 +500,9 @@ private:
                      SIGNAL(triggered()),
                      this,
                      SLOT(onOpenTriggered()));
+
+    //Multi-threading
+    refreshThread = new std::thread(MainUi::refresh, this);
   }
 
   bool eventFilter(QObject* obj, QEvent* ev) {
