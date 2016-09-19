@@ -15,6 +15,134 @@
 
 using namespace std;
 
+class TreeItem {
+public:
+  explicit TreeItem(const QList<QVariant> &data, TreeItem* parent = 0) {
+    this->parentItem = parent;
+    this->itemData = data;
+  }
+  ~TreeItem() {
+    qDeleteAll(childItems);
+  }
+
+  void appendChild(TreeItem* item) {
+    childItems.append(item);
+  }
+
+  TreeItem* child(int row) {
+    return childItems.value(row);
+  }
+
+  int childCount() const {
+    return childItems.count();
+  }
+
+  int row() const {
+    if(parentItem)
+      return parentItem->childItems.indexOf(const_cast<TreeItem*>(this));
+    return 0;
+  }
+  int columnCount() const {
+    return itemData.count();
+  }
+  TreeItem* parent() {
+    return parentItem;
+  }
+  QVariant data(int column) const {
+    return itemData.value(column);
+  }
+
+private:
+  TreeItem* parentItem;
+  QList<QVariant> itemData;
+  QList<TreeItem*> childItems;
+};
+
+class TreeModel : public QAbstractItemModel {
+  Q_OBJECT
+public:
+  explicit TreeModel(const QString &data, QObject* parent = 0) {
+    QList<QVariant> rootData;
+    rootData << "Title" << "Summary";
+    rootItem = new TreeItem(rootData);
+    setupModelData(data.split(QString("\n")), rootItem);
+  }
+  ~TreeModel() {
+    delete rootItem;
+  }
+
+  QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE {
+    if (!index.isValid())
+      return QVariant();
+    if (role != Qt::DisplayRole)
+      return QVariant();
+
+    TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
+    return item->data(index.column());
+  }
+
+  Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE {
+    if (!index.isValid())
+      return 0;
+    return QAbstractItemModel::flags(index);
+  }
+
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role = Qt::DisplayRole) const Q_DECL_OVERRIDE {
+    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+      return rootItem->data(section);
+    return QVariant();
+  }
+
+  QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE {
+    if(!hasIndex(row, column, parent))
+      return QModelIndex();
+    TreeItem* parentItem;
+    if(!parent.isValid())
+      parentItem = rootItem;
+    else
+      parentItem = static_cast<TreeItem*>(parent.internalPointer());
+    TreeItem* childItem = parentItem->child(row);
+    if(childItem)
+      return createIndex(row, column, childItem);
+    else
+      return QModelIndex();
+  }
+
+  QModelIndex parent(const QModelIndex &index) const Q_DECL_OVERRIDE {
+    if(!index.isValid())
+      return QModelIndex();
+    TreeItem* childItem = static_cast<TreeItem*>(index.internalPointer());
+    TreeItem* parentItem = childItem->parent();
+    if(parentItem == rootItem)
+      return QModelIndex();
+    return createIndex(parentItem->row(), 0, parentItem);
+  }
+
+  int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE {
+    TreeItem* parentItem;
+    if(parent.column() > 0)
+      return 0;
+    if(!parent.isValid())
+      parentItem = rootItem;
+    else
+      parentItem = static_cast<TreeItem*>(parent.internalPointer());
+    return parentItem->childCount();
+  }
+
+  int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE {
+    if (parent.isValid())
+      return static_cast<TreeItem*>(parent.internalPointer())->columnCount();
+    return rootItem->columnCount();
+  }
+
+private:
+  void setupModelData(const QStringList &lines, TreeItem* parent);
+  TreeItem* rootItem;
+};
+
+
+
 class MainUi : public QObject {
   Q_OBJECT
 
