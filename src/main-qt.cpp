@@ -84,7 +84,18 @@ public:
     }
     return true;
   }
-  bool removeColumns(int position, int columns);
+  bool removeColumns(int position, int columns) {
+    if (position < 0 || position + columns > itemData.size())
+      return false;
+
+    for (int column = 0; column < columns; ++column)
+      itemData.remove(position);
+
+    foreach (TreeItem *child, childItems)
+      child->removeColumns(position, columns);
+
+    return true;
+  }
 
   int childNumber() const { //Same as row()
     if(parentItem)
@@ -118,6 +129,11 @@ public:
     data << "1" << "2" << "3";
     TreeItem* childrenItem = new TreeItem(data, rootItem);
     rootItem->appendChild(childrenItem);
+
+    QVector<QVariant> data2;
+    data2 << "4" << "5" << "6";
+    TreeItem* child2 = new TreeItem(data2, rootItem);
+    rootItem->appendChild(child2);
     //QStringList qstr = QStringList() << "hello" << "world";
 
     //setupModelData(qstr, rootItem);
@@ -127,15 +143,27 @@ public:
   }
 
 
-
   QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE {
     if (!index.isValid())
       return QVariant();
-    if (role != Qt::DisplayRole)
+    if (role != Qt::DisplayRole && role != Qt::EditRole)
       return QVariant();
 
-    TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
+    TreeItem* item = getItem(index);
     return item->data(index.column());
+  }
+
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) Q_DECL_OVERRIDE {
+    if (role != Qt::EditRole)
+      return false;
+
+    TreeItem *item = getItem(index);
+    bool result = item->setData(index.column(), value);
+
+    if (result)
+      emit dataChanged(index, index);
+
+    return result;
   }
 
   Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE {
@@ -151,18 +179,73 @@ public:
     return QVariant();
   }
 
+  bool setHeaderData(int section, Qt::Orientation orientation,
+                     const QVariant &value, int role = Qt::EditRole) Q_DECL_OVERRIDE {
+    if (role != Qt::EditRole || orientation != Qt::Horizontal)
+      return false;
+
+    bool result = rootItem->setData(section, value);
+
+    if (result)
+      emit headerDataChanged(orientation, section, section);
+
+    return result;
+  }
+
   QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE {
     if(parent.isValid() && parent.column() != 0)
       return QModelIndex();
 
     TreeItem* parentItem = getItem(parent);
-
     TreeItem* childItem = parentItem->child(row);
     if(childItem)
       return createIndex(row, column, childItem);
     else
       return QModelIndex();
   }
+
+  bool insertColumns(int position, int columns, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE {
+    bool success;
+    beginInsertColumns(parent, position, position + columns -1);
+    success = rootItem->insertColumns(position, columns);
+    endInsertColumns();
+    return success;
+  }
+
+  bool insertRows(int position, int rows, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE {
+    TreeItem* parentItem = getItem(parent);
+    bool success;
+    beginInsertRows(parent, position, position + rows -1);
+    success = parentItem->insertChildren(position, rows, rootItem->columnCount());
+    endInsertRows();
+
+    return success;
+  }
+
+  bool removeColumns(int position, int columns, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE {
+    bool success;
+
+    beginRemoveColumns(parent, position, position + columns - 1);
+    success = rootItem->removeColumns(position, columns);
+    endRemoveColumns();
+
+    if (rootItem->columnCount() == 0)
+      removeRows(0, rowCount());
+
+    return success;
+  }
+
+  bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE {
+    TreeItem *parentItem = getItem(parent);
+    bool success = true;
+
+    beginRemoveRows(parent, position, position + rows - 1);
+    success = parentItem->removeChildren(position, rows);
+    endRemoveRows();
+
+    return success;
+  }
+
 
   QModelIndex parent(const QModelIndex &index) const Q_DECL_OVERRIDE {
     if(!index.isValid())
@@ -175,6 +258,7 @@ public:
     return createIndex(parentItem->row(), 0, parentItem);
   }
 
+
   int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE {
     TreeItem* parentItem = getItem(parent);
     return parentItem->childCount();
@@ -182,6 +266,15 @@ public:
 
   int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE {
     return rootItem->columnCount();
+  }
+
+  //My implementation
+  void appendRow(TreeItem* treeItem) {
+    rootItem->appendChild(treeItem);
+  }
+
+  TreeItem* root() {
+    return rootItem;
   }
 
 private:
@@ -308,6 +401,7 @@ private slots:
 
     if(med.scanAddresses.size() <= 800) {
       addressToScanTreeWidget(med, scanType, scanTreeWidget);
+      addressToScanModel(med, scanType, scanModel);
     }
 
     updateNumberOfAddresses(mainWindow);
@@ -577,6 +671,8 @@ private:
   QWidget* chooseProc;
   QDialog* processDialog;
 
+  TreeModel* scanModel;
+
   void loadUiFiles() {
     QUiLoader loader;
 
@@ -618,8 +714,20 @@ private:
     qRegisterMetaType<QVector<int>>(); //For multithreading.
 
 
-    TreeModel* model = new TreeModel(mainWindow);
-    mainWindow->findChild<QTreeView*>("scanTreeView")->setModel(model);
+    //Tree model
+    scanModel = new TreeModel(mainWindow);
+    mainWindow->findChild<QTreeView*>("scanTreeView")->setModel(scanModel);
+
+    //Testing
+    //get the item
+    QVariant item = scanModel->index(1,0).data();
+    cout<<item.toString().toStdString()<<endl;
+    QModelIndex index = scanModel->index(1,0);
+    scanModel->setData(index, "helo");
+    QVector<QVariant> newData;
+    newData << "foo";
+    TreeItem* newItem = new TreeItem(newData, scanModel->root());
+    scanModel->appendRow(newItem);
 
     //Add signal to the process
     QWidget* process = mainWindow->findChild<QWidget*>("process");
@@ -739,6 +847,21 @@ private:
     }
   }
 
+  void addressToScanModel(Med med, string scanType, TreeModel* model) {
+    QTreeView* treeView = mainWindow->findChild<QTreeView*>("scanTreeView");
+    for(int i=0;i<med.scanAddresses.size();i++) {
+      char address[32];
+      sprintf(address, "%p", (void*)(med.scanAddresses[i].address));
+
+      string value = med.getScanAddressValueByIndex(i, scanType);
+      QVector<QVariant> data;
+      //data << address << createTypeComboBox2(treeView, scanType) << value.c_str();
+
+    }
+
+  }
+
+
   void updateNumberOfAddresses(QWidget* mainWindow) {
     char message[128];
     sprintf(message, "%ld addresses found", med.scanAddresses.size());
@@ -844,7 +967,7 @@ private:
 
 
 
-  QComboBox* createTypeComboBox(QTreeWidget* widget, string type) {
+  QComboBox* createTypeComboBox(QWidget* widget, string type) {
     QComboBox* combo = new QComboBox(widget);
     combo->addItems(QStringList() <<
                     "int8" <<
@@ -856,6 +979,20 @@ private:
     combo->setCurrentText(type.c_str());
     return combo;
   }
+
+  QComboBox* createTypeComboBox2(QWidget* widget, string type) {
+    QComboBox* combo = new QComboBox(widget);
+    combo->addItems(QStringList() <<
+                    "int8" <<
+                    "int16" <<
+                    "int32" <<
+                    "float32" <<
+                    "float64");
+
+    combo->setCurrentText(type.c_str());
+    return combo;
+  }
+
 
 };
 
