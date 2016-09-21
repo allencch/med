@@ -2,6 +2,7 @@
  * 2016-09-19
  * Try to use QThread, but it involves signal and slot. So, I choose C++11 thread instead, for simpler implementation
  * TODO: Need to redesign the "read" and "write" when item change. Not every time it is "write".
+ * Possible solution, create property to the object.
  */
 #include <iostream>
 #include <cstdio>
@@ -17,7 +18,7 @@ using namespace std;
 
 class TreeItem {
 public:
-  explicit TreeItem(const QList<QVariant> &data, TreeItem* parent = 0) {
+  explicit TreeItem(const QVector<QVariant> &data, TreeItem* parent = 0) {
     this->parentItem = parent;
     this->itemData = data;
   }
@@ -52,19 +53,71 @@ public:
     return itemData.value(column);
   }
 
+  bool insertChildren(int position, int count, int columns) {
+    if(position < 0 || position > childItems.size())
+      return false;
+
+    for(int row=0 ; row < count ; row++) {
+      QVector<QVariant> data(columns);
+      TreeItem* item = new TreeItem(data, this);
+      childItems.insert(position, item);
+    }
+    return true;
+  }
+
+  bool insertColumns(int position, int columns) {
+    if(position < 0 || position > itemData.size())
+      return false;
+    for(int column = 0; column < columns; column++) {
+      itemData.insert(position, QVariant());
+    }
+    foreach(TreeItem* child, childItems) //Qt keyword
+      child->insertColumns(position, columns);
+    return true;
+  }
+
+  bool removeChildren(int position, int count) {
+    if(position < 0 || position + count > childItems.size())
+      return false;
+    for(int row=0;row<count;row++) {
+      delete childItems.takeAt(position);
+    }
+    return true;
+  }
+  bool removeColumns(int position, int columns);
+
+  int childNumber() const { //Same as row()
+    if(parentItem)
+      return parentItem->childItems.indexOf(const_cast<TreeItem*>(this));
+    return 0;
+  }
+
+  bool setData(int column, const QVariant &value) {
+    if(column <0 || column >= itemData.size())
+      return false;
+    itemData[column] = value;
+    return true;
+  }
+
+
 private:
   TreeItem* parentItem;
-  QList<QVariant> itemData;
+  QVector<QVariant> itemData;
   QList<TreeItem*> childItems;
 };
 
 class TreeModel : public QAbstractItemModel {
   Q_OBJECT
 public:
-  explicit TreeModel(QObject* parent = 0) {
-    QList<QVariant> rootData;
+  explicit TreeModel(QObject* parent = 0) : QAbstractItemModel(parent) {
+    QVector<QVariant> rootData;
     rootData << "Address" << "Type" << "Value";
     rootItem = new TreeItem(rootData);
+
+    QVector<QVariant> data;
+    data << "1" << "2" << "3";
+    TreeItem* childrenItem = new TreeItem(data, rootItem);
+    rootItem->appendChild(childrenItem);
     //QStringList qstr = QStringList() << "hello" << "world";
 
     //setupModelData(qstr, rootItem);
@@ -72,6 +125,8 @@ public:
   ~TreeModel() {
     delete rootItem;
   }
+
+
 
   QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE {
     if (!index.isValid())
@@ -86,7 +141,7 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE {
     if (!index.isValid())
       return 0;
-    return QAbstractItemModel::flags(index);
+    return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
   }
 
   QVariant headerData(int section, Qt::Orientation orientation,
@@ -97,13 +152,11 @@ public:
   }
 
   QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE {
-    if(!hasIndex(row, column, parent))
+    if(parent.isValid() && parent.column() != 0)
       return QModelIndex();
-    TreeItem* parentItem;
-    if(!parent.isValid())
-      parentItem = rootItem;
-    else
-      parentItem = static_cast<TreeItem*>(parent.internalPointer());
+
+    TreeItem* parentItem = getItem(parent);
+
     TreeItem* childItem = parentItem->child(row);
     if(childItem)
       return createIndex(row, column, childItem);
@@ -114,7 +167,8 @@ public:
   QModelIndex parent(const QModelIndex &index) const Q_DECL_OVERRIDE {
     if(!index.isValid())
       return QModelIndex();
-    TreeItem* childItem = static_cast<TreeItem*>(index.internalPointer());
+
+    TreeItem* childItem = getItem(index);
     TreeItem* parentItem = childItem->parent();
     if(parentItem == rootItem)
       return QModelIndex();
@@ -122,25 +176,26 @@ public:
   }
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE {
-    TreeItem* parentItem;
-    if(parent.column() > 0)
-      return 0;
-    if(!parent.isValid())
-      parentItem = rootItem;
-    else
-      parentItem = static_cast<TreeItem*>(parent.internalPointer());
+    TreeItem* parentItem = getItem(parent);
     return parentItem->childCount();
   }
 
   int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE {
-    if (parent.isValid())
-      return static_cast<TreeItem*>(parent.internalPointer())->columnCount();
     return rootItem->columnCount();
   }
 
 private:
   void setupModelData(const QStringList &lines, TreeItem* parent) {
     //parent->appendChild(new TreeItem(lines), parent);
+  }
+
+  TreeItem* getItem(const QModelIndex &index) const {
+    if(index.isValid()) {
+      TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
+      if(item)
+        return item;
+    }
+    return rootItem;
   }
   TreeItem* rootItem;
 };
