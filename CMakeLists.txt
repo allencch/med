@@ -3,7 +3,7 @@ project (Med)
 
 set(CMAKE_CXX_FLAGS "-std=c++11")
 set(CMAKE_INCLUDE_CURRENT_DIR ON) #required for qt moc
-#set(CMAKE_AUTOMOC ON) #automatic moc
+set(CMAKE_AUTOMOC ON) #automatic moc
 
 find_package(PkgConfig REQUIRED)
 find_package(Qt5UiTools)
@@ -14,8 +14,12 @@ add_executable(med src/med.cpp src/main.cpp)
 add_executable(testfile src/test.c)
 add_executable(medgui src/med.cpp src/main-gui.cpp)
 
-qt5_generate_moc(src/main-qt.cpp main-qt.moc)
-add_executable(med-qt src/med.cpp src/main-qt.cpp main-qt.moc)
+#qt5_generate_moc(src/main-qt.cpp main-qt.moc) #Using automatic moc can solve the Q_OBJECT issue in other cpp files
+add_executable(med-qt
+  src/med.cpp
+  src/main-qt.cpp
+  src/TreeItem.cpp
+  src/TreeModel.cpp )
 
 add_definitions(${GTK3_CFLAGS} ${JSONCPP_CFLAGS})
 target_link_libraries(med ${GTK3_LIBRARIES} ${JSONCPP_LIBRARIES} -lpthread)
