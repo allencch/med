@@ -19,7 +19,8 @@ add_executable(med-qt
   src/med.cpp
   src/main-qt.cpp
   src/TreeItem.cpp
-  src/TreeModel.cpp )
+  src/TreeModel.cpp
+  src/ComboBoxDelegate.cpp )
 
 add_definitions(${GTK3_CFLAGS} ${JSONCPP_CFLAGS})
 target_link_libraries(med ${GTK3_LIBRARIES} ${JSONCPP_LIBRARIES} -lpthread)
