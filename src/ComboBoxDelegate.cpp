@@ -50,7 +50,7 @@ void ComboBoxDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
   // and https://forum.qt.io/topic/18175/qcombobox-in-qtreeview/2
   QStyleOptionComboBox comboBoxOption;
   comboBoxOption.rect = option.rect;
-  comboBoxOption.state = QStyle::State_Active;
+  comboBoxOption.state = option.state;
   comboBoxOption.frame = true;
   comboBoxOption.currentText = index.model()->data(index).toString();
 
@@ -62,7 +62,7 @@ void ComboBoxDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
 QSize ComboBoxDelegate::sizeHint(const QStyleOptionViewItem &option,
                              const QModelIndex &index) const {
   QComboBox combo;
-  return combo.sizeHint();
+  return combo.sizeHint(); //Fix the height issue
   //return QStyledItemDelegate::sizeHint(option, index);
 }
 //*/

@@ -11,6 +11,7 @@
 #include <mutex>
 #include <QApplication>
 #include <QtUiTools>
+#include <QtDebug>
 
 #include "TreeItem.hpp"
 #include "TreeModel.hpp"
@@ -391,6 +392,12 @@ private slots:
     }
   }
 
+  void onScanTreeViewClicked(const QModelIndex &index) {
+    if(index.column() == 1) {
+      mainWindow->findChild<QTreeView*>("scanTreeView")->edit(index); //Trigger edit by 1 click
+    }
+  }
+
 private:
   QWidget* mainWindow;
   QWidget* chooseProc;
@@ -443,6 +450,10 @@ private:
     mainWindow->findChild<QTreeView*>("scanTreeView")->setModel(scanModel);
     ComboBoxDelegate* delegate = new ComboBoxDelegate();
     mainWindow->findChild<QTreeView*>("scanTreeView")->setItemDelegateForColumn(1, delegate);
+    QObject::connect(mainWindow->findChild<QTreeView*>("scanTreeView"),
+                     SIGNAL(clicked(QModelIndex)),
+                     this,
+                     SLOT(onScanTreeViewClicked(QModelIndex)));
 
 
     //Add signal to the process
