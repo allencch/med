@@ -14,6 +14,7 @@
 
 #include "TreeItem.hpp"
 #include "TreeModel.hpp"
+#include "ComboBoxDelegate.hpp"
 #include "med.hpp"
 
 using namespace std;
@@ -437,21 +438,12 @@ private:
 
     qRegisterMetaType<QVector<int>>(); //For multithreading.
 
-
     //Tree model
     scanModel = new TreeModel(mainWindow);
     mainWindow->findChild<QTreeView*>("scanTreeView")->setModel(scanModel);
+    ComboBoxDelegate* delegate = new ComboBoxDelegate();
+    mainWindow->findChild<QTreeView*>("scanTreeView")->setItemDelegateForColumn(1, delegate);
 
-    //Testing
-    //get the item
-    QVariant item = scanModel->index(1,0).data();
-    cout<<item.toString().toStdString()<<endl;
-    QModelIndex index = scanModel->index(1,0);
-    scanModel->setData(index, "helo");
-    QVector<QVariant> newData;
-    newData << "foo";
-    TreeItem* newItem = new TreeItem(newData, scanModel->root());
-    scanModel->appendRow(newItem);
 
     //Add signal to the process
     QWidget* process = mainWindow->findChild<QWidget*>("process");

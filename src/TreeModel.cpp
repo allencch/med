@@ -9,12 +9,12 @@ TreeModel::TreeModel(QObject* parent) : QAbstractItemModel(parent) {
   rootItem = new TreeItem(rootData);
 
   QVector<QVariant> data;
-  data << "1" << "2" << "3";
+  data << "1" << "int8" << "3";
   TreeItem* childrenItem = new TreeItem(data, rootItem);
   rootItem->appendChild(childrenItem);
 
   QVector<QVariant> data2;
-  data2 << "4" << "5" << "6";
+  data2 << "4" << "int8" << "6";
   TreeItem* child2 = new TreeItem(data2, rootItem);
   rootItem->appendChild(child2);
   //QStringList qstr = QStringList() << "hello" << "world";
@@ -29,6 +29,11 @@ TreeModel::~TreeModel() {
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid())
     return QVariant();
+
+  //if(role == Qt::CheckStateRole && index.column() == 0) {
+    //return static_cast<int>(Qt::Checked);
+  //}
+
   if (role != Qt::DisplayRole && role != Qt::EditRole)
     return QVariant();
 
@@ -52,7 +57,10 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
     return 0;
-  return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+  Qt::ItemFlags flags = Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+  if(index.column() == 0)
+    flags |= Qt::ItemIsUserCheckable;
+  return flags;
 }
 
 QVariant TreeModel::headerData(int section, Qt::Orientation orientation,
