@@ -8,7 +8,7 @@ TreeModel::TreeModel(QObject* parent) : QAbstractItemModel(parent) {
   rootData << "Address" << "Type" << "Value";
   rootItem = new TreeItem(rootData);
 
-  QVector<QVariant> data;
+  /*QVector<QVariant> data;
   data << "1" << "int8" << "3";
   TreeItem* childrenItem = new TreeItem(data, rootItem);
   rootItem->appendChild(childrenItem);
@@ -16,7 +16,7 @@ TreeModel::TreeModel(QObject* parent) : QAbstractItemModel(parent) {
   QVector<QVariant> data2;
   data2 << "4" << "int8" << "6";
   TreeItem* child2 = new TreeItem(data2, rootItem);
-  rootItem->appendChild(child2);
+  rootItem->appendChild(child2);//*/
   //QStringList qstr = QStringList() << "hello" << "world";
 
   //setupModelData(qstr, rootItem);
@@ -47,7 +47,6 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
 
   TreeItem *item = getItem(index);
   bool result = item->setData(index.column(), value);
-
   if (result)
     emit dataChanged(index, index);
 
@@ -161,7 +160,9 @@ int TreeModel::columnCount(const QModelIndex &parent) const {
 
 //My implementation
 void TreeModel::appendRow(TreeItem* treeItem) {
+  beginInsertRows(QModelIndex(), rowCount(), rowCount()+1);  //This is important, else the View will not be updated when the Model is modified by the signal.
   rootItem->appendChild(treeItem);
+  endInsertRows();
 }
 
 TreeItem* TreeModel::root() {

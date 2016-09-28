@@ -126,7 +126,7 @@ private slots:
     }
 
     if(med.scanAddresses.size() <= 800) {
-      addressToScanTreeWidget(med, scanType, scanTreeWidget);
+      //addressToScanTreeWidget(med, scanType, scanTreeWidget);
       addressToScanModel(med, scanType, scanModel);
     }
 
@@ -455,7 +455,6 @@ private:
                      this,
                      SLOT(onScanTreeViewClicked(QModelIndex)));
 
-
     //Add signal to the process
     QWidget* process = mainWindow->findChild<QWidget*>("process");
     QObject::connect(process, SIGNAL(clicked()), this, SLOT(onProcessClicked()));
@@ -539,6 +538,9 @@ private:
     }
   }
 
+  /**
+   * @deprecated
+   */
   void addressToScanTreeWidget(Med med, string scanType, QTreeWidget* scanTreeWidget) {
     for(int i=0;i<med.scanAddresses.size();i++) {
       char address[32];
@@ -576,16 +578,20 @@ private:
 
   void addressToScanModel(Med med, string scanType, TreeModel* model) {
     QTreeView* treeView = mainWindow->findChild<QTreeView*>("scanTreeView");
+    cout<<model->rowCount()<<endl;
     for(int i=0;i<med.scanAddresses.size();i++) {
       char address[32];
       sprintf(address, "%p", (void*)(med.scanAddresses[i].address));
 
       string value = med.getScanAddressValueByIndex(i, scanType);
+
       QVector<QVariant> data;
-      //data << address << createTypeComboBox2(treeView, scanType) << value.c_str();
-
+      data << address << scanType.c_str() << value.c_str();
+      TreeItem* childItem = new TreeItem(data, model->root());
+      model->appendRow(childItem);
     }
-
+    cout<<model->rowCount()<<endl;
+    //model->insertRows(model->rowCount(), med.scanAddresses.size());
   }
 
 
