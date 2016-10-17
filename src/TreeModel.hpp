@@ -45,6 +45,7 @@ public:
 
   //My implementation
   void appendRow(TreeItem* treeItem);
+  void clearAll();
 
   TreeItem* root();
 

@@ -107,8 +107,8 @@ private slots:
 
   void onScanClicked() {
     scanUpdateMutex.lock();
-    QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
-    scanTreeWidget->clear();
+    //QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
+    //scanTreeWidget->clear();
 
     //Get scanned type
     string scanType = mainWindow->findChild<QComboBox*>("scanType")->currentText().toStdString();
@@ -136,8 +136,10 @@ private slots:
 
   void onFilterClicked() {
     scanUpdateMutex.lock();
-    QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
-    scanTreeWidget->clear();
+    //QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
+    //scanTreeWidget->clear();
+
+    scanModel->clearAll();
 
     //Get scanned type
     string scanType = mainWindow->findChild<QComboBox*>("scanType")->currentText().toStdString();
@@ -146,8 +148,10 @@ private slots:
 
     med.scanFilter(scanValue, scanType);
 
-    if(med.scanAddresses.size() <= 800)
-      addressToScanTreeWidget(med, scanType, scanTreeWidget);
+    if(med.scanAddresses.size() <= 800) {
+      //addressToScanTreeWidget(med, scanType, scanTreeWidget);
+      addressToScanModel(med, scanType, scanModel);
+    }
 
     updateNumberOfAddresses(mainWindow);
     scanUpdateMutex.unlock();

@@ -165,6 +165,10 @@ void TreeModel::appendRow(TreeItem* treeItem) {
   endInsertRows();
 }
 
+void TreeModel::clearAll() {
+  removeRows(0, rowCount());
+}
+
 TreeItem* TreeModel::root() {
   return rootItem;
 }
