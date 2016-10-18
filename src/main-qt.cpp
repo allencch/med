@@ -159,7 +159,8 @@ private slots:
 
   void onClearClicked() {
     mainWindow->findChild<QTreeWidget*>("scanTreeWidget")->clear();
-    med.scanAddresses.clear();
+    //med.scanAddresses.clear();
+    scanModel->clearAll();
     mainWindow->findChild<QStatusBar*>("statusbar")->showMessage("Scan cleared");
   }
 
@@ -716,20 +717,6 @@ private:
     combo->setCurrentText(type.c_str());
     return combo;
   }
-
-  QComboBox* createTypeComboBox2(QWidget* widget, string type) {
-    QComboBox* combo = new QComboBox(widget);
-    combo->addItems(QStringList() <<
-                    "int8" <<
-                    "int16" <<
-                    "int32" <<
-                    "float32" <<
-                    "float64");
-
-    combo->setCurrentText(type.c_str());
-    return combo;
-  }
-
 
 };
 
