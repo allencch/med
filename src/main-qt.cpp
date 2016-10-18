@@ -109,6 +109,7 @@ private slots:
     scanUpdateMutex.lock();
     //QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
     //scanTreeWidget->clear();
+    scanModel->clearAll();
 
     //Get scanned type
     string scanType = mainWindow->findChild<QComboBox*>("scanType")->currentText().toStdString();
@@ -403,6 +404,10 @@ private slots:
     }
   }
 
+  void onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>()) {
+    qDebug() << topLeft << bottomRight << roles;
+  }
+
 private:
   QWidget* mainWindow;
   QWidget* chooseProc;
@@ -529,6 +534,11 @@ private:
                      SIGNAL(triggered()),
                      this,
                      SLOT(onOpenTriggered()));
+
+    QObject::connect(scanModel,
+                     SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
+                     this,
+                     SLOT(onScanTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
 
     //Multi-threading
     refreshThread = new std::thread(MainUi::refresh, this);
