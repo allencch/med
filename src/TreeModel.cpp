@@ -1,12 +1,17 @@
 #include <QtWidgets>
-
+#include <iostream>
+#include <cstdio>
 #include "TreeItem.hpp"
 #include "TreeModel.hpp"
 
-TreeModel::TreeModel(QObject* parent) : QAbstractItemModel(parent) {
+using namespace std;
+
+TreeModel::TreeModel(Med* med, QObject* parent) : QAbstractItemModel(parent) {
   QVector<QVariant> rootData;
   rootData << "Address" << "Type" << "Value";
   rootItem = new TreeItem(rootData);
+
+  this->med = med;
 
   /*QVector<QVariant> data;
   data << "1" << "int8" << "3";
@@ -45,8 +50,22 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   if (role != Qt::EditRole)
     return false;
 
+  //Update the med
+  //Update, split this out
+  int row = index.row();
+  if(index.column() == 2) { //value
+    try {
+      med->setValueByAddress(med->scanAddresses[row].address,
+                             value.toString().toStdString(),
+                             med->scanAddresses[row].getScanType());
+    } catch(string e) {
+      cerr << "editScanValue: "<<e<<endl;
+    }
+  }
+
   TreeItem *item = getItem(index);
   bool result = item->setData(index.column(), value);
+
   if (result)
     emit dataChanged(index, index);
 
@@ -165,10 +184,6 @@ void TreeModel::appendRow(TreeItem* treeItem) {
   endInsertRows();
 }
 
-void TreeModel::clearAll() {
-  removeRows(0, rowCount());
-}
-
 TreeItem* TreeModel::root() {
   return rootItem;
 }
@@ -184,4 +199,22 @@ TreeItem* TreeModel::getItem(const QModelIndex &index) const {
       return item;
   }
   return rootItem;
+}
+
+
+void TreeModel::clearAll() {
+  removeRows(0, rowCount());
+}
+
+void TreeModel::scan(string scanType) {
+  this->clearAll();
+  for(int i=0;i<med->scanAddresses.size();i++) {
+    char address[32];
+    sprintf(address, "%p", (void*)(med->scanAddresses[i].address));
+    string value = med->getScanAddressValueByIndex(i, scanType);
+    QVector<QVariant> data;
+    data << address << scanType.c_str() << value.c_str();
+    TreeItem* childItem = new TreeItem(data, this->root());
+    this->appendRow(childItem);
+  }
 }

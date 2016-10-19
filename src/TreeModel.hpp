@@ -6,11 +6,19 @@
 #include <QVariant>
 
 #include "TreeItem.hpp"
+#include "med.hpp"
 
+/**
+ * Trying to use the Med instead of TreeItem. But looks like using Med directly instead of TreeItem looks improbable.
+ * Because the TreeItem will represent the cell in the TreeView. So, Med cannot directly represented
+ * as the cell, unless through TreeItem, because of the QVariant(). Therefore,
+ * I put Med in the model, so that, instead of writing the interaction through the Main(), it will be
+ * easier writing the interactions of Model and Med within the Model itself.
+ */
 class TreeModel : public QAbstractItemModel {
   Q_OBJECT
 public:
-  TreeModel(QObject* parent = 0);
+  TreeModel(Med* med, QObject* parent = 0);
   ~TreeModel();
 
   QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
@@ -47,7 +55,10 @@ public:
   void appendRow(TreeItem* treeItem);
   void clearAll();
 
+  void scan(string scanType);
+
   TreeItem* root();
+  Med* med;
 
 private:
   void setupModelData(const QStringList &lines, TreeItem* parent);

@@ -109,7 +109,7 @@ private slots:
     scanUpdateMutex.lock();
     //QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
     //scanTreeWidget->clear();
-    scanModel->clearAll();
+    //scanModel->clearAll();
 
     //Get scanned type
     string scanType = mainWindow->findChild<QComboBox*>("scanType")->currentText().toStdString();
@@ -128,7 +128,8 @@ private slots:
 
     if(med.scanAddresses.size() <= 800) {
       //addressToScanTreeWidget(med, scanType, scanTreeWidget);
-      addressToScanModel(med, scanType, scanModel);
+      //addressToScanModel(med, scanType, scanModel);
+      scanModel->scan(scanType);
     }
 
     updateNumberOfAddresses(mainWindow);
@@ -140,7 +141,7 @@ private slots:
     //QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
     //scanTreeWidget->clear();
 
-    scanModel->clearAll();
+    //scanModel->clearAll();
 
     //Get scanned type
     string scanType = mainWindow->findChild<QComboBox*>("scanType")->currentText().toStdString();
@@ -150,8 +151,7 @@ private slots:
     med.scanFilter(scanValue, scanType);
 
     if(med.scanAddresses.size() <= 800) {
-      //addressToScanTreeWidget(med, scanType, scanTreeWidget);
-      addressToScanModel(med, scanType, scanModel);
+      scanModel->scan(scanType);
     }
 
     updateNumberOfAddresses(mainWindow);
@@ -456,7 +456,7 @@ private:
     qRegisterMetaType<QVector<int>>(); //For multithreading.
 
     //Tree model
-    scanModel = new TreeModel(mainWindow);
+    scanModel = new TreeModel(&med, mainWindow);
     mainWindow->findChild<QTreeView*>("scanTreeView")->setModel(scanModel);
     ComboBoxDelegate* delegate = new ComboBoxDelegate();
     mainWindow->findChild<QTreeView*>("scanTreeView")->setItemDelegateForColumn(1, delegate);
@@ -535,10 +535,10 @@ private:
                      this,
                      SLOT(onOpenTriggered()));
 
-    QObject::connect(scanModel,
+    /*QObject::connect(scanModel,
                      SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
                      this,
-                     SLOT(onScanTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
+                     SLOT(onScanTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));*/
 
     //Multi-threading
     refreshThread = new std::thread(MainUi::refresh, this);
@@ -591,24 +591,6 @@ private:
     }
   }
 
-  void addressToScanModel(Med med, string scanType, TreeModel* model) {
-    QTreeView* treeView = mainWindow->findChild<QTreeView*>("scanTreeView");
-    cout<<model->rowCount()<<endl;
-    for(int i=0;i<med.scanAddresses.size();i++) {
-      char address[32];
-      sprintf(address, "%p", (void*)(med.scanAddresses[i].address));
-
-      string value = med.getScanAddressValueByIndex(i, scanType);
-
-      QVector<QVariant> data;
-      data << address << scanType.c_str() << value.c_str();
-      TreeItem* childItem = new TreeItem(data, model->root());
-      model->appendRow(childItem);
-    }
-    cout<<model->rowCount()<<endl;
-    //model->insertRows(model->rowCount(), med.scanAddresses.size());
-  }
-
 
   void updateNumberOfAddresses(QWidget* mainWindow) {
     char message[128];
@@ -616,6 +598,9 @@ private:
     mainWindow->findChild<QStatusBar*>("statusbar")->showMessage(message);
   }
 
+  /**
+   * @deprecated
+   */
   void editScanValue(QTreeWidgetItem* item, int column) {
     int index = item->treeWidget()->indexOfTopLevelItem(item);
     string text = item->text(column).toStdString();
