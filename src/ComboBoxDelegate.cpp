@@ -1,6 +1,10 @@
 #include <QtWidgets>
+#include <QtDebug>
 #include <cstdio>
+#include <iostream>
 #include "ComboBoxDelegate.hpp"
+
+using namespace std;
 
 QWidget* ComboBoxDelegate::createEditor(QWidget* parent,
                                         const QStyleOptionViewItem &option,

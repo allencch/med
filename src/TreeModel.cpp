@@ -1,6 +1,7 @@
 #include <QtWidgets>
 #include <iostream>
 #include <cstdio>
+#include "med-qt.hpp"
 #include "TreeItem.hpp"
 #include "TreeModel.hpp"
 
@@ -53,7 +54,7 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   //Update the med
   //Update, split this out
   int row = index.row();
-  if(index.column() == 2) { //value
+  if(index.column() == SCAN_COL_VALUE) { //value
     try {
       med->setValueByAddress(med->scanAddresses[row].address,
                              value.toString().toStdString(),
@@ -62,9 +63,21 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
       cerr << "editScanValue: "<<e<<endl;
     }
   }
+  else if (index.column() == SCAN_COL_TYPE) {
+    try {
+      string value2 = med->getValueByAddress(med->scanAddresses[row].address,
+                                             value.toString().toStdString());
+      QVariant valueToSet = QString::fromStdString(value2);
+
+      TreeItem *item = getItem(index);
+      item->setData(2, valueToSet); //Update the target value
+    } catch(string e) {
+      cerr << "editScanType: " << e << endl;
+    }
+  }
 
   TreeItem *item = getItem(index);
-  bool result = item->setData(index.column(), value);
+  bool result = item->setData(index.column(), value); //Update the cell
 
   if (result)
     emit dataChanged(index, index);

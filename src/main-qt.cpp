@@ -13,13 +13,13 @@
 #include <QtUiTools>
 #include <QtDebug>
 
+#include "med-qt.hpp"
 #include "TreeItem.hpp"
 #include "TreeModel.hpp"
 #include "ComboBoxDelegate.hpp"
 #include "med.hpp"
 
 using namespace std;
-
 
 class MainUi : public QObject {
   Q_OBJECT
