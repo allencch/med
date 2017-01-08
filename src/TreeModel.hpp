@@ -55,7 +55,7 @@ public:
   void appendRow(TreeItem* treeItem);
   void clearAll();
 
-  void scan(string scanType);
+  void addScan(string scanType);
 
   TreeItem* root();
   Med* med;

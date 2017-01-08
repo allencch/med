@@ -129,7 +129,7 @@ private slots:
     if(med.scanAddresses.size() <= 800) {
       //addressToScanTreeWidget(med, scanType, scanTreeWidget);
       //addressToScanModel(med, scanType, scanModel);
-      scanModel->scan(scanType);
+      scanModel->addScan(scanType);
     }
 
     updateNumberOfAddresses(mainWindow);
@@ -151,7 +151,7 @@ private slots:
     med.scanFilter(scanValue, scanType);
 
     if(med.scanAddresses.size() <= 800) {
-      scanModel->scan(scanType);
+      scanModel->addScan(scanType);
     }
 
     updateNumberOfAddresses(mainWindow);

@@ -65,6 +65,7 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   }
   else if (index.column() == SCAN_COL_TYPE) {
     try {
+      med->scanAddresses[row].setScanType(value.toString().toStdString());
       string value2 = med->getValueByAddress(med->scanAddresses[row].address,
                                              value.toString().toStdString());
       QVariant valueToSet = QString::fromStdString(value2);
@@ -192,7 +193,7 @@ int TreeModel::columnCount(const QModelIndex &parent) const {
 
 //My implementation
 void TreeModel::appendRow(TreeItem* treeItem) {
-  beginInsertRows(QModelIndex(), rowCount(), rowCount()+1);  //This is important, else the View will not be updated when the Model is modified by the signal.
+  beginInsertRows(QModelIndex(), rowCount(), rowCount() + 1);  //This is important, else the View will not be updated when the Model is modified by the signal.
   rootItem->appendChild(treeItem);
   endInsertRows();
 }
@@ -214,12 +215,11 @@ TreeItem* TreeModel::getItem(const QModelIndex &index) const {
   return rootItem;
 }
 
-
 void TreeModel::clearAll() {
   removeRows(0, rowCount());
 }
 
-void TreeModel::scan(string scanType) {
+void TreeModel::addScan(string scanType) {
   this->clearAll();
   for(int i=0;i<med->scanAddresses.size();i++) {
     char address[32];
