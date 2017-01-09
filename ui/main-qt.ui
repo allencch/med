@@ -106,25 +106,6 @@
          <widget class="QTreeView" name="scanTreeView"/>
         </item>
         <item>
-         <widget class="QTreeWidget" name="scanTreeWidget">
-          <column>
-           <property name="text">
-            <string>Address</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Type</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Value</string>
-           </property>
-          </column>
-         </widget>
-        </item>
-        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <widget class="QPushButton" name="scanAdd">
@@ -153,6 +134,9 @@
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QTreeView" name="storeTreeView"/>
+        </item>
         <item>
          <widget class="QTreeWidget" name="addressTreeWidget">
           <column>

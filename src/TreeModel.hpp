@@ -60,7 +60,7 @@ public:
   TreeItem* root();
   Med* med;
 
-private:
+protected:
   void setupModelData(const QStringList &lines, TreeItem* parent);
 
   TreeItem* getItem(const QModelIndex &index) const;

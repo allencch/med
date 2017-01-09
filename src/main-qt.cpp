@@ -16,6 +16,7 @@
 #include "med-qt.hpp"
 #include "TreeItem.hpp"
 #include "TreeModel.hpp"
+#include "StoreTreeModel.hpp"
 #include "ComboBoxDelegate.hpp"
 #include "med.hpp"
 
@@ -159,7 +160,6 @@ private slots:
   }
 
   void onClearClicked() {
-    mainWindow->findChild<QTreeWidget*>("scanTreeWidget")->clear();
     //med.scanAddresses.clear();
     scanModel->clearAll();
     mainWindow->findChild<QStatusBar*>("statusbar")->showMessage("Scan cleared");
@@ -252,15 +252,15 @@ private slots:
 
   void onAddressItemChanged(QTreeWidgetItem* item, int column) {
     switch(column) {
-    case 0:
+    case ADDRESS_COL_DESCRIPTION:
       editAddressDescription(item, column);
       break;
-    case 1:
+    case ADDRESS_COL_ADDRESS:
       editAddressAddress(item, column);
       break;
-    case 2: //Not available, because the 2nd column is combobox
+    case ADDRESS_COL_TYPE: //Not available, because the 2nd column is combobox
       break;
-    case 3:
+    case ADDRESS_COL_VALUE:
       editAddressValue(item, column);
       break;
     }
@@ -373,18 +373,18 @@ private slots:
 
     for(int i=0;i<med.addresses.size();i++) {
       QTreeWidgetItem* itemToAdd = new QTreeWidgetItem(addressTreeWidget);
-      itemToAdd->setText(0, med.addresses[i].description.c_str());
-      itemToAdd->setText(1, intToHex(med.addresses[i].address).c_str());
-      itemToAdd->setText(3, med.getAddressValueByIndex(i).c_str());
+      itemToAdd->setText(ADDRESS_COL_DESCRIPTION, med.addresses[i].description.c_str());
+      itemToAdd->setText(ADDRESS_COL_ADDRESS, intToHex(med.addresses[i].address).c_str());
+      itemToAdd->setText(ADDRESS_COL_VALUE, med.getAddressValueByIndex(i).c_str());
       itemToAdd->setFlags(itemToAdd->flags() | Qt::ItemIsEditable);
 
       QComboBox* combo = createTypeComboBox(addressTreeWidget, med.addresses[i].getScanType());
       combo->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
-      addressTreeWidget->setItemWidget(itemToAdd, 2, combo);
+      addressTreeWidget->setItemWidget(itemToAdd, ADDRESS_COL_TYPE, combo);
 
       QCheckBox* checkbox = new QCheckBox(addressTreeWidget);
       checkbox->setCheckState(med.addresses[i].lock ? Qt::Checked : Qt::Unchecked);
-      addressTreeWidget->setItemWidget(itemToAdd, 4, checkbox);
+      addressTreeWidget->setItemWidget(itemToAdd, ADDRESS_COL_LOCK , checkbox);
 
       //Add signal
       QObject::connect(combo,
@@ -414,6 +414,7 @@ private:
   QDialog* processDialog;
 
   TreeModel* scanModel;
+  StoreTreeModel * storeModel; //Previously is the address model, but named as "store" is better
 
   void loadUiFiles() {
     QUiLoader loader;
@@ -459,11 +460,20 @@ private:
     scanModel = new TreeModel(&med, mainWindow);
     mainWindow->findChild<QTreeView*>("scanTreeView")->setModel(scanModel);
     ComboBoxDelegate* delegate = new ComboBoxDelegate();
-    mainWindow->findChild<QTreeView*>("scanTreeView")->setItemDelegateForColumn(1, delegate);
+    mainWindow->findChild<QTreeView*>("scanTreeView")->setItemDelegateForColumn(SCAN_COL_TYPE, delegate);
     QObject::connect(mainWindow->findChild<QTreeView*>("scanTreeView"),
                      SIGNAL(clicked(QModelIndex)),
                      this,
                      SLOT(onScanTreeViewClicked(QModelIndex)));
+
+    storeModel = new StoreTreeModel(&med, mainWindow);
+    mainWindow->findChild<QTreeView*>("storeTreeView")->setModel(storeModel);
+    ComboBoxDelegate* storeDelegate = new ComboBoxDelegate();
+    mainWindow->findChild<QTreeView*>("storeTreeView")->setItemDelegateForColumn(ADDRESS_COL_TYPE, storeDelegate);
+    QObject::connect(mainWindow->findChild<QTreeView*>("storeTreeView"),
+                     SIGNAL(clicked(QModelIndex)),
+                     this,
+                     SLOT(onStoreTreeViewClicked(QModelIndex)));
 
     //Add signal to the process
     QWidget* process = mainWindow->findChild<QWidget*>("process");
