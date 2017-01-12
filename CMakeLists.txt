@@ -22,7 +22,8 @@ add_executable(
   src/TreeItem.cpp
   src/TreeModel.cpp
   src/ComboBoxDelegate.cpp
-  src/StoreTreeModel.cpp)
+  src/StoreTreeModel.cpp
+  src/CheckBoxDelegate.cpp)
 
 add_definitions(${GTK3_CFLAGS} ${JSONCPP_CFLAGS})
 target_link_libraries(med ${GTK3_LIBRARIES} ${JSONCPP_LIBRARIES} -lpthread)

@@ -18,6 +18,7 @@
 #include "TreeModel.hpp"
 #include "StoreTreeModel.hpp"
 #include "ComboBoxDelegate.hpp"
+#include "CheckBoxDelegate.hpp"
 #include "med.hpp"
 
 using namespace std;
@@ -482,6 +483,9 @@ private:
                      SIGNAL(clicked(QModelIndex)),
                      this,
                      SLOT(onStoreTreeViewClicked(QModelIndex)));
+    CheckBoxDelegate* storeLockDelegate = new CheckBoxDelegate();
+    mainWindow->findChild<QTreeView*>("storeTreeView")->setItemDelegateForColumn(ADDRESS_COL_LOCK, storeLockDelegate);
+
 
     //Add signal to the process
     QWidget* process = mainWindow->findChild<QWidget*>("process");

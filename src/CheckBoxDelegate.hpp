@@ -1,22 +1,15 @@
-#ifndef COMBOBOX_DELEGATE_H
-#define COMBOBOX_DELEGATE_H
+#ifndef CHECKBOX_DELEGATE_H
+#define CHECKBOX_DELEGATE_H
 
-/**
- * Issue:
- * There is a remaining issue using ComboBoxDelegate. It will only
- * appear when editing, not by default like the QTreeWidget.
- */
-
-//Based on http://www.qtcentre.org/threads/43148-QComboBox-in-QTreeView
-// and http://doc.qt.io/qt-5/qtwidgets-itemviews-spinboxdelegate-example.html
 #include <QStyledItemDelegate>
-#include <QComboBox>
+#include <QCheckBox>
 
-class ComboBoxDelegate : public QStyledItemDelegate {
+class CheckBoxDelegate : public QStyledItemDelegate {
   Q_OBJECT
 
 public:
-  ComboBoxDelegate(QWidget* parent = 0) : QStyledItemDelegate(parent) {}
+  CheckBoxDelegate(QWidget* parent = 0) : QStyledItemDelegate(parent) {}
+
 
   QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const Q_DECL_OVERRIDE;
@@ -26,15 +19,13 @@ public:
 
   void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
-  mutable QComboBox* editor; //Not using yet
+  mutable QCheckBox* editor; //Not using yet
 
   void paint(QPainter* painter, const QStyleOptionViewItem &option,
              const QModelIndex &index) const Q_DECL_OVERRIDE;
   QSize sizeHint(const QStyleOptionViewItem &option,
                  const QModelIndex &index) const Q_DECL_OVERRIDE;
-
 private slots:
   void setData(int value);
 };
-
 #endif
