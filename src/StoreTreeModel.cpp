@@ -77,7 +77,7 @@ void StoreTreeModel::addScan() {
     sprintf(address, "%p", (void*)(med->addresses[i].address));
     string value = med->getAddressValueByIndex(i);
     QVector<QVariant> data;
-    data << "Your description" << address << med->addresses[i].getScanType().c_str() << value.c_str() << true;
+    data << "Your description" << address << med->addresses[i].getScanType().c_str() << value.c_str() << false;
     TreeItem* childItem = new TreeItem(data, this->root());
     this->appendRow(childItem);
   }

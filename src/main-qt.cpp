@@ -29,6 +29,11 @@ class MainUi : public QObject {
 public:
   MainUi() {
     loadUiFiles();
+    loadProcessUi();
+    setupStatusBar();
+    setupScanTreeView();
+    setupStoreTreeView();
+    setupUi();
   }
   Med med;
   std::thread* refreshThread;
@@ -427,12 +432,14 @@ private:
 
   void loadUiFiles() {
     QUiLoader loader;
-
     QFile file("./main-qt.ui");
     file.open(QFile::ReadOnly);
     mainWindow = loader.load(&file);
     file.close();
+  }
 
+  void loadProcessUi() {
+    QUiLoader loader;
     //Cannot put the followings to another method
     processDialog = new QDialog(mainWindow); //If put this to another method, then I cannot set the mainWindow as the parent
     QFile processFile("./process.ui");
@@ -447,24 +454,20 @@ private:
     processDialog->setModal(true);
     processDialog->resize(400, 400);
 
-    //Statusbar message
-    QStatusBar* statusBar = mainWindow->findChild<QStatusBar*>("statusbar");
-    statusBar->showMessage("Tips: Left panel is scanned address. Right panel is stored address.");
-
     //Add signal
     QTreeWidget* procTreeWidget = chooseProc->findChild<QTreeWidget*>("procTreeWidget");
     QObject::connect(procTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(onProcItemDblClicked(QTreeWidgetItem*, int)));
 
     procTreeWidget->installEventFilter(this);
+  }
 
-    //Set default scan type
-    mainWindow->findChild<QComboBox*>("scanType")->setCurrentIndex(1);
+  void setupStatusBar() {
+    //Statusbar message
+    QStatusBar* statusBar = mainWindow->findChild<QStatusBar*>("statusbar");
+    statusBar->showMessage("Tips: Left panel is scanned address. Right panel is stored address.");
+  }
 
-    //TODO: center
-    mainWindow->show();
-
-    qRegisterMetaType<QVector<int>>(); //For multithreading.
-
+  void setupScanTreeView() {
     //Tree model
     scanModel = new TreeModel(&med, mainWindow);
     mainWindow->findChild<QTreeView*>("scanTreeView")->setModel(scanModel);
@@ -475,6 +478,9 @@ private:
                      this,
                      SLOT(onScanTreeViewClicked(QModelIndex)));
 
+  }
+
+  void setupStoreTreeView() {
     storeModel = new StoreTreeModel(&med, mainWindow);
     mainWindow->findChild<QTreeView*>("storeTreeView")->setModel(storeModel);
     ComboBoxDelegate* storeDelegate = new ComboBoxDelegate();
@@ -485,6 +491,19 @@ private:
                      SLOT(onStoreTreeViewClicked(QModelIndex)));
     CheckBoxDelegate* storeLockDelegate = new CheckBoxDelegate();
     mainWindow->findChild<QTreeView*>("storeTreeView")->setItemDelegateForColumn(ADDRESS_COL_LOCK, storeLockDelegate);
+  }
+
+  void setupUi() {
+
+    //Set default scan type
+    mainWindow->findChild<QComboBox*>("scanType")->setCurrentIndex(1);
+
+    //TODO: center
+    mainWindow->show();
+
+    qRegisterMetaType<QVector<int>>(); //For multithreading.
+
+
 
 
     //Add signal to the process
