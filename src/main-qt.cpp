@@ -165,21 +165,25 @@ private slots:
     mainWindow->findChild<QStatusBar*>("statusbar")->showMessage("Scan cleared");
   }
 
+
+
   void onScanAddClicked() {
-    QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
-    QTreeWidgetItem* item = scanTreeWidget->currentItem();
-    int index = scanTreeWidget->indexOfTopLevelItem(item);
+    int index = MainUi::getTreeViewSelectedIndex(mainWindow->findChild<QTreeView*>("scanTreeView"));
     if (index == -1)
       return;
 
     //TODO: Write this to a function
-    MedAddress medAddress;
-    medAddress.address = med.scanAddresses[index].address;
-    medAddress.scanType = med.scanAddresses[index].scanType;
-    med.addresses.push_back(medAddress);
+    // MedAddress medAddress;
+    // medAddress.address = med.scanAddresses[index].address;
+    // medAddress.scanType = med.scanAddresses[index].scanType;
+    // med.addresses.push_back(medAddress);
+    med.addToStoreByIndex(index);
+
+    //TODO: Add scan
+    storeModel->addScan();
 
     //Add to AddressTreeWidget
-    QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
+    /*QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
     QTreeWidgetItem* itemToAdd = new QTreeWidgetItem(addressTreeWidget);
     itemToAdd->setText(0, "Your description");
     itemToAdd->setText(1, intToHex(medAddress.address).c_str());
@@ -201,7 +205,7 @@ private slots:
     QObject::connect(combo,
                      SIGNAL(currentTextChanged(QString)),
                      this,
-                     SLOT(onAddressTypeChanged(QString)));
+                     SLOT(onAddressTypeChanged(QString)));*/
   }
 
   //TODO: Complete this one
@@ -404,6 +408,10 @@ private slots:
     }
   }
 
+  void onStoreTreeViewClicked(const QModelIndex &index) {
+    //TODO
+  }
+
   void onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>()) {
     qDebug() << topLeft << bottomRight << roles;
   }
@@ -493,16 +501,16 @@ private:
                      );
 
     //Add signal
-    QObject::connect(mainWindow->findChild<QTreeWidget*>("scanTreeWidget"),
-                     SIGNAL(itemChanged(QTreeWidgetItem*, int)),
-                     this,
-                     SLOT(onScanItemChanged(QTreeWidgetItem*, int))
-                     );
-    QObject::connect(mainWindow->findChild<QTreeWidget*>("scanTreeWidget"),
-                     SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
-                     this,
-                     SLOT(onScanItemDblClicked(QTreeWidgetItem*, int))
-                     );
+    // QObject::connect(mainWindow->findChild<QTreeWidget*>("scanTreeWidget"),
+    //                  SIGNAL(itemChanged(QTreeWidgetItem*, int)),
+    //                  this,
+    //                  SLOT(onScanItemChanged(QTreeWidgetItem*, int))
+    //                  );
+    // QObject::connect(mainWindow->findChild<QTreeWidget*>("scanTreeWidget"),
+    //                  SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
+    //                  this,
+    //                  SLOT(onScanItemDblClicked(QTreeWidgetItem*, int))
+    //                  );
 
     QObject::connect(mainWindow->findChild<QPushButton*>("scanAddAll"),
                      SIGNAL(clicked()),
@@ -723,6 +731,14 @@ private:
     return combo;
   }
 
+  static int getTreeViewSelectedIndex(QTreeView* treeView) {
+    QModelIndexList selectedIndexes = treeView->selectionModel()->selectedIndexes();
+    if (selectedIndexes.count() == 0) {
+      return -1;
+    }
+    int index = selectedIndexes.first().row();
+    return index;
+  }
 };
 
 int main(int argc, char **argv) {

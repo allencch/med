@@ -245,6 +245,8 @@ public:
   void saveFile(const char* filename) throw(string);
   void openFile(const char* filename) throw(string);
 
+  bool addToStoreByIndex(int ind);
+
 private:
   /**
    * @param scanType is just a record.

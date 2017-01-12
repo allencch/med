@@ -27,8 +27,6 @@ public:
   int childNumber() const;
 
   bool setData(int column, const QVariant &value);
-
-
 private:
   TreeItem* parentItem;
   QVector<QVariant> itemData;

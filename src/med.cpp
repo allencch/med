@@ -535,65 +535,6 @@ void memWriteList(Scanner scanner,pid_t pid,uint8_t* data,int size) {
 
 
 
-void memWriteList2(Scanner scanner,pid_t pid,uint8_t* data,int size) {
-  pidAttach(pid);
-
-  uint8_t* buf = (uint8_t*)malloc(size+sizeof(long)); //plus 8 bytes, to avoid WORD problem, seems like "long" can represent "word"
-
-  for(unsigned int j=0;j<scanner.addresses.size();j++) {
-
-
-
-    long word;
-    for(int i=0;i<size;i+=sizeof(long)) {
-      errno = 0;
-      word = ptrace(PTRACE_PEEKDATA,pid,(void*)(scanner.addresses[j]+i),NULL);
-      if(errno) {
-        printf("PEEKDATA error: %p, %s\n",(void*)(scanner.addresses[j]+i),strerror(errno));
-        //exit(1);
-      }
-
-      //Write word to the buffer
-      memcpy((long*)(buf)+i,&word,sizeof(long));
-    }
-
-    /*printf("Peeked: ");
-      for(int i=0;i<size+sizeof(long);i++) {
-      printf("%02x ",buf[i]);
-      }
-      printf("\n");//*/
-
-    memcpy(buf,data,size);
-
-    /*printf("To write: ");
-      for(int i=0;i<size+sizeof(long);i++) {
-      printf("%02x ",buf[i]);
-      }
-      printf("\n");//*/
-
-
-    for(int i=0;i<size;i+=sizeof(long)) {
-      //FIXME: This writes as uint32, it should be uint8
-      // According to manual, it read "word". Depend on the CPU.
-      // If the OS is 32bit, then word is 32bit; if 64bit, then 64bit.
-      // Thus, the best solution is peek first, then only over write the position
-
-      // FIXED!!! The problem caused by the 4th parameter, which is the value, instead of address
-      // Therefore, the value should be the WORD size.
-      if(ptrace(PTRACE_POKEDATA,pid,(void*)(scanner.addresses[j]+i),(void*) (*((long*)(buf)+i)) ) == -1L) {
-        printf("POKEDATA error: %s\n",strerror(errno));
-        //exit(1);
-      }
-    }
-  }
-
-  free(buf);
-  printf("Success!\n");
-  pidDetach(pid);
-  //memDump(pid,address,10);
-}
-
-
 /**
  * Copy the memory from PEEKDATA
  * @deprecated because replaced by procfs mem method
@@ -611,10 +552,6 @@ int memCopy(pid_t pid,unsigned long address,unsigned char* out,int size,bool sho
   }
   return 1;
 }
-
-
-
-
 
 /**
  * Scan memory, using procfs mem
@@ -663,10 +600,6 @@ void memScanEqual(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
 
   pidDetach(pid);
 }
-
-
-
-
 
 void memScanFilter(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
   pidAttach(pid);
@@ -1029,6 +962,19 @@ void Med::setValueByAddress(unsigned long address, string value, string scanType
   medMutex.unlock();
   if(buffer)
     free(buffer);
+}
+
+bool Med::addToStoreByIndex(int index) {
+  if (index < 0 || index > this->scanAddresses.size() - 1) {
+    return false;
+  }
+
+  MedAddress medAddress;
+  medAddress.address = this->scanAddresses[index].address;
+  medAddress.scanType = this->scanAddresses[index].scanType;
+  this->addresses.push_back(medAddress);
+
+  return true;
 }
 
 void Med::saveFile(const char* filename) throw(string) {
