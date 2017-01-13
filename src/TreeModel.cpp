@@ -48,6 +48,9 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
 }
 
 bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+  if (index.column() == SCAN_COL_ADDRESS)
+    return false;
+
   if (role != Qt::EditRole)
     return false;
 
@@ -71,7 +74,7 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
       QVariant valueToSet = QString::fromStdString(value2);
 
       TreeItem *item = getItem(index);
-      item->setData(2, valueToSet); //Update the target value
+      item->setData(SCAN_COL_VALUE, valueToSet); //Update the target value
     } catch(string e) {
       cerr << "editScanType: " << e << endl;
     }
@@ -89,9 +92,10 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
     return 0;
+
   Qt::ItemFlags flags = Qt::ItemIsEditable | QAbstractItemModel::flags(index);
-  if(index.column() == 0)
-    flags |= Qt::ItemIsUserCheckable;
+  //if(index.column() == SCAN_COL_ADDRESS)
+  //  flags |= Qt::ItemIsUserCheckable;
   return flags;
 }
 

@@ -409,13 +409,15 @@ private slots:
   }
 
   void onScanTreeViewClicked(const QModelIndex &index) {
-    if(index.column() == 1) {
+    if(index.column() == SCAN_COL_TYPE) {
       mainWindow->findChild<QTreeView*>("scanTreeView")->edit(index); //Trigger edit by 1 click
     }
   }
 
   void onStoreTreeViewClicked(const QModelIndex &index) {
-    //TODO
+    if (index.column() == ADDRESS_COL_TYPE) {
+      mainWindow->findChild<QTreeView*>("storeTreeView")->edit(index);
+    }
   }
 
   void onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>()) {
@@ -485,12 +487,12 @@ private:
     mainWindow->findChild<QTreeView*>("storeTreeView")->setModel(storeModel);
     ComboBoxDelegate* storeDelegate = new ComboBoxDelegate();
     mainWindow->findChild<QTreeView*>("storeTreeView")->setItemDelegateForColumn(ADDRESS_COL_TYPE, storeDelegate);
+    CheckBoxDelegate* storeLockDelegate = new CheckBoxDelegate();
+    mainWindow->findChild<QTreeView*>("storeTreeView")->setItemDelegateForColumn(ADDRESS_COL_LOCK, storeLockDelegate);
     QObject::connect(mainWindow->findChild<QTreeView*>("storeTreeView"),
                      SIGNAL(clicked(QModelIndex)),
                      this,
                      SLOT(onStoreTreeViewClicked(QModelIndex)));
-    CheckBoxDelegate* storeLockDelegate = new CheckBoxDelegate();
-    mainWindow->findChild<QTreeView*>("storeTreeView")->setItemDelegateForColumn(ADDRESS_COL_LOCK, storeLockDelegate);
   }
 
   void setupUi() {

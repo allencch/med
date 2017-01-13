@@ -43,9 +43,40 @@ bool StoreTreeModel::setData(const QModelIndex &index, const QVariant &value, in
   //Update the med
   //Update, split this out
   int row = index.row();
-  if(index.column() == ADDRESS_COL_VALUE) { //value
+  if(index.column() == ADDRESS_COL_VALUE) {
+    try {
+      med->setValueByAddress(med->addresses[row].address,
+                             value.toString().toStdString(),
+                             med->addresses[row].getScanType());
+    } catch(string e) {
+      cerr << "editStoreValue: "<<e<<endl;
+    }
   }
   else if (index.column() == ADDRESS_COL_TYPE) {
+    try {
+      med->addresses[row].setScanType(value.toString().toStdString());
+      string value2 = med->getValueByAddress(med->addresses[row].address,
+                                             value.toString().toStdString());
+      QVariant valueToSet = QString::fromStdString(value2);
+
+      TreeItem *item = getItem(index);
+      item->setData(ADDRESS_COL_VALUE, valueToSet); //Update the target value
+    } catch(string e) {
+      cerr << "editStoreType: " << e << endl;
+    }
+  }
+  else if (index.column() == ADDRESS_COL_ADDRESS) {
+    try {
+      med->addresses[row].address = hexToInt(value.toString().toStdString());
+      string value2 = med->getValueByAddress(med->addresses[row].address,
+                                             med->addresses[row].getScanType());
+      QVariant valueToSet = QString::fromStdString(value2);
+
+      TreeItem *item = getItem(index);
+      item->setData(ADDRESS_COL_VALUE, valueToSet); //Update the target value
+     } catch(string e) {
+      cerr << "editStoreAddress: " << e << endl;
+    }
   }
   else if (index.column() == ADDRESS_COL_LOCK) {
   }
