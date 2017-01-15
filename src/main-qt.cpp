@@ -177,12 +177,6 @@ private slots:
     int index = MainUi::getTreeViewSelectedIndex(mainWindow->findChild<QTreeView*>("scanTreeView"));
     if (index == -1)
       return;
-
-    //TODO: Write this to a function
-    // MedAddress medAddress;
-    // medAddress.address = med.scanAddresses[index].address;
-    // medAddress.scanType = med.scanAddresses[index].scanType;
-    // med.addresses.push_back(medAddress);
     med.addToStoreByIndex(index);
 
     //TODO: Add scan
@@ -307,7 +301,7 @@ private slots:
       shiftFrom = hexToInt(mainWindow->findChild<QLineEdit*>("shiftFrom")->text().toStdString());
       shiftTo = hexToInt(mainWindow->findChild<QLineEdit*>("shiftTo")->text().toStdString());
       difference = shiftTo - shiftFrom;
-    } catch(string e) {
+    } catch(MedException &e) {
       throw e;
     }
 
@@ -317,14 +311,8 @@ private slots:
       return;
     }
 
-    QTreeWidget* addressTree = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
-    for(int i=0;i<med.addresses.size();i++) {
-      long address = med.addresses[i].address;
-      address += difference;
-      med.addresses[i].address = address;
-      QTreeWidgetItem* item = addressTree->topLevelItem(i);
-      item->setText(1, intToHex(address).c_str());
-    }
+    med.shiftStoreAddresses(difference);
+    storeModel->refresh();
   }
 
   void onSaveAsTriggered() {
@@ -351,35 +339,8 @@ private slots:
                                                     QString("Open JSON (*.json)"));
     med.openFile(filename.toStdString().c_str());
 
-    //Load the data to the address panel
-    QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
-    addressTreeWidget->clear();
-
-    for(int i=0;i<med.addresses.size();i++) {
-      QTreeWidgetItem* itemToAdd = new QTreeWidgetItem(addressTreeWidget);
-      itemToAdd->setText(ADDRESS_COL_DESCRIPTION, med.addresses[i].description.c_str());
-      itemToAdd->setText(ADDRESS_COL_ADDRESS, intToHex(med.addresses[i].address).c_str());
-      itemToAdd->setText(ADDRESS_COL_VALUE, med.getAddressValueByIndex(i).c_str());
-      itemToAdd->setFlags(itemToAdd->flags() | Qt::ItemIsEditable);
-
-      QComboBox* combo = createTypeComboBox(addressTreeWidget, med.addresses[i].getScanType());
-      combo->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
-      addressTreeWidget->setItemWidget(itemToAdd, ADDRESS_COL_TYPE, combo);
-
-      QCheckBox* checkbox = new QCheckBox(addressTreeWidget);
-      checkbox->setCheckState(med.addresses[i].lock ? Qt::Checked : Qt::Unchecked);
-      addressTreeWidget->setItemWidget(itemToAdd, ADDRESS_COL_LOCK , checkbox);
-
-      //Add signal
-      QObject::connect(combo,
-                       SIGNAL(currentTextChanged(QString)),
-                       this,
-                       SLOT(onAddressTypeChanged(QString)));
-      QObject::connect(checkbox,
-                       SIGNAL(stateChanged(int)),
-                       this,
-                       SLOT(onAddressLockChanged(int)));
-    }
+    storeModel->clearAll();
+    storeModel->refresh();
   }
 
   void onScanTreeViewClicked(const QModelIndex &index) {

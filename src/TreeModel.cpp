@@ -62,8 +62,8 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
       med->setValueByAddress(med->scanAddresses[row].address,
                              value.toString().toStdString(),
                              med->scanAddresses[row].getScanType());
-    } catch(string e) {
-      cerr << "editScanValue: "<<e<<endl;
+    } catch(MedException &e) {
+      cerr << "editScanValue: " << e.what() << endl;
     }
   }
   else if (index.column() == SCAN_COL_TYPE) {
@@ -75,8 +75,8 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
 
       TreeItem *item = getItem(index);
       item->setData(SCAN_COL_VALUE, valueToSet); //Update the target value
-    } catch(string e) {
-      cerr << "editScanType: " << e << endl;
+    } catch(MedException &e) {
+      cerr << "editScanType: " << e.what() << endl;
     }
   }
 
@@ -173,7 +173,6 @@ bool TreeModel::removeRows(int position, int rows, const QModelIndex &parent) {
   return success;
 }
 
-
 QModelIndex TreeModel::parent(const QModelIndex &index) const {
   if(!index.isValid())
     return QModelIndex();
@@ -226,11 +225,10 @@ void TreeModel::clearAll() {
 void TreeModel::addScan(string scanType) {
   this->clearAll();
   for(int i=0;i<med->scanAddresses.size();i++) {
-    char address[32];
-    sprintf(address, "%p", (void*)(med->scanAddresses[i].address));
+    string address = med->getScanAddressByIndex(i);
     string value = med->getScanAddressValueByIndex(i, scanType);
     QVector<QVariant> data;
-    data << address << scanType.c_str() << value.c_str();
+    data << address.c_str() << scanType.c_str() << value.c_str();
     TreeItem* childItem = new TreeItem(data, this->root());
     this->appendRow(childItem);
   }

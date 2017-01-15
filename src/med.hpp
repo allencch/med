@@ -260,12 +260,17 @@ public:
 
   void addNewAddress();
   void deleteAddressByIndex(int ind);
+  void shiftStoreAddresses(long diff);
 
   /**
    * @return string in the hex format
    */
   string getScanAddressByIndex(int ind);
   string getStoreAddressByIndex(int ind);
+
+  string setStoreAddressByIndex(int ind, string address);
+
+  string getStoreDescriptionByIndex(int ind);
 
 private:
   /**

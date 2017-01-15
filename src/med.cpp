@@ -77,7 +77,7 @@ long hexToInt(string str) throw(MedException) {
   ss >> hex >> ret;
   if(ss.fail()) {
     fprintf(stderr,"Error input: %s\n",str.c_str());
-    throw string("Error input");
+    throw MedException("Error input");
   }
 
   return ret;
@@ -972,6 +972,7 @@ bool Med::addToStoreByIndex(int index) {
   }
 
   MedAddress medAddress;
+  medAddress.description = "Your description";
   medAddress.address = this->scanAddresses[index].address;
   medAddress.scanType = this->scanAddresses[index].scanType;
   this->addresses.push_back(medAddress);
@@ -1072,4 +1073,22 @@ string Med::getStoreAddressByIndex(int ind) {
 
 void Med::deleteAddressByIndex(int ind) {
   addresses.erase(addresses.begin() + ind);
+}
+
+void Med::shiftStoreAddresses(long diff) {
+  for (int i=0; i < addresses.size(); i++) {
+    long address = addresses[i].address;
+    address += diff;
+    addresses[i].address = address;
+  }
+}
+
+string Med::getStoreDescriptionByIndex(int ind) {
+  return addresses[ind].description;
+}
+
+string Med::setStoreAddressByIndex(int ind, string address) {
+  addresses[ind].address = hexToInt(address);
+  string value = getValueByAddress(addresses[ind].address, addresses[ind].getScanType());
+  return value;
 }
