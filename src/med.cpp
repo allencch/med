@@ -681,12 +681,14 @@ string memValue(long pid, unsigned long address, string scanType) throw(MedExcep
     free(buf);
     close(memFd);
     pidDetach(pid);
+    medMutex.unlock();
     throw MedException("Address seek fail");
   }
   if(read(memFd,buf,size) == -1) {
     free(buf);
     close(memFd);
     pidDetach(pid);
+    medMutex.unlock();
     throw MedException("Address read fail");
   }
 
@@ -1044,4 +1046,30 @@ void Med::unlockAddressValueByIndex(int ind) {
   address->lockThread->join();
   delete address->lockThread;
   address->lockThread = NULL;
+}
+
+
+void Med::addNewAddress() {
+  MedAddress medAddress;
+  medAddress.description = "Your description";
+  medAddress.address = 0;
+  medAddress.setScanType("int16");
+  medAddress.lock = false;
+  addresses.push_back(medAddress);
+}
+
+string Med::getScanAddressByIndex(int ind) {
+  char address[32];
+  sprintf(address, "%p", (void*)(scanAddresses[ind].address));
+  return string(address);
+}
+
+string Med::getStoreAddressByIndex(int ind) {
+  char address[32];
+  sprintf(address, "%p", (void*)(addresses[ind].address));
+  return string(address);
+}
+
+void Med::deleteAddressByIndex(int ind) {
+  addresses.erase(addresses.begin() + ind);
 }

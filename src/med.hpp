@@ -242,7 +242,6 @@ public:
   string getScanAddressValueByIndex(int ind, string scanType);
   string getScanValueByIndex(int ind);
 
-
   /**
    * The function name is not value significant. It refers to right hand panel stored address.
    */
@@ -258,6 +257,15 @@ public:
   void openFile(const char* filename) throw(MedException);
 
   bool addToStoreByIndex(int ind);
+
+  void addNewAddress();
+  void deleteAddressByIndex(int ind);
+
+  /**
+   * @return string in the hex format
+   */
+  string getScanAddressByIndex(int ind);
+  string getStoreAddressByIndex(int ind);
 
 private:
   /**

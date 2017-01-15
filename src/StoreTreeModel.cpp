@@ -101,24 +101,17 @@ Qt::ItemFlags StoreTreeModel::flags(const QModelIndex &index) const {
   return flags;
 }
 
-void StoreTreeModel::addScan() {
+void StoreTreeModel::refresh() {
   this->clearAll();
   for(int i=0;i<med->addresses.size();i++) {
-    char address[32];
-    sprintf(address, "%p", (void*)(med->addresses[i].address));
+    string address = med->getStoreAddressByIndex(i);
     string value;
     try {
       med->getAddressValueByIndex(i);
-    } catch(MedException &ex) {
-      cout << "Add new value";
-    }
+    } catch(MedException &ex) {}
     QVector<QVariant> data;
-    data << "Your description" << address << med->addresses[i].getScanType().c_str() << value.c_str() << false;
+    data << "Your description" << address.c_str() << med->addresses[i].getScanType().c_str() << value.c_str() << false;
     TreeItem* childItem = new TreeItem(data, this->root());
     this->appendRow(childItem);
   }
-}
-
-void StoreTreeModel::refresh() {
-  this->addScan();
 }

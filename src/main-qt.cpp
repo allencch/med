@@ -186,7 +186,7 @@ private slots:
     med.addToStoreByIndex(index);
 
     //TODO: Add scan
-    storeModel->addScan();
+    storeModel->refresh();
 
     //Add to AddressTreeWidget
     /*QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
@@ -288,46 +288,16 @@ private slots:
   }
 
   void onAddressNewClicked() {
-    MedAddress medAddress;
-    medAddress.description = "Your description";
-    medAddress.address = 0;
-    medAddress.setScanType("int16");
-    medAddress.lock = false;
-    med.addresses.push_back(medAddress);
+    med.addNewAddress();
     storeModel->refresh();
-
-    // //Add to AddressTreeWidget
-    // QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
-    // QTreeWidgetItem* itemToAdd = new QTreeWidgetItem(addressTreeWidget);
-    // itemToAdd->setText(0, medAddress.description.c_str());
-    // itemToAdd->setText(1, "0");
-    // itemToAdd->setFlags(itemToAdd->flags() | Qt::ItemIsEditable);
-
-    // //Add combo box
-    // QComboBox* combo = createTypeComboBox(addressTreeWidget, medAddress.getScanType());
-    // combo->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
-    // addressTreeWidget->setItemWidget(itemToAdd, 2, combo);
-
-    // QCheckBox* checkbox = new QCheckBox(addressTreeWidget);
-    // checkbox->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
-    // checkbox->setCheckState(Qt::Unchecked);
-    // addressTreeWidget->setItemWidget(itemToAdd, 4, checkbox);
-
-    // //Add signal
-    // QObject::connect(combo,
-    //                  SIGNAL(currentTextChanged(QString)),
-    //                  this,
-    //                  SLOT(onAddressTypeChanged(QString)));
-    // QObject::connect(checkbox,
-    //                  SIGNAL(stateChanged(int)),
-    //                  this,
-    //                  SLOT(onAddressLockChanged(int)));
   }
 
   void onAddressDeleteClicked() {
-    QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
-    QTreeWidgetItem* item = addressTreeWidget->currentItem();
-    delete item;
+    int index = MainUi::getTreeViewSelectedIndex(mainWindow->findChild<QTreeView*>("storeTreeView"));
+    if (index == -1)
+      return;
+    med.deleteAddressByIndex(index);
+    storeModel->refresh();
   }
 
   void onAddressShiftClicked() {
