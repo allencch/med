@@ -260,6 +260,9 @@ private slots:
     editAddressType(item, text.toStdString());
   }
 
+  /**
+   * @deprecated
+   */
   void onAddressItemChanged(QTreeWidgetItem* item, int column) {
     switch(column) {
     case ADDRESS_COL_DESCRIPTION:
@@ -291,33 +294,34 @@ private slots:
     medAddress.setScanType("int16");
     medAddress.lock = false;
     med.addresses.push_back(medAddress);
+    storeModel->refresh();
 
-     //Add to AddressTreeWidget
-    QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
-    QTreeWidgetItem* itemToAdd = new QTreeWidgetItem(addressTreeWidget);
-    itemToAdd->setText(0, medAddress.description.c_str());
-    itemToAdd->setText(1, "0");
-    itemToAdd->setFlags(itemToAdd->flags() | Qt::ItemIsEditable);
+    // //Add to AddressTreeWidget
+    // QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
+    // QTreeWidgetItem* itemToAdd = new QTreeWidgetItem(addressTreeWidget);
+    // itemToAdd->setText(0, medAddress.description.c_str());
+    // itemToAdd->setText(1, "0");
+    // itemToAdd->setFlags(itemToAdd->flags() | Qt::ItemIsEditable);
 
-    //Add combo box
-    QComboBox* combo = createTypeComboBox(addressTreeWidget, medAddress.getScanType());
-    combo->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
-    addressTreeWidget->setItemWidget(itemToAdd, 2, combo);
+    // //Add combo box
+    // QComboBox* combo = createTypeComboBox(addressTreeWidget, medAddress.getScanType());
+    // combo->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
+    // addressTreeWidget->setItemWidget(itemToAdd, 2, combo);
 
-    QCheckBox* checkbox = new QCheckBox(addressTreeWidget);
-    checkbox->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
-    checkbox->setCheckState(Qt::Unchecked);
-    addressTreeWidget->setItemWidget(itemToAdd, 4, checkbox);
+    // QCheckBox* checkbox = new QCheckBox(addressTreeWidget);
+    // checkbox->setProperty("tree-row", addressTreeWidget->indexOfTopLevelItem(itemToAdd));
+    // checkbox->setCheckState(Qt::Unchecked);
+    // addressTreeWidget->setItemWidget(itemToAdd, 4, checkbox);
 
-    //Add signal
-    QObject::connect(combo,
-                     SIGNAL(currentTextChanged(QString)),
-                     this,
-                     SLOT(onAddressTypeChanged(QString)));
-    QObject::connect(checkbox,
-                     SIGNAL(stateChanged(int)),
-                     this,
-                     SLOT(onAddressLockChanged(int)));
+    // //Add signal
+    // QObject::connect(combo,
+    //                  SIGNAL(currentTextChanged(QString)),
+    //                  this,
+    //                  SLOT(onAddressTypeChanged(QString)));
+    // QObject::connect(checkbox,
+    //                  SIGNAL(stateChanged(int)),
+    //                  this,
+    //                  SLOT(onAddressLockChanged(int)));
   }
 
   void onAddressDeleteClicked() {
@@ -549,11 +553,11 @@ private:
                       SLOT(onScanAddClicked())
                       );
 
-    QObject::connect(mainWindow->findChild<QTreeWidget*>("addressTreeWidget"),
+    /*QObject::connect(mainWindow->findChild<QTreeWidget*>("addressTreeWidget"),
                      SIGNAL(itemChanged(QTreeWidgetItem*, int)),
                      this,
                      SLOT(onAddressItemChanged(QTreeWidgetItem*, int))
-                     );
+                     );*/
 
     QObject::connect(mainWindow->findChild<QPushButton*>("addressNew"),
                      SIGNAL(clicked()),

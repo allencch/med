@@ -71,7 +71,7 @@ using namespace std;
 /**
  * @brief Convert hexadecimal string to integer value
  */
-long hexToInt(string str) throw(string) {
+long hexToInt(string str) throw(MedException) {
   stringstream ss(str);
   unsigned long ret = -1;
   ss >> hex >> ret;
@@ -319,27 +319,27 @@ int getMem(pid_t pid) {
 /**
  * Attach PID
  */
-pid_t pidAttach(pid_t pid) throw(string) {
+pid_t pidAttach(pid_t pid) throw(MedException) {
   //Attach the processr
   if(ptrace(PTRACE_ATTACH,pid,NULL,NULL) == -1L) {
     fprintf(stderr,"Failed attach: %s\n",strerror(errno));
-    throw string("Failed attach");
+    throw MedException("Failed attach");
   }
 
   int status;
   if(waitpid(pid,&status,0) == -1 || !WIFSTOPPED(status)) {
     fprintf(stderr,"Error waiting: %s\n",strerror(errno));
-    throw string("Error waiting");
+    throw MedException("Error waiting");
   }
 
   return pid;
 }
 
-pid_t pidDetach(pid_t pid) throw(string){
+pid_t pidDetach(pid_t pid) throw(MedException){
   //Detach
   if(ptrace(PTRACE_DETACH,pid,NULL,NULL) == -1L) {
     fprintf(stderr,"Failed detach: %s\n",strerror(errno));
-    throw string("Failed detach");
+    throw MedException("Failed detach");
   }
   return -1;
 }
@@ -668,7 +668,7 @@ bool addrIsValid(pid_t pid,unsigned long address) {
 }
 
 
-string memValue(long pid, unsigned long address, string scanType) throw (string) {
+string memValue(long pid, unsigned long address, string scanType) throw(MedException) {
   pidAttach(pid);
 
   int size = scanTypeToSize(stringToScanType(scanType));
@@ -681,13 +681,13 @@ string memValue(long pid, unsigned long address, string scanType) throw (string)
     free(buf);
     close(memFd);
     pidDetach(pid);
-    throw string("Address seek fail");
+    throw MedException("Address seek fail");
   }
   if(read(memFd,buf,size) == -1) {
     free(buf);
     close(memFd);
     pidDetach(pid);
-    throw string("Address read fail");
+    throw MedException("Address read fail");
   }
 
   char str[32];
@@ -711,7 +711,7 @@ string memValue(long pid, unsigned long address, string scanType) throw (string)
     free(buf);
     close(memFd);
     pidDetach(pid);
-    throw string("Error Type");
+    throw MedException("Error Type");
   }
 
   free(buf);
@@ -977,7 +977,7 @@ bool Med::addToStoreByIndex(int index) {
   return true;
 }
 
-void Med::saveFile(const char* filename) throw(string) {
+void Med::saveFile(const char* filename) throw(MedException) {
   Json::Value root;
   //Using C++11
   for(auto address: this->addresses) {
@@ -992,19 +992,19 @@ void Med::saveFile(const char* filename) throw(string) {
   ofstream ofs;
   ofs.open(filename);
   if(ofs.fail()) {
-    throw string("Save JSON: Fail to open file ") + filename;
+    throw MedException(string("Save JSON: Fail to open file ") + filename);
   }
   ofs << root << endl;
   ofs.close();
 }
 
-void Med::openFile(const char* filename) throw(string) {
+void Med::openFile(const char* filename) throw(MedException) {
   Json::Value root;
 
   ifstream ifs;
   ifs.open(filename);
   if(ifs.fail()) {
-    throw string("Open JSON: Fail to open file ") + filename;
+    throw MedException(string("Open JSON: Fail to open file ") + filename);
   }
   ifs >> root;
   ifs.close();

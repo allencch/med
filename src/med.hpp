@@ -46,6 +46,7 @@
 #include <string>
 #include <mutex>
 #include <thread>
+#include <exception>
 
 using namespace std;
 
@@ -74,6 +75,17 @@ enum ScanType {
   Unknown
 };
 
+class MedException: public exception {
+public:
+  MedException(string message) {
+    this->message = message;
+  }
+  virtual const char* what() const throw() {
+    return message.c_str();
+  }
+private:
+  string message;
+};
 
 /**
  * Convert string to ScanType, they are "int8", "int16", etc.
@@ -90,7 +102,7 @@ int scanTypeToSize(ScanType type);
 /**
  * @brief Convert hexadecimal string to integer value
  */
-long hexToInt(string str) throw(string);
+long hexToInt(string str) throw(MedException);
 
 /**
  * @brief Convert long integer to hex string
@@ -133,8 +145,8 @@ int padWordSize(int x);
  */
 int getMem(pid_t pid);
 
-pid_t pidAttach(pid_t pid) throw(string);
-pid_t pidDetach(pid_t pid) throw(string);
+pid_t pidAttach(pid_t pid) throw(MedException);
+pid_t pidDetach(pid_t pid) throw(MedException);
 
 int memDump(pid_t pid,unsigned long address,int size);
 void memWrite(pid_t pid,unsigned long address,uint8_t* data,int size);
@@ -169,7 +181,7 @@ string pidName(string pid);
 /**
  * Get the value from the address as string based on the scanType (string)
  */
-string memValue(long pid, unsigned long address, string scanType) throw (string);
+string memValue(long pid, unsigned long address, string scanType) throw(MedException);
 
 
 /**
@@ -242,8 +254,8 @@ public:
   void lockAddressValueByIndex(int ind);
   void unlockAddressValueByIndex(int ind);
 
-  void saveFile(const char* filename) throw(string);
-  void openFile(const char* filename) throw(string);
+  void saveFile(const char* filename) throw(MedException);
+  void openFile(const char* filename) throw(MedException);
 
   bool addToStoreByIndex(int ind);
 
