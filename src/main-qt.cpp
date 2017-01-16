@@ -192,7 +192,7 @@ private slots:
       shiftTo = hexToInt(mainWindow->findChild<QLineEdit*>("shiftTo")->text().toStdString());
       difference = shiftTo - shiftFrom;
     } catch(MedException &e) {
-      throw e;
+      cout << e.what() << endl;
     }
 
     //Get PID

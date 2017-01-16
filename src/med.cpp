@@ -76,8 +76,8 @@ long hexToInt(string str) throw(MedException) {
   unsigned long ret = -1;
   ss >> hex >> ret;
   if(ss.fail()) {
-    fprintf(stderr,"Error input: %s\n",str.c_str());
-    throw MedException("Error input");
+    // fprintf(stderr,"Error input: %s\n",str.c_str());
+    throw MedException(string("Error input: ") + str);
   }
 
   return ret;
@@ -875,6 +875,7 @@ void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* d
   int memFd = getMem(pid);
 
   //Loop through maps
+  scanAddresses.clear();
   for(unsigned int i=0;i<maps.starts.size();i++) {
     //printf("maps: %p\t%p\n", maps.starts[i],maps.ends[i]);
     //Loop each maps to get the "page"
