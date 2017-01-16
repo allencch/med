@@ -1,7 +1,7 @@
 Med (Memory Editor)
 ===================
 
-Date: 2015-05-28
+Date: 2017-01-17
 
 There was a memory editor in Windows, that was Game Master. But it was not a freeware. And there is a freeware memory editor, it is ArtMoney. But it is also for Windows only. In Linux, there is only one memory editor, scanmem with GameConqueror as the GUI. However, there is a lot of limitation from scanmem and GameConqueror. Thus, that is why I decided to create one which can fit my needs.
 
@@ -11,7 +11,7 @@ Med is still in the development, it is not stable. Anyone can help to improve th
 Usage
 =====
 
-There are 2 programs: **med** and **medgui**. med is the command-line which is less useful, but only for development testing; medgui is the GUI to ease the memory editing process. All the following usages are related to medgui. In order to use it, please use **sudo**.
+There are 2 programs: **med** and **med-qt**. med is the command-line which is less useful, but only for development testing; med-qt is the GUI to ease the memory editing process. All the following usages are related to med-qt. In order to use it, please use **sudo**.
 
 
 Interface
@@ -48,15 +48,19 @@ The JSON file is used. Please save the file in the JSON extension.
 
 Build Instruction
 =================
-This program requires **GCC** (C++ compiler), **GTK+ 3**, and **JSONPP**.
+This program requires **GCC** (C++ compiler), **Qt5**, and **JSONPP**.
 
-1. In the directory that contains the source code including `Makefile`,
+1. In the directory that contains the source code including `CMakeLists.txt`,
 
-`make`
+```
+mkdir build && cd build  
+cmake ../  
+make  
+```
 
-2. To run the GUI, make sure the `ui.glade` is together with the compiled binary files, and enter
+2. To run the GUI, make sure the `main-qt.ui` and `process.ui` are together with the compiled binary files, and enter
 
-`sudo ./medgui`
+`sudo ./med-qt`
 
 3. In order to run the command-line,
 
