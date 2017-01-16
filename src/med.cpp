@@ -820,6 +820,24 @@ MedAddress::MedAddress(unsigned long address) : MedScan(address) {
   this->lock = false;
   this->lockThread = NULL;
 }
+MedAddress::~MedAddress() {
+  if (this->lockThread) {
+    this->unlockValue();
+  }
+}
+
+void MedAddress::lockValue(string pid) {
+  this->lock = true;
+  this->lockedValue = this->getValue(stol(pid), this->getScanType());
+  this->lockThread = new std::thread(::lockValue, pid, this);
+}
+
+void MedAddress::unlockValue() {
+  this->lock = false;
+  this->lockThread->join();
+  delete this->lockThread;
+  this->lockThread = NULL;
+}
 
 
 Med::Med() {}
@@ -1032,13 +1050,13 @@ void Med::openFile(const char* filename) throw(MedException) {
   }
 }
 
-void lockValue(Med* med, MedAddress* address) {
+void lockValue(string pid, MedAddress* address) {
   while(1) {
     if(!address->lock) {
       return; //End
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(800));
-    address->setValue(stol(med->selectedProcess.pid), address->lockedValue);
+    address->setValue(stol(pid), address->lockedValue);
   }
 }
 
@@ -1047,20 +1065,14 @@ void Med::lockAddressValueByIndex(int ind) {
   MedAddress* address = this->addresses[ind];
   if (address->lock)
     return;
-
-  address->lock = true;
-  address->lockedValue = address->getValue(stol(this->selectedProcess.pid), address->getScanType());
-  address->lockThread = new std::thread(lockValue, this, address);
+  address->lockValue(this->selectedProcess.pid);
 }
 
 void Med::unlockAddressValueByIndex(int ind) {
   MedAddress* address = this->addresses[ind];
   if (!address->lock)
     return;
-  address->lock = false; //Make sure make it to false.
-  address->lockThread->join();
-  delete address->lockThread;
-  address->lockThread = NULL;
+  address->unlockValue();
 }
 
 void Med::setStoreLockByIndex(int ind, bool lockStatus) {

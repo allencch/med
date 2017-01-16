@@ -148,8 +148,8 @@ int getMem(pid_t pid);
 pid_t pidAttach(pid_t pid) throw(MedException);
 pid_t pidDetach(pid_t pid) throw(MedException);
 
-int memDump(pid_t pid,unsigned long address,int size);
-void memWrite(pid_t pid,unsigned long address,uint8_t* data,int size);
+int memDump(pid_t pid, unsigned long address,int size);
+void memWrite(pid_t pid, unsigned long address,uint8_t* data,int size);
 void memWriteList(Scanner scanner,pid_t pid,uint8_t* data,int size);
 
 int memCopy(pid_t pid,unsigned long address,unsigned char* out,int size,bool showError);
@@ -211,12 +211,16 @@ class MedAddress : public MedScan {
 public:
   MedAddress();
   MedAddress(unsigned long address);
+  ~MedAddress();
 
   //TODO: Unlock and join in destructor
 
   string description;
   bool lock; /**< Not using mutex */
   string lockedValue;
+
+  void lockValue(string pid);
+  void unlockValue();
 
 private:
   std::thread* lockThread;
@@ -291,5 +295,7 @@ private:
   static void memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType);
   static void memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType);
 };
+
+void lockValue(string pid, MedAddress* address);
 
 #endif
