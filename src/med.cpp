@@ -946,7 +946,14 @@ string Med::getScanTypeByIndex(int ind) {
   return this->scanAddresses[ind].getScanType();
 }
 
-string Med::getAddressValueByIndex(int ind) {
+/**
+ * @deprecated
+ */
+string Med:: getAddressValueByIndex(int ind) {
+  return getStoreValueByIndex(ind);
+}
+
+string Med::getStoreValueByIndex(int ind) {
   return this->addresses[ind].getValue(stol(this->selectedProcess.pid), this->addresses[ind].getScanType());
 }
 

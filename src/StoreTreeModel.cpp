@@ -101,6 +101,17 @@ Qt::ItemFlags StoreTreeModel::flags(const QModelIndex &index) const {
   return flags;
 }
 
+void StoreTreeModel::refreshValues() {
+  for(int i=0; i < med->addresses.size(); i++) {
+    string value;
+    try {
+      value = med->getStoreValueByIndex(i);
+    } catch(MedException &ex) {}
+    QModelIndex modelIndex = index(i, ADDRESS_COL_VALUE);
+    setData(modelIndex, QString::fromStdString(value));
+  }
+}
+
 void StoreTreeModel::refresh() {
   this->clearAll();
   for(int i=0;i<med->addresses.size();i++) {

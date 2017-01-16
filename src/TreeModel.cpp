@@ -222,7 +222,7 @@ void TreeModel::addScan(string scanType) {
   }
 }
 
-void TreeModel::refresh() {
+void TreeModel::refreshValues() {
   for(int i=0; i < med->scanAddresses.size(); i++) {
     string value = med->getScanValueByIndex(i);
     QModelIndex modelIndex = index(i, SCAN_COL_VALUE);

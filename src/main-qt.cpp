@@ -41,60 +41,31 @@ public:
     setupStatusBar();
     setupScanTreeView();
     setupStoreTreeView();
+    setupSignals();
     setupUi();
   }
   Med med;
   std::thread* refreshThread;
   std::mutex scanUpdateMutex;
-  std::mutex addressUpdateMutex;
+  std::mutex addressUpdateMutex; //TODO: Rename to storeUpdateMutex
 
   static void refresh(MainUi* mainUi) {
     while(1) {
-      //mainUi->refreshScanTreeWidget();
-      //mainUi->refreshAddressTreeWidget();
-
       mainUi->refreshScanTreeView();
+      mainUi->refreshStoreTreeView();
       std::this_thread::sleep_for(chrono::milliseconds(800));
     }
   }
 
   void refreshScanTreeView() {
     scanUpdateMutex.lock();
-    scanModel->refresh();
+    scanModel->refreshValues();
     scanUpdateMutex.unlock();
   }
 
-  void refreshScanTreeWidget() {
-    QTreeWidget* scanTreeWidget = this->mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
-    QTreeWidgetItemIterator it(scanTreeWidget);
-    scanUpdateMutex.lock();
-    while(*it) {
-      try {
-        int index = scanTreeWidget->indexOfTopLevelItem(*it);
-        string value = med.getScanValueByIndex(index);
-        (*it)->setText(2, value.c_str());
-      } catch(string e) {
-        (*it)->setText(2, "Error memory");
-      }
-      it++;
-    }
-    scanUpdateMutex.unlock();
-  }
-
-  void refreshAddressTreeWidget() {
-    QTreeWidget* addressTreeWidget = this->mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
-    QTreeWidgetItemIterator it(addressTreeWidget);
+  void refreshStoreTreeView() {
     addressUpdateMutex.lock();
-    while(*it) {
-      try {
-        int index = addressTreeWidget->indexOfTopLevelItem(*it);
-        string value = med.getAddressValueByIndex(index);
-        (*it)->setText(3, value.c_str());
-      } catch(string e) {
-        (*it)->setText(3, "Error memory");
-      }
-      it++;
-    }
+    storeModel->refreshValues();
     addressUpdateMutex.unlock();
   }
 
@@ -161,10 +132,6 @@ private slots:
 
   void onFilterClicked() {
     scanUpdateMutex.lock();
-    //QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
-    //scanTreeWidget->clear();
-
-    //scanModel->clearAll();
 
     //Get scanned type
     string scanType = mainWindow->findChild<QComboBox*>("scanType")->currentText().toStdString();
@@ -182,12 +149,11 @@ private slots:
   }
 
   void onClearClicked() {
-    //med.scanAddresses.clear();
+    scanUpdateMutex.lock();
     scanModel->clearAll();
     mainWindow->findChild<QStatusBar*>("statusbar")->showMessage("Scan cleared");
+    scanUpdateMutex.unlock();
   }
-
-
 
   void onScanAddClicked() {
     int index = MainUi::getTreeViewSelectedIndex(mainWindow->findChild<QTreeView*>("scanTreeView"));
@@ -286,6 +252,12 @@ private slots:
     }
   }
 
+  void onStoreTreeViewDoubleClicked(const QModelIndex &index) {
+    if (index.column() == ADDRESS_COL_VALUE) {
+      addressUpdateMutex.lock();
+    }
+  }
+
   void onStoreTreeViewClicked(const QModelIndex &index) {
     if (index.column() == ADDRESS_COL_TYPE) {
       mainWindow->findChild<QTreeView*>("storeTreeView")->edit(index);
@@ -298,6 +270,13 @@ private slots:
       tryUnlock(scanUpdateMutex);
     }
   }
+
+  void onStoreTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>()) {
+    // qDebug() << topLeft << bottomRight << roles;
+    if (topLeft.column() == ADDRESS_COL_VALUE) {
+      tryUnlock(addressUpdateMutex);
+    }
+  }\
 
 private:
   QWidget* mainWindow;
@@ -358,6 +337,12 @@ private:
                      SIGNAL(doubleClicked(QModelIndex)),
                      this,
                      SLOT(onScanTreeViewDoubleClicked(QModelIndex)));
+
+    QObject::connect(scanModel,
+                     SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
+                     this,
+                     SLOT(onScanTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
+
   }
 
   void setupStoreTreeView() {
@@ -371,31 +356,35 @@ private:
                      SIGNAL(clicked(QModelIndex)),
                      this,
                      SLOT(onStoreTreeViewClicked(QModelIndex)));
+    QObject::connect(mainWindow->findChild<QTreeView*>("storeTreeView"),
+                     SIGNAL(doubleClicked(QModelIndex)),
+                     this,
+                     SLOT(onStoreTreeViewDoubleClicked(QModelIndex)));
+
+    QObject::connect(storeModel,
+                     SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
+                     this,
+                     SLOT(onStoreTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
+
   }
 
-  void setupUi() {
-
-    //Set default scan type
-    mainWindow->findChild<QComboBox*>("scanType")->setCurrentIndex(1);
-
-    //TODO: center
-    mainWindow->show();
-
-    qRegisterMetaType<QVector<int>>(); //For multithreading.
-
-
-
-
+  void setupSignals() {
     //Add signal to the process
-    QWidget* process = mainWindow->findChild<QWidget*>("process");
-    QObject::connect(process, SIGNAL(clicked()), this, SLOT(onProcessClicked()));
+    QObject::connect(mainWindow->findChild<QWidget*>("process"),
+                     SIGNAL(clicked()),
+                     this,
+                     SLOT(onProcessClicked()));
 
     //Add signal to scan
-    QWidget* scanButton = mainWindow->findChild<QWidget*>("scanButton");
-    QObject::connect(scanButton, SIGNAL(clicked()), this, SLOT(onScanClicked()));
+    QObject::connect(mainWindow->findChild<QWidget*>("scanButton"),
+                     SIGNAL(clicked()),
+                     this,
+                     SLOT(onScanClicked()));
 
-    QWidget* filterButton = mainWindow->findChild<QWidget*>("filterButton");
-    QObject::connect(filterButton, SIGNAL(clicked()), this, SLOT(onFilterClicked()));
+    QObject::connect(mainWindow->findChild<QWidget*>("filterButton"),
+                     SIGNAL(clicked()),
+                     this,
+                     SLOT(onFilterClicked()));
 
     QObject::connect(mainWindow->findChild<QWidget*>("scanClear"),
                      SIGNAL(clicked()),
@@ -440,10 +429,17 @@ private:
                      this,
                      SLOT(onOpenTriggered()));
 
-    QObject::connect(scanModel,
-                     SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
-                     this,
-                     SLOT(onScanTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
+  }
+
+  void setupUi() {
+
+    //Set default scan type
+    mainWindow->findChild<QComboBox*>("scanType")->setCurrentIndex(1);
+
+    //TODO: center
+    mainWindow->show();
+
+    qRegisterMetaType<QVector<int>>(); //For multithreading.
 
     //Multi-threading
     refreshThread = new std::thread(MainUi::refresh, this);

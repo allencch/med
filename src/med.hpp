@@ -244,9 +244,11 @@ public:
   string getScanTypeByIndex(int ind);
 
   /**
+   * @deprecated. Replace by getStoreValueByIndex()
    * The function name is not value significant. It refers to right hand panel stored address.
    */
   string getAddressValueByIndex(int ind);
+  string getStoreValueByIndex(int ind);
 
   string getValueByAddress(unsigned long address, string scanType);
   void setValueByAddress(unsigned long address, string value, string scanType);

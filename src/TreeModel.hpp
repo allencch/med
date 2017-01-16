@@ -56,7 +56,7 @@ public:
 
   void addScan(string scanType);
 
-  void refresh();
+  void refreshValues();
 
   TreeItem* root();
   Med* med;
