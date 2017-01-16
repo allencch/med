@@ -457,7 +457,7 @@ void memWrite(pid_t pid,unsigned long address,uint8_t* data,int size) {
 
   uint8_t* buf = (uint8_t*)malloc(psize);
   long word;
-
+  medMutex.lock();
   for(int i=0;i<psize;i+=sizeof(long)) {
     errno = 0;
     word = ptrace(PTRACE_PEEKDATA,pid,(uint8_t*)(address)+i,NULL);
@@ -472,8 +472,6 @@ void memWrite(pid_t pid,unsigned long address,uint8_t* data,int size) {
   }
 
   memcpy(buf,data,size); //over-write on top of it, so that the last padding byte will preserved
-
-
 
   for(int i=0;i<size;i+=sizeof(long)) {
     //FIXME: This writes as uint32, it should be uint8
@@ -495,6 +493,8 @@ void memWrite(pid_t pid,unsigned long address,uint8_t* data,int size) {
   //printf("Success!\n");
   pidDetach(pid);
   //memDump(pid,address,10); //Should I dump???
+
+  medMutex.unlock();
 }
 
 void memWriteList(Scanner scanner,pid_t pid,uint8_t* data,int size) {
@@ -677,6 +677,8 @@ string memValue(long pid, unsigned long address, string scanType) throw(MedExcep
   uint8_t* buf = (uint8_t*)malloc(size + 1); //+1 for the NULL
   memset(buf,0,size+1);
 
+  medMutex.lock();
+
   if(lseek(memFd,address,SEEK_SET)==-1) {
     free(buf);
     close(memFd);
@@ -713,6 +715,7 @@ string memValue(long pid, unsigned long address, string scanType) throw(MedExcep
     free(buf);
     close(memFd);
     pidDetach(pid);
+    medMutex.unlock();
     throw MedException("Error Type");
   }
 
@@ -721,7 +724,7 @@ string memValue(long pid, unsigned long address, string scanType) throw(MedExcep
   pidDetach(pid);
 
   string ret = string(str);
-
+  medMutex.unlock();
   return ret;
 }
 
@@ -791,26 +794,20 @@ void MedScan::setScanType(string s) {
 
 string MedScan::getValue(long pid) {
   string value;
-  medMutex.lock();
   value = memValue(pid, this->address, this->getScanType());
-  medMutex.unlock();
   return value;
 }
 
 string MedScan::getValue(long pid, string scanType) {
   string value;
-  medMutex.lock();
   value = memValue(pid, this->address, scanType);
-  medMutex.unlock();
   return value;
 }
 
 void MedScan::setValue(long pid, string v) {
   uint8_t* buffer;
   int size = stringToRaw(v, this->scanType, &buffer);
-  medMutex.lock();
   memWrite(pid, this->address, buffer, size);
-  medMutex.unlock();
   free(buffer);
 }
 
@@ -824,14 +821,16 @@ MedAddress::MedAddress(unsigned long address) : MedScan(address) {
   this->lockThread = NULL;
 }
 
+
 Med::Med() {}
-Med::~Med() {}
+Med::~Med() {
+  clearStore();
+}
+
 void Med::scanEqual(string v, string t) {
   uint8_t* buffer = NULL;
   int size = stringToRaw(v, t, &buffer);
-  medMutex.lock();
   Med::memScanEqual(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t);
-  medMutex.unlock();
   if(buffer)
     free(buffer);
 }
@@ -839,9 +838,7 @@ void Med::scanEqual(string v, string t) {
 void Med::scanFilter(string v, string t) {
   uint8_t* buffer = NULL;
   int size = stringToRaw(v, t, &buffer);
-  medMutex.lock();
   Med::memScanFilter(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t);
-  medMutex.unlock();
   if(buffer)
     free(buffer);
 }
@@ -850,8 +847,8 @@ void Med::scanFilter(string v, string t) {
  * Scan memory, using procfs mem
  */
 void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType = NULL) {
+  medMutex.lock();
   pidAttach(pid);
-  scanAddresses.clear();
 
   ProcMaps maps = getMaps(pid);
 
@@ -893,9 +890,11 @@ void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* d
   close(memFd);
 
   pidDetach(pid);
+  medMutex.unlock();
 }
 
 void Med::memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType = NULL) {
+  medMutex.lock();
   pidAttach(pid);
   vector<MedScan> addresses; //New addresses
 
@@ -919,7 +918,6 @@ void Med::memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* 
     }
   }
 
-
   free(buf);
 
   //Remove old one
@@ -927,6 +925,7 @@ void Med::memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* 
   printf("Filtered %lu results\n",scanAddresses.size());
   close(memFd);
   pidDetach(pid);
+  medMutex.unlock();
 }
 
 vector<Process> Med::listProcesses() {
@@ -954,25 +953,23 @@ string Med:: getAddressValueByIndex(int ind) {
 }
 
 string Med::getStoreValueByIndex(int ind) {
-  return this->addresses[ind].getValue(stol(this->selectedProcess.pid), this->addresses[ind].getScanType());
+  return this->addresses[ind]->getValue(stol(this->selectedProcess.pid), this->addresses[ind]->getScanType());
 }
 
 string Med::getValueByAddress(unsigned long address, string scanType) {
   string value;
-  if(address != 0) //In case adding the address manually
-    medMutex.lock();
+  //if(address != 0) //In case adding the address manually
+  //  medMutex.lock();
   value = memValue(stol(this->selectedProcess.pid), address, scanType);
-  if(address != 0)
-    medMutex.unlock();
+  //if(address != 0)
+  //  medMutex.unlock();
   return value;
 }
 
 void Med::setValueByAddress(unsigned long address, string value, string scanType) {
   uint8_t* buffer = NULL;
   int size = stringToRaw(string(value), scanType, &buffer);
-  medMutex.lock();
   memWrite(stoi(this->selectedProcess.pid), address, buffer, size);
-  medMutex.unlock();
   if(buffer)
     free(buffer);
 }
@@ -982,10 +979,10 @@ bool Med::addToStoreByIndex(int index) {
     return false;
   }
 
-  MedAddress medAddress;
-  medAddress.description = "Your description";
-  medAddress.address = this->scanAddresses[index].address;
-  medAddress.scanType = this->scanAddresses[index].scanType;
+  MedAddress* medAddress = new MedAddress();
+  medAddress->description = "Your description";
+  medAddress->address = this->scanAddresses[index].address;
+  medAddress->scanType = this->scanAddresses[index].scanType;
   this->addresses.push_back(medAddress);
 
   return true;
@@ -996,11 +993,11 @@ void Med::saveFile(const char* filename) throw(MedException) {
   //Using C++11
   for(auto address: this->addresses) {
     Json::Value pairs;
-    pairs["description"] = address.description;
-    pairs["address"] = intToHex(address.address);
-    pairs["type"] = address.getScanType();
-    pairs["value"] = string(address.getValue(stol(this->selectedProcess.pid), address.getScanType()));
-    pairs["lock"] = address.lock;
+    pairs["description"] = address->description;
+    pairs["address"] = intToHex(address->address);
+    pairs["type"] = address->getScanType();
+    pairs["value"] = string(address->getValue(stol(this->selectedProcess.pid), address->getScanType()));
+    pairs["lock"] = address->lock;
     root.append(pairs);
   }
   ofstream ofs;
@@ -1023,13 +1020,13 @@ void Med::openFile(const char* filename) throw(MedException) {
   ifs >> root;
   ifs.close();
 
-  this->addresses.clear();
+  clearStore();
   for(int i=0;i<root.size();i++) {
-    MedAddress address;
-    address.description = root[i]["description"].asString();
-    address.address = hexToInt(root[i]["address"].asString());
-    address.setScanType(root[i]["type"].asString());
-    address.lock = root[i]["lock"].asBool();
+    MedAddress* address = new MedAddress();
+    address->description = root[i]["description"].asString();
+    address->address = hexToInt(root[i]["address"].asString());
+    address->setScanType(root[i]["type"].asString());
+    address->lock = false; // always open as false, so that do not update the value
 
     this->addresses.push_back(address);
   }
@@ -1047,26 +1044,39 @@ void lockValue(Med* med, MedAddress* address) {
 
 void Med::lockAddressValueByIndex(int ind) {
   //Create a thread
-  MedAddress* address = &(this->addresses[ind]);
+  MedAddress* address = this->addresses[ind];
+  if (address->lock)
+    return;
+
+  address->lock = true;
   address->lockedValue = address->getValue(stol(this->selectedProcess.pid), address->getScanType());
   address->lockThread = new std::thread(lockValue, this, address);
 }
 
 void Med::unlockAddressValueByIndex(int ind) {
-  MedAddress* address = &(this->addresses[ind]);
+  MedAddress* address = this->addresses[ind];
+  if (!address->lock)
+    return;
   address->lock = false; //Make sure make it to false.
   address->lockThread->join();
   delete address->lockThread;
   address->lockThread = NULL;
 }
 
+void Med::setStoreLockByIndex(int ind, bool lockStatus) {
+  lockStatus ? lockAddressValueByIndex(ind) : unlockAddressValueByIndex(ind);
+}
+
+bool Med::getStoreLockByIndex(int ind) {
+  return addresses[ind]->lock;
+}
 
 void Med::addNewAddress() {
-  MedAddress medAddress;
-  medAddress.description = "Your description";
-  medAddress.address = 0;
-  medAddress.setScanType("int16");
-  medAddress.lock = false;
+  MedAddress* medAddress = new MedAddress();
+  medAddress->description = "Your description";
+  medAddress->address = 0;
+  medAddress->setScanType("int16");
+  medAddress->lock = false;
   addresses.push_back(medAddress);
 }
 
@@ -1078,28 +1088,35 @@ string Med::getScanAddressByIndex(int ind) {
 
 string Med::getStoreAddressByIndex(int ind) {
   char address[32];
-  sprintf(address, "%p", (void*)(addresses[ind].address));
+  sprintf(address, "%p", (void*)(addresses[ind]->address));
   return string(address);
 }
 
 void Med::deleteAddressByIndex(int ind) {
+  delete addresses[ind];
   addresses.erase(addresses.begin() + ind);
 }
 
 void Med::shiftStoreAddresses(long diff) {
   for (int i=0; i < addresses.size(); i++) {
-    long address = addresses[i].address;
+    long address = addresses[i]->address;
     address += diff;
-    addresses[i].address = address;
+    addresses[i]->address = address;
   }
 }
 
 string Med::getStoreDescriptionByIndex(int ind) {
-  return addresses[ind].description;
+  return addresses[ind]->description;
 }
 
 string Med::setStoreAddressByIndex(int ind, string address) {
-  addresses[ind].address = hexToInt(address);
-  string value = getValueByAddress(addresses[ind].address, addresses[ind].getScanType());
+  addresses[ind]->address = hexToInt(address);
+  string value = getValueByAddress(addresses[ind]->address, addresses[ind]->getScanType());
   return value;
+}
+
+void Med::clearStore() {
+  for(int i=0;i<addresses.size();i++)
+    delete addresses[i];
+  addresses.clear();
 }

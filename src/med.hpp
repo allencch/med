@@ -211,6 +211,9 @@ class MedAddress : public MedScan {
 public:
   MedAddress();
   MedAddress(unsigned long address);
+
+  //TODO: Unlock and join in destructor
+
   string description;
   bool lock; /**< Not using mutex */
   string lockedValue;
@@ -229,7 +232,9 @@ public:
 
   vector<Process> processes; /**< This is the list of processes */
   vector<MedScan> scanAddresses; /**< The memory scanner, replace the Scanner*/
-  vector<MedAddress> addresses;
+  vector<MedAddress*> addresses;
+
+  void clearStore();
 
   Process selectedProcess; /**< Not using pointer yet */
 
@@ -253,6 +258,9 @@ public:
   string getValueByAddress(unsigned long address, string scanType);
   void setValueByAddress(unsigned long address, string value, string scanType);
 
+
+  void setStoreLockByIndex(int ind, bool lockStatus);
+  bool getStoreLockByIndex(int ind);
   void lockAddressValueByIndex(int ind);
   void unlockAddressValueByIndex(int ind);
 
@@ -274,6 +282,7 @@ public:
   string setStoreAddressByIndex(int ind, string address);
 
   string getStoreDescriptionByIndex(int ind);
+
 
 private:
   /**

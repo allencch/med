@@ -101,9 +101,6 @@ private slots:
 
   void onScanClicked() {
     scanUpdateMutex.lock();
-    //QTreeWidget* scanTreeWidget = mainWindow->findChild<QTreeWidget*>("scanTreeWidget");
-    //scanTreeWidget->clear();
-    //scanModel->clearAll();
 
     //Get scanned type
     string scanType = mainWindow->findChild<QComboBox*>("scanType")->currentText().toStdString();
@@ -116,13 +113,11 @@ private slots:
     }
     try {
       med.scanEqual(scanValue, scanType);
-    } catch(string e) {
-      cerr << "scan: "<<e<<endl;
+    } catch(MedException &ex) {
+      cerr << "scan: "<< ex.what() <<endl;
     }
 
     if(med.scanAddresses.size() <= 800) {
-      //addressToScanTreeWidget(med, scanType, scanTreeWidget);
-      //addressToScanModel(med, scanType, scanModel);
       scanModel->addScan(scanType);
     }
 
@@ -159,36 +154,34 @@ private slots:
     int index = MainUi::getTreeViewSelectedIndex(mainWindow->findChild<QTreeView*>("scanTreeView"));
     if (index == -1)
       return;
+    scanUpdateMutex.lock();
     med.addToStoreByIndex(index);
 
     //TODO: Add scan
     storeModel->refresh();
+    scanUpdateMutex.unlock();
   }
 
   //TODO: Complete this one
   void onScanAddAllClicked() {
   }
 
-
-  void onAddressLockChanged(int state) {
-    QCheckBox* checkbox = qobject_cast<QCheckBox*>(sender());
-    QTreeWidget* addressTreeWidget = mainWindow->findChild<QTreeWidget*>("addressTreeWidget");
-    QTreeWidgetItem* item = addressTreeWidget->topLevelItem(checkbox->property("tree-row").toInt());
-    int index = item->treeWidget()->indexOfTopLevelItem(item);
-    med.addresses[index].lock = state == Qt::Checked ? true : false;
-  }
-
   void onAddressNewClicked() {
+    addressUpdateMutex.lock();
     med.addNewAddress();
-    storeModel->refresh();
+    storeModel->addRow();
+    addressUpdateMutex.unlock();
   }
 
   void onAddressDeleteClicked() {
     int index = MainUi::getTreeViewSelectedIndex(mainWindow->findChild<QTreeView*>("storeTreeView"));
     if (index == -1)
       return;
+
+    addressUpdateMutex.lock();
     med.deleteAddressByIndex(index);
     storeModel->refresh();
+    addressUpdateMutex.unlock();
   }
 
   void onAddressShiftClicked() {
@@ -207,9 +200,10 @@ private slots:
       cerr<< "No PID" <<endl;
       return;
     }
-
+    addressUpdateMutex.lock();
     med.shiftStoreAddresses(difference);
     storeModel->refresh();
+    addressUpdateMutex.unlock();
   }
 
   void onSaveAsTriggered() {
@@ -236,8 +230,10 @@ private slots:
                                                     QString("Open JSON (*.json)"));
     med.openFile(filename.toStdString().c_str());
 
+    addressUpdateMutex.lock();
     storeModel->clearAll();
     storeModel->refresh();
+    addressUpdateMutex.unlock();
   }
 
   void onScanTreeViewClicked(const QModelIndex &index) {
@@ -262,6 +258,9 @@ private slots:
     if (index.column() == ADDRESS_COL_TYPE) {
       mainWindow->findChild<QTreeView*>("storeTreeView")->edit(index);
     }
+    else if (index.column() == ADDRESS_COL_LOCK) {
+      mainWindow->findChild<QTreeView*>("storeTreeView")->edit(index);
+    }
   }
 
   void onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>()) {
@@ -276,7 +275,7 @@ private slots:
     if (topLeft.column() == ADDRESS_COL_VALUE) {
       tryUnlock(addressUpdateMutex);
     }
-  }\
+  }
 
 private:
   QWidget* mainWindow;

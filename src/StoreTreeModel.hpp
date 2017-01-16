@@ -19,6 +19,7 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
   void refresh();
   void refreshValues(); //Refresh values only
+  void addRow();
 };
 
 #endif

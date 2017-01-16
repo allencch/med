@@ -40,15 +40,13 @@ bool StoreTreeModel::setData(const QModelIndex &index, const QVariant &value, in
   if (role != Qt::EditRole)
     return false;
 
-  //Update the med
-  //Update, split this out
   int row = index.row();
   if(index.column() == ADDRESS_COL_VALUE) {
     try {
       //TODO: Refactor
-      med->setValueByAddress(med->addresses[row].address,
+      med->setValueByAddress(med->addresses[row]->address,
                              value.toString().toStdString(),
-                             med->addresses[row].getScanType());
+                             med->addresses[row]->getScanType());
     } catch(MedException &e) {
       cerr << "editStoreValue: " << e.what() << endl;
     }
@@ -56,8 +54,8 @@ bool StoreTreeModel::setData(const QModelIndex &index, const QVariant &value, in
   else if (index.column() == ADDRESS_COL_TYPE) {
     try {
       //TODO: refactor
-      med->addresses[row].setScanType(value.toString().toStdString());
-      string value2 = med->getValueByAddress(med->addresses[row].address,
+      med->addresses[row]->setScanType(value.toString().toStdString());
+      string value2 = med->getValueByAddress(med->addresses[row]->address,
                                              value.toString().toStdString());
       QVariant valueToSet = QString::fromStdString(value2);
 
@@ -79,6 +77,7 @@ bool StoreTreeModel::setData(const QModelIndex &index, const QVariant &value, in
     }
   }
   else if (index.column() == ADDRESS_COL_LOCK) {
+    med->setStoreLockByIndex(row, value.toBool());
   }
 
   TreeItem *item = getItem(index);
@@ -121,9 +120,25 @@ void StoreTreeModel::refresh() {
       value = med->getAddressValueByIndex(i);
     } catch(MedException &ex) {}
     string description = med->getStoreDescriptionByIndex(i);
+    bool lock = med->getStoreLockByIndex(i);
     QVector<QVariant> data;
-    data << description.c_str() << address.c_str() << med->addresses[i].getScanType().c_str() << value.c_str() << false;
+    data << description.c_str() << address.c_str() << med->addresses[i]->getScanType().c_str() << value.c_str() << lock;
     TreeItem* childItem = new TreeItem(data, this->root());
     this->appendRow(childItem);
   }
+}
+
+void StoreTreeModel::addRow() {
+  int lastIndex = med->addresses.size() - 1;
+  string address = med->getStoreAddressByIndex(lastIndex);
+  string value;
+  try {
+    value = med->getAddressValueByIndex(lastIndex);
+  } catch(MedException &ex) {}
+  string description = med->getStoreDescriptionByIndex(lastIndex);
+  bool lock = med->getStoreLockByIndex(lastIndex);
+  QVector<QVariant> data;
+  data << description.c_str() << address.c_str() << med->addresses[lastIndex]->getScanType().c_str() << value.c_str() << lock;
+  TreeItem* childItem = new TreeItem(data, this->root());
+  this->appendRow(childItem);
 }
