@@ -942,6 +942,10 @@ string Med::getScanValueByIndex(int ind) {
   return this->scanAddresses[ind].getValue(stol(this->selectedProcess.pid), this->scanAddresses[ind].getScanType());
 }
 
+string Med::getScanTypeByIndex(int ind) {
+  return this->scanAddresses[ind].getScanType();
+}
+
 string Med::getAddressValueByIndex(int ind) {
   return this->addresses[ind].getValue(stol(this->selectedProcess.pid), this->addresses[ind].getScanType());
 }

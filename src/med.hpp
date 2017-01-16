@@ -241,6 +241,7 @@ public:
 
   string getScanAddressValueByIndex(int ind, string scanType);
   string getScanValueByIndex(int ind);
+  string getScanTypeByIndex(int ind);
 
   /**
    * The function name is not value significant. It refers to right hand panel stored address.

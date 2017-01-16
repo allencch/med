@@ -23,6 +23,14 @@
 
 using namespace std;
 
+/**
+ * This will just perform the unlock by force
+ */
+void tryUnlock(std::mutex &mutex) {
+  mutex.try_lock();
+  mutex.unlock();
+}
+
 class MainUi : public QObject {
   Q_OBJECT
 
@@ -44,8 +52,16 @@ public:
     while(1) {
       //mainUi->refreshScanTreeWidget();
       //mainUi->refreshAddressTreeWidget();
+
+      mainUi->refreshScanTreeView();
       std::this_thread::sleep_for(chrono::milliseconds(800));
     }
+  }
+
+  void refreshScanTreeView() {
+    scanUpdateMutex.lock();
+    scanModel->refresh();
+    scanUpdateMutex.unlock();
   }
 
   void refreshScanTreeWidget() {
@@ -264,6 +280,12 @@ private slots:
     }
   }
 
+  void onScanTreeViewDoubleClicked(const QModelIndex &index) {
+    if (index.column() == SCAN_COL_VALUE) {
+      scanUpdateMutex.lock();
+    }
+  }
+
   void onStoreTreeViewClicked(const QModelIndex &index) {
     if (index.column() == ADDRESS_COL_TYPE) {
       mainWindow->findChild<QTreeView*>("storeTreeView")->edit(index);
@@ -271,7 +293,10 @@ private slots:
   }
 
   void onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>()) {
-    qDebug() << topLeft << bottomRight << roles;
+    // qDebug() << topLeft << bottomRight << roles;
+    if (topLeft.column() == SCAN_COL_VALUE) {
+      tryUnlock(scanUpdateMutex);
+    }
   }
 
 private:
@@ -329,7 +354,10 @@ private:
                      SIGNAL(clicked(QModelIndex)),
                      this,
                      SLOT(onScanTreeViewClicked(QModelIndex)));
-
+    QObject::connect(mainWindow->findChild<QTreeView*>("scanTreeView"),
+                     SIGNAL(doubleClicked(QModelIndex)),
+                     this,
+                     SLOT(onScanTreeViewDoubleClicked(QModelIndex)));
   }
 
   void setupStoreTreeView() {
@@ -412,10 +440,10 @@ private:
                      this,
                      SLOT(onOpenTriggered()));
 
-    /*QObject::connect(scanModel,
+    QObject::connect(scanModel,
                      SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
                      this,
-                     SLOT(onScanTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));*/
+                     SLOT(onScanTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
 
     //Multi-threading
     refreshThread = new std::thread(MainUi::refresh, this);
@@ -436,13 +464,20 @@ private:
     mainWindow->findChild<QStatusBar*>("statusbar")->showMessage(message);
   }
 
-  static int getTreeViewSelectedIndex(QTreeView* treeView) {
+  static QModelIndex getTreeViewSelectedModelIndex(QTreeView* treeView) {
     QModelIndexList selectedIndexes = treeView->selectionModel()->selectedIndexes();
     if (selectedIndexes.count() == 0) {
+      return QModelIndex();
+    }
+    return selectedIndexes.first();
+  }
+
+  static int getTreeViewSelectedIndex(QTreeView* treeView) {
+    QModelIndex modelIndex = MainUi::getTreeViewSelectedModelIndex(treeView);
+    if (!modelIndex.isValid()) {
       return -1;
     }
-    int index = selectedIndexes.first().row();
-    return index;
+    return modelIndex.row();
   }
 };
 

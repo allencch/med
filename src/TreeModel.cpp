@@ -13,19 +13,6 @@ TreeModel::TreeModel(Med* med, QObject* parent) : QAbstractItemModel(parent) {
   rootItem = new TreeItem(rootData);
 
   this->med = med;
-
-  /*QVector<QVariant> data;
-  data << "1" << "int8" << "3";
-  TreeItem* childrenItem = new TreeItem(data, rootItem);
-  rootItem->appendChild(childrenItem);
-
-  QVector<QVariant> data2;
-  data2 << "4" << "int8" << "6";
-  TreeItem* child2 = new TreeItem(data2, rootItem);
-  rootItem->appendChild(child2);//*/
-  //QStringList qstr = QStringList() << "hello" << "world";
-
-  //setupModelData(qstr, rootItem);
 }
 
 TreeModel::~TreeModel() {
@@ -83,8 +70,9 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   TreeItem *item = getItem(index);
   bool result = item->setData(index.column(), value); //Update the cell
 
-  if (result)
+  if (result) {
     emit dataChanged(index, index);
+  }
 
   return result;
 }
@@ -231,5 +219,13 @@ void TreeModel::addScan(string scanType) {
     data << address.c_str() << scanType.c_str() << value.c_str();
     TreeItem* childItem = new TreeItem(data, this->root());
     this->appendRow(childItem);
+  }
+}
+
+void TreeModel::refresh() {
+  for(int i=0; i < med->scanAddresses.size(); i++) {
+    string value = med->getScanValueByIndex(i);
+    QModelIndex modelIndex = index(i, SCAN_COL_VALUE);
+    setData(modelIndex, QString::fromStdString(value));
   }
 }

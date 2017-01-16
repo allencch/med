@@ -46,7 +46,6 @@ public:
 
   QModelIndex parent(const QModelIndex &index) const Q_DECL_OVERRIDE;
 
-
   int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
 
   int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
@@ -56,6 +55,8 @@ public:
   void clearAll();
 
   void addScan(string scanType);
+
+  void refresh();
 
   TreeItem* root();
   Med* med;
