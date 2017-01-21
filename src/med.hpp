@@ -287,6 +287,10 @@ public:
 
   string getStoreDescriptionByIndex(int ind);
 
+  void setStoreDescriptionByIndex(int ind, string description);
+  
+  void sortStoreByDescription();
+  void sortStoreByAddress();
 
 private:
   /**

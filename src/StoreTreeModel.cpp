@@ -10,7 +10,7 @@ using namespace std;
 
 StoreTreeModel::StoreTreeModel(Med* med, QObject* parent) : TreeModel(med, parent) {
   QVector<QVariant> rootData;
-  rootData << "Description" << "Address" << "Type" << "Value" << "Lock";
+  rootData << "Description +" << "Address +" << "Type" << "Value" << "Lock";
   rootItem = new TreeItem(rootData);
   this->med = med;
 }
@@ -79,6 +79,9 @@ bool StoreTreeModel::setData(const QModelIndex &index, const QVariant &value, in
   else if (index.column() == ADDRESS_COL_LOCK) {
     med->setStoreLockByIndex(row, value.toBool());
   }
+  else if (index.column() == ADDRESS_COL_DESCRIPTION) {
+    med->setStoreDescriptionByIndex(row, value.toString().toStdString());
+  }
 
   TreeItem *item = getItem(index);
   bool result = item->setData(index.column(), value); //Update the cell
@@ -141,4 +144,14 @@ void StoreTreeModel::addRow() {
   data << description.c_str() << address.c_str() << med->addresses[lastIndex]->getScanType().c_str() << value.c_str() << lock;
   TreeItem* childItem = new TreeItem(data, this->root());
   this->appendRow(childItem);
+}
+
+void StoreTreeModel::sortByAddress() {
+  med->sortStoreByAddress();
+  refresh();
+}
+
+void StoreTreeModel::sortByDescription() {
+  med->sortStoreByDescription();
+  refresh();
 }

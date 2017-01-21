@@ -277,6 +277,15 @@ private slots:
     }
   }
 
+  void onStoreHeaderClicked(int logicalIndex) {
+    if (logicalIndex == ADDRESS_COL_DESCRIPTION) {
+      storeModel->sortByDescription();
+    }
+    else if (logicalIndex == ADDRESS_COL_ADDRESS) {
+      storeModel->sortByAddress();
+    }
+  }
+
 private:
   QWidget* mainWindow;
   QWidget* chooseProc;
@@ -365,6 +374,12 @@ private:
                      this,
                      SLOT(onStoreTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
 
+    auto* header = mainWindow->findChild<QTreeView*>("storeTreeView")->header();
+    header->setSectionsClickable(true);
+    QObject::connect(header,
+                     SIGNAL(sectionClicked(int)),
+                     this,
+                     SLOT(onStoreHeaderClicked(int)));
   }
 
   void setupSignals() {

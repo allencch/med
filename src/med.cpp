@@ -50,7 +50,7 @@
 #include <vector>
 #include <cinttypes>
 #include <chrono>
-
+#include <algorithm>
 
 #include <sys/ptrace.h> //ptrace()
 #include <sys/wait.h> //waitpid()
@@ -1129,7 +1129,23 @@ string Med::setStoreAddressByIndex(int ind, string address) {
 }
 
 void Med::clearStore() {
-  for(int i=0;i<addresses.size();i++)
+  for(unsigned int i=0;i<addresses.size();i++)
     delete addresses[i];
   addresses.clear();
+}
+
+void Med::setStoreDescriptionByIndex(int ind, string description) {
+  addresses[ind]->description = description;
+}
+
+void Med::sortStoreByAddress() {
+  sort(addresses.begin(), addresses.end(), [](MedAddress* a, MedAddress* b) {
+      return a->address < b->address;
+    });
+}
+
+void Med::sortStoreByDescription() {
+  sort(addresses.begin(), addresses.end(), [](MedAddress* a, MedAddress* b) {
+      return a->description.compare(b->description) < 0; 
+    });
 }

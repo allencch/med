@@ -20,6 +20,9 @@ public:
   void refresh();
   void refreshValues(); //Refresh values only
   void addRow();
+
+  void sortByDescription();
+  void sortByAddress();
 };
 
 #endif
