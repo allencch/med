@@ -845,7 +845,10 @@ Med::~Med() {
   clearStore();
 }
 
-void Med::scanEqual(string v, string t) {
+void Med::scanEqual(string v, string t) throw(MedException) {
+  if (v.length() == 0)
+    throw MedException("Scan empty string");
+  
   uint8_t* buffer = NULL;
   int size = stringToRaw(v, t, &buffer);
   Med::memScanEqual(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t);
@@ -853,7 +856,9 @@ void Med::scanEqual(string v, string t) {
     free(buffer);
 }
 
-void Med::scanFilter(string v, string t) {
+void Med::scanFilter(string v, string t) throw(MedException) {
+  if (v.length() == 0)
+    throw MedException("Filter empty string");
   uint8_t* buffer = NULL;
   int size = stringToRaw(v, t, &buffer);
   Med::memScanFilter(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t);
@@ -1015,7 +1020,11 @@ void Med::saveFile(const char* filename) throw(MedException) {
     pairs["description"] = address->description;
     pairs["address"] = intToHex(address->address);
     pairs["type"] = address->getScanType();
-    pairs["value"] = string(address->getValue(stol(this->selectedProcess.pid), address->getScanType()));
+    try {
+      pairs["value"] = string(address->getValue(stol(this->selectedProcess.pid), address->getScanType()));
+    } catch(MedException &ex) {
+      pairs["value"] = "";
+    }
     pairs["lock"] = address->lock;
     root.append(pairs);
   }

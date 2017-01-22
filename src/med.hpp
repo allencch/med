@@ -243,8 +243,8 @@ public:
   Process selectedProcess; /**< Not using pointer yet */
 
 
-  void scanEqual(string scanValue, string scanType);
-  void scanFilter(string scanValue, string scanType);
+  void scanEqual(string scanValue, string scanType) throw(MedException);
+  void scanFilter(string scanValue, string scanType) throw(MedException);
 
   vector<Process> listProcesses();
 
