@@ -57,6 +57,7 @@ public:
   void addScan(string scanType);
 
   void refreshValues();
+  void empty(); //including the med data
 
   TreeItem* root();
   Med* med;

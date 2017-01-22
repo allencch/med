@@ -154,6 +154,17 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="addressClear">
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
            <widget class="QLineEdit" name="shiftFrom">
             <property name="placeholderText">
              <string>Shift from</string>
@@ -171,6 +182,13 @@
            <widget class="QPushButton" name="addressShift">
             <property name="text">
              <string>Shift</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="addressShiftAll">
+            <property name="text">
+             <string>Shift All</string>
             </property>
            </widget>
           </item>

@@ -155,3 +155,8 @@ void StoreTreeModel::sortByDescription() {
   med->sortStoreByDescription();
   refresh();
 }
+
+void StoreTreeModel::empty() {
+  med->addresses.clear();
+  TreeModel::empty();
+}

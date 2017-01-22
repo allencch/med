@@ -144,11 +144,16 @@ private slots:
     scanUpdateMutex.unlock();
   }
 
-  void onClearClicked() {
+  void onScanClearClicked() {
     scanUpdateMutex.lock();
-    scanModel->clearAll();
+    scanModel->empty();
     mainWindow->findChild<QStatusBar*>("statusbar")->showMessage("Scan cleared");
     scanUpdateMutex.unlock();
+  }
+  void onAddressClearClicked() {
+    addressUpdateMutex.lock();
+    storeModel->empty();
+    addressUpdateMutex.unlock();
   }
 
   void onScanAddClicked() {
@@ -198,7 +203,7 @@ private slots:
     addressUpdateMutex.unlock();
   }
 
-  void onAddressShiftClicked() {
+  void onAddressShiftAllClicked() {
     //Get the from and to
     long shiftFrom, shiftTo, difference;
     try {
@@ -419,9 +424,8 @@ private:
     QObject::connect(mainWindow->findChild<QWidget*>("scanClear"),
                      SIGNAL(clicked()),
                      this,
-                     SLOT(onClearClicked())
+                     SLOT(onScanClearClicked())
                      );
-
 
     QObject::connect(mainWindow->findChild<QPushButton*>("scanAddAll"),
                      SIGNAL(clicked()),
@@ -435,7 +439,6 @@ private:
                       SLOT(onScanAddClicked())
                       );
 
-
     QObject::connect(mainWindow->findChild<QPushButton*>("addressNew"),
                      SIGNAL(clicked()),
                      this,
@@ -444,11 +447,15 @@ private:
                      SIGNAL(clicked()),
                      this,
                      SLOT(onAddressDeleteClicked()));
-
-    QObject::connect(mainWindow->findChild<QPushButton*>("addressShift"),
+    QObject::connect(mainWindow->findChild<QPushButton*>("addressClear"),
                      SIGNAL(clicked()),
                      this,
-                     SLOT(onAddressShiftClicked()));
+                     SLOT(onAddressClearClicked()));
+
+    QObject::connect(mainWindow->findChild<QPushButton*>("addressShiftAll"),
+                     SIGNAL(clicked()),
+                     this,
+                     SLOT(onAddressShiftAllClicked()));
 
     QObject::connect(mainWindow->findChild<QAction*>("actionSaveAs"),
                      SIGNAL(triggered()),

@@ -23,6 +23,7 @@ public:
 
   void sortByDescription();
   void sortByAddress();
+  void empty();
 };
 
 #endif

@@ -229,3 +229,8 @@ void TreeModel::refreshValues() {
     setData(modelIndex, QString::fromStdString(value));
   }
 }
+
+void TreeModel::empty() {
+  med->scanAddresses.clear();
+  clearAll();
+}
