@@ -9,6 +9,7 @@
 #include <chrono>
 #include <thread>
 #include <mutex>
+#include <algorithm>
 #include <QApplication>
 #include <QtUiTools>
 #include <QtDebug>
@@ -151,19 +152,25 @@ private slots:
   }
 
   void onScanAddClicked() {
-    int index = MainUi::getTreeViewSelectedIndex(mainWindow->findChild<QTreeView*>("scanTreeView"));
-    if (index == -1)
-      return;
+    auto indexes = mainWindow->findChild<QTreeView*>("scanTreeView")
+      ->selectionModel()
+      ->selectedRows(SCAN_COL_ADDRESS);
+    
     scanUpdateMutex.lock();
-    med.addToStoreByIndex(index);
+    for (int i=0;i<indexes.size();i++) {
+      med.addToStoreByIndex(indexes[i].row());
+    }
 
-    //TODO: Add scan
     storeModel->refresh();
     scanUpdateMutex.unlock();
   }
 
-  //TODO: Complete this one
   void onScanAddAllClicked() {
+    scanUpdateMutex.lock();
+    for(auto i=0;i<med.scanAddresses.size();i++)
+      med.addToStoreByIndex(i);
+    storeModel->refresh();
+    scanUpdateMutex.unlock();
   }
 
   void onAddressNewClicked() {
@@ -174,12 +181,19 @@ private slots:
   }
 
   void onAddressDeleteClicked() {
-    int index = MainUi::getTreeViewSelectedIndex(mainWindow->findChild<QTreeView*>("storeTreeView"));
-    if (index == -1)
-      return;
+    auto indexes = mainWindow->findChild<QTreeView*>("storeTreeView")
+      ->selectionModel()
+      ->selectedRows(ADDRESS_COL_ADDRESS);
+
+    //Sort and reverse
+    sort(indexes.begin(), indexes.end(), [](QModelIndex a, QModelIndex b) {
+        return a.row() > b.row();
+      });
 
     addressUpdateMutex.lock();
-    med.deleteAddressByIndex(index);
+    for (auto i=0;i<indexes.size();i++) {
+      med.deleteAddressByIndex(indexes[i].row());
+    }
     storeModel->refresh();
     addressUpdateMutex.unlock();
   }
@@ -350,7 +364,7 @@ private:
                      SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
                      this,
                      SLOT(onScanTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
-
+    mainWindow->findChild<QTreeView*>("scanTreeView")->setSelectionMode(QAbstractItemView::ExtendedSelection);
   }
 
   void setupStoreTreeView() {
@@ -380,6 +394,8 @@ private:
                      SIGNAL(sectionClicked(int)),
                      this,
                      SLOT(onStoreHeaderClicked(int)));
+
+    mainWindow->findChild<QTreeView*>("storeTreeView")->setSelectionMode(QAbstractItemView::ExtendedSelection);
   }
 
   void setupSignals() {
@@ -474,6 +490,9 @@ private:
     mainWindow->findChild<QStatusBar*>("statusbar")->showMessage(message);
   }
 
+  /**
+   * @deprecated
+   */
   static QModelIndex getTreeViewSelectedModelIndex(QTreeView* treeView) {
     QModelIndexList selectedIndexes = treeView->selectionModel()->selectedIndexes();
     if (selectedIndexes.count() == 0) {
@@ -482,6 +501,9 @@ private:
     return selectedIndexes.first();
   }
 
+  /**
+   * @deprecated
+   */
   static int getTreeViewSelectedIndex(QTreeView* treeView) {
     QModelIndex modelIndex = MainUi::getTreeViewSelectedModelIndex(treeView);
     if (!modelIndex.isValid()) {
@@ -489,6 +511,7 @@ private:
     }
     return modelIndex.row();
   }
+
 };
 
 int main(int argc, char **argv) {
