@@ -11,7 +11,7 @@ Med is still in the development, it is not stable. Anyone can help to improve th
 Usage
 =====
 
-There are 2 programs: **med** and **med-qt**. med is the command-line which is less useful, but only for development testing; med-qt is the GUI to ease the memory editing process. All the following usages are related to med-qt. In order to use it, please use **sudo**.
+`med-qt` is the GUI memory editor. In order to use it, please use **sudo**.
 
 
 Interface
@@ -62,18 +62,13 @@ make
 
 `sudo ./med-qt`
 
-3. In order to run the command-line,
-
-`sudo ./med [PID]`
-
 
 TODO
 ====
-1. Add All button.
-2. Memory editor dialog (view any memory as block).
-3. Scan by address (from/to).
-4. Scan by array.
-5. Scan by string.
-6. Scan by changes.
-7. Scan by pointer(?)
+1. Memory editor dialog (view any memory as block).
+2. Scan by address (from/to).
+3. Scan by array.
+4. Scan by string.
+5. Scan by changes.
+6. Scan by pointer(?)
 

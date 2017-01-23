@@ -562,4 +562,4 @@ int main(int argc, char **argv) {
   return app.exec();
 }
 
-#include "main-qt.moc"
+#include "med-qt.moc"
