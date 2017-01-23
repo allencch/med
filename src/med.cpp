@@ -3,30 +3,6 @@
  * @version	0.0.1
  * @date	2012-03-15
  *
- * Simple memory editor. The goal is to hack the Android game from adb shell
- * It is inspired by scanmem.
- * Actually intend to write in C, but I need list (vector), so I change
- * it to C++.
- * By default, all the search is little endian.
- *
- * Todo:
- * Scan integer, float, little endian, big endian, arrays
- * Edit integer, float, little endian, big endian, arrays
- * Dump with hex position
- * In the interactive mode,
- * try to use solve the keyboard problem, such as moving cursor.
- * Pause and play the process
- *
- *
- * Search by block
- *
- *
- * Fixed:
- * Solve the problem of the I/O Error for the large running file
- * On Android, the scan and edit does not work, because of permission limit.
- * Tried the signal.h kill() to SIGSTOP the process during scanning in Android, but still get the EIO
- * (I/O Error).
- *
  * Changelog:
  * 2015-05-20	Because of 64-bit computer, the address must use long int.
  *
@@ -34,7 +10,6 @@
 
 
 //#define _FILE_OFFSET_BITS 64
-
 
 #include <cstdio>
 #include <cstdlib>
@@ -66,14 +41,13 @@
 
 using namespace std;
 
-//Scanner scanner; //Global variable
 
 /**
  * @brief Convert hexadecimal string to integer value
  */
 long hexToInt(string str) throw(MedException) {
   stringstream ss(str);
-  unsigned long ret = -1;
+  long ret = -1;
   ss >> hex >> ret;
   if(ss.fail()) {
     // fprintf(stderr,"Error input: %s\n",str.c_str());
@@ -269,7 +243,7 @@ ProcMaps getMaps(pid_t pid) {
 
 
   char useless[64];
-  unsigned long start,end;
+  MemAddr start,end;
   char rd,wr;
   int inode;
   //int ret;
@@ -345,30 +319,10 @@ pid_t pidDetach(pid_t pid) throw(MedException){
 }
 
 
-int memDump2(pid_t pid,unsigned long address,int size) {
-  pidAttach(pid);
-
-  long word;
-  uint8_t* byteptr = (uint8_t*)(&word);
-  for(int i=0;i<size;i+=sizeof(long)) {
-    word = ptrace(PTRACE_PEEKDATA,pid,(void*)(address + i),NULL);
-    if(errno) {
-      printf("Error: %p, %s\n",(void*)address,strerror(errno));
-      return 0;
-    }
-    for(unsigned int j=0;j<sizeof(long);j++) {
-      printf("%02x ",*(byteptr+j));
-    }
-  }
-  printf("\n");
-  pidDetach(pid);
-  return 1;
-}
-
 /**
  * Dump the hexa deximal
  */
-int memDump(pid_t pid,unsigned long address,int size) {
+int memDump(pid_t pid,MemAddr address,int size) {
   pidAttach(pid);
   printf("%d\n",size);
   int memFd = getMem(pid);
@@ -400,58 +354,15 @@ int memDump(pid_t pid,unsigned long address,int size) {
  * Convert the size to padded word size.
  */
 int padWordSize(int x) {
-  if(x % sizeof(unsigned long))
-    return x + sizeof(unsigned long) - x % sizeof(unsigned long);
+  if(x % sizeof(MemAddr))
+    return x + sizeof(MemAddr) - x % sizeof(MemAddr);
   return x;
-}
-
-void memWrite2(pid_t pid,unsigned long address,uint8_t* data,int size) {
-  pidAttach(pid);
-  cout << "size: " <<size<< endl;
-  uint8_t* buf = (uint8_t*)malloc(size+sizeof(long)); //plus 8 bytes, to avoid WORD problem, seems like "long" can represent "word"
-  long word;
-  for(int i=0;i<size;i+=sizeof(long)) {
-    errno = 0;
-    word = ptrace(PTRACE_PEEKDATA,pid,(uint8_t*)(address)+i,NULL);
-    if(errno) {
-      printf("PEEKDATA error: %p, %s\n",(void*)address,strerror(errno));
-      //exit(1);
-    }
-
-    //Write word to the buffer
-    memcpy((uint8_t*)buf+i,&word,sizeof(long));
-  }
-
-
-  memcpy(buf,data,size);
-
-
-  for(int i=0;i<size;i+=sizeof(long)) {
-    //FIXME: This writes as uint32, it should be uint8
-    // According to manual, it read "word". Depend on the CPU.
-    // If the OS is 32bit, then word is 32bit; if 64bit, then 64bit.
-    // Thus, the best solution is peek first, then only over write the position
-
-    // FIXED!!! The problem caused by the 4th parameter, which is the value, instead of address
-    // Therefore, the value should be the WORD size.
-
-    if(ptrace(PTRACE_POKEDATA,pid,(uint8_t*)(address)+i,*(long*)((uint8_t*)data+i) ) == -1L) {
-      printf("POKEDATA error: %s\n",strerror(errno));
-      //exit(1);
-    }
-  }
-
-
-  free(buf);
-  //printf("Success!\n");
-  pidDetach(pid);
-  memDump(pid,address,10); //Should I dump???
 }
 
 /**
  * @param size is the size based on the byte
  */
-void memWrite(pid_t pid,unsigned long address,uint8_t* data,int size) {
+void memWrite(pid_t pid,MemAddr address,uint8_t* data,int size) {
   pidAttach(pid);
   int psize = padWordSize(size); //padded size
 
@@ -536,105 +447,6 @@ void memWriteList(Scanner scanner,pid_t pid,uint8_t* data,int size) {
 
 
 /**
- * Copy the memory from PEEKDATA
- * @deprecated because replaced by procfs mem method
- */
-int memCopy(pid_t pid,unsigned long address,unsigned char* out,int size,bool showError=true) {
-  for(int i=0;i<size;i++) {
-    out[i] = ptrace(PTRACE_PEEKDATA,pid,(void*)(address + i),NULL);
-    if(errno) {
-      if(showError) {
-        printf("Error: %p, %s\n",(void*)address,strerror(errno));
-        //exit(1);
-      }
-      return 0;
-    }
-  }
-  return 1;
-}
-
-/**
- * Scan memory, using procfs mem
- */
-void memScanEqual(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
-  pidAttach(pid);
-  scanner.addresses.clear();
-
-  ProcMaps maps = getMaps(pid);
-
-
-  uint8_t* page = (uint8_t*)malloc(getpagesize()); //For block of memory
-
-  int memFd = getMem(pid);
-
-  //Loop through maps
-  for(unsigned int i=0;i<maps.starts.size();i++) {
-    //printf("maps: %p\t%p\n", maps.starts[i],maps.ends[i]);
-    //Loop each maps to get the "page"
-    for(unsigned long int j=maps.starts[i];j<maps.ends[i];j+=getpagesize()) {
-      //printf("address: 0x%08x\n",j);
-      //printf("\t\tAddress: %p\n", j);
-      if(lseek(memFd,j,SEEK_SET) == -1) {
-        //printf("lseek error: %p, %s\n",j,strerror(errno));
-        continue;
-      }
-
-      if(read(memFd,page,getpagesize()) == -1) {
-        //printf("read error: %p, %s\n",j,strerror(errno));
-        continue;
-      }
-
-      //Once get the page, now can compare the data within the page
-      for(int k=0;k<=getpagesize() - size;k++) {
-        //printf("Data: %p\n", page+k);
-        if(memcmp(page+k, data, size) == 0) {
-          scanner.addresses.push_back(j +k);
-        }
-      }
-    }
-  }
-
-  printf("Found %lu results\n",scanner.addresses.size());
-  free(page);
-  close(memFd);
-
-  pidDetach(pid);
-}
-
-void memScanFilter(Scanner &scanner,pid_t pid,unsigned char* data,int size) {
-  pidAttach(pid);
-  vector<unsigned long> addresses; //New addresses
-
-  int memFd = getMem(pid);
-
-  uint8_t* buf = (uint8_t*)malloc(size);
-
-  for(unsigned int i=0;i<scanner.addresses.size();i++) {
-    if(lseek(memFd,scanner.addresses[i],SEEK_SET) == -1) {
-      //printf("lseek error: 0x%08x, %s\n",scanner.addresses[i],strerror(errno));
-      continue;
-    }
-    if(read(memFd,buf,size) == -1) {
-      //printf("read error: 0x%08x, %s\n",scanner.addresses[i],strerror(errno));
-      continue;
-    }
-
-    if(memcmp(buf,data,size) == 0) {
-      addresses.push_back(scanner.addresses[i]);
-    }
-  }
-
-
-  free(buf);
-
-  //Remove old one
-  scanner.addresses = addresses;
-  printf("Filtered %lu results\n",scanner.addresses.size());
-  close(memFd);
-  pidDetach(pid);
-}
-
-/**
  * Reverse the memory (Big to Little Endian or vice versa)
  */
 void memReverse(uint8_t* buf,int size) {
@@ -651,7 +463,7 @@ void memReverse(uint8_t* buf,int size) {
 /**
  * Check whether the address is in the /proc/PID/maps
  */
-bool addrInMaps(pid_t pid, unsigned long address) {
+bool addrInMaps(pid_t pid, MemAddr address) {
   ProcMaps maps = getMaps(pid);
   for(unsigned int i=0;i<maps.starts.size();i++) {
     if(address < maps.starts[i] || address > maps.ends[i]) {
@@ -662,13 +474,8 @@ bool addrInMaps(pid_t pid, unsigned long address) {
   return true;
 }
 
-bool addrIsValid(pid_t pid,unsigned long address) {
 
-  return true;
-}
-
-
-string memValue(long pid, unsigned long address, string scanType) throw(MedException) {
+string memValue(long pid, MemAddr address, string scanType) throw(MedException) {
   pidAttach(pid);
 
   int size = scanTypeToSize(stringToScanType(scanType));
@@ -772,7 +579,7 @@ string pidName(string pid) {
   }
   ifile >> ret;
   ifile.close();
-  \
+  
   return ret;
 }
 
@@ -781,7 +588,7 @@ string pidName(string pid) {
 Object (though not oriented) solution
 *****************/
 MedScan::MedScan() {}
-MedScan::MedScan(unsigned long address) {
+MedScan::MedScan(MemAddr address) {
   this->address = address;
 }
 string MedScan::getScanType() {
@@ -816,7 +623,7 @@ MedAddress::MedAddress() {
   this->lock = false;
   this->lockThread = NULL;
 }
-MedAddress::MedAddress(unsigned long address) : MedScan(address) {
+MedAddress::MedAddress(MemAddr address) : MedScan(address) {
   this->lock = false;
   this->lockThread = NULL;
 }
@@ -884,7 +691,7 @@ void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* d
   for(unsigned int i=0;i<maps.starts.size();i++) {
     //printf("maps: %p\t%p\n", maps.starts[i],maps.ends[i]);
     //Loop each maps to get the "page"
-    for(unsigned long int j=maps.starts[i];j<maps.ends[i];j+=getpagesize()) {
+    for(MemAddr j=maps.starts[i];j<maps.ends[i];j+=getpagesize()) {
       //printf("address: 0x%08x\n",j);
       //printf("\t\tAddress: %p\n", j);
       if(lseek(memFd,j,SEEK_SET) == -1) {
@@ -980,7 +787,7 @@ string Med::getStoreValueByIndex(int ind) {
   return this->addresses[ind]->getValue(stol(this->selectedProcess.pid), this->addresses[ind]->getScanType());
 }
 
-string Med::getValueByAddress(unsigned long address, string scanType) {
+string Med::getValueByAddress(MemAddr address, string scanType) {
   string value;
   //if(address != 0) //In case adding the address manually
   //  medMutex.lock();
@@ -990,7 +797,7 @@ string Med::getValueByAddress(unsigned long address, string scanType) {
   return value;
 }
 
-void Med::setValueByAddress(unsigned long address, string value, string scanType) {
+void Med::setValueByAddress(MemAddr address, string value, string scanType) {
   uint8_t* buffer = NULL;
   int size = stringToRaw(string(value), scanType, &buffer);
   memWrite(stoi(this->selectedProcess.pid), address, buffer, size);

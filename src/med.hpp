@@ -6,33 +6,15 @@
  * Simple memory editor. The goal is to hack the Android game from adb shell
  * It is inspired by scanmem.
  * Actually intend to write in C, but I need list (vector), so I change
- * it to C++.
- * By default, all the search is little endian.
- *
- * TODO: 2016-05-22
- * Re-design into object, so that can work smoothly with the GUI.
- * Previously, I focused on the scanner only. Then modify the value or whatever
- * happened at the GUI. Now I plan to move every thing to the object, then the frontend
- * will be designed based on the object.
- * But I don't intend to put mutex here. (Will think about it)
  *
  * TODO: (old)
  * Scan integer, float, little endian, big endian, arrays
  * Edit integer, float, little endian, big endian, arrays
  * Dump with hex position
- * In the interactive mode,
- * try to use solve the keyboard problem, such as moving cursor.
  * Pause and play the process
  *
  *
  * Search by block
- *
- *
- * Fixed:
- * Solve the problem of the I/O Error for the large running file
- * On Android, the scan and edit does not work, because of permission limit.
- * Tried the signal.h kill() to SIGSTOP the process during scanning in Android, but still get the EIO
- * (I/O Error).
  *
  * Important:
  * pidAttach() must be attach only when scan, else the process is being paused.
@@ -46,15 +28,18 @@
 #include <string>
 #include <mutex>
 #include <thread>
+#include <vector>
 #include <exception>
 
 using namespace std;
 
 static std::mutex medMutex; //One and only one, globally accessible
 
+typedef unsigned long MemAddr;
+
 struct ProcMaps {
-  vector<unsigned long> starts;
-  vector<unsigned long> ends;
+  vector<MemAddr> starts;
+  vector<MemAddr> ends;
 };
 
 struct Process {
@@ -63,7 +48,7 @@ struct Process {
 };
 
 struct Scanner {
-  vector<unsigned long> addresses;
+  vector<MemAddr> addresses;
 };
 
 enum ScanType {
@@ -148,30 +133,18 @@ int getMem(pid_t pid);
 pid_t pidAttach(pid_t pid) throw(MedException);
 pid_t pidDetach(pid_t pid) throw(MedException);
 
-int memDump(pid_t pid, unsigned long address,int size);
-void memWrite(pid_t pid, unsigned long address,uint8_t* data,int size);
-void memWriteList(Scanner scanner,pid_t pid,uint8_t* data,int size);
-
-int memCopy(pid_t pid,unsigned long address,unsigned char* out,int size,bool showError);
+int memDump(pid_t pid, MemAddr address,int size);
+void memWrite(pid_t pid, MemAddr address,uint8_t* data,int size);
 
 /**
- * Scan memory, using procfs mem
- * @param pid (pid_t) is an integer of PID
+ * @deprecated
  */
-void memScanEqual(Scanner &scanner,pid_t pid,unsigned char* data,int size);
-void memScanFilter(Scanner &scanner,pid_t pid,unsigned char* data,int size);
+void memWriteList(Scanner scanner,pid_t pid,uint8_t* data,int size);
 
 /**
  * Reverse the memory (Big to Little Endian or vice versa)
  */
 void memReverse(uint8_t* buf,int size);
-
-/**
- * Get the list of PID
- * This is done by accessing the /proc and /proc/PID and /proc/PID/cmdline
- * The list suppose to be in the descending order
- */
-vector<Process> pidList();
 
 /**
  * Get the cmdline from PID
@@ -181,7 +154,7 @@ string pidName(string pid);
 /**
  * Get the value from the address as string based on the scanType (string)
  */
-string memValue(long pid, unsigned long address, string scanType) throw(MedException);
+string memValue(long pid, MemAddr address, string scanType) throw(MedException);
 
 
 /**
@@ -190,8 +163,8 @@ string memValue(long pid, unsigned long address, string scanType) throw(MedExcep
 class MedScan {
 public:
   MedScan();
-  MedScan(unsigned long address);
-  unsigned long address;
+  MedScan(MemAddr address);
+  MemAddr address;
 
   string getScanType();
   void setScanType(string s);
@@ -210,10 +183,8 @@ class MedAddress : public MedScan {
   friend class Med;
 public:
   MedAddress();
-  MedAddress(unsigned long address);
+  MedAddress(MemAddr address);
   ~MedAddress();
-
-  //TODO: Unlock and join in destructor
 
   string description;
   bool lock; /**< Not using mutex */
@@ -259,8 +230,8 @@ public:
   string getAddressValueByIndex(int ind);
   string getStoreValueByIndex(int ind);
 
-  string getValueByAddress(unsigned long address, string scanType);
-  void setValueByAddress(unsigned long address, string value, string scanType);
+  string getValueByAddress(MemAddr address, string scanType);
+  void setValueByAddress(MemAddr address, string value, string scanType);
 
 
   void setStoreLockByIndex(int ind, bool lockStatus);

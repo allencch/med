@@ -24,3 +24,12 @@ add_executable(
 
 add_definitions(${JSONCPP_CFLAGS})
 target_link_libraries(med-qt ${JSONCPP_LIBRARIES} -lpthread Qt5::UiTools)
+
+#https://cmake.org/cmake/help/v3.0/module/FindCxxTest.html
+find_package(CxxTest) 
+if(CXXTEST_FOUND)
+  include_directories(${CXXTEST_INCLUDE_DIR})
+  enable_testing()
+  CXXTEST_ADD_TEST(med-test med-test.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/med-test.h)
+endif()
