@@ -1120,11 +1120,15 @@ void Med::deleteAddressByIndex(int ind) {
 }
 
 void Med::shiftStoreAddresses(long diff) {
-  for (int i=0; i < addresses.size(); i++) {
-    long address = addresses[i]->address;
-    address += diff;
-    addresses[i]->address = address;
+  for (unsigned int i=0; i < addresses.size(); i++) {
+    shiftStoreAddressByIndex(i, diff);
   }
+}
+
+void Med::shiftStoreAddressByIndex(int ind, long diff) {
+  long address = addresses[ind]->address;
+  address += diff;
+  addresses[ind]->address = address;
 }
 
 string Med::getStoreDescriptionByIndex(int ind) {

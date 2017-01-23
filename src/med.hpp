@@ -276,6 +276,7 @@ public:
   void addNewAddress();
   void deleteAddressByIndex(int ind);
   void shiftStoreAddresses(long diff);
+  void shiftStoreAddressByIndex(int ind, long diff);
 
   /**
    * @return string in the hex format

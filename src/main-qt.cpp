@@ -225,6 +225,35 @@ private slots:
     addressUpdateMutex.unlock();
   }
 
+  void onAddressShiftClicked() {
+    //Get the from and to
+    long shiftFrom, shiftTo, difference;
+    try {
+      shiftFrom = hexToInt(mainWindow->findChild<QLineEdit*>("shiftFrom")->text().toStdString());
+      shiftTo = hexToInt(mainWindow->findChild<QLineEdit*>("shiftTo")->text().toStdString());
+      difference = shiftTo - shiftFrom;
+    } catch(MedException &e) {
+      cout << e.what() << endl;
+    }
+    
+    //Get PID
+    if(med.selectedProcess.pid == "") {
+      cerr<< "No PID" <<endl;
+      return;
+    }
+
+    auto indexes = mainWindow->findChild<QTreeView*>("storeTreeView")
+      ->selectionModel()
+      ->selectedRows(ADDRESS_COL_ADDRESS);
+
+    addressUpdateMutex.lock();
+    for (auto i=0;i<indexes.size();i++) {
+      med.shiftStoreAddressByIndex(indexes[i].row(), difference);
+    }
+    storeModel->refresh();
+    addressUpdateMutex.unlock();
+  }
+
   void onSaveAsTriggered() {
     if(med.selectedProcess.pid == "") {
       cerr<< "No PID" <<endl;
@@ -456,7 +485,13 @@ private:
                      SIGNAL(clicked()),
                      this,
                      SLOT(onAddressShiftAllClicked()));
+    
+    QObject::connect(mainWindow->findChild<QPushButton*>("addressShift"),
+                     SIGNAL(clicked()),
+                     this,
+                     SLOT(onAddressShiftClicked()));
 
+    
     QObject::connect(mainWindow->findChild<QAction*>("actionSaveAs"),
                      SIGNAL(triggered()),
                      this,
