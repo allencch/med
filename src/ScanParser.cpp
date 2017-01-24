@@ -12,7 +12,7 @@ string ScanParser::trim(string s) {
 
 string ScanParser::getOp(string v) {
   v = ScanParser::trim(v);
-  regex r("^(=|>(?=[^=])|<(?=[^=])|>=|<=|!)");
+  regex r("^(=|>(?=[^=])|<(?=[^=>])|>=|<=|!|<>)");
   auto begin = sregex_iterator(v.begin(), v.end(), r);
   auto end = sregex_iterator();
 
@@ -35,12 +35,14 @@ ScanParser::OpType ScanParser::stringToOpType(string s) {
     return ScanParser::Ge;
   else if (s == "!")
     return ScanParser::Neq;
+  else if (s == "<>")
+    return ScanParser::Within;
   return ScanParser::Eq;
 }
 
 string ScanParser::getValue(string v) {
   v = ScanParser::trim(v);
-  regex r("^(=|>(?=[^=])|<(?=[^=])|>=|<=|!)");
+  regex r("^(=|>(?=[^=])|<(?=[^=>])|>=|<=|!|<>)");
   return ScanParser::trim(regex_replace(v, r, ""));
 }
 

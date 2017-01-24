@@ -16,7 +16,8 @@ public:
     Lt,
     Neq,
     Ge,
-    Le
+    Le,
+    Within
   };
   static string getOp(string v);
   static string trim(string s);

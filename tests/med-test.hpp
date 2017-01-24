@@ -40,6 +40,8 @@ class TestScanParser : public CxxTest::TestSuite {
     s = "1234";
     op = ScanParser::getOp(s);
     TS_ASSERT_EQUALS(op, "");
+
+    TS_ASSERT_EQUALS(ScanParser::getOp(" <> 1234, 5432 "), "<>");
   }
 
   void testStringToOpType() {
@@ -50,6 +52,7 @@ class TestScanParser : public CxxTest::TestSuite {
     TS_ASSERT_EQUALS(ScanParser::stringToOpType("!"), ScanParser::Neq);
     TS_ASSERT_EQUALS(ScanParser::stringToOpType("="), ScanParser::Eq);
     TS_ASSERT_EQUALS(ScanParser::stringToOpType(""), ScanParser::Eq);
+    TS_ASSERT_EQUALS(ScanParser::stringToOpType("<>"), ScanParser::Within);
   }
 
   void testGetValue() {
