@@ -712,25 +712,30 @@ void Med::scan(string v, string t) throw(MedException) {
     free(buffer);
 }
 
+/**
+ * @deprecated
+ */
 void Med::scanEqual(string v, string t) throw(MedException) {
+  scan(v, t);
+}
+
+void Med::filter(string v, string t) throw(MedException) {
+  ScanParser::OpType op = ScanParser::getOpType(v);
+  string value = ScanParser::getValue(v);
   if (v.length() == 0)
-    throw MedException("Scan empty string");
-  
+    throw MedException("Filter empty string");
   uint8_t* buffer = NULL;
-  int size = stringToRaw(v, t, &buffer);
-  Med::memScanEqual(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t);
+  int size = stringToRaw(value, t, &buffer);
+  Med::memFilter(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t, op);
   if(buffer)
     free(buffer);
 }
 
+/**
+ * @deprecated
+ */
 void Med::scanFilter(string v, string t) throw(MedException) {
-  if (v.length() == 0)
-    throw MedException("Filter empty string");
-  uint8_t* buffer = NULL;
-  int size = stringToRaw(v, t, &buffer);
-  Med::memScanFilter(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t);
-  if(buffer)
-    free(buffer);
+  filter(v, t);
 }
 
 void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op) {
@@ -775,6 +780,7 @@ void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int siz
 
 /**
  * Scan memory, using procfs mem
+ * @deprecated
  */
 void Med::memScanEqual(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType) {
   Med::memScan(scanAddresses, pid, data, size, scanType, ScanParser::Eq);
@@ -813,6 +819,9 @@ void Med::memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int s
   medMutex.unlock();
 }
 
+/**
+ * @deprecated
+ */
 void Med::memScanFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType) {
   Med::memFilter(scanAddresses, pid, data, size, scanType, ScanParser::Eq);
 }
@@ -832,13 +841,6 @@ string Med::getScanValueByIndex(int ind) {
 
 string Med::getScanTypeByIndex(int ind) {
   return this->scanAddresses[ind].getScanType();
-}
-
-/**
- * @deprecated
- */
-string Med:: getAddressValueByIndex(int ind) {
-  return getStoreValueByIndex(ind);
 }
 
 string Med::getStoreValueByIndex(int ind) {

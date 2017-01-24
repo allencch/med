@@ -243,11 +243,6 @@ public:
   string getScanValueByIndex(int ind);
   string getScanTypeByIndex(int ind);
 
-  /**
-   * @deprecated. Replace by getStoreValueByIndex()
-   * The function name is not value significant. It refers to right hand panel stored address.
-   */
-  string getAddressValueByIndex(int ind);
   string getStoreValueByIndex(int ind);
 
   string getValueByAddress(MemAddr address, string scanType);

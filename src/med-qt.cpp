@@ -113,11 +113,12 @@ private slots:
       return;
     }
     try {
-      med.scanEqual(scanValue, scanType);
+      med.scan(scanValue, scanType);
     } catch(MedException &ex) {
       cerr << "scan: "<< ex.what() <<endl;
     }
 
+    scanModel->clearAll();
     if(med.scanAddresses.size() <= 800) {
       scanModel->addScan(scanType);
     }
@@ -134,7 +135,7 @@ private slots:
 
     string scanValue = mainWindow->findChild<QLineEdit*>("scanEntry")->text().toStdString();
 
-    med.scanFilter(scanValue, scanType);
+    med.filter(scanValue, scanType);
 
     if(med.scanAddresses.size() <= 800) {
       scanModel->addScan(scanType);

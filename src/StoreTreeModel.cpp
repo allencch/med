@@ -120,7 +120,7 @@ void StoreTreeModel::refresh() {
     string address = med->getStoreAddressByIndex(i);
     string value;
     try {
-      value = med->getAddressValueByIndex(i);
+      value = med->getStoreValueByIndex(i);
     } catch(MedException &ex) {}
     string description = med->getStoreDescriptionByIndex(i);
     bool lock = med->getStoreLockByIndex(i);
@@ -136,7 +136,7 @@ void StoreTreeModel::addRow() {
   string address = med->getStoreAddressByIndex(lastIndex);
   string value;
   try {
-    value = med->getAddressValueByIndex(lastIndex);
+    value = med->getStoreValueByIndex(lastIndex);
   } catch(MedException &ex) {}
   string description = med->getStoreDescriptionByIndex(lastIndex);
   bool lock = med->getStoreLockByIndex(lastIndex);
