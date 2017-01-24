@@ -31,11 +31,14 @@
 #include <vector>
 #include <exception>
 
+#include "ScanParser.hpp"
+
 using namespace std;
 
 static std::mutex medMutex; //One and only one, globally accessible
 
 typedef unsigned long MemAddr;
+typedef unsigned char Byte;
 
 struct ProcMaps {
   vector<MemAddr> starts;
@@ -77,12 +80,10 @@ private:
  */
 ScanType stringToScanType(string scanType);
 
-
 /**
  * Convert ScanType to sizeof
  */
 int scanTypeToSize(ScanType type);
-
 
 /**
  * @brief Convert hexadecimal string to integer value
@@ -93,7 +94,6 @@ long hexToInt(string str) throw(MedException);
  * @brief Convert long integer to hex string
  */
 string intToHex(long int);
-
 
 /**
  * @brief Print the hexadecimal data
@@ -117,7 +117,6 @@ int stringToRaw(string str, ScanType type, uint8_t** buffer);
  * @param type is string in "int8", "int16", etc
  */
 int stringToRaw(string str, string type, uint8_t** buffer);
-
 
 /**
  * Convert the size to padded word size.
@@ -156,6 +155,12 @@ string pidName(string pid);
  */
 string memValue(long pid, MemAddr address, string scanType) throw(MedException);
 
+/**
+ * Lock value thread
+ */
+class MedAddress; //Prototype
+void lockValue(string pid, MedAddress* address);
+
 // Memory comparison function
 bool memEq(const void* ptr1, const void* ptr2, size_t size);
 bool memGt(const void* ptr1, const void* ptr2, size_t size);
@@ -163,6 +168,12 @@ bool memLt(const void* ptr1, const void* ptr2, size_t size);
 bool memNeq(const void* ptr1, const void* ptr2, size_t size);
 bool memGe(const void* ptr1, const void* ptr2, size_t size); //Greater or equal
 bool memLe(const void* ptr1, const void* ptr2, size_t size);
+
+/**
+ * Compare the memory based on the operation
+ */
+bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpType op);
+
 
 /**
  * This is the Scanner replacement
@@ -220,9 +231,11 @@ public:
 
   Process selectedProcess; /**< Not using pointer yet */
 
-
   void scanEqual(string scanValue, string scanType) throw(MedException);
   void scanFilter(string scanValue, string scanType) throw(MedException);
+
+  void scan(string scanValue, string scanType) throw(MedException);
+  void filter(string scanValue, string scanType) throw(MedException);
 
   vector<Process> listProcesses();
 
@@ -272,13 +285,12 @@ public:
   void sortStoreByAddress();
 
 private:
-  /**
-   * @param scanType is just a record.
-   */
-  static void memScanEqual(vector<MedScan> &scanAddresses, pid_t pid, unsigned char* data, int size, string scanType);
-  static void memScanFilter(vector<MedScan> &scanAddresses, pid_t pid, unsigned char* data, int size, string scanType);
+  static void memScanEqual(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType);
+  static void memScanFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType);
+
+  static void memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op);
+  static void memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op);
 };
 
-void lockValue(string pid, MedAddress* address);
 
 #endif

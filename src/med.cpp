@@ -38,6 +38,7 @@
 #include <json/json.h>
 
 #include "med.hpp"
+#include "ScanParser.hpp"
 
 using namespace std;
 
@@ -87,7 +88,7 @@ ScanType stringToScanType(string scanType) {
 }
 
 string scanTypeToString(ScanType scanType) {
-  string ret = "unknown";
+  string ret;
   switch(scanType) {
   case Int8:
     ret = "int8";
@@ -104,6 +105,8 @@ string scanTypeToString(ScanType scanType) {
   case Float64:
     ret = "float64";
     break;
+  default:
+    ret = "unknown";
   }
   return ret;
 }
@@ -131,8 +134,6 @@ int scanTypeToSize(ScanType type) {
   }
   return ret;
 }
-
-
 
 /**
  * Convert numerical string to raw data (hexadecimal).
@@ -242,8 +243,8 @@ ProcMaps getMaps(pid_t pid) {
   }
 
   char useless[64];
-  MemAddr start,end;
-  char rd,wr;
+  MemAddr start, end;
+  char rd, wr;
   int inode;
   //int ret;
   char sp; //shared or private
@@ -265,7 +266,7 @@ ProcMaps getMaps(pid_t pid) {
     if(rd == 'r' && wr == 'w' && ((end - start) > 0)) {
       procMaps.starts.push_back(start);
       procMaps.ends.push_back(end);
-    }//*/
+    }
   }
 
   fclose(file);
@@ -283,7 +284,7 @@ int getMem(pid_t pid) {
   //printf("filename: %s\n",filename);
   int ret = open(filename,O_RDONLY);
   if(ret == -1) {
-    printf("Open failed: %s\n",strerror(errno));
+    printf("Open failed: %s\n", strerror(errno));
   }
   return ret;
 }
@@ -293,15 +294,14 @@ int getMem(pid_t pid) {
  * Attach PID
  */
 pid_t pidAttach(pid_t pid) throw(MedException) {
-  //Attach the processr
-  if(ptrace(PTRACE_ATTACH,pid,NULL,NULL) == -1L) {
-    fprintf(stderr,"Failed attach: %s\n",strerror(errno));
+  if(ptrace(PTRACE_ATTACH, pid, NULL, NULL) == -1L) {
+    fprintf(stderr, "Failed attach: %s\n", strerror(errno));
     throw MedException("Failed attach");
   }
 
   int status;
-  if(waitpid(pid,&status,0) == -1 || !WIFSTOPPED(status)) {
-    fprintf(stderr,"Error waiting: %s\n",strerror(errno));
+  if(waitpid(pid, &status, 0) == -1 || !WIFSTOPPED(status)) {
+    fprintf(stderr, "Error waiting: %s\n", strerror(errno));
     throw MedException("Error waiting");
   }
 
@@ -309,9 +309,8 @@ pid_t pidAttach(pid_t pid) throw(MedException) {
 }
 
 pid_t pidDetach(pid_t pid) throw(MedException){
-  //Detach
-  if(ptrace(PTRACE_DETACH,pid,NULL,NULL) == -1L) {
-    fprintf(stderr,"Failed detach: %s\n",strerror(errno));
+  if(ptrace(PTRACE_DETACH, pid, NULL, NULL) == -1L) {
+    fprintf(stderr, "Failed detach: %s\n", strerror(errno));
     throw MedException("Failed detach");
   }
   return -1;
@@ -326,7 +325,7 @@ int memDump(pid_t pid,MemAddr address,int size) {
   printf("%d\n",size);
   int memFd = getMem(pid);
   uint8_t* buf = (uint8_t*)malloc(size);
-  //for(int i=0;i<size;i++) {
+
   if(lseek(memFd,address,SEEK_SET) == -1) {
     printf("lseek error: %p, %s\n",(void*)address,strerror(errno));
     //continue;
@@ -336,7 +335,6 @@ int memDump(pid_t pid,MemAddr address,int size) {
     printf("read error: %p, %s\n",(void*)address,strerror(errno));
     //continue;
   }
-  //}
 
 
   for(int i=0;i<size;i++) {
@@ -454,6 +452,7 @@ void memReverse(uint8_t* buf,int size) {
 
 /**
  * Check whether the address is in the /proc/PID/maps
+ * @deprecated
  */
 bool addrInMaps(pid_t pid, MemAddr address) {
   ProcMaps maps = getMaps(pid);
@@ -575,6 +574,17 @@ string pidName(string pid) {
   return ret;
 }
 
+void lockValue(string pid, MedAddress* address) {
+  while(1) {
+    if(!address->lock) {
+      return; //End
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(800));
+    address->setValue(stol(pid), address->lockedValue);
+  }
+}
+
+
 bool memEq(const void* ptr1, const void* ptr2, size_t size) {
   int ret = memcmp(ptr1, ptr2, size);
   if (ret == 0)
@@ -606,6 +616,20 @@ bool memLe(const void* ptr1, const void* ptr2, size_t size) {
   return memLt(ptr1, ptr2, size) && memEq(ptr1, ptr2, size);
 }
 
+bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpType op) {
+  if (op == ScanParser::Gt) 
+    return memGt(ptr1, ptr2, size);
+  else if (op == ScanParser::Lt) 
+    return memLt(ptr1, ptr2, size);
+  else if (op == ScanParser::Ge)
+    return memGe(ptr1, ptr2, size);
+  else if (op == ScanParser::Le)
+    return memLe(ptr1, ptr2, size);
+  else if (op == ScanParser::Neq)
+    return memNeq(ptr1, ptr2, size);
+  else
+    return memEq(ptr1, ptr2, size);
+}
 
 
 /*******************
@@ -676,6 +700,18 @@ Med::~Med() {
   clearStore();
 }
 
+void Med::scan(string v, string t) throw(MedException) {
+  ScanParser::OpType op = ScanParser::getOpType(v);
+  string value = ScanParser::getValue(v);
+  if (value.length() == 0)
+    throw MedException("Scan empty string");
+  uint8_t* buffer = NULL;
+  int size = stringToRaw(value, t, &buffer);
+  Med::memScan(this->scanAddresses, stoi(selectedProcess.pid), buffer, size, t, op);
+  if(buffer)
+    free(buffer);
+}
+
 void Med::scanEqual(string v, string t) throw(MedException) {
   if (v.length() == 0)
     throw MedException("Scan empty string");
@@ -697,10 +733,7 @@ void Med::scanFilter(string v, string t) throw(MedException) {
     free(buffer);
 }
 
-/**
- * Scan memory, using procfs mem
- */
-void Med::memScanEqual(vector<MedScan> &scanAddresses, pid_t pid, unsigned char* data, int size, string scanType) {
+void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op) {
   medMutex.lock();
   pidAttach(pid);
 
@@ -723,7 +756,7 @@ void Med::memScanEqual(vector<MedScan> &scanAddresses, pid_t pid, unsigned char*
 
       //Once get the page, now can compare the data within the page
       for(int k=0;k<=getpagesize() - size;k++) {
-        if(memEq(page + k, data, size)) {
+        if(memCompare(page + k, data, size, op)) {
           MedScan medScan(j + k);
           medScan.setScanType(scanType);
           scanAddresses.push_back(medScan);
@@ -740,7 +773,14 @@ void Med::memScanEqual(vector<MedScan> &scanAddresses, pid_t pid, unsigned char*
   medMutex.unlock();
 }
 
-void Med::memScanFilter(vector<MedScan> &scanAddresses, pid_t pid, unsigned char* data, int size, string scanType) {
+/**
+ * Scan memory, using procfs mem
+ */
+void Med::memScanEqual(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType) {
+  Med::memScan(scanAddresses, pid, data, size, scanType, ScanParser::Eq);
+}
+
+void Med::memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op) {
   medMutex.lock();
   pidAttach(pid);
   vector<MedScan> addresses; //New addresses
@@ -757,7 +797,7 @@ void Med::memScanFilter(vector<MedScan> &scanAddresses, pid_t pid, unsigned char
       continue;
     }
 
-    if(memEq(buf, data, size)) {
+    if(memCompare(buf, data, size, op)) {
       scanAddresses[i].setScanType(scanType);
       addresses.push_back(scanAddresses[i]);
     }
@@ -771,6 +811,10 @@ void Med::memScanFilter(vector<MedScan> &scanAddresses, pid_t pid, unsigned char
   close(memFd);
   pidDetach(pid);
   medMutex.unlock();
+}
+
+void Med::memScanFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType) {
+  Med::memFilter(scanAddresses, pid, data, size, scanType, ScanParser::Eq);
 }
 
 vector<Process> Med::listProcesses() {
@@ -874,16 +918,6 @@ void Med::openFile(const char* filename) throw(MedException) {
     address->lock = false; // always open as false, so that do not update the value
 
     this->addresses.push_back(address);
-  }
-}
-
-void lockValue(string pid, MedAddress* address) {
-  while(1) {
-    if(!address->lock) {
-      return; //End
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(800));
-    address->setValue(stol(pid), address->lockedValue);
   }
 }
 
