@@ -156,6 +156,13 @@ string pidName(string pid);
  */
 string memValue(long pid, MemAddr address, string scanType) throw(MedException);
 
+// Memory comparison function
+bool memEq(const void* ptr1, const void* ptr2, size_t size);
+bool memGt(const void* ptr1, const void* ptr2, size_t size);
+bool memLt(const void* ptr1, const void* ptr2, size_t size);
+bool memNeq(const void* ptr1, const void* ptr2, size_t size);
+bool memGe(const void* ptr1, const void* ptr2, size_t size); //Greater or equal
+bool memLe(const void* ptr1, const void* ptr2, size_t size);
 
 /**
  * This is the Scanner replacement
@@ -268,8 +275,8 @@ private:
   /**
    * @param scanType is just a record.
    */
-  static void memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType);
-  static void memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType);
+  static void memScanEqual(vector<MedScan> &scanAddresses, pid_t pid, unsigned char* data, int size, string scanType);
+  static void memScanFilter(vector<MedScan> &scanAddresses, pid_t pid, unsigned char* data, int size, string scanType);
 };
 
 void lockValue(string pid, MedAddress* address);

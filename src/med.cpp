@@ -241,7 +241,6 @@ ProcMaps getMaps(pid_t pid) {
     exit(1);
   }
 
-
   char useless[64];
   MemAddr start,end;
   char rd,wr;
@@ -362,7 +361,7 @@ int padWordSize(int x) {
 /**
  * @param size is the size based on the byte
  */
-void memWrite(pid_t pid,MemAddr address,uint8_t* data,int size) {
+void memWrite(pid_t pid, MemAddr address, uint8_t* data, int size) {
   pidAttach(pid);
   int psize = padWordSize(size); //padded size
 
@@ -371,39 +370,32 @@ void memWrite(pid_t pid,MemAddr address,uint8_t* data,int size) {
   medMutex.lock();
   for(int i=0;i<psize;i+=sizeof(long)) {
     errno = 0;
-    word = ptrace(PTRACE_PEEKDATA,pid,(uint8_t*)(address)+i,NULL);
+    word = ptrace(PTRACE_PEEKDATA,pid,(uint8_t*)(address) + i, NULL);
 
     if(errno) {
-      printf("PEEKDATA error: %p, %s\n",(void*)address,strerror(errno));
-      //exit(1);
+      printf("PEEKDATA error: %p, %s\n", (void*)address, strerror(errno));
     }
 
     //Write word to the buffer
-    memcpy((uint8_t*)buf+i,&word,sizeof(long));
+    memcpy((uint8_t*)buf + i, &word, sizeof(long));
   }
 
   memcpy(buf,data,size); //over-write on top of it, so that the last padding byte will preserved
 
   for(int i=0;i<size;i+=sizeof(long)) {
-    //FIXME: This writes as uint32, it should be uint8
-    // According to manual, it read "word". Depend on the CPU.
+    // This writes as uint32, it should be uint8
+    // According to manual, it reads "word". Depend on the CPU.
     // If the OS is 32bit, then word is 32bit; if 64bit, then 64bit.
     // Thus, the best solution is peek first, then only over write the position
-
-    // FIXED!!! The problem caused by the 4th parameter, which is the value, instead of address
     // Therefore, the value should be the WORD size.
 
     if(ptrace(PTRACE_POKEDATA,pid,(uint8_t*)(address)+i,*(long*)((uint8_t*)buf+i) ) == -1L) {
       printf("POKEDATA error: %s\n",strerror(errno));
-      //exit(1);
     }
   }
 
-
   free(buf);
-  //printf("Success!\n");
   pidDetach(pid);
-  //memDump(pid,address,10); //Should I dump???
 
   medMutex.unlock();
 }
@@ -482,11 +474,11 @@ string memValue(long pid, MemAddr address, string scanType) throw(MedException) 
 
   int memFd = getMem(pid);
   uint8_t* buf = (uint8_t*)malloc(size + 1); //+1 for the NULL
-  memset(buf,0,size+1);
+  memset(buf, 0, size + 1);
 
   medMutex.lock();
 
-  if(lseek(memFd,address,SEEK_SET)==-1) {
+  if(lseek(memFd, address, SEEK_SET) == -1) {
     free(buf);
     close(memFd);
     pidDetach(pid);
@@ -504,19 +496,19 @@ string memValue(long pid, MemAddr address, string scanType) throw(MedException) 
   char str[32];
   switch(stringToScanType(scanType)) {
   case Int8:
-    sprintf(str,"%" PRIu8, *(uint8_t*)buf);
+    sprintf(str, "%" PRIu8, *(uint8_t*)buf);
     break;
   case Int16:
-    sprintf(str,"%" PRIu16, *(uint16_t*)buf);
+    sprintf(str, "%" PRIu16, *(uint16_t*)buf);
     break;
   case Int32:
-    sprintf(str,"%" PRIu32, *(uint32_t*)buf);
+    sprintf(str, "%" PRIu32, *(uint32_t*)buf);
     break;
   case Float32:
-    sprintf(str,"%f", *(float*)buf);
+    sprintf(str, "%f", *(float*)buf);
     break;
   case Float64:
-    sprintf(str,"%lf", *(double*)buf);
+    sprintf(str, "%lf", *(double*)buf);
     break;
   case Unknown:
     free(buf);
@@ -529,9 +521,9 @@ string memValue(long pid, MemAddr address, string scanType) throw(MedException) 
   free(buf);
   close(memFd);
   pidDetach(pid);
+  medMutex.unlock();
 
   string ret = string(str);
-  medMutex.unlock();
   return ret;
 }
 
@@ -582,6 +574,38 @@ string pidName(string pid) {
   
   return ret;
 }
+
+bool memEq(const void* ptr1, const void* ptr2, size_t size) {
+  int ret = memcmp(ptr1, ptr2, size);
+  if (ret == 0)
+    return true;
+  return false;
+}
+
+bool memGt(const void* ptr1, const void* ptr2, size_t size) {
+  int ret = memcmp(ptr1, ptr2, size);
+  if (ret > 0)
+    return true;
+  return false;
+}
+
+bool memLt(const void* ptr1, const void* ptr2, size_t size) {
+  int ret = memcmp(ptr1, ptr2, size);
+  if (ret < 0)
+    return true;
+  return false;
+}
+
+bool memNeq(const void* ptr1, const void* ptr2, size_t size) {
+  return !memEq(ptr1, ptr2, size);
+}
+bool memGe(const void* ptr1, const void* ptr2, size_t size) {
+  return memGt(ptr1, ptr2, size) && memEq(ptr1, ptr2, size);
+}
+bool memLe(const void* ptr1, const void* ptr2, size_t size) {
+  return memLt(ptr1, ptr2, size) && memEq(ptr1, ptr2, size);
+}
+
 
 
 /*******************
@@ -676,7 +700,7 @@ void Med::scanFilter(string v, string t) throw(MedException) {
 /**
  * Scan memory, using procfs mem
  */
-void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType = NULL) {
+void Med::memScanEqual(vector<MedScan> &scanAddresses, pid_t pid, unsigned char* data, int size, string scanType) {
   medMutex.lock();
   pidAttach(pid);
 
@@ -686,29 +710,21 @@ void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* d
 
   int memFd = getMem(pid);
 
-  //Loop through maps
   scanAddresses.clear();
   for(unsigned int i=0;i<maps.starts.size();i++) {
-    //printf("maps: %p\t%p\n", maps.starts[i],maps.ends[i]);
-    //Loop each maps to get the "page"
     for(MemAddr j=maps.starts[i];j<maps.ends[i];j+=getpagesize()) {
-      //printf("address: 0x%08x\n",j);
-      //printf("\t\tAddress: %p\n", j);
-      if(lseek(memFd,j,SEEK_SET) == -1) {
-        //printf("lseek error: %p, %s\n",j,strerror(errno));
+      if(lseek(memFd, j, SEEK_SET) == -1) {
         continue;
       }
 
-      if(read(memFd,page,getpagesize()) == -1) {
-        //printf("read error: %p, %s\n",j,strerror(errno));
+      if(read(memFd, page, getpagesize()) == -1) {
         continue;
       }
 
       //Once get the page, now can compare the data within the page
       for(int k=0;k<=getpagesize() - size;k++) {
-        //printf("Data: %p\n", page+k);
-        if(memcmp(page+k, data, size) == 0) {
-          MedScan medScan(j +k);
+        if(memEq(page + k, data, size)) {
+          MedScan medScan(j + k);
           medScan.setScanType(scanType);
           scanAddresses.push_back(medScan);
         }
@@ -724,7 +740,7 @@ void Med::memScanEqual(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* d
   medMutex.unlock();
 }
 
-void Med::memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* data,int size, string scanType = NULL) {
+void Med::memScanFilter(vector<MedScan> &scanAddresses, pid_t pid, unsigned char* data, int size, string scanType) {
   medMutex.lock();
   pidAttach(pid);
   vector<MedScan> addresses; //New addresses
@@ -734,16 +750,14 @@ void Med::memScanFilter(vector<MedScan> &scanAddresses,pid_t pid,unsigned char* 
   uint8_t* buf = (uint8_t*)malloc(size);
 
   for(unsigned int i=0;i<scanAddresses.size();i++) {
-    if(lseek(memFd,scanAddresses[i].address,SEEK_SET) == -1) {
-      //printf("lseek error: 0x%08x, %s\n",scanner.addresses[i],strerror(errno));
+    if(lseek(memFd, scanAddresses[i].address, SEEK_SET) == -1) {
       continue;
     }
-    if(read(memFd,buf,size) == -1) {
-      //printf("read error: 0x%08x, %s\n",scanner.addresses[i],strerror(errno));
+    if(read(memFd, buf, size) == -1) {
       continue;
     }
 
-    if(memcmp(buf,data,size) == 0) {
+    if(memEq(buf, data, size)) {
       scanAddresses[i].setScanType(scanType);
       addresses.push_back(scanAddresses[i]);
     }
@@ -789,11 +803,7 @@ string Med::getStoreValueByIndex(int ind) {
 
 string Med::getValueByAddress(MemAddr address, string scanType) {
   string value;
-  //if(address != 0) //In case adding the address manually
-  //  medMutex.lock();
   value = memValue(stol(this->selectedProcess.pid), address, scanType);
-  //if(address != 0)
-  //  medMutex.unlock();
   return value;
 }
 
@@ -806,7 +816,7 @@ void Med::setValueByAddress(MemAddr address, string value, string scanType) {
 }
 
 bool Med::addToStoreByIndex(int index) {
-  if (index < 0 || index > this->scanAddresses.size() - 1) {
+  if (index < 0 || index > (int)this->scanAddresses.size() - 1) {
     return false;
   }
 
@@ -821,7 +831,7 @@ bool Med::addToStoreByIndex(int index) {
 
 void Med::saveFile(const char* filename) throw(MedException) {
   Json::Value root;
-  //Using C++11
+
   for(auto address: this->addresses) {
     Json::Value pairs;
     pairs["description"] = address->description;
