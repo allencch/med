@@ -67,4 +67,16 @@ class TestScanParser : public CxxTest::TestSuite {
     TS_ASSERT_EQUALS(ScanParser::isArray("1,2,3"), true);
     TS_ASSERT_EQUALS(ScanParser::isArray("1 2 3"), false);
   }
+
+  void testGetValues() {
+    string s = "<> 1 , 2 , 3  ";
+    vector<string> values = ScanParser::getValues(s);
+    TS_ASSERT_EQUALS(values.size(), 3);
+    TS_ASSERT_EQUALS(values[2], "3");
+
+    s = "  > 10";
+    values = ScanParser::getValues(s);
+    TS_ASSERT_EQUALS(values.size(), 1);
+    TS_ASSERT_EQUALS(values[0], "10");
+  }
 };
