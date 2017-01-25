@@ -1,6 +1,8 @@
 #ifndef TREEITEM_H
 #define TREEITEM_H
 
+#include <QApplication>
+
 class TreeItem {
 public:
   explicit TreeItem(const QVector<QVariant> &data, TreeItem* parent = 0);

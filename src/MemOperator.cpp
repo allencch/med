@@ -206,14 +206,42 @@ bool memEq(const void* ptr1, const void* ptr2, size_t size) {
 }
 
 bool memGt(const void* ptr1, const void* ptr2, size_t size) {
-  int ret = memcmp(ptr1, ptr2, size);
+  //This is tricky, because of the little endianness, memcmp should check from right to left, not from left to right
+  // Thus, need to reverse the memory
+
+  uint8_t* rev1 = (uint8_t*)malloc(size);
+  uint8_t* rev2 = (uint8_t*)malloc(size);
+  memcpy(rev1, ptr1, size);
+  memcpy(rev2, ptr2, size);
+
+  memReverse(rev1, size);
+  memReverse(rev2, size);
+
+  int ret = memcmp(rev1, rev2, size);
+
+  free(rev1);
+  free(rev2);
+
   if (ret > 0)
     return true;
   return false;
+
 }
 
 bool memLt(const void* ptr1, const void* ptr2, size_t size) {
-  int ret = memcmp(ptr1, ptr2, size);
+  uint8_t* rev1 = (uint8_t*)malloc(size);
+  uint8_t* rev2 = (uint8_t*)malloc(size);
+  memcpy(rev1, ptr1, size);
+  memcpy(rev2, ptr2, size);
+
+  memReverse(rev1, size);
+  memReverse(rev2, size);
+
+  int ret = memcmp(rev1, rev2, size);
+
+  free(rev1);
+  free(rev2);
+  
   if (ret < 0)
     return true;
   return false;
@@ -223,10 +251,10 @@ bool memNeq(const void* ptr1, const void* ptr2, size_t size) {
   return !memEq(ptr1, ptr2, size);
 }
 bool memGe(const void* ptr1, const void* ptr2, size_t size) {
-  return memGt(ptr1, ptr2, size) && memEq(ptr1, ptr2, size);
+  return memGt(ptr1, ptr2, size) || memEq(ptr1, ptr2, size);
 }
 bool memLe(const void* ptr1, const void* ptr2, size_t size) {
-  return memLt(ptr1, ptr2, size) && memEq(ptr1, ptr2, size);
+  return memLt(ptr1, ptr2, size) || memEq(ptr1, ptr2, size);
 }
 
 bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpType op) {

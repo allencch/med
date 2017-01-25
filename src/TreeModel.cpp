@@ -226,7 +226,8 @@ void TreeModel::refreshValues() {
   for(int i=0; i < med->scanAddresses.size(); i++) {
     string value = med->getScanValueByIndex(i);
     QModelIndex modelIndex = index(i, SCAN_COL_VALUE);
-    setData(modelIndex, QString::fromStdString(value));
+    getItem(modelIndex)->setData(SCAN_COL_VALUE, QString::fromStdString(value)); // Do not use model setData, because it will modify the med value
+    emit dataChanged(modelIndex, modelIndex);
   }
 }
 

@@ -110,7 +110,8 @@ void StoreTreeModel::refreshValues() {
       value = med->getStoreValueByIndex(i);
     } catch(MedException &ex) {}
     QModelIndex modelIndex = index(i, ADDRESS_COL_VALUE);
-    setData(modelIndex, QString::fromStdString(value));
+    getItem(modelIndex)->setData(ADDRESS_COL_VALUE, QString::fromStdString(value));
+    emit dataChanged(modelIndex, modelIndex);
   }
 }
 

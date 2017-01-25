@@ -10,6 +10,7 @@
 
 
 //#define _FILE_OFFSET_BITS 64
+#include <iostream>
 #include <cstring> //strerror()
 #include <string>
 #include <fstream>

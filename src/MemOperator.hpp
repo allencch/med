@@ -50,7 +50,7 @@ bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpT
 /**
  * Compare the value of a memory address with two other memory addresses whether it is within the interval [low, up]
  */
-bool memWithin(const void* src, const void* low, const void* up);
+bool memWithin(const void* src, const void* low, const void* up, size_t size);
 
 
 #endif
