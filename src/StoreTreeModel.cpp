@@ -104,15 +104,20 @@ Qt::ItemFlags StoreTreeModel::flags(const QModelIndex &index) const {
 }
 
 void StoreTreeModel::refreshValues() {
-  for(int i=0; i < med->addresses.size(); i++) {
+  if (rowCount() == 0)
+    return;
+  QModelIndex first = index(0, SCAN_COL_VALUE);
+  QModelIndex last = index(rowCount() - 1, SCAN_COL_VALUE);
+  
+  for(int i=0; i < rowCount(); i++) {
     string value;
     try {
       value = med->getStoreValueByIndex(i);
     } catch(MedException &ex) {}
     QModelIndex modelIndex = index(i, ADDRESS_COL_VALUE);
     getItem(modelIndex)->setData(ADDRESS_COL_VALUE, QString::fromStdString(value));
-    emit dataChanged(modelIndex, modelIndex);
   }
+  emit dataChanged(first, last);
 }
 
 void StoreTreeModel::refresh() {

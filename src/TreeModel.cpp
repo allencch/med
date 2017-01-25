@@ -223,12 +223,16 @@ void TreeModel::addScan(string scanType) {
 }
 
 void TreeModel::refreshValues() {
-  for(int i=0; i < med->scanAddresses.size(); i++) {
+  if (rowCount() == 0)
+    return;
+  QModelIndex first = index(0, SCAN_COL_VALUE);
+  QModelIndex last = index(rowCount() - 1, SCAN_COL_VALUE);
+  for(int i=0; i < rowCount(); i++) {
     string value = med->getScanValueByIndex(i);
     QModelIndex modelIndex = index(i, SCAN_COL_VALUE);
     getItem(modelIndex)->setData(SCAN_COL_VALUE, QString::fromStdString(value)); // Do not use model setData, because it will modify the med value
-    emit dataChanged(modelIndex, modelIndex);
   }
+  emit dataChanged(first, last);
 }
 
 void TreeModel::empty() {
