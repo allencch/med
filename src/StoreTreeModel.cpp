@@ -106,8 +106,8 @@ Qt::ItemFlags StoreTreeModel::flags(const QModelIndex &index) const {
 void StoreTreeModel::refreshValues() {
   if (rowCount() == 0)
     return;
-  QModelIndex first = index(0, SCAN_COL_VALUE);
-  QModelIndex last = index(rowCount() - 1, SCAN_COL_VALUE);
+  QModelIndex first = index(0, ADDRESS_COL_VALUE);
+  QModelIndex last = index(rowCount() - 1, ADDRESS_COL_VALUE);
   
   for(int i=0; i < rowCount(); i++) {
     string value;
