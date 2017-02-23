@@ -114,4 +114,25 @@ public:
     up[2] = 0xff;
     TS_ASSERT_EQUALS(memWithin(src, low, up, sizeof(src)), true);
   }
+
+  void testMemCompare() {
+    unsigned char src[] = { 0x20, 0x00, 0x00 };
+    unsigned char low[] = { 0x10, 0x00, 0x00 };
+    unsigned char up[] = { 0x30, 0x00, 0x00 };
+    TS_ASSERT_EQUALS(memCompare(src, low, sizeof(src), ScanParser::Ge), true);
+    TS_ASSERT_EQUALS(memCompare(src, up, sizeof(src), ScanParser::Ge), false);
+  }
+
+  void testMemCompareWithin() {
+    unsigned char src[] = { 0x20, 0x00 };
+    unsigned char dest[] = { 0x10, 0x00, 0x21, 0x00 };
+    TS_ASSERT_EQUALS(memCompare(src, sizeof(src),
+                                dest, sizeof(dest),
+                                ScanParser::Within), true);
+
+    dest[2] = 0x19;
+    TS_ASSERT_EQUALS(memCompare(src, sizeof(src),
+                                dest, sizeof(dest),
+                                ScanParser::Within), false);
+  }
 };

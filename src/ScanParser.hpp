@@ -28,6 +28,8 @@ public:
   static vector<string> getValues(const string &v);
   static bool isArray(const string &v);
 
+  static bool isValid(const string &v);
+
   static vector<string> split(const string &s, char delim);
 };
 

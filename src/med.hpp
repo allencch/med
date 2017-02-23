@@ -86,12 +86,15 @@ string intToHex(long int);
 /**
  * @brief Print the hexadecimal data
  */
-void printHex(FILE* file,void* addr,int size);
+void printHex(FILE* file, void* addr, int size);
 
 /**
  * @param pid is pid_t, which is actually integer.
  */
 ProcMaps getMaps(pid_t pid);
+
+// Create buffer by scan type. Remember to free()
+int createBufferByScanType(ScanType type, void** buffer, int size = 1);
 
 /**
  * Convert numerical string to raw data (hexadecimal).

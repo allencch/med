@@ -127,49 +127,45 @@ int scanTypeToSize(ScanType type) {
   return ret;
 }
 
-/**
- * Convert numerical string to raw data (hexadecimal).
- * @param s is a string which can separated by space
- * @param buffer is to store the output address, must be free() if not used.
- * @return number of values (bytes) to be scanned
- */
-int stringToRaw(string str, ScanType type, uint8_t **buffer) {
-  //Tokenise the string
-  stringstream ss(str);
-  istream_iterator<string> eos; //end of string
-  istream_iterator<string> iit(ss);
-
-  vector<string> tokens(iit,eos);
-
-  int size = tokens.size();
-  int retsize = 0;
-  uint8_t* buf;
-
+int createBufferByScanType(ScanType type, void** buffer, int size) {
+  int retsize = scanTypeToSize(type) * size;
+  void* buf = NULL;
   switch(type) {
   case Int8:
     retsize = sizeof(uint8_t) * size;
-    buf = (uint8_t*)malloc(sizeof(uint8_t) * size);
+    buf = malloc(sizeof(uint8_t) * size);
     break;
   case Int16:
     retsize = sizeof(uint16_t) * size;
-    buf = (uint8_t*)malloc(sizeof(uint16_t) * size);
+    buf = malloc(sizeof(uint16_t) * size);
     break;
   case Int32:
     retsize = sizeof(uint32_t) * size;
-    buf = (uint8_t*)malloc(sizeof(uint32_t) * size);
+    buf = malloc(sizeof(uint32_t) * size);
     break;
   case Float32:
     retsize = sizeof(float) * size;
-    buf = (uint8_t*)malloc(sizeof(float) * size);
+    buf = malloc(sizeof(float) * size);
     break;
   case Float64:
     retsize = sizeof(double) * size;
-    buf = (uint8_t*)malloc(sizeof(double) * size);
+    buf = malloc(sizeof(double) * size);
     break;
   case Unknown:
     retsize = 0;
     break;
   }
+  *buffer = buf;
+  
+  return retsize;
+}
+
+int stringToRaw(string str, ScanType type, uint8_t** buffer) {
+  vector<string> tokens = ScanParser::getValues(str);
+
+  int size = tokens.size();
+  int retsize = createBufferByScanType(type, (void**)buffer, size);
+  uint8_t* buf = *buffer;
 
   for(unsigned int i=0;i<tokens.size();i++) {
     stringstream ss(tokens[i]);
@@ -198,9 +194,8 @@ int stringToRaw(string str, ScanType type, uint8_t **buffer) {
     if(ss.fail()) {
       printf("Error input: %s\n",tokens[i].c_str());
     }
-  }
-
-  *buffer = buf;
+    buf += scanTypeToSize(type);
+  }  
 
   return retsize;
 }
@@ -208,7 +203,7 @@ int stringToRaw(string str, ScanType type, uint8_t **buffer) {
 
 int stringToRaw(string str, string type, uint8_t **buffer) {
   ScanType scantype = stringToScanType(type);
-  return stringToRaw(str,scantype,buffer);
+  return stringToRaw(str, scantype, buffer);
 }
 
 
@@ -465,6 +460,10 @@ Med::~Med() {
 }
 
 void Med::scan(string v, string t) throw(MedException) {
+  if (!ScanParser::isValid(v)) {
+    cerr << "Invalid scan string" << endl;
+    return;
+  }
   ScanParser::OpType op = ScanParser::getOpType(v);
   string value = ScanParser::getValue(v);
   if (value.length() == 0)
@@ -484,6 +483,11 @@ void Med::scanEqual(string v, string t) throw(MedException) {
 }
 
 void Med::filter(string v, string t) throw(MedException) {
+  if (!ScanParser::isValid(v)) {
+    cerr << "Invalid scan string" << endl;
+    return;
+  }
+
   ScanParser::OpType op = ScanParser::getOpType(v);
   string value = ScanParser::getValue(v);
   if (v.length() == 0)
@@ -509,8 +513,9 @@ void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int siz
   ProcMaps maps = getMaps(pid);
 
   uint8_t* page = (uint8_t*)malloc(getpagesize()); //For block of memory
-
   int memFd = getMem(pid);
+
+  int srcSize = scanTypeToSize(stringToScanType(scanType));
 
   scanAddresses.clear();
   for(unsigned int i=0;i<maps.starts.size();i++) {
@@ -524,8 +529,8 @@ void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int siz
       }
 
       //Once get the page, now can compare the data within the page
-      for(int k=0;k<=getpagesize() - size;k++) {
-        if(memCompare(page + k, data, size, op)) {
+      for(int k=0;k<=getpagesize() - size;k+=2) {
+        if(memCompare(page + k, srcSize, data, size, op)) {
           MedScan medScan(j + k);
           medScan.setScanType(scanType);
           scanAddresses.push_back(medScan);
@@ -557,8 +562,9 @@ void Med::memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int s
 
   int memFd = getMem(pid);
 
-  uint8_t* buf = (uint8_t*)malloc(size);
+  int srcSize = scanTypeToSize(stringToScanType(scanType));
 
+  uint8_t* buf = (uint8_t*)malloc(size);
   for(unsigned int i=0;i<scanAddresses.size();i++) {
     if(lseek(memFd, scanAddresses[i].address, SEEK_SET) == -1) {
       continue;
@@ -567,7 +573,7 @@ void Med::memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int s
       continue;
     }
 
-    if(memCompare(buf, data, size, op)) {
+    if(memCompare(buf, srcSize, data, size, op)) {
       scanAddresses[i].setScanType(scanType);
       addresses.push_back(scanAddresses[i]);
     }

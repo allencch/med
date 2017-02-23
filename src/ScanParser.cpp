@@ -75,3 +75,9 @@ vector<string> ScanParser::getValues(const string &v) {
   return values;
 }
 
+bool ScanParser::isValid(const string &v) {
+  if (ScanParser::getOpType(v) == ScanParser::Within &&
+      !ScanParser::isArray(v))
+    return false;
+  return true;
+}

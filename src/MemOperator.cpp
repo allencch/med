@@ -2,6 +2,7 @@
 #include <cstring> //strerror()
 #include <cinttypes>
 #include <string>
+#include <iostream>
 
 #include <sys/ptrace.h> //ptrace()
 #include <sys/prctl.h> //prctl()
@@ -270,6 +271,16 @@ bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpT
     return memNeq(ptr1, ptr2, size);
   else
     return memEq(ptr1, ptr2, size);
+}
+
+bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, ScanParser::OpType op) throw(MedException) {
+  if (op != ScanParser::Within)
+    return memCompare(ptr1, ptr2, size1, op);
+
+  int chunk = size2 / size1; //TODO: will be used for array
+  if (chunk < 2)
+    throw MedException("Scan value is not array");
+  return memWithin(ptr1, ptr2, (uint8_t*)ptr2 + size1, size1);
 }
 
 bool memWithin(const void* src, const void* low, const void* up, size_t size) {
