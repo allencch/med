@@ -1,9 +1,3 @@
-/**
- * 2016-09-19
- * Try to use QThread, but it involves signal and slot. So, I choose C++11 thread instead, for simpler implementation
- * TODO: Need to redesign the "read" and "write" when item change. Not every time it is "write".
- * Possible solution, create property to the object.
- */
 #include <iostream>
 #include <cstdio>
 #include <chrono>
@@ -381,7 +375,6 @@ private:
   }
 
   void setupScanTreeView() {
-    //Tree model
     scanModel = new TreeModel(&med, mainWindow);
     mainWindow->findChild<QTreeView*>("scanTreeView")->setModel(scanModel);
     ComboBoxDelegate* delegate = new ComboBoxDelegate();
