@@ -1,0 +1,34 @@
+# Maintainer: Allen Choong <allencch at hotmail dot com>
+pkgname=med-git
+pkgver=r84.43dcc29
+pkgrel=1
+pkgdesc="Memory Editor (still under development)"
+arch=('i686' 'x86_64')
+url="https://github.com/allencch/med"
+license=('BSD')
+depends=('jsoncpp' 'qt5-base')
+makedepends=('git' 'cmake')
+optdepends=('cxxtest')
+provides=('med')
+conflicts=('med')
+backup=()
+source=('git://github.com/allencch/med.git#branch=cmake-build')
+md5sums=('SKIP')
+
+pkgver() {
+  cd "$srcdir/${pkgname%-git}"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+  mkdir -p "$srcdir/${pkgname%-git}/build"
+  cd "$srcdir/${pkgname%-git}/build"
+  cmake -DCMAKE_INSTALL_PREFIX=/usr ../
+}
+
+package() {
+  cd "$srcdir/${pkgname%-git}/build"
+  make DESTDIR="$pkgdir/" install
+}
+
+# vim:set ts=2 sw=2 et:
