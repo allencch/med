@@ -30,7 +30,7 @@ add_executable(med-qt
 target_link_libraries(med-qt med Qt5::UiTools)
 
 #https://cmake.org/cmake/help/v3.7/module/FindCxxTest.html
-find_package(CxxTest) 
+find_package(CxxTest)
 if(CXXTEST_FOUND)
   include_directories(${CXXTEST_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src/)
   enable_testing()
@@ -38,3 +38,11 @@ if(CXXTEST_FOUND)
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/med-test.hpp)
   target_link_libraries(med-test med)
 endif()
+
+install(TARGETS med med-qt
+  RUNTIME DESTINATION /opt/med
+  LIBRARY DESTINATION lib)
+install(FILES ui/main-qt.ui ui/process.ui
+  DESTINATION /opt/med)
+install(FILES med DESTINATION bin
+  PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ)
