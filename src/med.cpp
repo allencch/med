@@ -34,11 +34,12 @@
 
 using namespace std;
 
+const int STEP = 1;
 
 /**
  * @brief Convert hexadecimal string to integer value
  */
-long hexToInt(string str) throw(MedException) {
+long hexToInt(string str) {
   stringstream ss(str);
   long ret = -1;
   ss >> hex >> ret;
@@ -156,7 +157,7 @@ int createBufferByScanType(ScanType type, void** buffer, int size) {
     break;
   }
   *buffer = buf;
-  
+
   return retsize;
 }
 
@@ -195,7 +196,7 @@ int stringToRaw(string str, ScanType type, uint8_t** buffer) {
       printf("Error input: %s\n",tokens[i].c_str());
     }
     buf += scanTypeToSize(type);
-  }  
+  }
 
   return retsize;
 }
@@ -280,7 +281,7 @@ int getMem(pid_t pid) {
 /**
  * Attach PID
  */
-pid_t pidAttach(pid_t pid) throw(MedException) {
+pid_t pidAttach(pid_t pid) {
   if(ptrace(PTRACE_ATTACH, pid, NULL, NULL) == -1L) {
     fprintf(stderr, "Failed attach: %s\n", strerror(errno));
     throw MedException("Failed attach");
@@ -295,7 +296,7 @@ pid_t pidAttach(pid_t pid) throw(MedException) {
   return pid;
 }
 
-pid_t pidDetach(pid_t pid) throw(MedException){
+pid_t pidDetach(pid_t pid){
   if(ptrace(PTRACE_DETACH, pid, NULL, NULL) == -1L) {
     fprintf(stderr, "Failed detach: %s\n", strerror(errno));
     throw MedException("Failed detach");
@@ -376,7 +377,7 @@ string pidName(string pid) {
   }
   ifile >> ret;
   ifile.close();
-  
+
   return ret;
 }
 
@@ -459,7 +460,7 @@ Med::~Med() {
   clearStore();
 }
 
-void Med::scan(string v, string t) throw(MedException) {
+void Med::scan(string v, string t) {
   if (!ScanParser::isValid(v)) {
     cerr << "Invalid scan string" << endl;
     return;
@@ -478,11 +479,11 @@ void Med::scan(string v, string t) throw(MedException) {
 /**
  * @deprecated
  */
-void Med::scanEqual(string v, string t) throw(MedException) {
+void Med::scanEqual(string v, string t) {
   scan(v, t);
 }
 
-void Med::filter(string v, string t) throw(MedException) {
+void Med::filter(string v, string t) {
   if (!ScanParser::isValid(v)) {
     cerr << "Invalid scan string" << endl;
     return;
@@ -502,7 +503,7 @@ void Med::filter(string v, string t) throw(MedException) {
 /**
  * @deprecated
  */
-void Med::scanFilter(string v, string t) throw(MedException) {
+void Med::scanFilter(string v, string t) {
   filter(v, t);
 }
 
@@ -529,7 +530,7 @@ void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int siz
       }
 
       //Once get the page, now can compare the data within the page
-      for(int k=0;k<=getpagesize() - size;k+=2) {
+      for(int k = 0; k <= getpagesize() - size; k += STEP) {
         if(memCompare(page + k, srcSize, data, size, op)) {
           MedScan medScan(j + k);
           medScan.setScanType(scanType);
@@ -645,7 +646,7 @@ bool Med::addToStoreByIndex(int index) {
   return true;
 }
 
-void Med::saveFile(const char* filename) throw(MedException) {
+void Med::saveFile(const char* filename) {
   Json::Value root;
 
   for(auto address: this->addresses) {
@@ -670,7 +671,7 @@ void Med::saveFile(const char* filename) throw(MedException) {
   ofs.close();
 }
 
-void Med::openFile(const char* filename) throw(MedException) {
+void Med::openFile(const char* filename) {
   Json::Value root;
 
   ifstream ifs;
@@ -782,6 +783,6 @@ void Med::sortStoreByAddress() {
 
 void Med::sortStoreByDescription() {
   sort(addresses.begin(), addresses.end(), [](MedAddress* a, MedAddress* b) {
-      return a->description.compare(b->description) < 0; 
+      return a->description.compare(b->description) < 0;
     });
 }

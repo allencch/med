@@ -31,7 +31,7 @@ void memReverse(uint8_t* buf,int size);
 /**
  * Get the value from the address as string based on the scanType (string)
  */
-string memValue(long pid, MemAddr address, string scanType) throw(MedException);
+string memValue(long pid, MemAddr address, string scanType);
 
 // Memory comparison function
 bool memEq(const void* ptr1, const void* ptr2, size_t size);
@@ -45,7 +45,7 @@ bool memLe(const void* ptr1, const void* ptr2, size_t size);
  * Compare the memory based on the operation
  */
 bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpType op);
-bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, ScanParser::OpType op) throw(MedException);
+bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, ScanParser::OpType op);
 
 
 /**

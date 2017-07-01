@@ -76,7 +76,7 @@ int scanTypeToSize(ScanType type);
 /**
  * @brief Convert hexadecimal string to integer value
  */
-long hexToInt(string str) throw(MedException);
+long hexToInt(string str);
 
 /**
  * @brief Convert long integer to hex string
@@ -120,8 +120,8 @@ int padWordSize(int x);
  */
 int getMem(pid_t pid);
 
-pid_t pidAttach(pid_t pid) throw(MedException);
-pid_t pidDetach(pid_t pid) throw(MedException);
+pid_t pidAttach(pid_t pid);
+pid_t pidDetach(pid_t pid);
 
 
 /**
@@ -194,11 +194,11 @@ public:
 
   Process selectedProcess; /**< Not using pointer yet */
 
-  void scanEqual(string scanValue, string scanType) throw(MedException);
-  void scanFilter(string scanValue, string scanType) throw(MedException);
+  void scanEqual(string scanValue, string scanType);
+  void scanFilter(string scanValue, string scanType);
 
-  void scan(string scanValue, string scanType) throw(MedException);
-  void filter(string scanValue, string scanType) throw(MedException);
+  void scan(string scanValue, string scanType);
+  void filter(string scanValue, string scanType);
 
   vector<Process> listProcesses();
 
@@ -217,8 +217,8 @@ public:
   void lockAddressValueByIndex(int ind);
   void unlockAddressValueByIndex(int ind);
 
-  void saveFile(const char* filename) throw(MedException);
-  void openFile(const char* filename) throw(MedException);
+  void saveFile(const char* filename);
+  void openFile(const char* filename);
 
   bool addToStoreByIndex(int ind);
 
@@ -238,7 +238,7 @@ public:
   string getStoreDescriptionByIndex(int ind);
 
   void setStoreDescriptionByIndex(int ind, string description);
-  
+
   void sortStoreByDescription();
   void sortStoreByAddress();
 

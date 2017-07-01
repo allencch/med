@@ -138,7 +138,7 @@ void memReverse(uint8_t* buf,int size) {
 }
 
 
-string memValue(long pid, MemAddr address, string scanType) throw(MedException) {
+string memValue(long pid, MemAddr address, string scanType) {
   pidAttach(pid);
 
   int size = scanTypeToSize(stringToScanType(scanType));
@@ -242,7 +242,7 @@ bool memLt(const void* ptr1, const void* ptr2, size_t size) {
 
   free(rev1);
   free(rev2);
-  
+
   if (ret < 0)
     return true;
   return false;
@@ -259,9 +259,9 @@ bool memLe(const void* ptr1, const void* ptr2, size_t size) {
 }
 
 bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpType op) {
-  if (op == ScanParser::Gt) 
+  if (op == ScanParser::Gt)
     return memGt(ptr1, ptr2, size);
-  else if (op == ScanParser::Lt) 
+  else if (op == ScanParser::Lt)
     return memLt(ptr1, ptr2, size);
   else if (op == ScanParser::Ge)
     return memGe(ptr1, ptr2, size);
@@ -273,7 +273,7 @@ bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpT
     return memEq(ptr1, ptr2, size);
 }
 
-bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, ScanParser::OpType op) throw(MedException) {
+bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, ScanParser::OpType op) {
   if (op != ScanParser::Within)
     return memCompare(ptr1, ptr2, size1, op);
 
