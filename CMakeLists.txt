@@ -29,6 +29,9 @@ add_executable(med-qt
   src/CheckBoxDelegate.cpp)
 target_link_libraries(med-qt med Qt5::UiTools)
 
+add_executable(test_thread_manager src/ThreadManager.cpp src/test_thread_manager.cpp)
+target_link_libraries(test_thread_manager -lpthread)
+
 #https://cmake.org/cmake/help/v3.7/module/FindCxxTest.html
 find_package(CxxTest)
 if(CXXTEST_FOUND)
