@@ -33,6 +33,7 @@
 
 #include "MedException.hpp"
 #include "ScanParser.hpp"
+#include "ThreadManager.hpp"
 
 using namespace std;
 
@@ -194,9 +195,6 @@ public:
 
   Process selectedProcess; /**< Not using pointer yet */
 
-  void scanEqual(string scanValue, string scanType);
-  void scanFilter(string scanValue, string scanType);
-
   void scan(string scanValue, string scanType);
   void filter(string scanValue, string scanType);
 
@@ -248,6 +246,8 @@ private:
 
   static void memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op);
   static void memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op);
+
+  ThreadManager* threadManager;
 };
 
 

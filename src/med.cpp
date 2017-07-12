@@ -455,9 +455,12 @@ void MedAddress::unlockValue() {
 }
 
 
-Med::Med() {}
+Med::Med() {
+  threadManager = new ThreadManager();
+}
 Med::~Med() {
   clearStore();
+  delete threadManager;
 }
 
 void Med::scan(string v, string t) {
@@ -476,13 +479,6 @@ void Med::scan(string v, string t) {
     free(buffer);
 }
 
-/**
- * @deprecated
- */
-void Med::scanEqual(string v, string t) {
-  scan(v, t);
-}
-
 void Med::filter(string v, string t) {
   if (!ScanParser::isValid(v)) {
     cerr << "Invalid scan string" << endl;
@@ -498,13 +494,6 @@ void Med::filter(string v, string t) {
   Med::memFilter(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t, op);
   if(buffer)
     free(buffer);
-}
-
-/**
- * @deprecated
- */
-void Med::scanFilter(string v, string t) {
-  filter(v, t);
 }
 
 void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op) {

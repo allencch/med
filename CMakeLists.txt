@@ -16,7 +16,8 @@ add_executable(testfile src/test.c)
 add_library(med SHARED
   src/med.cpp
   src/ScanParser.cpp
-  src/MemOperator.cpp)
+  src/MemOperator.cpp
+  src/ThreadManager.cpp)
 target_link_libraries(med ${JSONCPP_LIBRARIES} -lpthread)
 
 #qt5_generate_moc(src/med-qt.cpp med-qt.moc) #Using automatic moc can solve the Q_OBJECT issue in other cpp files
