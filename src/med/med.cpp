@@ -314,25 +314,6 @@ int padWordSize(int x) {
   return x;
 }
 
-
-
-
-/**
- * Check whether the address is in the /proc/PID/maps
- * @deprecated
- */
-bool addrInMaps(pid_t pid, MemAddr address) {
-  ProcMaps maps = getMaps(pid);
-  for(unsigned int i=0;i<maps.starts.size();i++) {
-    if(address < maps.starts[i] || address > maps.ends[i]) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-
 /**
  * Get the list of PID
  * This is done by accessing the /proc and /proc/PID and /proc/PID/cmdline
@@ -537,14 +518,6 @@ void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int siz
   medMutex.unlock();
 }
 
-/**
- * Scan memory, using procfs mem
- * @deprecated
- */
-void Med::memScanEqual(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType) {
-  Med::memScan(scanAddresses, pid, data, size, scanType, ScanParser::Eq);
-}
-
 void Med::memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op) {
   medMutex.lock();
   pidAttach(pid);
@@ -577,13 +550,6 @@ void Med::memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int s
   close(memFd);
   pidDetach(pid);
   medMutex.unlock();
-}
-
-/**
- * @deprecated
- */
-void Med::memScanFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType) {
-  Med::memFilter(scanAddresses, pid, data, size, scanType, ScanParser::Eq);
 }
 
 vector<Process> Med::listProcesses() {
