@@ -1,6 +1,6 @@
 #include <QApplication>
 #include <QtUiTools>
-#include "TreeItem.hpp"
+#include "gui/TreeItem.hpp"
 
 TreeItem::TreeItem(const QVector<QVariant> &data, TreeItem* parent) {
   this->parentItem = parent;

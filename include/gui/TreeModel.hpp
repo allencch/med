@@ -5,8 +5,8 @@
 #include <QModelIndex>
 #include <QVariant>
 
-#include "TreeItem.hpp"
-#include "med.hpp"
+#include "gui/TreeItem.hpp"
+#include "med/med.hpp"
 
 /**
  * Trying to use the Med instead of TreeItem. But looks like using Med directly instead of TreeItem looks improbable.

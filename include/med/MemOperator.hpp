@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "med.hpp"
-#include "MedException.hpp"
-#include "ScanParser.hpp"
+#include "med/med.hpp"
+#include "med/MedException.hpp"
+#include "med/ScanParser.hpp"
 
 using namespace std;
 

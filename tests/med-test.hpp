@@ -1,8 +1,8 @@
 #include <string>
 #include <cxxtest/TestSuite.h>
 
-#include "MemOperator.hpp"
-#include "ScanParser.hpp"
+#include "med/MemOperator.hpp"
+#include "med/ScanParser.hpp"
 
 using namespace std;
 

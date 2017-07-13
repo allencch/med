@@ -2,7 +2,7 @@
 #include <QtDebug>
 #include <cstdio>
 #include <iostream>
-#include "ComboBoxDelegate.hpp"
+#include "gui/ComboBoxDelegate.hpp"
 
 using namespace std;
 

@@ -8,13 +8,13 @@
 #include <QtUiTools>
 #include <QtDebug>
 
-#include "med-qt.hpp"
-#include "TreeItem.hpp"
-#include "TreeModel.hpp"
-#include "StoreTreeModel.hpp"
-#include "ComboBoxDelegate.hpp"
-#include "CheckBoxDelegate.hpp"
-#include "med.hpp"
+#include "gui/med-qt.hpp"
+#include "gui/TreeItem.hpp"
+#include "gui/TreeModel.hpp"
+#include "gui/StoreTreeModel.hpp"
+#include "gui/ComboBoxDelegate.hpp"
+#include "gui/CheckBoxDelegate.hpp"
+#include "med/med.hpp"
 
 using namespace std;
 
@@ -155,7 +155,7 @@ private slots:
     auto indexes = mainWindow->findChild<QTreeView*>("scanTreeView")
       ->selectionModel()
       ->selectedRows(SCAN_COL_ADDRESS);
-    
+
     scanUpdateMutex.lock();
     for (int i=0;i<indexes.size();i++) {
       med.addToStoreByIndex(indexes[i].row());
@@ -230,7 +230,7 @@ private slots:
     } catch(MedException &e) {
       cout << e.what() << endl;
     }
-    
+
     //Get PID
     if(med.selectedProcess.pid == "") {
       cerr<< "No PID" <<endl;
@@ -479,13 +479,13 @@ private:
                      SIGNAL(clicked()),
                      this,
                      SLOT(onAddressShiftAllClicked()));
-    
+
     QObject::connect(mainWindow->findChild<QPushButton*>("addressShift"),
                      SIGNAL(clicked()),
                      this,
                      SLOT(onAddressShiftClicked()));
 
-    
+
     QObject::connect(mainWindow->findChild<QAction*>("actionSaveAs"),
                      SIGNAL(triggered()),
                      this,

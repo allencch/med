@@ -2,7 +2,7 @@
 #include <chrono>
 #include <future>
 
-#include "ThreadManager.hpp"
+#include "med/ThreadManager.hpp"
 
 using namespace std;
 
@@ -40,7 +40,7 @@ int main() {
       cout << "thread5: " << i << endl;
     }
   };
-  
+
   tm.queueTask(&fn);
   tm.queueTask(&fn2);
   tm.queueTask(&fn3);
@@ -49,6 +49,6 @@ int main() {
   tm.start();
 
   this_thread::sleep_for(chrono::seconds(5));
-  
+
   return 0;
 }

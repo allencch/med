@@ -28,9 +28,9 @@
 
 #include <json/json.h>
 
-#include "med.hpp"
-#include "MemOperator.hpp"
-#include "ScanParser.hpp"
+#include "med/med.hpp"
+#include "med/MemOperator.hpp"
+#include "med/ScanParser.hpp"
 
 using namespace std;
 

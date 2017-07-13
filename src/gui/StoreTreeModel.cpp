@@ -1,10 +1,10 @@
 #include <QtWidgets>
 #include <iostream>
 #include <cstdio>
-#include "med-qt.hpp"
-#include "TreeItem.hpp"
-#include "TreeModel.hpp"
-#include "StoreTreeModel.hpp"
+#include "gui/med-qt.hpp"
+#include "gui/TreeItem.hpp"
+#include "gui/TreeModel.hpp"
+#include "gui/StoreTreeModel.hpp"
 
 using namespace std;
 
@@ -108,7 +108,7 @@ void StoreTreeModel::refreshValues() {
     return;
   QModelIndex first = index(0, ADDRESS_COL_VALUE);
   QModelIndex last = index(rowCount() - 1, ADDRESS_COL_VALUE);
-  
+
   for(int i=0; i < rowCount(); i++) {
     string value;
     try {

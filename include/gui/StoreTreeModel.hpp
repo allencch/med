@@ -5,9 +5,9 @@
 #include <QModelIndex>
 #include <QVariant>
 
-#include "TreeItem.hpp"
-#include "TreeModel.hpp"
-#include "med.hpp"
+#include "gui/TreeItem.hpp"
+#include "gui/TreeModel.hpp"
+#include "med/med.hpp"
 
 class StoreTreeModel : public TreeModel {
   Q_OBJECT

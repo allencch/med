@@ -1,9 +1,9 @@
 #include <QtWidgets>
 #include <iostream>
 #include <cstdio>
-#include "med-qt.hpp"
-#include "TreeItem.hpp"
-#include "TreeModel.hpp"
+#include "gui/med-qt.hpp"
+#include "gui/TreeItem.hpp"
+#include "gui/TreeModel.hpp"
 
 using namespace std;
 

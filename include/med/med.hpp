@@ -31,9 +31,9 @@
 #include <vector>
 #include <exception>
 
-#include "MedException.hpp"
-#include "ScanParser.hpp"
-#include "ThreadManager.hpp"
+#include "med/MedException.hpp"
+#include "med/ScanParser.hpp"
+#include "med/ThreadManager.hpp"
 
 using namespace std;
 

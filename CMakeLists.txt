@@ -5,6 +5,8 @@ set(CMAKE_CXX_FLAGS "-std=c++14")
 set(CMAKE_INCLUDE_CURRENT_DIR ON) #required for qt moc
 set(CMAKE_AUTOMOC ON) #automatic moc
 
+include_directories(./include)
+
 add_definitions(${JSONCPP_CFLAGS})
 
 find_package(PkgConfig REQUIRED)
@@ -14,23 +16,34 @@ pkg_search_module(JSONCPP REQUIRED jsoncpp)
 add_executable(testfile src/test.c)
 
 add_library(med SHARED
-  src/med.cpp
-  src/ScanParser.cpp
-  src/MemOperator.cpp
-  src/ThreadManager.cpp)
+  src/med/med.cpp
+  src/med/ScanParser.cpp
+  src/med/MemOperator.cpp
+  src/med/ThreadManager.cpp)
 target_link_libraries(med ${JSONCPP_LIBRARIES} -lpthread)
 
-#qt5_generate_moc(src/med-qt.cpp med-qt.moc) #Using automatic moc can solve the Q_OBJECT issue in other cpp files
-add_executable(med-qt
-  src/med-qt.cpp
-  src/TreeItem.cpp
-  src/TreeModel.cpp
-  src/ComboBoxDelegate.cpp
-  src/StoreTreeModel.cpp
-  src/CheckBoxDelegate.cpp)
-target_link_libraries(med-qt med Qt5::UiTools)
+# Because the header files are located in different location,
+# and these header files use Q_OBJECT, so need to generate
+# moc. And create it as a static library.
+qt5_wrap_cpp(moc_med-qt
+  include/gui/TreeModel.hpp
+  include/gui/ComboBoxDelegate.hpp
+  include/gui/StoreTreeModel.hpp
+  include/gui/CheckBoxDelegate.hpp)
+add_library(moc-med-qt ${moc_med-qt})
+qt5_use_modules(moc-med-qt Widgets)
 
-add_executable(test_thread_manager src/ThreadManager.cpp src/test_thread_manager.cpp)
+# qt5_generate_moc(src/gui/med-qt.cpp med-qt.moc) #Using automatic moc can solve the Q_OBJECT issue in other cpp files
+add_executable(med-qt
+  src/gui/med-qt.cpp
+  src/gui/TreeItem.cpp
+  src/gui/TreeModel.cpp
+  src/gui/ComboBoxDelegate.cpp
+  src/gui/StoreTreeModel.cpp
+  src/gui/CheckBoxDelegate.cpp)
+target_link_libraries(med-qt moc-med-qt med Qt5::UiTools)
+
+add_executable(test_thread_manager src/med/ThreadManager.cpp src/test_thread_manager.cpp)
 target_link_libraries(test_thread_manager -lpthread)
 
 #https://cmake.org/cmake/help/v3.7/module/FindCxxTest.html

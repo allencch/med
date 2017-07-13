@@ -2,7 +2,7 @@
 #include <QtDebug>
 #include <cstdio>
 #include <iostream>
-#include "CheckBoxDelegate.hpp"
+#include "gui/CheckBoxDelegate.hpp"
 
 using namespace std;
 
