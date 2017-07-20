@@ -241,7 +241,22 @@ public:
   void sortStoreByAddress();
 
 private:
-  static void memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op);
+  static void memScan(vector<MedScan> &scanAddresses,
+                      pid_t pid,
+                      Byte* data,
+                      int size,
+                      string scanType,
+                      ScanParser::OpType op);
+
+  static void memScanPage(uint8_t* page,
+                          MemAddr start,
+                          int srcSize,
+                          vector<MedScan> &scanAddresses,
+                          Byte* data,
+                          int size,
+                          string scanType,
+                          ScanParser::OpType op);
+
   static void memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op);
 
   ThreadManager* threadManager;

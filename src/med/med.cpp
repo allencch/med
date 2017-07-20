@@ -19,6 +19,7 @@
 #include <vector>
 #include <chrono>
 #include <algorithm>
+#include <functional>
 
 #include <sys/ptrace.h> //ptrace()
 #include <sys/wait.h> //waitpid()
@@ -477,20 +478,37 @@ void Med::filter(string v, string t) {
     free(buffer);
 }
 
+void Med::memScanPage(uint8_t* page,
+                      MemAddr start,
+                      int srcSize,
+                      vector<MedScan> &scanAddresses,
+                      Byte* data,
+                      int size,
+                      string scanType,
+                      ScanParser::OpType op) {
+  //Once get the page, now can compare the data within the page
+  for(int k = 0; k <= getpagesize() - size; k += STEP) {
+    if(memCompare(page + k, srcSize, data, size, op)) {
+      MedScan medScan(start + k);
+      medScan.setScanType(scanType);
+      scanAddresses.push_back(medScan);
+    }
+  }
+}
+
 void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op) {
   medMutex.lock();
   pidAttach(pid);
 
   ProcMaps maps = getMaps(pid);
-
   uint8_t* page = (uint8_t*)malloc(getpagesize()); //For block of memory
   int memFd = getMem(pid);
-
   int srcSize = scanTypeToSize(stringToScanType(scanType));
 
   scanAddresses.clear();
-  for(unsigned int i=0;i<maps.starts.size();i++) {
-    for(MemAddr j=maps.starts[i];j<maps.ends[i];j+=getpagesize()) {
+
+  for(int i = 0; i < (int)maps.starts.size(); i++) {
+    for(MemAddr j = maps.starts[i]; j < maps.ends[i]; j += getpagesize()) {
       if(lseek(memFd, j, SEEK_SET) == -1) {
         continue;
       }
@@ -498,15 +516,7 @@ void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int siz
       if(read(memFd, page, getpagesize()) == -1) {
         continue;
       }
-
-      //Once get the page, now can compare the data within the page
-      for(int k = 0; k <= getpagesize() - size; k += STEP) {
-        if(memCompare(page + k, srcSize, data, size, op)) {
-          MedScan medScan(j + k);
-          medScan.setScanType(scanType);
-          scanAddresses.push_back(medScan);
-        }
-      }
+      Med::memScanPage(page, j, srcSize, scanAddresses, data, size, scanType, op);
     }
   }
 
