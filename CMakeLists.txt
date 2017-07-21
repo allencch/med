@@ -26,6 +26,7 @@ target_link_libraries(med ${JSONCPP_LIBRARIES} -lpthread)
 # and these header files use Q_OBJECT, so need to generate
 # moc. And create it as a static library.
 qt5_wrap_cpp(moc_med-qt
+  include/gui/med-qt.hpp
   include/gui/TreeModel.hpp
   include/gui/ComboBoxDelegate.hpp
   include/gui/StoreTreeModel.hpp
