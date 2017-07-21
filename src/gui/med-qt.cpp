@@ -26,6 +26,8 @@ void tryUnlock(std::mutex &mutex) {
   mutex.unlock();
 }
 
+enum UiState { Idle, Editing };
+
 class MainUi : public QObject {
   Q_OBJECT
 
@@ -38,7 +40,11 @@ public:
     setupStoreTreeView();
     setupSignals();
     setupUi();
+
+    scanState = UiState::Idle;
+    storeState = UiState::Idle;
   }
+
   Med med;
   std::thread* refreshThread;
   std::mutex scanUpdateMutex;
@@ -288,12 +294,14 @@ private slots:
   void onScanTreeViewDoubleClicked(const QModelIndex &index) {
     if (index.column() == SCAN_COL_VALUE) {
       scanUpdateMutex.lock();
+      scanState = UiState::Editing;
     }
   }
 
   void onStoreTreeViewDoubleClicked(const QModelIndex &index) {
     if (index.column() == ADDRESS_COL_VALUE) {
       addressUpdateMutex.lock();
+      storeState = UiState::Editing;
     }
   }
 
@@ -310,6 +318,7 @@ private slots:
     // qDebug() << topLeft << bottomRight << roles;
     if (topLeft.column() == SCAN_COL_VALUE) {
       tryUnlock(scanUpdateMutex);
+      scanState = UiState::Idle;
     }
   }
 
@@ -317,6 +326,7 @@ private slots:
     // qDebug() << topLeft << bottomRight << roles;
     if (topLeft.column() == ADDRESS_COL_VALUE) {
       tryUnlock(addressUpdateMutex);
+      storeState = UiState::Idle;
     }
   }
 
@@ -333,6 +343,9 @@ private:
   QWidget* mainWindow;
   QWidget* chooseProc;
   QDialog* processDialog;
+
+  UiState scanState;
+  UiState storeState;
 
   TreeModel* scanModel;
   StoreTreeModel * storeModel; //Previously is the address model, but named as "store" is better
@@ -366,6 +379,8 @@ private:
     QObject::connect(procTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(onProcItemDblClicked(QTreeWidgetItem*, int)));
 
     procTreeWidget->installEventFilter(this);
+
+    mainWindow->installEventFilter(this);
   }
 
   void setupStatusBar() {
@@ -518,6 +533,17 @@ private:
         onProcItemDblClicked(procTreeWidget->currentItem(), 0); //Just use the first column
       }
     }
+
+    if (ev->type() == QEvent::KeyRelease && static_cast<QKeyEvent*>(ev)->key() == Qt::Key_Escape) {
+      if (scanState == UiState::Editing) {
+        tryUnlock(scanUpdateMutex);
+        scanState = UiState::Idle;
+      }
+      if (storeState == UiState::Editing) {
+        tryUnlock(addressUpdateMutex);
+        storeState = UiState::Idle;
+      }
+    }
   }
 
   void updateNumberOfAddresses(QWidget* mainWindow) {
@@ -525,29 +551,6 @@ private:
     sprintf(message, "%ld addresses found", med.scanAddresses.size());
     mainWindow->findChild<QStatusBar*>("statusbar")->showMessage(message);
   }
-
-  /**
-   * @deprecated
-   */
-  static QModelIndex getTreeViewSelectedModelIndex(QTreeView* treeView) {
-    QModelIndexList selectedIndexes = treeView->selectionModel()->selectedIndexes();
-    if (selectedIndexes.count() == 0) {
-      return QModelIndex();
-    }
-    return selectedIndexes.first();
-  }
-
-  /**
-   * @deprecated
-   */
-  static int getTreeViewSelectedIndex(QTreeView* treeView) {
-    QModelIndex modelIndex = MainUi::getTreeViewSelectedModelIndex(treeView);
-    if (!modelIndex.isValid()) {
-      return -1;
-    }
-    return modelIndex.row();
-  }
-
 };
 
 int main(int argc, char **argv) {
