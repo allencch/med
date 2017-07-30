@@ -19,7 +19,7 @@ QWidget* CheckBoxDelegate::createEditor(QWidget* parent,
 
 void CheckBoxDelegate::setEditorData(QWidget* editor,
                                      const QModelIndex &index) const {
-  bool value = index.model()->data(index, Qt::DisplayRole).toBool();
+  bool value = !index.model()->data(index, Qt::DisplayRole).toBool();
   QCheckBox* checkBox = static_cast<QCheckBox*>(editor);
   checkBox->setCheckState(value ? Qt::Checked : Qt::Unchecked);
 }
