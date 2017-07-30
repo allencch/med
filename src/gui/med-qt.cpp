@@ -26,6 +26,51 @@ void tryUnlock(std::mutex &mutex) {
   mutex.unlock();
 }
 
+
+class ProcessDialogEventListener : public QObject {
+  Q_OBJECT
+public:
+  ProcessDialogEventListener(MainUi* mainUi) {
+    this->mainUi = mainUi;
+  }
+protected:
+  bool eventFilter(QObject* obj, QEvent* ev) {
+    QTreeWidget* procTreeWidget = mainUi->getChooseProcess()->findChild<QTreeWidget*>("procTreeWidget");
+    if(obj == procTreeWidget && ev->type() == QEvent::KeyRelease) {
+      if(static_cast<QKeyEvent*>(ev)->key() == Qt::Key_Return) { //Use Return instead of Enter
+        mainUi->onProcItemDblClicked(procTreeWidget->currentItem(), 0); //Just use the first column
+      }
+    }
+  }
+private:
+  MainUi* mainUi;
+};
+
+class MainWindowEventListener : public QObject {
+  Q_OBJECT
+public:
+  MainWindowEventListener(MainUi* mainUi) {
+    this->mainUi = mainUi;
+  }
+protected:
+  bool eventFilter(QObject* obj, QEvent* ev) {
+    if (ev->type() == QEvent::KeyRelease && static_cast<QKeyEvent*>(ev)->key() == Qt::Key_Escape) {
+      if (mainUi->getScanState() == UiState::Editing) {
+        tryUnlock(mainUi->scanUpdateMutex);
+        mainUi->setScanState(UiState::Idle);
+      }
+      if (mainUi->getStoreState() == UiState::Editing) {
+        tryUnlock(mainUi->addressUpdateMutex);
+        mainUi->setStoreState(UiState::Idle);
+      }
+    }
+  }
+
+private:
+  MainUi* mainUi;
+};
+
+
 MainUi::MainUi() {
   loadUiFiles();
   loadProcessUi();
@@ -355,9 +400,9 @@ void MainUi::loadProcessUi() {
   QTreeWidget* procTreeWidget = chooseProc->findChild<QTreeWidget*>("procTreeWidget");
   QObject::connect(procTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(onProcItemDblClicked(QTreeWidgetItem*, int)));
 
-  procTreeWidget->installEventFilter(this);
+  procTreeWidget->installEventFilter(new ProcessDialogEventListener(this));
 
-  mainWindow->installEventFilter(this);
+  mainWindow->installEventFilter(new MainWindowEventListener(this));
 }
 
 void MainUi::setupStatusBar() {
@@ -503,31 +548,36 @@ void MainUi::setupUi() {
   refreshThread = new std::thread(MainUi::refresh, this);
 }
 
-bool MainUi::eventFilter(QObject* obj, QEvent* ev) {
-  QTreeWidget* procTreeWidget = chooseProc->findChild<QTreeWidget*>("procTreeWidget");
-  if(obj == procTreeWidget && ev->type() == QEvent::KeyRelease) {
-    if(static_cast<QKeyEvent*>(ev)->key() == Qt::Key_Return) { //Use Return instead of Enter
-      onProcItemDblClicked(procTreeWidget->currentItem(), 0); //Just use the first column
-    }
-  }
-
-  if (ev->type() == QEvent::KeyRelease && static_cast<QKeyEvent*>(ev)->key() == Qt::Key_Escape) {
-    if (scanState == UiState::Editing) {
-      tryUnlock(scanUpdateMutex);
-      scanState = UiState::Idle;
-    }
-    if (storeState == UiState::Editing) {
-      tryUnlock(addressUpdateMutex);
-      storeState = UiState::Idle;
-    }
-  }
-}
-
 void MainUi::updateNumberOfAddresses(QWidget* mainWindow) {
   char message[128];
   sprintf(message, "%ld addresses found", med.scanAddresses.size());
   mainWindow->findChild<QStatusBar*>("statusbar")->showMessage(message);
 }
+
+////////////////////////
+// Accessors
+////////////////////////
+
+QWidget* MainUi::getChooseProcess() {
+  return chooseProc;
+}
+UiState MainUi::getScanState() {
+  return scanState;
+}
+UiState MainUi::getStoreState() {
+  return storeState;
+}
+
+void MainUi::setScanState(UiState state) {
+  scanState = state;
+}
+void MainUi::setStoreState(UiState state) {
+  storeState = state;
+}
+
+//////////////////////
+// Main function
+/////////////////////
 
 int main(int argc, char **argv) {
   QApplication app(argc, argv);
