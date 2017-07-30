@@ -5,11 +5,11 @@
 #define SCAN_COL_TYPE 1
 #define SCAN_COL_VALUE 2
 
-#define ADDRESS_COL_DESCRIPTION 0
-#define ADDRESS_COL_ADDRESS 1
-#define ADDRESS_COL_TYPE 2
-#define ADDRESS_COL_VALUE 3
-#define ADDRESS_COL_LOCK 4
+#define STORE_COL_DESCRIPTION 0
+#define STORE_COL_ADDRESS 1
+#define STORE_COL_TYPE 2
+#define STORE_COL_VALUE 3
+#define STORE_COL_LOCK 4
 
 #include <QTreeWidgetItem>
 
@@ -32,7 +32,7 @@ public:
   Med med;
   std::thread* refreshThread;
   std::mutex scanUpdateMutex;
-  std::mutex addressUpdateMutex; //TODO: Rename to storeUpdateMutex
+  std::mutex storeUpdateMutex; //TODO: Rename to storeUpdateMutex
 
   static void refresh(MainUi* mainUi);
 
@@ -55,13 +55,13 @@ private slots:
   void onScanClicked();
   void onFilterClicked();
   void onScanClearClicked();
-  void onAddressClearClicked();
+  void onStoreClearClicked();
   void onScanAddClicked();
   void onScanAddAllClicked();
-  void onAddressNewClicked();
-  void onAddressDeleteClicked();
-  void onAddressShiftAllClicked();
-  void onAddressShiftClicked();
+  void onStoreNewClicked();
+  void onStoreDeleteClicked();
+  void onStoreShiftAllClicked();
+  void onStoreShiftClicked();
   void onSaveAsTriggered();
   void onOpenTriggered();
   void onScanTreeViewClicked(const QModelIndex &index);

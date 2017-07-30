@@ -140,21 +140,21 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="QPushButton" name="addressNew">
+           <widget class="QPushButton" name="storeNew">
             <property name="text">
              <string>New</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="addressDelete">
+           <widget class="QPushButton" name="storeDelete">
             <property name="text">
              <string>Delete</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="addressClear">
+           <widget class="QPushButton" name="storeClear">
             <property name="text">
              <string>Clear</string>
             </property>
@@ -179,14 +179,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="addressShift">
+           <widget class="QPushButton" name="storeShift">
             <property name="text">
              <string>Shift</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="addressShiftAll">
+           <widget class="QPushButton" name="storeShiftAll">
             <property name="text">
              <string>Shift All</string>
             </property>

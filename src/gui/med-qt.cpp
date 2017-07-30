@@ -62,7 +62,7 @@ protected:
           mainUi->setScanState(UiState::Idle);
         }
         if (mainUi->getStoreState() == UiState::Editing) {
-          tryUnlock(mainUi->addressUpdateMutex);
+          tryUnlock(mainUi->storeUpdateMutex);
           mainUi->setStoreState(UiState::Idle);
         }
       }
@@ -79,8 +79,8 @@ protected:
         }
         else if (focused == mainWindow->findChild<QTreeView*>("storeTreeView")) {
           QModelIndex index = mainWindow->findChild<QTreeView*>("storeTreeView")->currentIndex();
-          if (index.column() == ADDRESS_COL_VALUE) {
-            mainUi->addressUpdateMutex.lock();
+          if (index.column() == STORE_COL_VALUE) {
+            mainUi->storeUpdateMutex.lock();
             mainUi->setStoreState(UiState::Editing);
           }
         }
@@ -121,9 +121,9 @@ void MainUi::refreshScanTreeView() {
 }
 
 void MainUi::refreshStoreTreeView() {
-  addressUpdateMutex.lock();
+  storeUpdateMutex.lock();
   storeModel->refreshValues();
-  addressUpdateMutex.unlock();
+  storeUpdateMutex.unlock();
 }
 
 void MainUi::onProcessClicked() {
@@ -206,10 +206,10 @@ void MainUi::onScanClearClicked() {
   mainWindow->findChild<QStatusBar*>("statusbar")->showMessage("Scan cleared");
   scanUpdateMutex.unlock();
 }
-void MainUi::onAddressClearClicked() {
-  addressUpdateMutex.lock();
+void MainUi::onStoreClearClicked() {
+  storeUpdateMutex.lock();
   storeModel->empty();
-  addressUpdateMutex.unlock();
+  storeUpdateMutex.unlock();
 }
 
 void MainUi::onScanAddClicked() {
@@ -234,32 +234,32 @@ void MainUi::onScanAddAllClicked() {
   scanUpdateMutex.unlock();
 }
 
-void MainUi::onAddressNewClicked() {
-  addressUpdateMutex.lock();
+void MainUi::onStoreNewClicked() {
+  storeUpdateMutex.lock();
   med.addNewAddress();
   storeModel->addRow();
-  addressUpdateMutex.unlock();
+  storeUpdateMutex.unlock();
 }
 
-void MainUi::onAddressDeleteClicked() {
+void MainUi::onStoreDeleteClicked() {
   auto indexes = mainWindow->findChild<QTreeView*>("storeTreeView")
     ->selectionModel()
-    ->selectedRows(ADDRESS_COL_ADDRESS);
+    ->selectedRows(STORE_COL_ADDRESS);
 
   //Sort and reverse
   sort(indexes.begin(), indexes.end(), [](QModelIndex a, QModelIndex b) {
       return a.row() > b.row();
     });
 
-  addressUpdateMutex.lock();
+  storeUpdateMutex.lock();
   for (auto i=0;i<indexes.size();i++) {
     med.deleteAddressByIndex(indexes[i].row());
   }
   storeModel->refresh();
-  addressUpdateMutex.unlock();
+  storeUpdateMutex.unlock();
 }
 
-void MainUi::onAddressShiftAllClicked() {
+void MainUi::onStoreShiftAllClicked() {
   //Get the from and to
   long shiftFrom, shiftTo, difference;
   try {
@@ -275,13 +275,13 @@ void MainUi::onAddressShiftAllClicked() {
     cerr<< "No PID" <<endl;
     return;
   }
-  addressUpdateMutex.lock();
+  storeUpdateMutex.lock();
   med.shiftStoreAddresses(difference);
   storeModel->refresh();
-  addressUpdateMutex.unlock();
+  storeUpdateMutex.unlock();
 }
 
-void MainUi::onAddressShiftClicked() {
+void MainUi::onStoreShiftClicked() {
   //Get the from and to
   long shiftFrom, shiftTo, difference;
   try {
@@ -300,14 +300,14 @@ void MainUi::onAddressShiftClicked() {
 
   auto indexes = mainWindow->findChild<QTreeView*>("storeTreeView")
     ->selectionModel()
-    ->selectedRows(ADDRESS_COL_ADDRESS);
+    ->selectedRows(STORE_COL_ADDRESS);
 
-  addressUpdateMutex.lock();
+  storeUpdateMutex.lock();
   for (auto i=0;i<indexes.size();i++) {
     med.shiftStoreAddressByIndex(indexes[i].row(), difference);
   }
   storeModel->refresh();
-  addressUpdateMutex.unlock();
+  storeUpdateMutex.unlock();
 }
 
 void MainUi::onSaveAsTriggered() {
@@ -334,10 +334,10 @@ void MainUi::onOpenTriggered() {
                                                   QString("Open JSON (*.json)"));
   med.openFile(filename.toStdString().c_str());
 
-  addressUpdateMutex.lock();
+  storeUpdateMutex.lock();
   storeModel->clearAll();
   storeModel->refresh();
-  addressUpdateMutex.unlock();
+  storeUpdateMutex.unlock();
 }
 
 void MainUi::onScanTreeViewClicked(const QModelIndex &index) {
@@ -354,17 +354,17 @@ void MainUi::onScanTreeViewDoubleClicked(const QModelIndex &index) {
 }
 
 void MainUi::onStoreTreeViewDoubleClicked(const QModelIndex &index) {
-  if (index.column() == ADDRESS_COL_VALUE) {
-    addressUpdateMutex.lock();
+  if (index.column() == STORE_COL_VALUE) {
+    storeUpdateMutex.lock();
     storeState = UiState::Editing;
   }
 }
 
 void MainUi::onStoreTreeViewClicked(const QModelIndex &index) {
-  if (index.column() == ADDRESS_COL_TYPE) {
+  if (index.column() == STORE_COL_TYPE) {
     mainWindow->findChild<QTreeView*>("storeTreeView")->edit(index);
   }
-  else if (index.column() == ADDRESS_COL_LOCK) {
+  else if (index.column() == STORE_COL_LOCK) {
     mainWindow->findChild<QTreeView*>("storeTreeView")->edit(index);
   }
 }
@@ -379,17 +379,17 @@ void MainUi::onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelI
 
 void MainUi::onStoreTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles) {
   // qDebug() << topLeft << bottomRight << roles;
-  if (topLeft.column() == ADDRESS_COL_VALUE) {
-    tryUnlock(addressUpdateMutex);
+  if (topLeft.column() == STORE_COL_VALUE) {
+    tryUnlock(storeUpdateMutex);
     storeState = UiState::Idle;
   }
 }
 
 void MainUi::onStoreHeaderClicked(int logicalIndex) {
-  if (logicalIndex == ADDRESS_COL_DESCRIPTION) {
+  if (logicalIndex == STORE_COL_DESCRIPTION) {
     storeModel->sortByDescription();
   }
-  else if (logicalIndex == ADDRESS_COL_ADDRESS) {
+  else if (logicalIndex == STORE_COL_ADDRESS) {
     storeModel->sortByAddress();
   }
 }
@@ -458,9 +458,9 @@ void MainUi::setupStoreTreeView() {
   storeModel = new StoreTreeModel(&med, mainWindow);
   mainWindow->findChild<QTreeView*>("storeTreeView")->setModel(storeModel);
   ComboBoxDelegate* storeDelegate = new ComboBoxDelegate();
-  mainWindow->findChild<QTreeView*>("storeTreeView")->setItemDelegateForColumn(ADDRESS_COL_TYPE, storeDelegate);
+  mainWindow->findChild<QTreeView*>("storeTreeView")->setItemDelegateForColumn(STORE_COL_TYPE, storeDelegate);
   CheckBoxDelegate* storeLockDelegate = new CheckBoxDelegate();
-  mainWindow->findChild<QTreeView*>("storeTreeView")->setItemDelegateForColumn(ADDRESS_COL_LOCK, storeLockDelegate);
+  mainWindow->findChild<QTreeView*>("storeTreeView")->setItemDelegateForColumn(STORE_COL_LOCK, storeLockDelegate);
   QObject::connect(mainWindow->findChild<QTreeView*>("storeTreeView"),
                    SIGNAL(clicked(QModelIndex)),
                    this,
@@ -521,28 +521,28 @@ void MainUi::setupSignals() {
                    SLOT(onScanAddClicked())
                    );
 
-  QObject::connect(mainWindow->findChild<QPushButton*>("addressNew"),
+  QObject::connect(mainWindow->findChild<QPushButton*>("storeNew"),
                    SIGNAL(clicked()),
                    this,
-                   SLOT(onAddressNewClicked()));
-  QObject::connect(mainWindow->findChild<QPushButton*>("addressDelete"),
+                   SLOT(onStoreNewClicked()));
+  QObject::connect(mainWindow->findChild<QPushButton*>("storeDelete"),
                    SIGNAL(clicked()),
                    this,
-                   SLOT(onAddressDeleteClicked()));
-  QObject::connect(mainWindow->findChild<QPushButton*>("addressClear"),
+                   SLOT(onStoreDeleteClicked()));
+  QObject::connect(mainWindow->findChild<QPushButton*>("storeClear"),
                    SIGNAL(clicked()),
                    this,
-                   SLOT(onAddressClearClicked()));
+                   SLOT(onStoreClearClicked()));
 
-  QObject::connect(mainWindow->findChild<QPushButton*>("addressShiftAll"),
+  QObject::connect(mainWindow->findChild<QPushButton*>("storeShiftAll"),
                    SIGNAL(clicked()),
                    this,
-                   SLOT(onAddressShiftAllClicked()));
+                   SLOT(onStoreShiftAllClicked()));
 
-  QObject::connect(mainWindow->findChild<QPushButton*>("addressShift"),
+  QObject::connect(mainWindow->findChild<QPushButton*>("storeShift"),
                    SIGNAL(clicked()),
                    this,
-                   SLOT(onAddressShiftClicked()));
+                   SLOT(onStoreShiftClicked()));
 
 
   QObject::connect(mainWindow->findChild<QAction*>("actionSaveAs"),
