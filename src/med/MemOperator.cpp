@@ -156,12 +156,12 @@ string memValue(long pid, MemAddr address, string scanType) {
     medMutex.unlock();
     throw MedException("Address seek fail");
   }
-  if(read(memFd,buf,size) == -1) {
+  if(read(memFd, buf, size) == -1) {
     free(buf);
     close(memFd);
     pidDetach(pid);
     medMutex.unlock();
-    throw MedException("Address read fail");
+    throw MedException("Address read fail: " + intToHex(address));
   }
 
   char str[32];

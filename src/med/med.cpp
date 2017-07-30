@@ -391,6 +391,7 @@ void MedScan::setScanType(string s) {
 
 string MedScan::getValue(long pid) {
   string value;
+
   value = memValue(pid, this->address, this->getScanType());
   return value;
 }
@@ -456,7 +457,7 @@ void Med::scan(string v, string t) {
     throw MedException("Scan empty string");
   uint8_t* buffer = NULL;
   int size = stringToRaw(value, t, &buffer);
-  Med::memScan(this->scanAddresses, stoi(selectedProcess.pid), buffer, size, t, op);
+  Med::memScan(this, this->scanAddresses, stoi(selectedProcess.pid), buffer, size, t, op);
   if(buffer)
     free(buffer);
 }
@@ -478,7 +479,8 @@ void Med::filter(string v, string t) {
     free(buffer);
 }
 
-void Med::memScanPage(uint8_t* page,
+void Med::memScanPage(Med* med,
+                      uint8_t* page,
                       MemAddr start,
                       int srcSize,
                       vector<MedScan> &scanAddresses,
@@ -488,15 +490,22 @@ void Med::memScanPage(uint8_t* page,
                       ScanParser::OpType op) {
   //Once get the page, now can compare the data within the page
   for(int k = 0; k <= getpagesize() - size; k += STEP) {
-    if(memCompare(page + k, srcSize, data, size, op)) {
-      MedScan medScan(start + k);
-      medScan.setScanType(scanType);
-      scanAddresses.push_back(medScan);
+    try {
+      if(memCompare(page + k, srcSize, data, size, op)) {
+        MedScan medScan(start + k);
+        medScan.setScanType(scanType);
+        med->scanAddressMutex.lock();
+        scanAddresses.push_back(medScan);
+        med->scanAddressMutex.unlock();
+      }
+    } catch(MedException& ex) {
+      cerr << ex.getMessage() << endl;
     }
   }
 }
 
-void Med::memScanMap(ProcMaps& maps,
+void Med::memScanMap(Med* med,
+                     ProcMaps& maps,
                      int mapIndex,
                      int fd,
                      uint8_t* page,
@@ -515,11 +524,11 @@ void Med::memScanMap(ProcMaps& maps,
       if(read(fd, page, getpagesize()) == -1) {
         continue;
       }
-      Med::memScanPage(page, j, srcSize, scanAddresses, data, size, scanType, op);
+      Med::memScanPage(med, page, j, srcSize, scanAddresses, data, size, scanType, op);
     }
 }
 
-void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op) {
+void Med::memScan(Med* med, vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op) {
   medMutex.lock();
   pidAttach(pid);
 
@@ -531,8 +540,13 @@ void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int siz
   scanAddresses.clear();
 
   for(int i = 0; i < (int)maps.starts.size(); i++) {
-    Med::memScanMap(maps, i, memFd, page, srcSize, scanAddresses, data, size, scanType, op);
+    TMTask* fn = new TMTask();
+    *fn = [med, &maps, i, memFd, page, srcSize, &scanAddresses, data, size, scanType, op]() {
+      Med::memScanMap(med, maps, i, memFd, page, srcSize, scanAddresses, data, size, scanType, op);
+    };
+    med->threadManager->queueTask(fn);
   }
+  med->threadManager->start();
 
   printf("Found %lu results\n",scanAddresses.size());
   free(page);
@@ -540,6 +554,7 @@ void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int siz
 
   pidDetach(pid);
   medMutex.unlock();
+  med->threadManager->clear();
 }
 
 void Med::memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op) {

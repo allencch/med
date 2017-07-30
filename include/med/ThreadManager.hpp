@@ -15,6 +15,7 @@ public:
   virtual ~ThreadManager();
 
   void queueTask(TMTask* fn);
+  void clear();
   void start();
 
 private:

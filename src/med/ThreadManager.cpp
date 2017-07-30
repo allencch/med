@@ -19,6 +19,13 @@ void ThreadManager::queueTask(TMTask* fn) {
   container.push_back(fn);
 }
 
+void ThreadManager::clear() {
+  for(auto task : container) {
+    delete task;
+  }
+  container.clear();
+}
+
 void ThreadManager::start() {
   // Note: Cannot assign startTask() to a variable then push_back to vector
   // The future must be destroyed at the end, else the asynchronous cannot work.
@@ -39,7 +46,7 @@ void ThreadManager::start() {
 future<void> ThreadManager::startTask(int index) {
   // Note: Cannot capture by reference, because the "index" will be overwritten during async
   ThreadManager* me = this;
-  future<void> fut = async([index, me]() { 
+  future<void> fut = async([index, me]() {
       if (index < 0 || index >= (int)me->container.size()) {
         throw "Task index out of range " + to_string(index);
       }

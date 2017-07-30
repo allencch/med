@@ -47,7 +47,7 @@ int main() {
   tm.queueTask(&fn4);
   tm.queueTask(&fn5);
   tm.start();
-
+  tm.clear();
   this_thread::sleep_for(chrono::seconds(5));
 
   return 0;

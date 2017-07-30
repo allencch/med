@@ -13,6 +13,11 @@ public:
   virtual const char* what() const throw() {
     return message.c_str();
   }
+
+  string getMessage() {
+    return message;
+  }
+
 private:
   string message;
 };
