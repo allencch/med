@@ -27,7 +27,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QLineEdit" name="selectedProc">
+       <widget class="QLineEdit" name="selectedProcess">
         <property name="toolTip">
          <string/>
         </property>

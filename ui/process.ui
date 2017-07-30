@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>chooseProc</class>
- <widget class="QWidget" name="chooseProc">
+ <class>processSelector</class>
+ <widget class="QWidget" name="processSelector">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <widget class="QTreeWidget" name="procTreeWidget">
+    <widget class="QTreeWidget" name="processTreeWidget">
      <column>
       <property name="text">
        <string>PID</string>

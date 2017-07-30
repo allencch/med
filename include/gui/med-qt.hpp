@@ -40,14 +40,14 @@ public:
   void refreshStoreTreeView();
 
   // Accessors
-  QWidget* getChooseProcess();
+  QWidget* getProcessSelector();
   UiState getScanState();
   UiState getStoreState();
   void setScanState(UiState);
   void setStoreState(UiState);
 
 public slots:
-  void onProcItemDblClicked(QTreeWidgetItem* item, int column);
+  void onProcessItemDblClicked(QTreeWidgetItem* item, int column);
 
 private slots:
   void onProcessClicked();
@@ -73,8 +73,8 @@ private slots:
 
 private:
   QWidget* mainWindow;
-  QWidget* chooseProc;
-  QDialog* processDialog;
+  QWidget* processSelector;
+  QDialog* processDialog; // This is the processSelector container
 
   UiState scanState;
   UiState storeState;

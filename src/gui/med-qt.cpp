@@ -35,10 +35,10 @@ public:
   }
 protected:
   bool eventFilter(QObject* obj, QEvent* ev) {
-    QTreeWidget* procTreeWidget = mainUi->getChooseProcess()->findChild<QTreeWidget*>("procTreeWidget");
-    if(obj == procTreeWidget && ev->type() == QEvent::KeyRelease) {
+    QTreeWidget* processTreeWidget = mainUi->getProcessSelector()->findChild<QTreeWidget*>("processTreeWidget");
+    if(obj == processTreeWidget && ev->type() == QEvent::KeyRelease) {
       if(static_cast<QKeyEvent*>(ev)->key() == Qt::Key_Return) { //Use Return instead of Enter
-        mainUi->onProcItemDblClicked(procTreeWidget->currentItem(), 0); //Just use the first column
+        mainUi->onProcessItemDblClicked(processTreeWidget->currentItem(), 0); //Just use the first column
       }
     }
   }
@@ -110,24 +110,24 @@ void MainUi::onProcessClicked() {
   processDialog->show();
 
   //Get the tree widget
-  QTreeWidget* procTreeWidget = chooseProc->findChild<QTreeWidget*>("procTreeWidget");
+  QTreeWidget* processTreeWidget = processSelector->findChild<QTreeWidget*>("processTreeWidget");
 
-  procTreeWidget->clear(); //Remove all items
+  processTreeWidget->clear(); //Remove all items
 
   //Add all the process into the tree widget
   for(int i=med.processes.size()-1;i>=0;i--) {
-    QTreeWidgetItem* item = new QTreeWidgetItem(procTreeWidget);
+    QTreeWidgetItem* item = new QTreeWidgetItem(processTreeWidget);
     item->setText(0, med.processes[i].pid.c_str());
     item->setText(1, med.processes[i].cmdline.c_str());
   }
 }
 
-void MainUi::onProcItemDblClicked(QTreeWidgetItem* item, int column) {
+void MainUi::onProcessItemDblClicked(QTreeWidgetItem* item, int column) {
   int index = item->treeWidget()->indexOfTopLevelItem(item); //Get the current row index
   med.selectedProcess = med.processes[med.processes.size() -1 - index];
 
-  //Make changes to the selectedProc and hide the window
-  QLineEdit* line = this->mainWindow->findChild<QLineEdit*>("selectedProc");
+  //Make changes to the selectedProcess and hide the window
+  QLineEdit* line = this->mainWindow->findChild<QLineEdit*>("selectedProcess");
   line->setText(QString::fromLatin1((med.selectedProcess.pid + " " + med.selectedProcess.cmdline).c_str())); //Do not use fromStdString(), it will append with some unknown characters
 
   processDialog->hide();
@@ -387,20 +387,20 @@ void MainUi::loadProcessUi() {
   QFile processFile("./process.ui");
   processFile.open(QFile::ReadOnly);
 
-  chooseProc = loader.load(&processFile, processDialog);
+  processSelector = loader.load(&processFile, processDialog);
   processFile.close();
 
   QVBoxLayout* layout = new QVBoxLayout();
-  layout->addWidget(chooseProc);
+  layout->addWidget(processSelector);
   processDialog->setLayout(layout);
   processDialog->setModal(true);
   processDialog->resize(400, 400);
 
   //Add signal
-  QTreeWidget* procTreeWidget = chooseProc->findChild<QTreeWidget*>("procTreeWidget");
-  QObject::connect(procTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(onProcItemDblClicked(QTreeWidgetItem*, int)));
+  QTreeWidget* processTreeWidget = processSelector->findChild<QTreeWidget*>("processTreeWidget");
+  QObject::connect(processTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(onProcessItemDblClicked(QTreeWidgetItem*, int)));
 
-  procTreeWidget->installEventFilter(new ProcessDialogEventListener(this));
+  processTreeWidget->installEventFilter(new ProcessDialogEventListener(this));
 
   mainWindow->installEventFilter(new MainWindowEventListener(this));
 }
@@ -558,8 +558,8 @@ void MainUi::updateNumberOfAddresses(QWidget* mainWindow) {
 // Accessors
 ////////////////////////
 
-QWidget* MainUi::getChooseProcess() {
-  return chooseProc;
+QWidget* MainUi::getProcessSelector() {
+  return processSelector;
 }
 UiState MainUi::getScanState() {
   return scanState;
