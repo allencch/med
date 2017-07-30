@@ -256,6 +256,16 @@ private:
                           int size,
                           string scanType,
                           ScanParser::OpType op);
+  static void memScanMap(ProcMaps& maps,
+                         int mapIndex,
+                         int fd,
+                         uint8_t* page,
+                         int srcSize,
+                         vector<MedScan> &scanAddresses,
+                         Byte* data,
+                         int size,
+                         string scanType,
+                         ScanParser::OpType op);
 
   static void memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op);
 

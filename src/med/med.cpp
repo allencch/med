@@ -496,6 +496,29 @@ void Med::memScanPage(uint8_t* page,
   }
 }
 
+void Med::memScanMap(ProcMaps& maps,
+                     int mapIndex,
+                     int fd,
+                     uint8_t* page,
+                     int srcSize,
+                     vector<MedScan>
+                     &scanAddresses,
+                     Byte* data,
+                     int size,
+                     string scanType,
+                     ScanParser::OpType op) {
+  for(MemAddr j = maps.starts[mapIndex]; j < maps.ends[mapIndex]; j += getpagesize()) {
+      if(lseek(fd, j, SEEK_SET) == -1) {
+        continue;
+      }
+
+      if(read(fd, page, getpagesize()) == -1) {
+        continue;
+      }
+      Med::memScanPage(page, j, srcSize, scanAddresses, data, size, scanType, op);
+    }
+}
+
 void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op) {
   medMutex.lock();
   pidAttach(pid);
@@ -508,16 +531,7 @@ void Med::memScan(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int siz
   scanAddresses.clear();
 
   for(int i = 0; i < (int)maps.starts.size(); i++) {
-    for(MemAddr j = maps.starts[i]; j < maps.ends[i]; j += getpagesize()) {
-      if(lseek(memFd, j, SEEK_SET) == -1) {
-        continue;
-      }
-
-      if(read(memFd, page, getpagesize()) == -1) {
-        continue;
-      }
-      Med::memScanPage(page, j, srcSize, scanAddresses, data, size, scanType, op);
-    }
+    Med::memScanMap(maps, i, memFd, page, srcSize, scanAddresses, data, size, scanType, op);
   }
 
   printf("Found %lu results\n",scanAddresses.size());
