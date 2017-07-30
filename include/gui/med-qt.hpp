@@ -41,6 +41,7 @@ public:
 
   // Accessors
   QWidget* getProcessSelector();
+  QWidget* getMainWindow();
   UiState getScanState();
   UiState getStoreState();
   void setScanState(UiState);

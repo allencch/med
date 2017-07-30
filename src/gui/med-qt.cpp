@@ -54,14 +54,36 @@ public:
   }
 protected:
   bool eventFilter(QObject* obj, QEvent* ev) {
-    if (ev->type() == QEvent::KeyRelease && static_cast<QKeyEvent*>(ev)->key() == Qt::Key_Escape) {
-      if (mainUi->getScanState() == UiState::Editing) {
-        tryUnlock(mainUi->scanUpdateMutex);
-        mainUi->setScanState(UiState::Idle);
+    if (ev->type() == QEvent::KeyRelease) {
+
+      if (static_cast<QKeyEvent*>(ev)->key() == Qt::Key_Escape) {
+        if (mainUi->getScanState() == UiState::Editing) {
+          tryUnlock(mainUi->scanUpdateMutex);
+          mainUi->setScanState(UiState::Idle);
+        }
+        if (mainUi->getStoreState() == UiState::Editing) {
+          tryUnlock(mainUi->addressUpdateMutex);
+          mainUi->setStoreState(UiState::Idle);
+        }
       }
-      if (mainUi->getStoreState() == UiState::Editing) {
-        tryUnlock(mainUi->addressUpdateMutex);
-        mainUi->setStoreState(UiState::Idle);
+
+      if (static_cast<QKeyEvent*>(ev)->key() == Qt::Key_F2) {
+        QWidget* mainWindow = mainUi->getMainWindow();
+        QWidget* focused = mainWindow->focusWidget()->parentWidget()->parentWidget(); // When the TreeView item value is selected, the TreeView will be the grandparent of the editing
+        if (focused == mainWindow->findChild<QTreeView*>("scanTreeView")) {
+          QModelIndex index = mainWindow->findChild<QTreeView*>("scanTreeView")->currentIndex();
+          if (index.column() == SCAN_COL_VALUE) {
+            mainUi->scanUpdateMutex.lock();
+            mainUi->setScanState(UiState::Editing);
+          }
+        }
+        else if (focused == mainWindow->findChild<QTreeView*>("storeTreeView")) {
+          QModelIndex index = mainWindow->findChild<QTreeView*>("storeTreeView")->currentIndex();
+          if (index.column() == ADDRESS_COL_VALUE) {
+            mainUi->addressUpdateMutex.lock();
+            mainUi->setStoreState(UiState::Editing);
+          }
+        }
       }
     }
   }
@@ -561,6 +583,11 @@ void MainUi::updateNumberOfAddresses(QWidget* mainWindow) {
 QWidget* MainUi::getProcessSelector() {
   return processSelector;
 }
+
+QWidget* MainUi::getMainWindow() {
+  return mainWindow;
+}
+
 UiState MainUi::getScanState() {
   return scanState;
 }
