@@ -29,7 +29,7 @@ class MainUi : public QObject {
   Q_OBJECT
 
 public:
-  MainUi();
+  MainUi(QApplication* app);
 
   Med med;
   std::thread* refreshThread;
@@ -65,7 +65,9 @@ private slots:
   void onStoreShiftAllClicked();
   void onStoreShiftClicked();
   void onSaveAsTriggered();
+  void onSaveTriggered();
   void onOpenTriggered();
+  void onQuitTriggered();
   void onScanTreeViewClicked(const QModelIndex &index);
   void onScanTreeViewDoubleClicked(const QModelIndex &index);
   void onStoreTreeViewDoubleClicked(const QModelIndex &index);
@@ -75,6 +77,7 @@ private slots:
   void onStoreHeaderClicked(int logicalIndex);
 
 private:
+  QApplication* app;
   QWidget* mainWindow;
   QWidget* processSelector;
   QDialog* processDialog; // This is the processSelector container

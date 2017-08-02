@@ -55,8 +55,9 @@ public:
 protected:
   bool eventFilter(QObject* obj, QEvent* ev) {
     if (ev->type() == QEvent::KeyRelease) {
+      QKeyEvent* keyEvent = static_cast<QKeyEvent*>(ev);
 
-      if (static_cast<QKeyEvent*>(ev)->key() == Qt::Key_Escape) {
+      if (keyEvent->key() == Qt::Key_Escape) {
         if (mainUi->getScanState() == UiState::Editing) {
           tryUnlock(mainUi->scanUpdateMutex);
           mainUi->setScanState(UiState::Idle);
@@ -67,7 +68,7 @@ protected:
         }
       }
 
-      if (static_cast<QKeyEvent*>(ev)->key() == Qt::Key_F2) {
+      if (keyEvent->key() == Qt::Key_F2) {
         QWidget* mainWindow = mainUi->getMainWindow();
         QWidget* focused = mainWindow->focusWidget()->parentWidget()->parentWidget(); // When the TreeView item value is selected, the TreeView will be the grandparent of the editing
         if (focused == mainWindow->findChild<QTreeView*>("scanTreeView")) {
@@ -93,7 +94,8 @@ private:
 };
 
 
-MainUi::MainUi() {
+MainUi::MainUi(QApplication* app) {
+  this->app = app;
   loadUiFiles();
   loadProcessUi();
   setupStatusBar();
@@ -319,6 +321,12 @@ void MainUi::onSaveAsTriggered() {
                                                   QString("Save JSON"),
                                                   "./",
                                                   QString("Save JSON (*.json)"));
+
+  if (filename == "") {
+    return;
+  }
+  this->filename = filename;
+  setWindowTitle();
 
   med.saveFile(filename.toStdString().c_str());
 }
@@ -559,7 +567,14 @@ void MainUi::setupSignals() {
                    SIGNAL(triggered()),
                    this,
                    SLOT(onOpenTriggered()));
-
+  QObject::connect(mainWindow->findChild<QAction*>("actionSave"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onSaveTriggered()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionQuit"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onQuitTriggered()));
 }
 
 void MainUi::setupUi() {
@@ -578,8 +593,8 @@ void MainUi::setupUi() {
 
 void MainUi::updateNumberOfAddresses(QWidget* mainWindow) {
   char message[128];
-  sprintf(message, "%ld addresses found", med.scanAddresses.size());
-  mainWindow->findChild<QStatusBar*>("statusbar")->showMessage(message);
+  sprintf(message, "%ld", med.scanAddresses.size());
+  mainWindow->findChild<QLabel*>("found")->setText(message);
 }
 
 void MainUi::setWindowTitle() {
@@ -589,6 +604,18 @@ void MainUi::setWindowTitle() {
   else {
     mainWindow->setWindowTitle(MAIN_TITLE);
   }
+}
+
+void MainUi::onSaveTriggered() {
+  if (filename == "") {
+    return;
+  }
+  med.saveFile(filename.toStdString().c_str());
+  mainWindow->findChild<QStatusBar*>("statusbar")->showMessage("Saved");
+}
+
+void MainUi::onQuitTriggered() {
+  app->quit();
 }
 
 ////////////////////////
@@ -623,7 +650,7 @@ void MainUi::setStoreState(UiState state) {
 
 int main(int argc, char **argv) {
   QApplication app(argc, argv);
-  MainUi* mainUi = new MainUi();
+  MainUi* mainUi = new MainUi(&app);
   return app.exec();
 }
 
