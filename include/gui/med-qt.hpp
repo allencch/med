@@ -21,6 +21,8 @@
 
 #include "med/med.hpp"
 
+const QString MAIN_TITLE = "Med";
+
 enum UiState { Idle, Editing };
 
 class MainUi : public QObject {
@@ -79,6 +81,7 @@ private:
 
   UiState scanState;
   UiState storeState;
+  QString filename;
 
   TreeModel* scanModel;
   StoreTreeModel * storeModel; //Previously is the address model, but named as "store" is better
@@ -91,6 +94,7 @@ private:
   void setupSignals();
   void setupUi();
   void updateNumberOfAddresses(QWidget* mainWindow);
+  void setWindowTitle();
 };
 
 #endif

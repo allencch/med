@@ -332,6 +332,12 @@ void MainUi::onOpenTriggered() {
                                                   QString("Open JSON"),
                                                   "./",
                                                   QString("Open JSON (*.json)"));
+  if (filename == "") {
+    return;
+  }
+  this->filename = filename;
+  setWindowTitle();
+
   med.openFile(filename.toStdString().c_str());
 
   storeUpdateMutex.lock();
@@ -574,6 +580,15 @@ void MainUi::updateNumberOfAddresses(QWidget* mainWindow) {
   char message[128];
   sprintf(message, "%ld addresses found", med.scanAddresses.size());
   mainWindow->findChild<QStatusBar*>("statusbar")->showMessage(message);
+}
+
+void MainUi::setWindowTitle() {
+  if (filename.length() > 0) {
+    mainWindow->setWindowTitle(MAIN_TITLE + ": " + filename);
+  }
+  else {
+    mainWindow->setWindowTitle(MAIN_TITLE);
+  }
 }
 
 ////////////////////////
