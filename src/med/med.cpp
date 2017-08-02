@@ -439,7 +439,7 @@ void MedAddress::unlockValue() {
 
 
 Med::Med() {
-  threadManager = new ThreadManager();
+  threadManager = new ThreadManager(8);
 }
 Med::~Med() {
   clearStore();
@@ -508,7 +508,6 @@ void Med::memScanMap(Med* med,
                      ProcMaps& maps,
                      int mapIndex,
                      int fd,
-                     uint8_t* page,
                      int srcSize,
                      vector<MedScan>
                      &scanAddresses,
@@ -517,15 +516,19 @@ void Med::memScanMap(Med* med,
                      string scanType,
                      ScanParser::OpType op) {
   for(MemAddr j = maps.starts[mapIndex]; j < maps.ends[mapIndex]; j += getpagesize()) {
-      if(lseek(fd, j, SEEK_SET) == -1) {
-        continue;
-      }
-
-      if(read(fd, page, getpagesize()) == -1) {
-        continue;
-      }
-      Med::memScanPage(med, page, j, srcSize, scanAddresses, data, size, scanType, op);
+    if(lseek(fd, j, SEEK_SET) == -1) {
+      continue;
     }
+
+    uint8_t* page = (uint8_t*)malloc(getpagesize()); //For block of memory
+
+    if(read(fd, page, getpagesize()) == -1) {
+      continue;
+    }
+    Med::memScanPage(med, page, j, srcSize, scanAddresses, data, size, scanType, op);
+
+    free(page);
+  }
 }
 
 void Med::memScan(Med* med, vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op) {
@@ -533,7 +536,6 @@ void Med::memScan(Med* med, vector<MedScan> &scanAddresses, pid_t pid, Byte* dat
   pidAttach(pid);
 
   ProcMaps maps = getMaps(pid);
-  uint8_t* page = (uint8_t*)malloc(getpagesize()); //For block of memory
   int memFd = getMem(pid);
   int srcSize = scanTypeToSize(stringToScanType(scanType));
 
@@ -541,20 +543,20 @@ void Med::memScan(Med* med, vector<MedScan> &scanAddresses, pid_t pid, Byte* dat
 
   for(int i = 0; i < (int)maps.starts.size(); i++) {
     TMTask* fn = new TMTask();
-    *fn = [med, &maps, i, memFd, page, srcSize, &scanAddresses, data, size, scanType, op]() {
-      Med::memScanMap(med, maps, i, memFd, page, srcSize, scanAddresses, data, size, scanType, op);
+    *fn = [med, &maps, i, memFd, srcSize, &scanAddresses, data, size, scanType, op]() {
+      Med::memScanMap(med, maps, i, memFd, srcSize, scanAddresses, data, size, scanType, op);
     };
     med->threadManager->queueTask(fn);
   }
+
   med->threadManager->start();
+  med->threadManager->clear();
 
   printf("Found %lu results\n",scanAddresses.size());
-  free(page);
   close(memFd);
 
   pidDetach(pid);
   medMutex.unlock();
-  med->threadManager->clear();
 }
 
 void Med::memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int size, string scanType, ScanParser::OpType op) {

@@ -262,7 +262,6 @@ private:
                          ProcMaps& maps,
                          int mapIndex,
                          int fd,
-                         uint8_t* page,
                          int srcSize,
                          vector<MedScan> &scanAddresses,
                          Byte* data,

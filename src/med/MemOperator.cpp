@@ -16,7 +16,7 @@ using namespace std;
 /**
  * Dump the hexa deximal
  */
-int memDump(pid_t pid,MemAddr address,int size) {
+void memDump(pid_t pid,MemAddr address,int size) {
   pidAttach(pid);
   printf("%d\n",size);
   int memFd = getMem(pid);
@@ -32,7 +32,6 @@ int memDump(pid_t pid,MemAddr address,int size) {
     //continue;
   }
 
-
   for(int i=0;i<size;i++) {
     printf("%02x ",buf[i]);
   }
@@ -40,7 +39,16 @@ int memDump(pid_t pid,MemAddr address,int size) {
   free(buf);
   close(memFd);
   pidDetach(pid);
-  return 1;
+}
+
+void memDirectDump(Byte* byteStart, int size) {
+  uint8_t* buf = (uint8_t*)malloc(size);
+  memcpy(buf, (void*)byteStart, size);
+  for(int i = 0; i < size ; i++) {
+    printf("%x ", buf[i]);
+  }
+  printf("\n");
+  free(buf);
 }
 
 
