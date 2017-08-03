@@ -73,14 +73,14 @@ protected:
         QWidget* focused = mainWindow->focusWidget()->parentWidget()->parentWidget(); // When the TreeView item value is selected, the TreeView will be the grandparent of the editing
         if (focused == mainWindow->findChild<QTreeView*>("scanTreeView")) {
           QModelIndex index = mainWindow->findChild<QTreeView*>("scanTreeView")->currentIndex();
-          if (index.column() == SCAN_COL_VALUE) {
+          if (index.column() == SCAN_COL_VALUE && mainUi->getScanState() == UiState::Idle) {
             mainUi->scanUpdateMutex.lock();
             mainUi->setScanState(UiState::Editing);
           }
         }
         else if (focused == mainWindow->findChild<QTreeView*>("storeTreeView")) {
           QModelIndex index = mainWindow->findChild<QTreeView*>("storeTreeView")->currentIndex();
-          if (index.column() == STORE_COL_VALUE) {
+          if (index.column() == STORE_COL_VALUE && mainUi->getStoreState() == UiState::Idle) {
             mainUi->storeUpdateMutex.lock();
             mainUi->setStoreState(UiState::Editing);
           }
