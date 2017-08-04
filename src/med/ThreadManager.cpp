@@ -2,7 +2,8 @@
 #include <future>
 #include <string>
 #include <iostream>
-#include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include "med/ThreadManager.hpp"
 
 using namespace std;
@@ -32,10 +33,13 @@ void ThreadManager::start() {
   // That is why, store all the futures to the local variable, which will be destroyed at the end of function.
   currThreadIndex = 0;
   vector<future<void>> futures;
+
+  unique_lock<mutex> lk(mut);
   while (currThreadIndex < (int)container.size()) {
     if (numOfRunningThreads >= maxThreads) {
-      this_thread::sleep_for(chrono::milliseconds(TM_SLEEP_DURATION));
-      continue;
+      cv.wait(lk, [this] {
+          return numOfRunningThreads < maxThreads;
+        });
     }
     numOfRunningThreads++;
     futures.push_back(startTask(currThreadIndex));
@@ -45,14 +49,15 @@ void ThreadManager::start() {
 
 future<void> ThreadManager::startTask(int index) {
   // Note: Cannot capture by reference, because the "index" will be overwritten during async
-  ThreadManager* me = this;
-  future<void> fut = async([index, me]() {
-      if (index < 0 || index >= (int)me->container.size()) {
+  future<void> fut = async([index, this]() {
+      if (index < 0 || index >= (int)container.size()) {
         throw "Task index out of range " + to_string(index);
       }
-      TMTask* fn = me->container[index];
+      TMTask* fn = container[index];
       (*fn)();
-      me->numOfRunningThreads--;
+      numOfRunningThreads--;
+
+      cv.notify_one();
     });
   return fut;
 }

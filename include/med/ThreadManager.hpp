@@ -4,8 +4,8 @@
 #include <functional>
 #include <vector>
 #include <future>
-
-const int TM_SLEEP_DURATION = 30; // milliseconds
+#include <condition_variable>
+#include <mutex>
 
 typedef std::function<void()> TMTask;
 
@@ -23,6 +23,9 @@ private:
   int maxThreads;
   int numOfRunningThreads;
   int currThreadIndex;
+
+  std::condition_variable cv;
+  std::mutex mut;
 
   std::future<void> startTask(int index);
 };
