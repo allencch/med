@@ -35,10 +35,9 @@ public:
   }
 protected:
   bool eventFilter(QObject* obj, QEvent* ev) {
-    QTreeWidget* processTreeWidget = mainUi->getProcessSelector()->findChild<QTreeWidget*>("processTreeWidget");
-    if(obj == processTreeWidget && ev->type() == QEvent::KeyRelease) {
+    if(obj == mainUi->processTreeWidget && ev->type() == QEvent::KeyRelease) {
       if(static_cast<QKeyEvent*>(ev)->key() == Qt::Key_Return) { //Use Return instead of Enter
-        mainUi->onProcessItemDblClicked(processTreeWidget->currentItem(), 0); //Just use the first column
+        mainUi->onProcessItemDblClicked(mainUi->processTreeWidget->currentItem(), 0); //Just use the first column
       }
     }
   }
@@ -69,17 +68,16 @@ protected:
       }
 
       if (keyEvent->key() == Qt::Key_F2) {
-        QWidget* mainWindow = mainUi->getMainWindow();
-        QWidget* focused = mainWindow->focusWidget()->parentWidget()->parentWidget(); // When the TreeView item value is selected, the TreeView will be the grandparent of the editing
-        if (focused == mainWindow->findChild<QTreeView*>("scanTreeView")) {
-          QModelIndex index = mainWindow->findChild<QTreeView*>("scanTreeView")->currentIndex();
+        QWidget* focused = mainUi->mainWindow->focusWidget()->parentWidget()->parentWidget(); // When the TreeView item value is selected, the TreeView will be the grandparent of the editing
+        if (focused == mainUi->scanTreeView) {
+          QModelIndex index = mainUi->scanTreeView->currentIndex();
           if (index.column() == SCAN_COL_VALUE && mainUi->getScanState() == UiState::Idle) {
             mainUi->scanUpdateMutex.lock();
             mainUi->setScanState(UiState::Editing);
           }
         }
-        else if (focused == mainWindow->findChild<QTreeView*>("storeTreeView")) {
-          QModelIndex index = mainWindow->findChild<QTreeView*>("storeTreeView")->currentIndex();
+        else if (focused == mainUi->storeTreeView) {
+          QModelIndex index = mainUi->storeTreeView->currentIndex();
           if (index.column() == STORE_COL_VALUE && mainUi->getStoreState() == UiState::Idle) {
             mainUi->storeUpdateMutex.lock();
             mainUi->setStoreState(UiState::Editing);
@@ -133,9 +131,6 @@ void MainUi::onProcessClicked() {
 
   processDialog->show();
 
-  //Get the tree widget
-  QTreeWidget* processTreeWidget = processSelector->findChild<QTreeWidget*>("processTreeWidget");
-
   processTreeWidget->clear(); //Remove all items
 
   //Add all the process into the tree widget
@@ -151,8 +146,7 @@ void MainUi::onProcessItemDblClicked(QTreeWidgetItem* item, int column) {
   med.selectedProcess = med.processes[med.processes.size() -1 - index];
 
   //Make changes to the selectedProcess and hide the window
-  QLineEdit* line = this->mainWindow->findChild<QLineEdit*>("selectedProcess");
-  line->setText(QString::fromLatin1((med.selectedProcess.pid + " " + med.selectedProcess.cmdline).c_str())); //Do not use fromStdString(), it will append with some unknown characters
+  selectedProcessLine->setText(QString::fromLatin1((med.selectedProcess.pid + " " + med.selectedProcess.cmdline).c_str())); //Do not use fromStdString(), it will append with some unknown characters
 
   processDialog->hide();
 }
@@ -161,7 +155,7 @@ void MainUi::onScanClicked() {
   scanUpdateMutex.lock();
 
   //Get scanned type
-  string scanType = mainWindow->findChild<QComboBox*>("scanType")->currentText().toStdString();
+  string scanType = scanTypeCombo->currentText().toStdString();
 
   string scanValue = mainWindow->findChild<QLineEdit*>("scanEntry")->text().toStdString();
 
@@ -188,7 +182,7 @@ void MainUi::onFilterClicked() {
   scanUpdateMutex.lock();
 
   //Get scanned type
-  string scanType = mainWindow->findChild<QComboBox*>("scanType")->currentText().toStdString();
+  string scanType = scanTypeCombo->currentText().toStdString();
 
   string scanValue = mainWindow->findChild<QLineEdit*>("scanEntry")->text().toStdString();
 
@@ -215,7 +209,7 @@ void MainUi::onStoreClearClicked() {
 }
 
 void MainUi::onScanAddClicked() {
-  auto indexes = mainWindow->findChild<QTreeView*>("scanTreeView")
+  auto indexes = scanTreeView
     ->selectionModel()
     ->selectedRows(SCAN_COL_ADDRESS);
 
@@ -244,7 +238,7 @@ void MainUi::onStoreNewClicked() {
 }
 
 void MainUi::onStoreDeleteClicked() {
-  auto indexes = mainWindow->findChild<QTreeView*>("storeTreeView")
+  auto indexes = storeTreeView
     ->selectionModel()
     ->selectedRows(STORE_COL_ADDRESS);
 
@@ -283,15 +277,26 @@ void MainUi::onStoreShiftAllClicked() {
   storeUpdateMutex.unlock();
 }
 
-void MainUi::onStoreShiftClicked() {
-  //Get the from and to
+
+void storeShift(MainUi* mainUi, bool reverse = false) {
+  auto mainWindow = mainUi->mainWindow;
+  auto &med = mainUi->med;
+  auto storeTreeView = mainUi->storeTreeView;
+  auto &storeUpdateMutex = mainUi->storeUpdateMutex;
+  auto storeModel = mainUi->storeModel;
+
   long shiftFrom, shiftTo, difference;
   try {
     shiftFrom = hexToInt(mainWindow->findChild<QLineEdit*>("shiftFrom")->text().toStdString());
     shiftTo = hexToInt(mainWindow->findChild<QLineEdit*>("shiftTo")->text().toStdString());
-    difference = shiftTo - shiftFrom;
+    if (reverse) {
+      difference = shiftFrom - shiftTo;
+    }
+    else {
+      difference = shiftTo - shiftFrom;
+    }
   } catch(MedException &e) {
-    cout << e.what() << endl;
+    cerr << e.what() << endl;
   }
 
   //Get PID
@@ -300,7 +305,7 @@ void MainUi::onStoreShiftClicked() {
     return;
   }
 
-  auto indexes = mainWindow->findChild<QTreeView*>("storeTreeView")
+  auto indexes = storeTreeView
     ->selectionModel()
     ->selectedRows(STORE_COL_ADDRESS);
 
@@ -311,6 +316,15 @@ void MainUi::onStoreShiftClicked() {
   storeModel->refresh();
   storeUpdateMutex.unlock();
 }
+
+void MainUi::onStoreShiftClicked() {
+  storeShift(this);
+}
+
+void MainUi::onStoreUnshiftClicked() {
+  storeShift(this, true);
+}
+
 
 void MainUi::onSaveAsTriggered() {
   if(med.selectedProcess.pid == "") {
@@ -356,7 +370,7 @@ void MainUi::onOpenTriggered() {
 
 void MainUi::onScanTreeViewClicked(const QModelIndex &index) {
   if(index.column() == SCAN_COL_TYPE) {
-    mainWindow->findChild<QTreeView*>("scanTreeView")->edit(index); //Trigger edit by 1 click
+    scanTreeView->edit(index); //Trigger edit by 1 click
   }
 }
 
@@ -376,10 +390,10 @@ void MainUi::onStoreTreeViewDoubleClicked(const QModelIndex &index) {
 
 void MainUi::onStoreTreeViewClicked(const QModelIndex &index) {
   if (index.column() == STORE_COL_TYPE) {
-    mainWindow->findChild<QTreeView*>("storeTreeView")->edit(index);
+    storeTreeView->edit(index);
   }
   else if (index.column() == STORE_COL_LOCK) {
-    mainWindow->findChild<QTreeView*>("storeTreeView")->edit(index);
+    storeTreeView->edit(index);
   }
 }
 
@@ -414,6 +428,11 @@ void MainUi::loadUiFiles() {
   file.open(QFile::ReadOnly);
   mainWindow = loader.load(&file);
   file.close();
+
+  scanTreeView = mainWindow->findChild<QTreeView*>("scanTreeView");
+  storeTreeView = mainWindow->findChild<QTreeView*>("storeTreeView");
+  selectedProcessLine = mainWindow->findChild<QLineEdit*>("selectedProcess");
+  scanTypeCombo = mainWindow->findChild<QComboBox*>("scanType");
 }
 
 void MainUi::loadProcessUi() {
@@ -426,6 +445,8 @@ void MainUi::loadProcessUi() {
   processSelector = loader.load(&processFile, processDialog);
   processFile.close();
 
+  processTreeWidget = processSelector->findChild<QTreeWidget*>("processTreeWidget");
+
   QVBoxLayout* layout = new QVBoxLayout();
   layout->addWidget(processSelector);
   processDialog->setLayout(layout);
@@ -433,7 +454,6 @@ void MainUi::loadProcessUi() {
   processDialog->resize(400, 400);
 
   //Add signal
-  QTreeWidget* processTreeWidget = processSelector->findChild<QTreeWidget*>("processTreeWidget");
   QObject::connect(processTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(onProcessItemDblClicked(QTreeWidgetItem*, int)));
 
   processTreeWidget->installEventFilter(new ProcessDialogEventListener(this));
@@ -449,14 +469,14 @@ void MainUi::setupStatusBar() {
 
 void MainUi::setupScanTreeView() {
   scanModel = new TreeModel(&med, mainWindow);
-  mainWindow->findChild<QTreeView*>("scanTreeView")->setModel(scanModel);
+  scanTreeView->setModel(scanModel);
   ComboBoxDelegate* delegate = new ComboBoxDelegate();
-  mainWindow->findChild<QTreeView*>("scanTreeView")->setItemDelegateForColumn(SCAN_COL_TYPE, delegate);
-  QObject::connect(mainWindow->findChild<QTreeView*>("scanTreeView"),
+  scanTreeView->setItemDelegateForColumn(SCAN_COL_TYPE, delegate);
+  QObject::connect(scanTreeView,
                    SIGNAL(clicked(QModelIndex)),
                    this,
                    SLOT(onScanTreeViewClicked(QModelIndex)));
-  QObject::connect(mainWindow->findChild<QTreeView*>("scanTreeView"),
+  QObject::connect(scanTreeView,
                    SIGNAL(doubleClicked(QModelIndex)),
                    this,
                    SLOT(onScanTreeViewDoubleClicked(QModelIndex)));
@@ -465,21 +485,21 @@ void MainUi::setupScanTreeView() {
                    SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
                    this,
                    SLOT(onScanTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
-  mainWindow->findChild<QTreeView*>("scanTreeView")->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  scanTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 }
 
 void MainUi::setupStoreTreeView() {
   storeModel = new StoreTreeModel(&med, mainWindow);
-  mainWindow->findChild<QTreeView*>("storeTreeView")->setModel(storeModel);
+  storeTreeView->setModel(storeModel);
   ComboBoxDelegate* storeDelegate = new ComboBoxDelegate();
-  mainWindow->findChild<QTreeView*>("storeTreeView")->setItemDelegateForColumn(STORE_COL_TYPE, storeDelegate);
+  storeTreeView->setItemDelegateForColumn(STORE_COL_TYPE, storeDelegate);
   CheckBoxDelegate* storeLockDelegate = new CheckBoxDelegate();
-  mainWindow->findChild<QTreeView*>("storeTreeView")->setItemDelegateForColumn(STORE_COL_LOCK, storeLockDelegate);
-  QObject::connect(mainWindow->findChild<QTreeView*>("storeTreeView"),
+  storeTreeView->setItemDelegateForColumn(STORE_COL_LOCK, storeLockDelegate);
+  QObject::connect(storeTreeView,
                    SIGNAL(clicked(QModelIndex)),
                    this,
                    SLOT(onStoreTreeViewClicked(QModelIndex)));
-  QObject::connect(mainWindow->findChild<QTreeView*>("storeTreeView"),
+  QObject::connect(storeTreeView,
                    SIGNAL(doubleClicked(QModelIndex)),
                    this,
                    SLOT(onStoreTreeViewDoubleClicked(QModelIndex)));
@@ -489,14 +509,14 @@ void MainUi::setupStoreTreeView() {
                    this,
                    SLOT(onStoreTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
 
-  auto* header = mainWindow->findChild<QTreeView*>("storeTreeView")->header();
+  auto* header = storeTreeView->header();
   header->setSectionsClickable(true);
   QObject::connect(header,
                    SIGNAL(sectionClicked(int)),
                    this,
                    SLOT(onStoreHeaderClicked(int)));
 
-  mainWindow->findChild<QTreeView*>("storeTreeView")->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  storeTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 }
 
 void MainUi::setupSignals() {
@@ -552,12 +572,14 @@ void MainUi::setupSignals() {
                    SIGNAL(clicked()),
                    this,
                    SLOT(onStoreShiftAllClicked()));
-
   QObject::connect(mainWindow->findChild<QPushButton*>("storeShift"),
                    SIGNAL(clicked()),
                    this,
                    SLOT(onStoreShiftClicked()));
-
+  QObject::connect(mainWindow->findChild<QPushButton*>("storeUnshift"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onStoreUnshiftClicked()));
 
   QObject::connect(mainWindow->findChild<QAction*>("actionSaveAs"),
                    SIGNAL(triggered()),
@@ -580,7 +602,7 @@ void MainUi::setupSignals() {
 void MainUi::setupUi() {
 
   //Set default scan type
-  mainWindow->findChild<QComboBox*>("scanType")->setCurrentIndex(1);
+  scanTypeCombo->setCurrentIndex(1);
 
   //TODO: center
   mainWindow->show();
@@ -621,14 +643,6 @@ void MainUi::onQuitTriggered() {
 ////////////////////////
 // Accessors
 ////////////////////////
-
-QWidget* MainUi::getProcessSelector() {
-  return processSelector;
-}
-
-QWidget* MainUi::getMainWindow() {
-  return mainWindow;
-}
 
 UiState MainUi::getScanState() {
   return scanState;

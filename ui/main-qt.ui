@@ -202,6 +202,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="storeUnshift">
+            <property name="text">
+             <string>Unshift</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="storeShiftAll">
             <property name="text">
              <string>Shift All</string>

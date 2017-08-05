@@ -42,12 +42,20 @@ public:
   void refreshStoreTreeView();
 
   // Accessors
-  QWidget* getProcessSelector();
-  QWidget* getMainWindow();
   UiState getScanState();
   UiState getStoreState();
   void setScanState(UiState);
   void setStoreState(UiState);
+
+  QWidget* mainWindow;
+  QWidget* processSelector;
+  QDialog* processDialog; // This is the processSelector container
+  QTreeView* scanTreeView;
+  QTreeView* storeTreeView;
+  QLineEdit* selectedProcessLine;
+  QComboBox* scanTypeCombo;
+  QTreeWidget* processTreeWidget;
+  StoreTreeModel * storeModel;
 
 public slots:
   void onProcessItemDblClicked(QTreeWidgetItem* item, int column);
@@ -64,6 +72,7 @@ private slots:
   void onStoreDeleteClicked();
   void onStoreShiftAllClicked();
   void onStoreShiftClicked();
+  void onStoreUnshiftClicked();
   void onSaveAsTriggered();
   void onSaveTriggered();
   void onOpenTriggered();
@@ -78,16 +87,12 @@ private slots:
 
 private:
   QApplication* app;
-  QWidget* mainWindow;
-  QWidget* processSelector;
-  QDialog* processDialog; // This is the processSelector container
 
   UiState scanState;
   UiState storeState;
   QString filename;
 
   TreeModel* scanModel;
-  StoreTreeModel * storeModel; //Previously is the address model, but named as "store" is better
 
   void loadUiFiles();
   void loadProcessUi();
