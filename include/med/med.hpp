@@ -37,7 +37,10 @@
 
 using namespace std;
 
-static std::mutex medMutex; //One and only one, globally accessible
+extern std::mutex medMutex; //One and only one, globally accessible
+
+const int SCAN_ADDRESS_VISIBLE_SIZE = 800;
+const int REFRESH_RATE = 800;
 
 typedef unsigned long MemAddr;
 typedef unsigned char Byte;
@@ -239,6 +242,8 @@ public:
 
   void sortStoreByDescription();
   void sortStoreByAddress();
+
+  void sortScanByAddress();
 
 private:
   static void memScan(Med* med,

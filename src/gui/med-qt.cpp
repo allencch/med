@@ -112,7 +112,7 @@ void MainUi::refresh(MainUi* mainUi) {
   while(1) {
     mainUi->refreshScanTreeView();
     mainUi->refreshStoreTreeView();
-    std::this_thread::sleep_for(chrono::milliseconds(800));
+    std::this_thread::sleep_for(chrono::milliseconds(REFRESH_RATE));
   }
 }
 
@@ -176,7 +176,7 @@ void MainUi::onScanClicked() {
   }
 
   scanModel->clearAll();
-  if(med.scanAddresses.size() <= 800) {
+  if(med.scanAddresses.size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
     scanModel->addScan(scanType);
   }
 
@@ -194,7 +194,7 @@ void MainUi::onFilterClicked() {
 
   med.filter(scanValue, scanType);
 
-  if(med.scanAddresses.size() <= 800) {
+  if(med.scanAddresses.size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
     scanModel->addScan(scanType);
   }
 

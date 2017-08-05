@@ -56,12 +56,12 @@ void memDirectDump(Byte* byteStart, int size) {
  * @param size is the size based on the byte
  */
 void memWrite(pid_t pid, MemAddr address, uint8_t* data, int size) {
+  medMutex.lock();
   pidAttach(pid);
   int psize = padWordSize(size); //padded size
 
   uint8_t* buf = (uint8_t*)malloc(psize);
   long word;
-  medMutex.lock();
   for(int i=0;i<psize;i+=sizeof(long)) {
     errno = 0;
     word = ptrace(PTRACE_PEEKDATA,pid,(uint8_t*)(address) + i, NULL);
@@ -147,6 +147,7 @@ void memReverse(uint8_t* buf,int size) {
 
 
 string memValue(long pid, MemAddr address, string scanType) {
+  medMutex.lock();
   pidAttach(pid);
 
   int size = scanTypeToSize(stringToScanType(scanType));
@@ -154,8 +155,6 @@ string memValue(long pid, MemAddr address, string scanType) {
   int memFd = getMem(pid);
   uint8_t* buf = (uint8_t*)malloc(size + 1); //+1 for the NULL
   memset(buf, 0, size + 1);
-
-  medMutex.lock();
 
   if(lseek(memFd, address, SEEK_SET) == -1) {
     free(buf);

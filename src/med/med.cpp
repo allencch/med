@@ -20,6 +20,7 @@
 #include <chrono>
 #include <algorithm>
 #include <functional>
+#include <mutex>
 
 #include <sys/ptrace.h> //ptrace()
 #include <sys/wait.h> //waitpid()
@@ -36,6 +37,7 @@
 using namespace std;
 
 const int STEP = 1;
+std::mutex medMutex;
 
 /**
  * @brief Convert hexadecimal string to integer value
@@ -368,8 +370,12 @@ void lockValue(string pid, MedAddress* address) {
     if(!address->lock) {
       return; //End
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(800));
-    address->setValue(stol(pid), address->lockedValue);
+    std::this_thread::sleep_for(std::chrono::milliseconds(REFRESH_RATE));
+    try {
+      address->setValue(stol(pid), address->lockedValue);
+    } catch(MedException& ex) {
+      cerr << "Lock value failed: " << ex.getMessage() << endl;
+    }
   }
 }
 
@@ -556,6 +562,9 @@ void Med::memScan(Med* med, vector<MedScan> &scanAddresses, pid_t pid, Byte* dat
   close(memFd);
 
   pidDetach(pid);
+  if (med->scanAddresses.size() < SCAN_ADDRESS_VISIBLE_SIZE) {
+    med->sortScanByAddress();
+  }
   medMutex.unlock();
 }
 
@@ -780,5 +789,11 @@ void Med::sortStoreByAddress() {
 void Med::sortStoreByDescription() {
   sort(addresses.begin(), addresses.end(), [](MedAddress* a, MedAddress* b) {
       return a->description.compare(b->description) < 0;
+    });
+}
+
+void Med::sortScanByAddress() {
+  sort(scanAddresses.begin(), scanAddresses.end(), [](MedScan a, MedScan b) {
+      return a.address < b.address;
     });
 }
