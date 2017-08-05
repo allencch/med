@@ -370,6 +370,25 @@ void MainUi::onOpenTriggered() {
   storeUpdateMutex.unlock();
 }
 
+void MainUi::onReloadTriggered() {
+  if(med.selectedProcess.pid == "") {
+    cerr<< "No PID" <<endl;
+    return;
+  }
+  if (filename == "") {
+    return;
+  }
+  this->filename = filename;
+  setWindowTitle();
+
+  med.openFile(filename.toStdString().c_str());
+
+  storeUpdateMutex.lock();
+  storeModel->clearAll();
+  storeModel->refresh();
+  storeUpdateMutex.unlock();
+}
+
 void MainUi::onScanTreeViewClicked(const QModelIndex &index) {
   if(index.column() == SCAN_COL_TYPE) {
     scanTreeView->edit(index); //Trigger edit by 1 click
@@ -599,6 +618,10 @@ void MainUi::setupSignals() {
                    SIGNAL(triggered()),
                    this,
                    SLOT(onQuitTriggered()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionReload"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onReloadTriggered()));
 }
 
 void MainUi::setupUi() {

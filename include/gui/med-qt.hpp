@@ -76,6 +76,7 @@ private slots:
   void onSaveAsTriggered();
   void onSaveTriggered();
   void onOpenTriggered();
+  void onReloadTriggered();
   void onQuitTriggered();
   void onScanTreeViewClicked(const QModelIndex &index);
   void onScanTreeViewDoubleClicked(const QModelIndex &index);
