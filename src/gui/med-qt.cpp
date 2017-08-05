@@ -255,29 +255,6 @@ void MainUi::onStoreDeleteClicked() {
   storeUpdateMutex.unlock();
 }
 
-void MainUi::onStoreShiftAllClicked() {
-  //Get the from and to
-  long shiftFrom, shiftTo, difference;
-  try {
-    shiftFrom = hexToInt(mainWindow->findChild<QLineEdit*>("shiftFrom")->text().toStdString());
-    shiftTo = hexToInt(mainWindow->findChild<QLineEdit*>("shiftTo")->text().toStdString());
-    difference = shiftTo - shiftFrom;
-  } catch(MedException &e) {
-    cout << e.what() << endl;
-  }
-
-  //Get PID
-  if(med.selectedProcess.pid == "") {
-    cerr<< "No PID" <<endl;
-    return;
-  }
-  storeUpdateMutex.lock();
-  med.shiftStoreAddresses(difference);
-  storeModel->refresh();
-  storeUpdateMutex.unlock();
-}
-
-
 void storeShift(MainUi* mainUi, bool reverse = false) {
   auto mainWindow = mainUi->mainWindow;
   auto &med = mainUi->med;
@@ -325,6 +302,31 @@ void MainUi::onStoreUnshiftClicked() {
   storeShift(this, true);
 }
 
+void MainUi::onStoreMoveClicked() {
+  long moveSteps;
+  try {
+    moveSteps = mainWindow->findChild<QLineEdit*>("shiftTo")->text().toInt();
+  } catch(MedException &e) {
+    cerr << e.what() << endl;
+  }
+
+  //Get PID
+  if(med.selectedProcess.pid == "") {
+    cerr<< "No PID" <<endl;
+    return;
+  }
+
+  auto indexes = storeTreeView
+    ->selectionModel()
+    ->selectedRows(STORE_COL_ADDRESS);
+
+  storeUpdateMutex.lock();
+  for (auto i=0;i<indexes.size();i++) {
+    med.shiftStoreAddressByIndex(indexes[i].row(), moveSteps);
+  }
+  storeModel->refresh();
+  storeUpdateMutex.unlock();
+}
 
 void MainUi::onSaveAsTriggered() {
   if(med.selectedProcess.pid == "") {
@@ -568,10 +570,6 @@ void MainUi::setupSignals() {
                    this,
                    SLOT(onStoreClearClicked()));
 
-  QObject::connect(mainWindow->findChild<QPushButton*>("storeShiftAll"),
-                   SIGNAL(clicked()),
-                   this,
-                   SLOT(onStoreShiftAllClicked()));
   QObject::connect(mainWindow->findChild<QPushButton*>("storeShift"),
                    SIGNAL(clicked()),
                    this,
@@ -580,6 +578,10 @@ void MainUi::setupSignals() {
                    SIGNAL(clicked()),
                    this,
                    SLOT(onStoreUnshiftClicked()));
+  QObject::connect(mainWindow->findChild<QPushButton*>("moveAddress"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onStoreMoveClicked()));
 
   QObject::connect(mainWindow->findChild<QAction*>("actionSaveAs"),
                    SIGNAL(triggered()),

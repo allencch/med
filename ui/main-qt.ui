@@ -189,8 +189,11 @@
           </item>
           <item>
            <widget class="QLineEdit" name="shiftTo">
+            <property name="toolTip">
+             <string>Target shift address OR number of bytes to be moved</string>
+            </property>
             <property name="placeholderText">
-             <string>Shift to</string>
+             <string>Shift to / bytes</string>
             </property>
            </widget>
           </item>
@@ -209,9 +212,12 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="storeShiftAll">
+           <widget class="QPushButton" name="moveAddress">
+            <property name="toolTip">
+             <string>Move the selected by number of bytes (+/-)</string>
+            </property>
             <property name="text">
-             <string>Shift All</string>
+             <string>Move</string>
             </property>
            </widget>
           </item>

@@ -70,9 +70,9 @@ private slots:
   void onScanAddAllClicked();
   void onStoreNewClicked();
   void onStoreDeleteClicked();
-  void onStoreShiftAllClicked();
   void onStoreShiftClicked();
   void onStoreUnshiftClicked();
+  void onStoreMoveClicked();
   void onSaveAsTriggered();
   void onSaveTriggered();
   void onOpenTriggered();
