@@ -12,6 +12,7 @@
 #define STORE_COL_LOCK 4
 
 #include <QTreeWidgetItem>
+#include <QStatusBar>
 
 #include "gui/TreeModel.hpp"
 #include "gui/StoreTreeModel.hpp"
@@ -55,7 +56,8 @@ public:
   QLineEdit* selectedProcessLine;
   QComboBox* scanTypeCombo;
   QTreeWidget* processTreeWidget;
-  StoreTreeModel * storeModel;
+  StoreTreeModel* storeModel;
+  QStatusBar* statusBar;
 
 public slots:
   void onProcessItemDblClicked(QTreeWidgetItem* item, int column);

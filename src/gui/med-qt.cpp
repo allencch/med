@@ -160,7 +160,7 @@ void MainUi::onScanClicked() {
   string scanValue = mainWindow->findChild<QLineEdit*>("scanEntry")->text().toStdString();
 
   if(med.selectedProcess.pid == "") {
-    cerr << "No process seelcted " <<endl;
+    statusBar->showMessage("No process selected");
     return;
   }
   try {
@@ -199,7 +199,7 @@ void MainUi::onFilterClicked() {
 void MainUi::onScanClearClicked() {
   scanUpdateMutex.lock();
   scanModel->empty();
-  mainWindow->findChild<QStatusBar*>("statusbar")->showMessage("Scan cleared");
+  statusBar->showMessage("Scan cleared");
   scanUpdateMutex.unlock();
 }
 void MainUi::onStoreClearClicked() {
@@ -263,6 +263,7 @@ void storeShift(MainUi* mainUi, bool reverse = false) {
   auto storeTreeView = mainUi->storeTreeView;
   auto &storeUpdateMutex = mainUi->storeUpdateMutex;
   auto storeModel = mainUi->storeModel;
+  auto statusBar = mainUi->statusBar;
 
   long shiftFrom, shiftTo, difference;
   try {
@@ -280,7 +281,7 @@ void storeShift(MainUi* mainUi, bool reverse = false) {
 
   //Get PID
   if(med.selectedProcess.pid == "") {
-    cerr<< "No PID" <<endl;
+    statusBar->showMessage("No process selected");
     return;
   }
 
@@ -314,7 +315,7 @@ void MainUi::onStoreMoveClicked() {
 
   //Get PID
   if(med.selectedProcess.pid == "") {
-    cerr<< "No PID" <<endl;
+    statusBar->showMessage("No process selected");
     return;
   }
 
@@ -337,7 +338,7 @@ void MainUi::onStoreMoveClicked() {
 
 void MainUi::onSaveAsTriggered() {
   if(med.selectedProcess.pid == "") {
-    cerr<< "No PID" <<endl;
+    statusBar->showMessage("No process selected");
     return;
   }
   QString filename = QFileDialog::getSaveFileName(mainWindow,
@@ -356,7 +357,7 @@ void MainUi::onSaveAsTriggered() {
 
 void MainUi::onOpenTriggered() {
   if(med.selectedProcess.pid == "") {
-    cerr<< "No PID" <<endl;
+    statusBar->showMessage("No process selected");
     return;
   }
   QString filename = QFileDialog::getOpenFileName(mainWindow,
@@ -379,7 +380,7 @@ void MainUi::onOpenTriggered() {
 
 void MainUi::onReloadTriggered() {
   if(med.selectedProcess.pid == "") {
-    cerr<< "No PID" <<endl;
+    statusBar->showMessage("No process selected");
     return;
   }
   if (filename == "") {
@@ -398,6 +399,10 @@ void MainUi::onReloadTriggered() {
 
 
 void MainUi::onNewAddressTriggered() {
+  if(med.selectedProcess.pid == "") {
+    statusBar->showMessage("No process selected");
+    return;
+  }
   storeUpdateMutex.lock();
   med.addNewAddress();
   storeModel->addRow();
@@ -523,7 +528,7 @@ void MainUi::loadProcessUi() {
 
 void MainUi::setupStatusBar() {
   //Statusbar message
-  QStatusBar* statusBar = mainWindow->findChild<QStatusBar*>("statusbar");
+  statusBar = mainWindow->findChild<QStatusBar*>("statusbar");
   statusBar->showMessage("Tips: Left panel is scanned address. Right panel is stored address.");
 }
 
@@ -707,7 +712,7 @@ void MainUi::onSaveTriggered() {
     return;
   }
   med.saveFile(filename.toStdString().c_str());
-  mainWindow->findChild<QStatusBar*>("statusbar")->showMessage("Saved");
+  statusBar->showMessage("Saved");
 }
 
 void MainUi::onQuitTriggered() {
