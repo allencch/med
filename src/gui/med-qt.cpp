@@ -623,6 +623,11 @@ void MainUi::setupSignals() {
                    this,
                    SLOT(onStorePrevClicked()));
 
+  QObject::connect(mainWindow->findChild<QPushButton*>("storeDelete"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onStoreDeleteClicked()));
+
   QObject::connect(mainWindow->findChild<QPushButton*>("storeClear"),
                    SIGNAL(clicked()),
                    this,
