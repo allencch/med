@@ -74,7 +74,6 @@ private slots:
   void onStoreNextClicked();
   void onStorePrevClicked();
 
-  void onStoreDeleteClicked();
   void onStoreShiftClicked();
   void onStoreUnshiftClicked();
   void onStoreMoveClicked();
@@ -86,6 +85,7 @@ private slots:
   void onQuitTriggered();
 
   void onNewAddressTriggered();
+  void onDeleteAddressTriggered();
 
   void onScanTreeViewClicked(const QModelIndex &index);
   void onScanTreeViewDoubleClicked(const QModelIndex &index);

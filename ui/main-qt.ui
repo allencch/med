@@ -176,13 +176,6 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="storeDelete">
-            <property name="text">
-             <string>Delete</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="storeClear">
             <property name="text">
              <string>Clear</string>
@@ -272,6 +265,7 @@
      <string>A&amp;ddress</string>
     </property>
     <addaction name="actionNewAddress"/>
+    <addaction name="actionDeleteAddress"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuStore"/>
@@ -326,6 +320,14 @@
   <action name="actionShiftAll">
    <property name="text">
     <string>Shift All</string>
+   </property>
+  </action>
+  <action name="actionDeleteAddress">
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
    </property>
   </action>
  </widget>

@@ -257,24 +257,6 @@ void MainUi::onStorePrevClicked() {
 }
 
 
-void MainUi::onStoreDeleteClicked() {
-  auto indexes = storeTreeView
-    ->selectionModel()
-    ->selectedRows(STORE_COL_ADDRESS);
-
-  //Sort and reverse
-  sort(indexes.begin(), indexes.end(), [](QModelIndex a, QModelIndex b) {
-      return a.row() > b.row();
-    });
-
-  storeUpdateMutex.lock();
-  for (auto i=0;i<indexes.size();i++) {
-    med.deleteAddressByIndex(indexes[i].row());
-  }
-  storeModel->refresh();
-  storeUpdateMutex.unlock();
-}
-
 void storeShift(MainUi* mainUi, bool reverse = false) {
   auto mainWindow = mainUi->mainWindow;
   auto &med = mainUi->med;
@@ -420,6 +402,25 @@ void MainUi::onNewAddressTriggered() {
   med.addNewAddress();
   storeModel->addRow();
   storeUpdateMutex.unlock();
+}
+
+void MainUi::onDeleteAddressTriggered() {
+  auto indexes = storeTreeView
+    ->selectionModel()
+    ->selectedRows(STORE_COL_ADDRESS);
+
+  //Sort and reverse
+  sort(indexes.begin(), indexes.end(), [](QModelIndex a, QModelIndex b) {
+      return a.row() > b.row();
+    });
+
+  storeUpdateMutex.lock();
+  for (auto i=0;i<indexes.size();i++) {
+    med.deleteAddressByIndex(indexes[i].row());
+  }
+  storeModel->refresh();
+  storeUpdateMutex.unlock();
+
 }
 
 
@@ -623,11 +624,6 @@ void MainUi::setupSignals() {
                    this,
                    SLOT(onStorePrevClicked()));
 
-  QObject::connect(mainWindow->findChild<QPushButton*>("storeDelete"),
-                   SIGNAL(clicked()),
-                   this,
-                   SLOT(onStoreDeleteClicked()));
-
   QObject::connect(mainWindow->findChild<QPushButton*>("storeClear"),
                    SIGNAL(clicked()),
                    this,
@@ -671,6 +667,10 @@ void MainUi::setupSignals() {
                    SIGNAL(triggered()),
                    this,
                    SLOT(onNewAddressTriggered()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionDeleteAddress"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onDeleteAddressTriggered()));
 }
 
 void MainUi::setupUi() {
