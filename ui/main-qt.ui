@@ -156,13 +156,6 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="QPushButton" name="storeNew">
-            <property name="text">
-             <string>New</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="prevAddress">
             <property name="toolTip">
              <string>Create previous address</string>
@@ -274,7 +267,14 @@
      <string>&amp;Help</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuStore">
+    <property name="title">
+     <string>A&amp;ddress</string>
+    </property>
+    <addaction name="actionNewAddress"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuStore"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -312,10 +312,20 @@
   </action>
   <action name="actionReload">
    <property name="text">
-    <string>Reload</string>
+    <string>&amp;Reload</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionNewAddress">
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="actionShiftAll">
+   <property name="text">
+    <string>Shift All</string>
    </property>
   </action>
  </widget>

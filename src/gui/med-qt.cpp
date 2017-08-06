@@ -230,13 +230,6 @@ void MainUi::onScanAddAllClicked() {
   scanUpdateMutex.unlock();
 }
 
-void MainUi::onStoreNewClicked() {
-  storeUpdateMutex.lock();
-  med.addNewAddress();
-  storeModel->addRow();
-  storeUpdateMutex.unlock();
-}
-
 void MainUi::onStoreNextClicked() {
   auto indexes = storeTreeView->selectionModel()->selectedRows(STORE_COL_ADDRESS);
   if (indexes.size() == 0) {
@@ -355,6 +348,11 @@ void MainUi::onStoreMoveClicked() {
   storeUpdateMutex.unlock();
 }
 
+
+///////////////////
+// Menu items
+///////////////////
+
 void MainUi::onSaveAsTriggered() {
   if(med.selectedProcess.pid == "") {
     cerr<< "No PID" <<endl;
@@ -415,6 +413,19 @@ void MainUi::onReloadTriggered() {
   storeModel->refresh();
   storeUpdateMutex.unlock();
 }
+
+
+void MainUi::onNewAddressTriggered() {
+  storeUpdateMutex.lock();
+  med.addNewAddress();
+  storeModel->addRow();
+  storeUpdateMutex.unlock();
+}
+
+
+/////////////////////////////
+// Scan and Store tree view
+/////////////////////////////
 
 void MainUi::onScanTreeViewClicked(const QModelIndex &index) {
   if(index.column() == SCAN_COL_TYPE) {
@@ -603,10 +614,6 @@ void MainUi::setupSignals() {
                    SLOT(onScanAddClicked())
                    );
 
-  QObject::connect(mainWindow->findChild<QPushButton*>("storeNew"),
-                   SIGNAL(clicked()),
-                   this,
-                   SLOT(onStoreNewClicked()));
   QObject::connect(mainWindow->findChild<QPushButton*>("nextAddress"),
                    SIGNAL(clicked()),
                    this,
@@ -654,6 +661,11 @@ void MainUi::setupSignals() {
                    SIGNAL(triggered()),
                    this,
                    SLOT(onReloadTriggered()));
+
+  QObject::connect(mainWindow->findChild<QAction*>("actionNewAddress"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onNewAddressTriggered()));
 }
 
 void MainUi::setupUi() {

@@ -71,7 +71,6 @@ private slots:
   void onScanAddClicked();
   void onScanAddAllClicked();
 
-  void onStoreNewClicked();
   void onStoreNextClicked();
   void onStorePrevClicked();
 
@@ -85,6 +84,8 @@ private slots:
   void onOpenTriggered();
   void onReloadTriggered();
   void onQuitTriggered();
+
+  void onNewAddressTriggered();
 
   void onScanTreeViewClicked(const QModelIndex &index);
   void onScanTreeViewDoubleClicked(const QModelIndex &index);
