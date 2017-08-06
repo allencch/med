@@ -131,6 +131,10 @@ int scanTypeToSize(ScanType type) {
   return ret;
 }
 
+int scanTypeToSize(string type) {
+  return scanTypeToSize(stringToScanType(type));
+}
+
 int createBufferByScanType(ScanType type, void** buffer, int size) {
   int retsize = scanTypeToSize(type) * size;
   void* buf = NULL;
@@ -688,7 +692,7 @@ void Med::openFile(const char* filename) {
   ifs.close();
 
   clearStore();
-  for(int i=0;i<root.size();i++) {
+  for(int i = 0; i < (int)root.size(); i++) {
     MedAddress* address = new MedAddress();
     address->description = root[i]["description"].asString();
     address->address = hexToInt(root[i]["address"].asString());
@@ -722,13 +726,48 @@ bool Med::getStoreLockByIndex(int ind) {
   return addresses[ind]->lock;
 }
 
-void Med::addNewAddress() {
+MedAddress* Med::addNewAddress() {
   MedAddress* medAddress = new MedAddress();
   medAddress->description = "Your description";
   medAddress->address = 0;
   medAddress->setScanType("int16");
   medAddress->lock = false;
   addresses.push_back(medAddress);
+  return medAddress;
+}
+
+MedAddress* Med::duplicateAddress(int ind) {
+  if (ind < 0 || ind >= (int)addresses.size()) {
+    cerr << "Index out of range" << endl;
+    return NULL;
+  }
+  MedAddress* addr = addresses[ind];
+
+  MedAddress* newAddr = addNewAddress();
+  newAddr->address = addr->address;
+  newAddr->setScanType(addr->getScanType());
+  newAddr->lock = false;
+  return newAddr;
+}
+
+MedAddress* Med::addNextAddress(int ind) {
+  MedAddress* newAddr = duplicateAddress(ind);
+  if (!newAddr) {
+    return NULL;
+  }
+  int step = scanTypeToSize(newAddr->getScanType());
+  newAddr->address = newAddr->address + step;
+  return newAddr;
+}
+
+MedAddress* Med::addPrevAddress(int ind) {
+  MedAddress* newAddr = duplicateAddress(ind);
+  if (!newAddr) {
+    return NULL;
+  }
+  int step = scanTypeToSize(newAddr->getScanType());
+  newAddr->address = newAddr->address - step;
+  return newAddr;
 }
 
 string Med::getScanAddressByIndex(int ind) {

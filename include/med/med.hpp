@@ -76,6 +76,7 @@ ScanType stringToScanType(string scanType);
  * Convert ScanType to sizeof
  */
 int scanTypeToSize(ScanType type);
+int scanTypeToSize(string type);
 
 /**
  * @brief Convert hexadecimal string to integer value
@@ -223,7 +224,10 @@ public:
 
   bool addToStoreByIndex(int ind);
 
-  void addNewAddress();
+  MedAddress* addNewAddress();
+  MedAddress* duplicateAddress(int ind);
+  MedAddress* addNextAddress(int ind);
+  MedAddress* addPrevAddress(int ind);
   void deleteAddressByIndex(int ind);
   void shiftStoreAddresses(long diff);
   void shiftStoreAddressByIndex(int ind, long diff);

@@ -163,6 +163,26 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="prevAddress">
+            <property name="toolTip">
+             <string>Create previous address</string>
+            </property>
+            <property name="text">
+             <string>Previous</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="nextAddress">
+            <property name="toolTip">
+             <string>Create next address</string>
+            </property>
+            <property name="text">
+             <string>Next</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="storeDelete">
             <property name="text">
              <string>Delete</string>

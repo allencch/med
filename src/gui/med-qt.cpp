@@ -237,6 +237,33 @@ void MainUi::onStoreNewClicked() {
   storeUpdateMutex.unlock();
 }
 
+void MainUi::onStoreNextClicked() {
+  auto indexes = storeTreeView->selectionModel()->selectedRows(STORE_COL_ADDRESS);
+  if (indexes.size() == 0) {
+    cerr << "onStoreNextClicked: nothing selected" << endl;
+    return;
+  }
+
+  storeUpdateMutex.lock();
+  med.addNextAddress(indexes[0].row());
+  storeModel->addRow();
+  storeUpdateMutex.unlock();
+}
+
+void MainUi::onStorePrevClicked() {
+  auto indexes = storeTreeView->selectionModel()->selectedRows(STORE_COL_ADDRESS);
+  if (indexes.size() == 0) {
+    cerr << "onStorePrevClicked: nothing selected" << endl;
+    return;
+  }
+
+  storeUpdateMutex.lock();
+  med.addPrevAddress(indexes[0].row());
+  storeModel->addRow();
+  storeUpdateMutex.unlock();
+}
+
+
 void MainUi::onStoreDeleteClicked() {
   auto indexes = storeTreeView
     ->selectionModel()
@@ -580,10 +607,15 @@ void MainUi::setupSignals() {
                    SIGNAL(clicked()),
                    this,
                    SLOT(onStoreNewClicked()));
-  QObject::connect(mainWindow->findChild<QPushButton*>("storeDelete"),
+  QObject::connect(mainWindow->findChild<QPushButton*>("nextAddress"),
                    SIGNAL(clicked()),
                    this,
-                   SLOT(onStoreDeleteClicked()));
+                   SLOT(onStoreNextClicked()));
+  QObject::connect(mainWindow->findChild<QPushButton*>("prevAddress"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onStorePrevClicked()));
+
   QObject::connect(mainWindow->findChild<QPushButton*>("storeClear"),
                    SIGNAL(clicked()),
                    this,
