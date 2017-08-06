@@ -1,4 +1,3 @@
-#include <thread>
 #include <future>
 #include <string>
 #include <iostream>
