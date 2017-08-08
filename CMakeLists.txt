@@ -52,9 +52,13 @@ find_package(CxxTest)
 if(CXXTEST_FOUND)
   include_directories(${CXXTEST_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src/)
   enable_testing()
-  CXXTEST_ADD_TEST(med-test med-test.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/med-test.hpp)
-  target_link_libraries(med-test med)
+  CXXTEST_ADD_TEST(testMemOperator testMemOperator.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/MemOperator.hpp)
+  target_link_libraries(testMemOperator med)
+
+  CXXTEST_ADD_TEST(testScanParser testScanParser.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/ScanParser.hpp)
+  target_link_libraries(testScanParser med)
 endif()
 
 install(TARGETS med med-qt
