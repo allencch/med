@@ -249,6 +249,8 @@ public:
 
   void sortScanByAddress();
 
+  Byte* readMemory(MemAddr address, size_t size); // need to free
+
 private:
   static void memScan(Med* med,
                       vector<MedScan> &scanAddresses,

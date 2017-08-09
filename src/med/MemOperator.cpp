@@ -297,3 +297,31 @@ bool memWithin(const void* src, const void* low, const void* up, size_t size) {
 MemAddr addressRoundDown(MemAddr addr) {
   return addr - (addr % 16);
 }
+
+
+Byte* memRead(pid_t pid, MemAddr address, size_t size) {
+  medMutex.lock();
+  pidAttach(pid);
+
+  int memFd = getMem(pid);
+  Byte* buf = (Byte*)malloc(size + 1);
+  memset(buf, 0, size + 1);
+
+  if(lseek(memFd, address, SEEK_SET) == -1) {
+    free(buf);
+    close(memFd);
+    pidDetach(pid);
+  }
+  if(read(memFd, buf, size) == -1) {
+    free(buf);
+    close(memFd);
+    pidDetach(pid);
+    medMutex.unlock();
+    throw MedException("Address read fail: " + intToHex(address));
+  }
+
+  close(memFd);
+  pidDetach(pid);
+  medMutex.unlock();
+  return buf; // Remember to free this
+}

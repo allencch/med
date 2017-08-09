@@ -68,10 +68,17 @@
          </item>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="refresh">
+         <property name="text">
+          <string>Refresh</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>
-      <widget class="QPlainTextEdit" name="plainTextEdit"/>
+      <widget class="QPlainTextEdit" name="memArea"/>
      </item>
     </layout>
    </item>

@@ -836,3 +836,7 @@ void Med::sortScanByAddress() {
       return a.address < b.address;
     });
 }
+
+Byte* Med::readMemory(MemAddr address, size_t size) {
+  return memRead(stol(this->selectedProcess.pid), address, size);
+}

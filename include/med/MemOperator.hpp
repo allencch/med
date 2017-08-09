@@ -15,9 +15,9 @@ struct Scanner {
 };
 
 
-void memDump(pid_t pid, MemAddr address,int size);
+void memDump(pid_t pid, MemAddr address, int size);
 void memDirectDump(Byte* address, int size);
-void memWrite(pid_t pid, MemAddr address,uint8_t* data,int size);
+void memWrite(pid_t pid, MemAddr address, uint8_t* data, int size);
 
 /**
  * @deprecated
@@ -58,5 +58,7 @@ bool memWithin(const void* src, const void* low, const void* up, size_t size);
  * Round down to hexadecimal zero end
  */
 MemAddr addressRoundDown(MemAddr addr);
+
+Byte* memRead(pid_t pid, MemAddr address, size_t size);
 
 #endif
