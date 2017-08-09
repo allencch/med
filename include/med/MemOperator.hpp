@@ -54,4 +54,9 @@ bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, 
  */
 bool memWithin(const void* src, const void* low, const void* up, size_t size);
 
+/**
+ * Round down to hexadecimal zero end
+ */
+MemAddr addressRoundDown(MemAddr addr);
+
 #endif

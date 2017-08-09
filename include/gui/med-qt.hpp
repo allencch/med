@@ -89,6 +89,8 @@ private slots:
   void onNewAddressTriggered();
   void onDeleteAddressTriggered();
 
+  void onMemEditorTriggered();
+
   void onScanTreeViewClicked(const QModelIndex &index);
   void onScanTreeViewDoubleClicked(const QModelIndex &index);
 
@@ -109,8 +111,11 @@ private:
 
   TreeModel* scanModel;
 
+  QWidget* memEditor;
+
   void loadUiFiles();
   void loadProcessUi();
+  void loadMemEditor();
   void setupStatusBar();
   void setupScanTreeView();
   void setupStoreTreeView();

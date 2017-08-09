@@ -266,6 +266,8 @@
     </property>
     <addaction name="actionNewAddress"/>
     <addaction name="actionDeleteAddress"/>
+    <addaction name="separator"/>
+    <addaction name="actionMemEditor"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuStore"/>
@@ -314,7 +316,7 @@
   </action>
   <action name="actionNewAddress">
    <property name="text">
-    <string>New</string>
+    <string>&amp;New</string>
    </property>
   </action>
   <action name="actionShiftAll">
@@ -324,10 +326,15 @@
   </action>
   <action name="actionDeleteAddress">
    <property name="text">
-    <string>Delete</string>
+    <string>&amp;Delete</string>
    </property>
    <property name="shortcut">
     <string>Del</string>
+   </property>
+  </action>
+  <action name="actionMemEditor">
+   <property name="text">
+    <string>Editor</string>
    </property>
   </action>
  </widget>

@@ -1,6 +1,7 @@
 #include <string>
 #include <cxxtest/TestSuite.h>
 
+#include "med/med.hpp"
 #include "med/MemOperator.hpp"
 
 using namespace std;
@@ -57,5 +58,23 @@ public:
     TS_ASSERT_EQUALS(memCompare(src, sizeof(src),
                                 dest, sizeof(dest),
                                 ScanParser::Within), false);
+  }
+
+  void testAddressRoundDown() {
+    MemAddr addr = 0x11112222;
+    MemAddr rounded = addressRoundDown(addr);
+    TS_ASSERT_EQUALS(rounded, 0x11112220);
+
+    addr = 0xaaaabbb8;
+    rounded = addressRoundDown(addr);
+    TS_ASSERT_EQUALS(rounded, 0xaaaabbb0);
+
+    addr = 0xffffccc0;
+    rounded = addressRoundDown(addr);
+    TS_ASSERT_EQUALS(rounded, 0xffffccc0);
+
+    addr = 0x4321432f;
+    rounded = addressRoundDown(addr);
+    TS_ASSERT_EQUALS(rounded, 0x43214320);
   }
 };

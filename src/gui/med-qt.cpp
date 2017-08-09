@@ -14,6 +14,7 @@
 #include "gui/StoreTreeModel.hpp"
 #include "gui/ComboBoxDelegate.hpp"
 #include "gui/CheckBoxDelegate.hpp"
+#include "gui/MemEditor.hpp"
 #include "med/med.hpp"
 
 using namespace std;
@@ -96,6 +97,7 @@ MainUi::MainUi(QApplication* app) {
   this->app = app;
   loadUiFiles();
   loadProcessUi();
+  loadMemEditor();
   setupStatusBar();
   setupScanTreeView();
   setupStoreTreeView();
@@ -425,7 +427,10 @@ void MainUi::onDeleteAddressTriggered() {
   }
   storeModel->refresh();
   storeUpdateMutex.unlock();
+}
 
+void MainUi::onMemEditorTriggered() {
+  memEditor->show();
 }
 
 
@@ -524,6 +529,10 @@ void MainUi::loadProcessUi() {
   processTreeWidget->installEventFilter(new ProcessDialogEventListener(this));
 
   mainWindow->installEventFilter(new MainWindowEventListener(this));
+}
+
+void MainUi::loadMemEditor() {
+  memEditor = new MemEditor(mainWindow, &med);
 }
 
 void MainUi::setupStatusBar() {
@@ -676,6 +685,10 @@ void MainUi::setupSignals() {
                    SIGNAL(triggered()),
                    this,
                    SLOT(onDeleteAddressTriggered()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionMemEditor"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onMemEditorTriggered()));
 }
 
 void MainUi::setupUi() {
