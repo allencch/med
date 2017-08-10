@@ -532,7 +532,7 @@ void MainUi::loadProcessUi() {
 }
 
 void MainUi::loadMemEditor() {
-  memEditor = new MemEditor(mainWindow, this);
+  memEditor = new MemEditor(this);
 }
 
 void MainUi::setupStatusBar() {

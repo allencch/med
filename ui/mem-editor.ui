@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QLineEdit" name="baseAddress">
          <property name="placeholderText">
@@ -78,7 +78,41 @@
       </layout>
      </item>
      <item>
-      <widget class="QPlainTextEdit" name="memArea"/>
+      <widget class="QSplitter" name="splitter">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <widget class="QPlainTextEdit" name="addrArea">
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QPlainTextEdit" name="memArea">
+        <property name="minimumSize">
+         <size>
+          <width>360</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QPlainTextEdit" name="textArea">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </widget>
      </item>
     </layout>
    </item>
