@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <cctype>
 
 #include <QWidget>
 #include <QtUiTools>
@@ -69,13 +70,15 @@ void MemEditor::onBaseAddressEdited() {
 
 void MemEditor::loadMemory(MemAddr address, size_t size) {
   Byte* memory = med->readMemory(address, size);
-  string memoryView = memoryToString(memory, size);
+  string memoryView = memoryToHex(memory, size);
+  string textView = memoryToString(memory, size);
   free(memory);
 
   memArea->setPlainText(QString(memoryView.c_str()));
+  textArea->setPlainText(QString(textView.c_str()));
 }
 
-string MemEditor::memoryToString(Byte* memory, size_t size) {
+string MemEditor::memoryToHex(Byte* memory, size_t size) {
   string memoryView = "";
   char buffer[4];
   for (int i = 0; i < (int)size; i++) {
@@ -86,6 +89,22 @@ string MemEditor::memoryToString(Byte* memory, size_t size) {
     }
   }
   return memoryView;
+}
+
+string MemEditor::memoryToString(Byte* memory, size_t size) {
+  string textView = "";
+  for (int i = 0; i < (int)size; i++) {
+    if (iscntrl(memory[i])) {
+      textView += ".";
+    }
+    else {
+      textView += memory[i];
+    }
+    if (i % 16 == 15) {
+      textView += "\n";
+    }
+  }
+  return textView;
 }
 
 void  MemEditor::loadAddresses(MemAddr address, size_t size) {

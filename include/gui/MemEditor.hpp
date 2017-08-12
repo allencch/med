@@ -8,8 +8,8 @@
 #include "gui/med-qt.hpp"
 #include "med/med.hpp"
 
-const int MEMORY_SIZE = 192; // 12 lines
-const int ADDRESS_LINE = 12;
+const int MEMORY_SIZE = 384; // 12 lines
+const int ADDRESS_LINE = 24;
 
 class MemEditor : public QWidget {
   Q_OBJECT
@@ -36,6 +36,7 @@ private:
   void loadMemory(MemAddr address, size_t size = MEMORY_SIZE); // 12 lines
   void loadAddresses(MemAddr address, size_t size = ADDRESS_LINE);
 
+  static std::string memoryToHex(Byte* memory, size_t size);
   static std::string memoryToString(Byte* memory, size_t size);
 };
 
