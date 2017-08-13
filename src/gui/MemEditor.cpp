@@ -4,8 +4,10 @@
 
 #include <QWidget>
 #include <QtUiTools>
+#include <QDebug>
 
 #include "gui/MemEditor.hpp"
+#include "gui/MemEditorEventListener.hpp"
 #include "med/MemOperator.hpp"
 
 using namespace std;
@@ -32,8 +34,11 @@ MemEditor::MemEditor(MainUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   QFont font("Monospace");
   font.setStyleHint(QFont::Monospace);
   memArea->setFont(font);
+  memArea->setTextInteractionFlags(memArea->textInteractionFlags() | Qt::TextSelectableByKeyboard);
   addrArea->setFont(font);
   textArea->setFont(font);
+
+  memArea->installEventFilter(new MemEditorEventListener(this));
 
   setupSignals();
 }
@@ -70,11 +75,11 @@ void MemEditor::onBaseAddressEdited() {
 
 void MemEditor::loadMemory(MemAddr address, size_t size) {
   Byte* memory = med->readMemory(address, size);
-  string memoryView = memoryToHex(memory, size);
+  memHex = memoryToHex(memory, size);
   string textView = memoryToString(memory, size);
   free(memory);
 
-  memArea->setPlainText(QString(memoryView.c_str()));
+  memArea->setPlainText(QString(memHex.c_str()));
   textArea->setPlainText(QString(textView.c_str()));
 }
 
@@ -82,10 +87,13 @@ string MemEditor::memoryToHex(Byte* memory, size_t size) {
   string memoryView = "";
   char buffer[4];
   for (int i = 0; i < (int)size; i++) {
-    sprintf(buffer, "%02X ", memory[i]);
+    sprintf(buffer, "%02X", memory[i]);
     memoryView += buffer;
     if (i % 16 == 15) {
       memoryView += "\n";
+    }
+    else {
+      memoryView += " ";
     }
   }
   return memoryView;
@@ -107,7 +115,7 @@ string MemEditor::memoryToString(Byte* memory, size_t size) {
   return textView;
 }
 
-void  MemEditor::loadAddresses(MemAddr address, size_t size) {
+void MemEditor::loadAddresses(MemAddr address, size_t size) {
   string addressView = "";
   for (int i = 0; i < (int)size; i++) {
     addressView += intToHex(address) + "\n";

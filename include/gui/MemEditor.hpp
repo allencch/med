@@ -16,6 +16,8 @@ class MemEditor : public QWidget {
 
 public:
   MemEditor(MainUi* mainUi);
+  QPlainTextEdit* memArea;
+  std::string memHex;
 
 private slots:
   void onBaseAddressEdited();
@@ -27,7 +29,6 @@ private:
   QWidget* mainChild;
 
   QLineEdit* baseAddress;
-  QPlainTextEdit* memArea;
   QPlainTextEdit* addrArea;
   QPlainTextEdit* textArea;
 

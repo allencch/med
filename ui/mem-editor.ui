@@ -106,6 +106,12 @@
           <height>0</height>
          </size>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="overwriteMode">
+         <bool>true</bool>
+        </property>
        </widget>
        <widget class="QPlainTextEdit" name="textArea">
         <property name="readOnly">

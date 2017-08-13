@@ -41,6 +41,7 @@ protected:
         mainUi->onProcessItemDblClicked(mainUi->processTreeWidget->currentItem(), 0); //Just use the first column
       }
     }
+    return false;
   }
 private:
   MainUi* mainUi;
@@ -86,6 +87,7 @@ protected:
         }
       }
     }
+    return false;
   }
 
 private:
