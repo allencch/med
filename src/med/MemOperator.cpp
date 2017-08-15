@@ -325,3 +325,27 @@ Byte* memRead(pid_t pid, MemAddr address, size_t size) {
   medMutex.unlock();
   return buf; // Remember to free this
 }
+
+string memToString(Byte* memory, string scanType) {
+  char str[32];
+  switch(stringToScanType(scanType)) {
+  case Int8:
+    sprintf(str, "%" PRIu8, *(uint8_t*)memory);
+    break;
+  case Int16:
+    sprintf(str, "%" PRIu16, *(uint16_t*)memory);
+    break;
+  case Int32:
+    sprintf(str, "%" PRIu32, *(uint32_t*)memory);
+    break;
+  case Float32:
+    sprintf(str, "%f", *(float*)memory);
+    break;
+  case Float64:
+    sprintf(str, "%lf", *(double*)memory);
+    break;
+  case Unknown:
+    throw MedException("Error Type");
+  }
+  return string(str);
+}

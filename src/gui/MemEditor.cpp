@@ -15,6 +15,7 @@ using namespace std;
 MemEditor::MemEditor(MainUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   this->mainUi = mainUi;
   this->med = &(mainUi->med);
+  rawMemory = NULL;
 
   QUiLoader loader;
   QFile file("./mem-editor.ui");
@@ -27,6 +28,8 @@ MemEditor::MemEditor(MainUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   this->resize(800, 500);
 
   baseAddress = mainChild->findChild<QLineEdit*>("baseAddress");
+  currAddress= mainChild->findChild<QLineEdit*>("currAddress");
+  valueLine = mainChild->findChild<QLineEdit*>("value");
   memArea = mainChild->findChild<QPlainTextEdit*>("memArea");
   addrArea = mainChild->findChild<QPlainTextEdit*>("addrArea");
   textArea = mainChild->findChild<QPlainTextEdit*>("textArea");
@@ -43,11 +46,22 @@ MemEditor::MemEditor(MainUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   setupSignals();
 }
 
+MemEditor::~MemEditor() {
+  if (rawMemory) {
+    free(rawMemory);
+    rawMemory = NULL;
+  }
+}
+
 void MemEditor::setupSignals() {
   QObject::connect(baseAddress,
                    SIGNAL(editingFinished()),
                    this,
                    SLOT(onBaseAddressEdited()));
+  QObject::connect(memArea,
+                   SIGNAL(cursorPositionChanged()),
+                   this,
+                   SLOT(onMemAreaCursorPositionChanged()));
 }
 
 
@@ -56,7 +70,7 @@ void MemEditor::onBaseAddressEdited() {
   if (addr == "") {
     return;
   }
-  
+
   if (med->selectedProcess.pid == "") {
     mainUi->statusBar->showMessage("No process selected");
     return;
@@ -77,6 +91,7 @@ void MemEditor::loadMemory(MemAddr address, size_t size) {
   Byte* memory = med->readMemory(address, size);
   memHex = memoryToHex(memory, size);
   string textView = memoryToString(memory, size);
+  storeRawMemory(memory, size);
   free(memory);
 
   memArea->setPlainText(QString(memHex.c_str()));
@@ -122,4 +137,35 @@ void MemEditor::loadAddresses(MemAddr address, size_t size) {
     address += 16;
   }
   addrArea->setPlainText(QString(addressView.c_str()));
+}
+
+void MemEditor::onMemAreaCursorPositionChanged() {
+  updateCurrAddress();
+  updateValueLine();
+}
+
+void MemEditor::updateCurrAddress() {
+  int position = memArea->textCursor().position();
+  int distance = position / 3;
+
+  MemAddr base = hexToInt(baseAddress->text().toStdString());
+  MemAddr curr = base + distance;
+  currAddress->setText(intToHex(curr).c_str());
+}
+
+void MemEditor::updateValueLine() {
+  int position = memArea->textCursor().position();
+  int distance = position / 3;
+
+  string scanType = mainChild->findChild<QComboBox*>("scanType")->currentText().toStdString();
+
+  string value = memToString(rawMemory + distance, scanType);
+  valueLine->setText(value.c_str());
+}
+
+void MemEditor::storeRawMemory(Byte* memory, size_t size) {
+  if (!rawMemory) {
+    rawMemory = (Byte*)malloc(size);
+  }
+  memcpy(rawMemory, memory, size);
 }

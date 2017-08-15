@@ -60,5 +60,6 @@ bool memWithin(const void* src, const void* low, const void* up, size_t size);
 MemAddr addressRoundDown(MemAddr addr);
 
 Byte* memRead(pid_t pid, MemAddr address, size_t size);
+string memToString(Byte* memory, string scanType);
 
 #endif
