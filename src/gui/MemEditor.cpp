@@ -87,6 +87,13 @@ void MemEditor::onBaseAddressEdited() {
   }
 }
 
+void MemEditor::refresh() {
+  QString addr = baseAddress->text();
+  MemAddr roundedAddr = addressRoundDown(hexToInt(addr.toStdString()));
+  baseAddress->setText(intToHex(roundedAddr).c_str());
+  loadMemory(roundedAddr);
+}
+
 void MemEditor::loadMemory(MemAddr address, size_t size) {
   Byte* memory = med->readMemory(address, size);
   memHex = memoryToHex(memory, size);
@@ -144,12 +151,16 @@ void MemEditor::onMemAreaCursorPositionChanged() {
   updateValueLine();
 }
 
-void MemEditor::updateCurrAddress() {
-  int position = memArea->textCursor().position();
+MemAddr MemEditor::getAddressByCursorPosition(int position) {
   int distance = position / 3;
 
   MemAddr base = hexToInt(baseAddress->text().toStdString());
-  MemAddr curr = base + distance;
+  return base + distance;
+}
+
+void MemEditor::updateCurrAddress() {
+  int position = memArea->textCursor().position();
+  MemAddr curr = getAddressByCursorPosition(position);
   currAddress->setText(intToHex(curr).c_str());
 }
 
@@ -168,4 +179,20 @@ void MemEditor::storeRawMemory(Byte* memory, size_t size) {
     rawMemory = (Byte*)malloc(size);
   }
   memcpy(rawMemory, memory, size);
+}
+
+void MemEditor::writeToProcessMemory(int position, char ch) {
+  string hexaString = getHexString(position);
+  hexaString[position % 3 % 2] = ch;
+  string value = to_string(hexToInt(hexaString));
+
+  MemAddr address = getAddressByCursorPosition(position);
+  mainUi->med.setValueByAddress(address, value, "int8");
+
+  refresh();
+}
+
+string MemEditor::getHexString(int position) {
+  int rounded = position - (position % 3);
+  return memHex.substr(rounded, 2);
 }

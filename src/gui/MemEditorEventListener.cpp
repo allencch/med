@@ -73,8 +73,7 @@ bool MemEditorEventListener::handleHexaInput(int key) {
   if (isspace(memEditor->memHex[position])) {
     return false;
   }
-  memEditor->memHex[position] = ch;
-  memArea->setPlainText(memEditor->memHex.c_str());
+  memEditor->writeToProcessMemory(position, ch);
   moveCursorNext(position + 1);
   return false;
 }

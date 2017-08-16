@@ -20,6 +20,8 @@ public:
   QPlainTextEdit* memArea;
   std::string memHex;
 
+  void writeToProcessMemory(int position, char ch);
+
 private slots:
   void onBaseAddressEdited();
   void onMemAreaCursorPositionChanged();
@@ -46,6 +48,11 @@ private:
   void updateCurrAddress();
   void updateValueLine();
   void storeRawMemory(Byte* memory, size_t size);
+
+  string getHexString(int position);
+  MemAddr getAddressByCursorPosition(int position);
+
+  void refresh();
 
   static std::string memoryToHex(Byte* memory, size_t size);
   static std::string memoryToString(Byte* memory, size_t size);
