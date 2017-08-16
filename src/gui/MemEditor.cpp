@@ -94,6 +94,11 @@ void MemEditor::refresh() {
   loadMemory(roundedAddr);
 }
 
+void MemEditor::updateAddresses() {
+  QString addr = baseAddress->text();
+  loadAddresses(hexToInt(addr.toStdString()));
+}
+
 void MemEditor::loadMemory(MemAddr address, size_t size) {
   Byte* memory = med->readMemory(address, size);
   memHex = memoryToHex(memory, size);
@@ -111,7 +116,7 @@ string MemEditor::memoryToHex(Byte* memory, size_t size) {
   for (int i = 0; i < (int)size; i++) {
     sprintf(buffer, "%02X", memory[i]);
     memoryView += buffer;
-    if (i % 16 == 15) {
+    if (i % 16 == 15 && i != MEMORY_SIZE - 1) {
       memoryView += "\n";
     }
     else {

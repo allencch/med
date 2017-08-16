@@ -23,6 +23,14 @@ bool MemEditorEventListener::eventFilter(QObject* obj, QEvent* ev) {
       moveCursorForward(position + 1);
       return true;
     }
+    else if (keyEvent->key() == Qt::Key_Up) {
+      moveCursorUpward();
+      return true;
+    }
+    else if (keyEvent->key() == Qt::Key_Down) {
+      moveCursorDownward();
+      return true;
+    }
     else {
       return handleHexaInput(keyEvent->key());
     }
@@ -93,4 +101,36 @@ void MemEditorEventListener::moveCursorNext(int position) {
     cursor.setPosition(position, QTextCursor::MoveAnchor);
     memArea->setTextCursor(cursor);
   }
+}
+
+void MemEditorEventListener::moveCursorUpward() {
+  auto cursor = memArea->textCursor();
+  int position = cursor.position();
+  if (position >= 16 * 3) { // one line has 16 bytes, each byte represented by 3 characters
+    return;
+  }
+
+  MemAddr base = hexToInt(memEditor->baseAddress->text().toStdString());
+  base -= 16;
+  memEditor->baseAddress->setText(intToHex(base).c_str());
+  memEditor->refresh();
+  memEditor->updateAddresses();
+  cursor.setPosition(position, QTextCursor::MoveAnchor);
+  memArea->setTextCursor(cursor);
+}
+
+void MemEditorEventListener::moveCursorDownward() {
+  auto cursor = memArea->textCursor();
+  int position = cursor.position();
+  if (position < (ADDRESS_LINE - 1) * 16 * 3) { // one line has 16 bytes, each byte represented by 3 characters
+    return;
+  }
+
+  MemAddr base = hexToInt(memEditor->baseAddress->text().toStdString());
+  base += 16;
+  memEditor->baseAddress->setText(intToHex(base).c_str());
+  memEditor->refresh();
+  memEditor->updateAddresses();
+  cursor.setPosition(position, QTextCursor::MoveAnchor);
+  memArea->setTextCursor(cursor);
 }

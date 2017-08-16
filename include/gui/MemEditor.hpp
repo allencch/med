@@ -17,10 +17,14 @@ class MemEditor : public QWidget {
 public:
   MemEditor(MainUi* mainUi);
   virtual ~MemEditor();
+
   QPlainTextEdit* memArea;
   std::string memHex;
+  QLineEdit* baseAddress;
 
   void writeToProcessMemory(int position, char ch);
+  void refresh();
+  void updateAddresses();
 
 private slots:
   void onBaseAddressEdited();
@@ -32,7 +36,6 @@ private:
   QWidget* parent;
   QWidget* mainChild;
 
-  QLineEdit* baseAddress;
   QLineEdit* currAddress;
   QLineEdit* valueLine;
   QPlainTextEdit* addrArea;
@@ -51,8 +54,6 @@ private:
 
   string getHexString(int position);
   MemAddr getAddressByCursorPosition(int position);
-
-  void refresh();
 
   static std::string memoryToHex(Byte* memory, size_t size);
   static std::string memoryToString(Byte* memory, size_t size);
