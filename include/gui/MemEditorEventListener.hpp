@@ -11,4 +11,6 @@ private:
 
   void moveCursorBackward(int position);
   void moveCursorForward(int position);
+  bool handleHexaInput(int key);
+  void moveCursorNext(int position);
 };

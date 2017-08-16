@@ -23,6 +23,9 @@ bool MemEditorEventListener::eventFilter(QObject* obj, QEvent* ev) {
       moveCursorForward(position + 1);
       return true;
     }
+    else {
+      return handleHexaInput(keyEvent->key());
+    }
   }
   return false;
 }
@@ -51,6 +54,40 @@ void MemEditorEventListener::moveCursorForward(int position) {
 
   if (isspace(memHex[position])) {
     moveCursorForward(position + 1);
+  }
+  else {
+    auto cursor = memArea->textCursor();
+    cursor.setPosition(position, QTextCursor::MoveAnchor);
+    memArea->setTextCursor(cursor);
+  }
+}
+
+bool MemEditorEventListener::handleHexaInput(int key) {
+  if (!((key >= Qt::Key_0 && key <= Qt::Key_9) ||
+        (key >= Qt::Key_A && key <= Qt::Key_F))) {
+    return false;
+  }
+  char ch = key;
+  auto cursor = memArea->textCursor();
+  int position = cursor.position();
+  if (isspace(memEditor->memHex[position])) {
+    return false;
+  }
+  memEditor->memHex[position] = ch;
+  memArea->setPlainText(memEditor->memHex.c_str());
+  moveCursorNext(position + 1);
+  return false;
+}
+
+void MemEditorEventListener::moveCursorNext(int position) {
+  auto& memHex = memEditor->memHex;
+
+  if (position >= (int)memHex.size()) {
+    return;
+  }
+  
+  if (isspace(memHex[position])) {
+    moveCursorNext(position + 1);
   }
   else {
     auto cursor = memArea->textCursor();
