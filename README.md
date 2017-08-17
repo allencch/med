@@ -1,8 +1,10 @@
 # Med (Memory Editor)
 
-There was a memory editor in Windows, that was Game Master. But it was not a freeware. And there is a freeware memory editor, it is ArtMoney. But it is also for Windows only. In Linux, there is only one memory editor, scanmem with GameConqueror as the GUI. However, there is a lot of limitation from scanmem and GameConqueror. Thus, that is why I decided to create one which can fit my needs.
+There was a memory editor in Windows, that was Game Master. But it was not a freeware. And there is a freeware memory editor, it is ArtMoney. But it is also for Windows only. In Linux, there is only one memory editor, scanmem with GameConqueror as the GUI. However, there is a lot of limitation from scanmem and GameConqueror. Thus, I decided to create one which can fit my needs.
 
 Med is still in the development, it is not stable. Anyone can help to improve the program.
+
+![Memory editing](http://i.imgur.com/6gSR0WI.png)
 
 
 ## Usage
@@ -84,7 +86,7 @@ cmake ../
 make  
 ```
 
-1. To run the GUI, make sure the `main-qt.ui` and `process.ui` are together with the compiled binary files, and enter
+1. To run the GUI, make sure the `*.ui` files are together with the compiled binary files, and enter
 
 `sudo ./med-qt`
 

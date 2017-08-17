@@ -68,7 +68,7 @@ endif()
 install(TARGETS med med-qt
   RUNTIME DESTINATION /opt/med
   LIBRARY DESTINATION lib)
-install(FILES ui/main-qt.ui ui/process.ui
+install(FILES ui/main-qt.ui ui/process.ui ui/mem-editor.ui
   DESTINATION /opt/med)
 install(FILES med DESTINATION bin
   PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ)
