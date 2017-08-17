@@ -1,5 +1,6 @@
 #include "med/med.hpp"
 #include "med/MedAddress.hpp"
+#include "med/MedCommon.hpp"
 
 MedAddress::MedAddress() {
   this->lock = false;
@@ -26,4 +27,11 @@ void MedAddress::unlockValue() {
   this->lockThread->join();
   delete this->lockThread;
   this->lockThread = NULL;
+}
+
+void MedAddress::setLockedValue(string value) {
+  lockedValue = value;
+}
+string MedAddress::getLockedValue() {
+  return lockedValue;
 }

@@ -1,6 +1,7 @@
 #include "med/med.hpp"
 #include "med/MedScan.hpp"
 #include "med/MemOperator.hpp"
+#include "med/MedCommon.hpp"
 
 
 /*******************

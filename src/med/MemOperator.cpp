@@ -10,6 +10,7 @@
 #include <fcntl.h> //open, read, lseek
 
 #include "med/MemOperator.hpp"
+#include "med/MedCommon.hpp"
 
 using namespace std;
 
