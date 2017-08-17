@@ -33,6 +33,7 @@ MemEditor::MemEditor(MainUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   memArea = mainChild->findChild<QPlainTextEdit*>("memArea");
   addrArea = mainChild->findChild<QPlainTextEdit*>("addrArea");
   textArea = mainChild->findChild<QPlainTextEdit*>("textArea");
+  refreshButton = mainChild->findChild<QPushButton*>("refresh");
 
   QFont font("Monospace");
   font.setStyleHint(QFont::Monospace);
@@ -62,6 +63,10 @@ void MemEditor::setupSignals() {
                    SIGNAL(cursorPositionChanged()),
                    this,
                    SLOT(onMemAreaCursorPositionChanged()));
+  QObject::connect(refreshButton,
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onRefreshButtonClicked()));
 }
 
 
@@ -200,4 +205,8 @@ void MemEditor::writeToProcessMemory(int position, char ch) {
 string MemEditor::getHexString(int position) {
   int rounded = position - (position % 3);
   return memHex.substr(rounded, 2);
+}
+
+void MemEditor::onRefreshButtonClicked() {
+  refresh();
 }

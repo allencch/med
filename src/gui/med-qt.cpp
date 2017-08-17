@@ -156,22 +156,19 @@ void MainUi::onProcessItemDblClicked(QTreeWidgetItem* item, int column) {
 }
 
 void MainUi::onScanClicked() {
-  scanUpdateMutex.lock();
-
-  //Get scanned type
-  string scanType = scanTypeCombo->currentText().toStdString();
-
-  string scanValue = mainWindow->findChild<QLineEdit*>("scanEntry")->text().toStdString();
-
   if(med.selectedProcess.pid == "") {
     statusBar->showMessage("No process selected");
-    scanUpdateMutex.unlock();
     return;
   }
+
+  string scanValue = mainWindow->findChild<QLineEdit*>("scanEntry")->text().toStdString();
   if (QString(scanValue.c_str()).trimmed() == "") {
-    scanUpdateMutex.unlock();
     return;
   }
+
+  string scanType = scanTypeCombo->currentText().toStdString();
+
+  scanUpdateMutex.lock();
 
   try {
     med.scan(scanValue, scanType);
@@ -189,12 +186,19 @@ void MainUi::onScanClicked() {
 }
 
 void MainUi::onFilterClicked() {
-  scanUpdateMutex.lock();
-
-  //Get scanned type
-  string scanType = scanTypeCombo->currentText().toStdString();
+  if(med.selectedProcess.pid == "") {
+    statusBar->showMessage("No process selected");
+    return;
+  }
 
   string scanValue = mainWindow->findChild<QLineEdit*>("scanEntry")->text().toStdString();
+  if (QString(scanValue.c_str()).trimmed() == "") {
+    return;
+  }
+
+  string scanType = scanTypeCombo->currentText().toStdString();
+
+  scanUpdateMutex.lock();
 
   med.filter(scanValue, scanType);
 

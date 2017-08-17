@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QLineEdit>
 #include <QPlainTextEdit>
+#include <QPushButton>
 #include "gui/med-qt.hpp"
 #include "med/med.hpp"
 
@@ -29,6 +30,7 @@ public:
 private slots:
   void onBaseAddressEdited();
   void onMemAreaCursorPositionChanged();
+  void onRefreshButtonClicked();
 
 private:
   Med* med;
@@ -40,6 +42,7 @@ private:
   QLineEdit* valueLine;
   QPlainTextEdit* addrArea;
   QPlainTextEdit* textArea;
+  QPushButton* refreshButton;
 
   Byte* rawMemory; // For re-use without keep read from PID
 
