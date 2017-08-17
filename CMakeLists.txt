@@ -19,7 +19,8 @@ add_library(med SHARED
   src/med/med.cpp
   src/med/ScanParser.cpp
   src/med/MemOperator.cpp
-  src/med/ThreadManager.cpp)
+  src/med/ThreadManager.cpp
+  src/med/MedScan.cpp)
 target_link_libraries(med ${JSONCPP_LIBRARIES} -lpthread)
 
 # Because the header files are located in different location,

@@ -31,6 +31,8 @@
 #include <vector>
 #include <exception>
 
+#include "med/MedTypes.hpp"
+#include "med/MedScan.hpp"
 #include "med/MedException.hpp"
 #include "med/ScanParser.hpp"
 #include "med/ThreadManager.hpp"
@@ -42,31 +44,6 @@ extern std::mutex medMutex; //One and only one, globally accessible
 const int SCAN_ADDRESS_VISIBLE_SIZE = 800;
 const int REFRESH_RATE = 800;
 
-typedef unsigned long MemAddr;
-typedef unsigned char Byte;
-
-struct ProcMaps {
-  vector<MemAddr> starts;
-  vector<MemAddr> ends;
-};
-
-struct Process {
-  string pid;
-  string cmdline; //aka "process" in GUI
-};
-
-
-enum ScanType {
-  Int8,
-  Int16,
-  Int32,
-  Float32,
-  Float64,
-  Unknown
-};
-
-
-
 /**
  * Convert string to ScanType, they are "int8", "int16", etc.
  */
@@ -77,6 +54,8 @@ ScanType stringToScanType(string scanType);
  */
 int scanTypeToSize(ScanType type);
 int scanTypeToSize(string type);
+
+string scanTypeToString(ScanType scanType);
 
 /**
  * @brief Convert hexadecimal string to integer value
@@ -141,26 +120,6 @@ string pidName(string pid);
 class MedAddress; //Prototype
 void lockValue(string pid, MedAddress* address);
 
-
-
-/**
- * This is the Scanner replacement
- */
-class MedScan {
-public:
-  MedScan();
-  MedScan(MemAddr address);
-  MemAddr address;
-
-  string getScanType();
-  void setScanType(string s);
-  ScanType scanType; //direct access
-
-  //No value, because value is calculated based on scan type
-  string getValue(long pid);
-  string getValue(long pid, string scanType);
-  void setValue(long pid, string val);
-};
 
 /**
  * This is the address will be saved, re-use, lock, etc.
