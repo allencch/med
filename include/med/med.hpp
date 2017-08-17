@@ -33,6 +33,7 @@
 
 #include "med/MedTypes.hpp"
 #include "med/MedScan.hpp"
+#include "med/MedAddress.hpp"
 #include "med/MedException.hpp"
 #include "med/ScanParser.hpp"
 #include "med/ThreadManager.hpp"
@@ -121,28 +122,7 @@ class MedAddress; //Prototype
 void lockValue(string pid, MedAddress* address);
 
 
-/**
- * This is the address will be saved, re-use, lock, etc.
- */
-class MedAddress : public MedScan {
-  friend class Med;
-public:
-  MedAddress();
-  MedAddress(MemAddr address);
-  ~MedAddress();
 
-  string description;
-  bool lock; /**< Not using mutex */
-
-  void lockValue(string pid);
-  void unlockValue();
-  void setLockedValue(string value);
-  string getLockedValue();
-
-private:
-  string lockedValue;
-  std::thread* lockThread;
-};
 
 /**
  * This is the core scanner. Only one scanner
