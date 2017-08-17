@@ -174,12 +174,14 @@ public:
 
   string description;
   bool lock; /**< Not using mutex */
-  string lockedValue;
 
   void lockValue(string pid);
   void unlockValue();
+  void setLockedValue(string value);
+  string getLockedValue();
 
 private:
+  string lockedValue;
   std::thread* lockThread;
 };
 

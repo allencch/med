@@ -44,6 +44,7 @@ bool StoreTreeModel::setData(const QModelIndex &index, const QVariant &value, in
   if(index.column() == STORE_COL_VALUE) {
     try {
       //TODO: Refactor
+      med->addresses[row]->setLockedValue(value.toString().toStdString());
       med->setValueByAddress(med->addresses[row]->address,
                              value.toString().toStdString(),
                              med->addresses[row]->getScanType());
@@ -55,9 +56,9 @@ bool StoreTreeModel::setData(const QModelIndex &index, const QVariant &value, in
     try {
       //TODO: refactor
       med->addresses[row]->setScanType(value.toString().toStdString());
-      string value2 = med->getValueByAddress(med->addresses[row]->address,
-                                             value.toString().toStdString());
-      QVariant valueToSet = QString::fromStdString(value2);
+      string valueByAddress = med->getValueByAddress(med->addresses[row]->address,
+                                                     value.toString().toStdString());
+      QVariant valueToSet = QString::fromStdString(valueByAddress);
 
       TreeItem *item = getItem(index);
       item->setData(STORE_COL_VALUE, valueToSet); //Update the target value
@@ -122,7 +123,7 @@ void StoreTreeModel::refreshValues() {
 
 void StoreTreeModel::refresh() {
   this->clearAll();
-  for(int i=0;i<med->addresses.size();i++) {
+  for(int i = 0; i < (int)med->addresses.size(); i++) {
     string address = med->getStoreAddressByIndex(i);
     string value;
     try {

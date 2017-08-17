@@ -376,7 +376,7 @@ void lockValue(string pid, MedAddress* address) {
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(REFRESH_RATE));
     try {
-      address->setValue(stol(pid), address->lockedValue);
+      address->setValue(stol(pid), address->getLockedValue());
     } catch(MedException& ex) {
       cerr << "Lock value failed: " << ex.getMessage() << endl;
     }
@@ -768,6 +768,13 @@ MedAddress* Med::addPrevAddress(int ind) {
   int step = scanTypeToSize(newAddr->getScanType());
   newAddr->address = newAddr->address - step;
   return newAddr;
+}
+
+void MedAddress::setLockedValue(string value) {
+  lockedValue = value;
+}
+string MedAddress::getLockedValue() {
+  return lockedValue;
 }
 
 string Med::getScanAddressByIndex(int ind) {
