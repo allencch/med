@@ -165,8 +165,14 @@ void MainUi::onScanClicked() {
 
   if(med.selectedProcess.pid == "") {
     statusBar->showMessage("No process selected");
+    scanUpdateMutex.unlock();
     return;
   }
+  if (QString(scanValue.c_str()).trimmed() == "") {
+    scanUpdateMutex.unlock();
+    return;
+  }
+
   try {
     med.scan(scanValue, scanType);
   } catch(MedException &ex) {
