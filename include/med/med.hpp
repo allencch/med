@@ -31,6 +31,8 @@
 #include <vector>
 #include <exception>
 
+#include <json/json.h>
+
 #include "med/MedTypes.hpp"
 #include "med/MedScan.hpp"
 #include "med/MedAddress.hpp"
@@ -66,6 +68,7 @@ public:
   void filter(string scanValue, string scanType);
 
   vector<Process> listProcesses();
+  string notes;
 
   string getScanAddressValueByIndex(int ind, string scanType);
   string getScanValueByIndex(int ind);
@@ -84,6 +87,8 @@ public:
 
   void saveFile(const char* filename);
   void openFile(const char* filename);
+  void loadLegacyJson(Json::Value& root);
+  void loadJson(Json::Value& root);
 
   bool addToStoreByIndex(int ind);
 

@@ -217,7 +217,6 @@ ProcMaps getMaps(pid_t pid) {
   MemAddr start, end;
   char rd, wr;
   int inode;
-  //int ret;
   char sp; //shared or private
   char fname[128];
 
@@ -227,14 +226,14 @@ ProcMaps getMaps(pid_t pid) {
   while(fgets(line,255,file)) {
     //parse line
     //the empty pathname has to be scan also
-    if(sscanf(line,"%lx-%lx %c%c%c%c %s %s %u %s",
-              &start,&end,
-              &rd,&wr,useless,&sp,
-              useless,useless,&inode,fname) <9) {
+    if (sscanf(line, "%lx-%lx %c%c%c%c %s %s %u %s",
+              &start, &end,
+              &rd, &wr, useless, &sp,
+              useless, useless, &inode, fname) < 9) {
       continue;
     }
 
-    if(rd == 'r' && wr == 'w' && ((end - start) > 0)) {
+    if (rd == 'r' && wr == 'w' && ((end - start) > 0)) {
       procMaps.starts.push_back(start);
       procMaps.ends.push_back(end);
     }

@@ -15,14 +15,10 @@
 #include <fstream>
 #include <iterator>
 #include <vector>
-#include <chrono>
 #include <algorithm>
-#include <functional>
 #include <mutex>
 
 #include <unistd.h> //getpagesize()
-
-#include <json/json.h>
 
 #include "med/med.hpp"
 #include "med/MemOperator.hpp"
@@ -241,8 +237,10 @@ bool Med::addToStoreByIndex(int index) {
 
 void Med::saveFile(const char* filename) {
   Json::Value root;
+  Json::Value addresses;
+  root["addresses"] = addresses;
 
-  for(auto address: this->addresses) {
+  for (auto address: this->addresses) {
     Json::Value pairs;
     pairs["description"] = address->description;
     pairs["address"] = intToHex(address->address);
@@ -253,30 +251,21 @@ void Med::saveFile(const char* filename) {
       pairs["value"] = "";
     }
     pairs["lock"] = address->lock;
-    root.append(pairs);
+    root["addresses"].append(pairs);
   }
+  root["notes"] = notes;
+
   ofstream ofs;
   ofs.open(filename);
-  if(ofs.fail()) {
+  if (ofs.fail()) {
     throw MedException(string("Save JSON: Fail to open file ") + filename);
   }
   ofs << root << endl;
   ofs.close();
 }
 
-void Med::openFile(const char* filename) {
-  Json::Value root;
-
-  ifstream ifs;
-  ifs.open(filename);
-  if(ifs.fail()) {
-    throw MedException(string("Open JSON: Fail to open file ") + filename);
-  }
-  ifs >> root;
-  ifs.close();
-
-  clearStore();
-  for(int i = 0; i < (int)root.size(); i++) {
+void Med::loadLegacyJson(Json::Value& root) {
+  for (int i = 0; i < (int)root.size(); i++) {
     MedAddress* address = new MedAddress();
     address->description = root[i]["description"].asString();
     address->address = hexToInt(root[i]["address"].asString());
@@ -284,6 +273,40 @@ void Med::openFile(const char* filename) {
     address->lock = false; // always open as false, so that do not update the value
 
     this->addresses.push_back(address);
+  }
+}
+
+void Med::loadJson(Json::Value& root) {
+  auto& addresses = root["addresses"];
+  for (int i = 0; i < (int)addresses.size(); i++) {
+    MedAddress* address = new MedAddress();
+    address->description = addresses[i]["description"].asString();
+    address->address = hexToInt(addresses[i]["address"].asString());
+    address->setScanType(addresses[i]["type"].asString());
+    address->lock = false; // always open as false, so that do not update the value
+
+    this->addresses.push_back(address);
+  }
+  notes = root["notes"].asString();
+}
+
+void Med::openFile(const char* filename) {
+  Json::Value root;
+
+  ifstream ifs;
+  ifs.open(filename);
+  if (ifs.fail()) {
+    throw MedException(string("Open JSON: Fail to open file ") + filename);
+  }
+  ifs >> root;
+  ifs.close();
+
+  clearStore();
+  if (root.isArray()) {
+    loadLegacyJson(root);
+  }
+  else {
+    loadJson(root);
   }
 }
 
