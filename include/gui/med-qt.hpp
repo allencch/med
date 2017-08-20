@@ -13,6 +13,7 @@
 
 #include <QTreeWidgetItem>
 #include <QStatusBar>
+#include <QPlainTextEdit>
 
 #include "gui/TreeModel.hpp"
 #include "gui/StoreTreeModel.hpp"
@@ -101,6 +102,8 @@ private slots:
   void onStoreTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
 
   void onStoreHeaderClicked(int logicalIndex);
+  void onShowNotesTriggered(bool checked);
+  void onNotesAreaChanged();
 
 private:
   QApplication* app;
@@ -113,6 +116,8 @@ private:
 
   QWidget* memEditor;
 
+  QPlainTextEdit* notesArea;
+
   void loadUiFiles();
   void loadProcessUi();
   void loadMemEditor();
@@ -123,6 +128,8 @@ private:
   void setupUi();
   void updateNumberOfAddresses(QWidget* mainWindow);
   void setWindowTitle();
+
+  void openFile(QString filename);
 };
 
 #endif

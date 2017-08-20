@@ -14,222 +14,249 @@
    <string>Med</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
-    <property name="leftMargin">
-     <number>9</number>
-    </property>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="sizeConstraint">
-       <enum>QLayout::SetDefaultConstraint</enum>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QLineEdit" name="selectedProcess">
-        <property name="toolTip">
-         <string/>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
         </property>
-        <property name="readOnly">
-         <bool>true</bool>
+        <property name="bottomMargin">
+         <number>0</number>
         </property>
-        <property name="placeholderText">
-         <string>Click Process to select a target process</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="process">
-        <property name="text">
-         <string>Process</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QLineEdit" name="scanEntry"/>
-      </item>
-      <item>
-       <widget class="QLabel" name="found">
-        <property name="minimumSize">
-         <size>
-          <width>65</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Number of address found</string>
-        </property>
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="scanType">
         <item>
-         <property name="text">
-          <string>int8</string>
-         </property>
+         <widget class="QLineEdit" name="selectedProcess">
+          <property name="toolTip">
+           <string/>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string>Click Process to select a target process</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <property name="text">
-          <string>int16</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>int32</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>float32</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>float64</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="scanButton">
-        <property name="text">
-         <string>Scan</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="filterButton">
-        <property name="text">
-         <string>Filter</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QTreeView" name="scanTreeView"/>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QPushButton" name="scanAdd">
-            <property name="text">
-             <string>Add</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="scanAddAll">
-            <property name="text">
-             <string>Add All</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="scanClear">
-            <property name="text">
-             <string>Clear</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QPushButton" name="process">
+          <property name="text">
+           <string>Process</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QTreeView" name="storeTreeView"/>
+         <widget class="QLineEdit" name="scanEntry"/>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="QPushButton" name="prevAddress">
-            <property name="toolTip">
-             <string>Create previous address</string>
-            </property>
-            <property name="text">
-             <string>Previous</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="nextAddress">
-            <property name="toolTip">
-             <string>Create next address</string>
-            </property>
-            <property name="text">
-             <string>Next</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="storeClear">
-            <property name="text">
-             <string>Clear</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QLabel" name="found">
+          <property name="minimumSize">
+           <size>
+            <width>65</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Number of address found</string>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <widget class="QComboBox" name="scanType">
           <item>
-           <widget class="QLineEdit" name="shiftFrom">
-            <property name="placeholderText">
-             <string>Shift from</string>
-            </property>
-           </widget>
+           <property name="text">
+            <string>int8</string>
+           </property>
           </item>
           <item>
-           <widget class="QLineEdit" name="shiftTo">
-            <property name="toolTip">
-             <string>Target shift address OR number of bytes to be moved</string>
-            </property>
-            <property name="placeholderText">
-             <string>Shift to / bytes</string>
-            </property>
-           </widget>
+           <property name="text">
+            <string>int16</string>
+           </property>
           </item>
           <item>
-           <widget class="QPushButton" name="storeShift">
-            <property name="text">
-             <string>Shift</string>
-            </property>
-           </widget>
+           <property name="text">
+            <string>int32</string>
+           </property>
           </item>
           <item>
-           <widget class="QPushButton" name="storeUnshift">
-            <property name="text">
-             <string>Unshift</string>
-            </property>
-           </widget>
+           <property name="text">
+            <string>float32</string>
+           </property>
           </item>
           <item>
-           <widget class="QPushButton" name="moveAddress">
-            <property name="toolTip">
-             <string>Move the selected by number of bytes (+/-)</string>
-            </property>
-            <property name="text">
-             <string>Move</string>
-            </property>
-           </widget>
+           <property name="text">
+            <string>float64</string>
+           </property>
           </item>
-         </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="scanButton">
+          <property name="text">
+           <string>Scan</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="filterButton">
+          <property name="text">
+           <string>Filter</string>
+          </property>
+         </widget>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QSplitter" name="splitter_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <widget class="QSplitter" name="splitter">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <widget class="QWidget" name="">
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <widget class="QTreeView" name="scanTreeView">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QPushButton" name="scanAdd">
+               <property name="text">
+                <string>Add</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="scanAddAll">
+               <property name="text">
+                <string>Add All</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="scanClear">
+               <property name="text">
+                <string>Clear</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QPlainTextEdit" name="notes">
+          <property name="placeholderText">
+           <string>Notes are written here</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QTreeView" name="storeTreeView"/>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QPushButton" name="prevAddress">
+              <property name="toolTip">
+               <string>Create previous address</string>
+              </property>
+              <property name="text">
+               <string>Previous</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="nextAddress">
+              <property name="toolTip">
+               <string>Create next address</string>
+              </property>
+              <property name="text">
+               <string>Next</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="storeClear">
+              <property name="text">
+               <string>Clear</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="QLineEdit" name="shiftFrom">
+              <property name="placeholderText">
+               <string>Shift from</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="shiftTo">
+              <property name="toolTip">
+               <string>Target shift address OR number of bytes to be moved</string>
+              </property>
+              <property name="placeholderText">
+               <string>Shift to / bytes</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="storeShift">
+              <property name="text">
+               <string>Shift</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="storeUnshift">
+              <property name="text">
+               <string>Unshift</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="moveAddress">
+              <property name="toolTip">
+               <string>Move the selected by number of bytes (+/-)</string>
+              </property>
+              <property name="text">
+               <string>Move</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
       </item>
      </layout>
     </item>
@@ -269,7 +296,14 @@
     <addaction name="separator"/>
     <addaction name="actionMemEditor"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionShowNotes"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuView"/>
    <addaction name="menuStore"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -334,7 +368,15 @@
   </action>
   <action name="actionMemEditor">
    <property name="text">
-    <string>Editor</string>
+    <string>&amp;Editor</string>
+   </property>
+  </action>
+  <action name="actionShowNotes">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Notes</string>
    </property>
   </action>
  </widget>

@@ -381,15 +381,8 @@ void MainUi::onOpenTriggered() {
   if (filename == "") {
     return;
   }
-  this->filename = filename;
-  setWindowTitle();
 
-  med.openFile(filename.toStdString().c_str());
-
-  storeUpdateMutex.lock();
-  storeModel->clearAll();
-  storeModel->refresh();
-  storeUpdateMutex.unlock();
+  openFile(filename);
 }
 
 void MainUi::onReloadTriggered() {
@@ -400,6 +393,11 @@ void MainUi::onReloadTriggered() {
   if (filename == "") {
     return;
   }
+
+  openFile(filename);
+}
+
+void MainUi::openFile(QString filename) {
   this->filename = filename;
   setWindowTitle();
 
@@ -409,6 +407,8 @@ void MainUi::onReloadTriggered() {
   storeModel->clearAll();
   storeModel->refresh();
   storeUpdateMutex.unlock();
+
+  notesArea->setPlainText(QString::fromStdString(med.notes));
 }
 
 
@@ -515,6 +515,7 @@ void MainUi::loadUiFiles() {
   storeTreeView = mainWindow->findChild<QTreeView*>("storeTreeView");
   selectedProcessLine = mainWindow->findChild<QLineEdit*>("selectedProcess");
   scanTypeCombo = mainWindow->findChild<QComboBox*>("scanType");
+  notesArea = mainWindow->findChild<QPlainTextEdit*>("notes");
 }
 
 void MainUi::loadProcessUi() {
@@ -701,6 +702,15 @@ void MainUi::setupSignals() {
                    SIGNAL(triggered()),
                    this,
                    SLOT(onMemEditorTriggered()));
+
+  QObject::connect(mainWindow->findChild<QAction*>("actionShowNotes"),
+                   SIGNAL(triggered(bool)),
+                   this,
+                   SLOT(onShowNotesTriggered(bool)));
+  QObject::connect(notesArea,
+                   SIGNAL(textChanged()),
+                   this,
+                   SLOT(onNotesAreaChanged()));
 }
 
 void MainUi::setupUi() {
@@ -715,6 +725,14 @@ void MainUi::setupUi() {
 
   //Multi-threading
   refreshThread = new std::thread(MainUi::refresh, this);
+
+  QAction* showNotesAction = mainWindow->findChild<QAction*>("actionShowNotes");
+  if (showNotesAction->isChecked()) {
+    notesArea->show();
+  }
+  else {
+    notesArea->hide();
+  }
 }
 
 void MainUi::updateNumberOfAddresses(QWidget* mainWindow) {
@@ -742,6 +760,19 @@ void MainUi::onSaveTriggered() {
 
 void MainUi::onQuitTriggered() {
   app->quit();
+}
+
+void MainUi::onShowNotesTriggered(bool checked) {
+  if (checked) {
+    notesArea->show();
+  }
+  else {
+    notesArea->hide();
+  }
+}
+
+void MainUi::onNotesAreaChanged() {
+  med.notes = notesArea->toPlainText().toStdString();
 }
 
 ////////////////////////
