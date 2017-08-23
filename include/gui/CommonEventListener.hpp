@@ -1,4 +1,7 @@
-#include <QObject>
+#ifndef COMMON_EVENT_LISTENER_HPP
+#define COMMON_EVENT_LISTENER_HPP
+
+#include <QTreeView>
 
 #include "gui/med-qt.hpp"
 
@@ -12,14 +15,28 @@ private:
   MainUi* mainUi;
 };
 
-
-class MainWindowEventListener : public QObject {
+class ScanTreeEventListener : public QObject {
   Q_OBJECT
 public:
-  MainWindowEventListener(MainUi* mainUi);
+  ScanTreeEventListener(QTreeView* treeView, MainUi* mainUi);
 protected:
-  bool eventFilter(QObject* obj, QEvent* ev) ;
+  bool eventFilter(QObject* obj, QEvent* ev);
 
 private:
   MainUi* mainUi;
+  QTreeView* treeView;
 };
+
+class StoreTreeEventListener : public QObject {
+  Q_OBJECT
+public:
+  StoreTreeEventListener(QTreeView* treeView, MainUi* mainUi);
+protected:
+  bool eventFilter(QObject* obj, QEvent* ev);
+
+private:
+  MainUi* mainUi;
+  QTreeView* treeView;
+};
+
+#endif

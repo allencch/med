@@ -441,6 +441,9 @@ void MainUi::loadUiFiles() {
   selectedProcessLine = mainWindow->findChild<QLineEdit*>("selectedProcess");
   scanTypeCombo = mainWindow->findChild<QComboBox*>("scanType");
   notesArea = mainWindow->findChild<QPlainTextEdit*>("notes");
+
+  scanTreeView->installEventFilter(new ScanTreeEventListener(scanTreeView, this));
+  storeTreeView->installEventFilter(new StoreTreeEventListener(storeTreeView, this));
 }
 
 void MainUi::loadProcessUi() {
@@ -465,8 +468,6 @@ void MainUi::loadProcessUi() {
   QObject::connect(processTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(onProcessItemDblClicked(QTreeWidgetItem*, int)));
 
   processTreeWidget->installEventFilter(new ProcessDialogEventListener(this));
-
-  mainWindow->installEventFilter(new MainWindowEventListener(this));
 }
 
 void MainUi::loadMemEditor() {
@@ -724,8 +725,6 @@ void MainUi::setStoreState(UiState state) {
 
 int main(int argc, char **argv) {
   QApplication app(argc, argv);
-  MainUi* mainUi = new MainUi(&app);
+  new MainUi(&app);
   return app.exec();
 }
-
-#include "med-qt.moc"
