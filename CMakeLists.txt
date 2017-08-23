@@ -35,7 +35,8 @@ qt5_wrap_cpp(moc_med-qt
   include/gui/StoreTreeModel.hpp
   include/gui/CheckBoxDelegate.hpp
   include/gui/MemEditor.hpp
-  include/gui/MemEditorEventListener.hpp)
+  include/gui/MemEditorEventListener.hpp
+  include/gui/CommonEventListener.hpp)
 add_library(moc-med-qt ${moc_med-qt})
 qt5_use_modules(moc-med-qt Widgets)
 
@@ -48,7 +49,8 @@ add_executable(med-qt
   src/gui/StoreTreeModel.cpp
   src/gui/CheckBoxDelegate.cpp
   src/gui/MemEditor.cpp
-  src/gui/MemEditorEventListener.cpp)
+  src/gui/MemEditorEventListener.cpp
+  src/gui/CommonEventListener.cpp)
 target_link_libraries(med-qt moc-med-qt med Qt5::UiTools)
 
 add_executable(test_thread_manager src/med/ThreadManager.cpp src/test_thread_manager.cpp)

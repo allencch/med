@@ -358,3 +358,11 @@ void lockValue(string pid, MedAddress* address) {
   }
 }
 
+
+/**
+ * This will just perform the unlock by force
+ */
+void tryUnlock(std::mutex &mutex) {
+  mutex.try_lock();
+  mutex.unlock();
+}
