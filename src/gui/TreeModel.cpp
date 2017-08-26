@@ -236,6 +236,6 @@ void TreeModel::refreshValues() {
 }
 
 void TreeModel::empty() {
-  med->scanAddresses.clear();
+  med->clearScan();
   clearAll();
 }

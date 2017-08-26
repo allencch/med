@@ -164,6 +164,6 @@ void StoreTreeModel::sortByDescription() {
 }
 
 void StoreTreeModel::empty() {
-  med->addresses.clear();
+  med->clearStore();
   TreeModel::empty();
 }

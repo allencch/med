@@ -61,6 +61,7 @@ public:
   vector<MedAddress*> addresses;
 
   void clearStore();
+  void clearScan();
 
   Process selectedProcess; /**< Not using pointer yet */
 

@@ -70,7 +70,9 @@ void MainUi::onProcessClicked() {
   }
 }
 
-void MainUi::onProcessItemDblClicked(QTreeWidgetItem* item, int column) {
+void MainUi::onProcessItemDblClicked(QTreeWidgetItem* item, int) {
+  clearAll();
+
   int index = item->treeWidget()->indexOfTopLevelItem(item); //Get the current row index
   med.selectedProcess = med.processes[med.processes.size() -1 - index];
 
@@ -106,7 +108,7 @@ void MainUi::onScanClicked() {
     scanModel->addScan(scanType);
   }
 
-  updateNumberOfAddresses(mainWindow);
+  updateNumberOfAddresses();
   scanUpdateMutex.unlock();
 }
 
@@ -131,7 +133,7 @@ void MainUi::onFilterClicked() {
     scanModel->addScan(scanType);
   }
 
-  updateNumberOfAddresses(mainWindow);
+  updateNumberOfAddresses();
   scanUpdateMutex.unlock();
 }
 
@@ -661,7 +663,7 @@ void MainUi::setupUi() {
   }
 }
 
-void MainUi::updateNumberOfAddresses(QWidget* mainWindow) {
+void MainUi::updateNumberOfAddresses() {
   char message[128];
   sprintf(message, "%ld", med.scanAddresses.size());
   mainWindow->findChild<QLabel*>("found")->setText(message);
@@ -717,6 +719,13 @@ void MainUi::setScanState(UiState state) {
 }
 void MainUi::setStoreState(UiState state) {
   storeState = state;
+}
+
+void MainUi::clearAll() {
+  filename = "";
+  onScanClearClicked();
+  onStoreClearClicked();
+  updateNumberOfAddresses();
 }
 
 //////////////////////

@@ -423,6 +423,10 @@ void Med::clearStore() {
   addresses.clear();
 }
 
+void Med::clearScan() {
+  scanAddresses.clear();
+}
+
 void Med::setStoreDescriptionByIndex(int ind, string description) {
   addresses[ind]->description = description;
 }

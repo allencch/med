@@ -126,10 +126,11 @@ private:
   void setupStoreTreeView();
   void setupSignals();
   void setupUi();
-  void updateNumberOfAddresses(QWidget* mainWindow);
+  void updateNumberOfAddresses();
   void setWindowTitle();
 
   void openFile(QString filename);
+  void clearAll();
 };
 
 #endif
