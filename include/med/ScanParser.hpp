@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "MedTypes.hpp"
+
 using namespace std;
 
 class ScanParser {
@@ -26,6 +28,7 @@ public:
   static OpType getOpType(const string &v);
   static string getValue(const string &v);
   static vector<string> getValues(const string &v);
+  static Bytes getBytes(const string &v, const string& t); /**<< Remember to delete[] */
   static bool isArray(const string &v);
 
   static bool isValid(const string &v);

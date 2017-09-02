@@ -69,6 +69,15 @@ If you have the memory addresses like HP, MP, strength, wisdom, agility, etc of 
 If we want to move back, fill in with negative value, and press move.
 
 
+## Scan by array
+
+Let's say we know a hero has the attributes like Max HP, HP, Max MP, and MP, with each 16-bits (2 bytes), then we can scan by array choosing `int16` and enter the values with comma,
+
+`3000, 2580, 1500, 1500`
+
+where the Max HP is 3000, current HP is 2580, Max MP is 1500, and current MP is 1500.
+
+
 ## Save/open file
 
 The JSON file is used. Please save the file in the JSON extension.
@@ -93,7 +102,7 @@ make
 
 # TODO
 
-1. Scan by array.
+1. ~~Scan by array.~~
 2. Memory editor dialog (view any memory as block).
 3. Scan within memory block range.
 4. Arithmetic operation with prefix notation.

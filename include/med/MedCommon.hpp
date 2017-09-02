@@ -2,6 +2,7 @@
 #define MED_COMMON_HPP
 
 #include <string>
+#include <mutex>
 
 #include "med/MedTypes.hpp"
 #include "med/MedAddress.hpp"
@@ -50,12 +51,12 @@ int createBufferByScanType(ScanType type, void** buffer, int size = 1);
  * @param buffer is to store the output address, must be free() if not used.
  * @return number of values to be scanned
  */
-int stringToRaw(string str, ScanType type, uint8_t** buffer);
+int stringToRaw(string str, ScanType type, Byte** buffer);
 
 /**
  * @param type is string in "int8", "int16", etc
  */
-int stringToRaw(string str, string type, uint8_t** buffer);
+int stringToRaw(string str, string type, Byte** buffer);
 
 /**
  * Convert the size to padded word size.
@@ -87,6 +88,9 @@ void lockValue(string pid, MedAddress* address);
 /**
  * This will just perform the unlock by force
  */
-void tryUnlock(std::mutex &mutex);
+void tryUnlock(std::mutex& mutex);
+
+void stringToMemory(const string& str, const string& type, Byte* buffer); // Similar to stringToRaw, but this doesn't create new memory
+void stringToMemory(const string& str, const ScanType& type, Byte* buffer);
 
 #endif

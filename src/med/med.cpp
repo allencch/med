@@ -42,14 +42,11 @@ void Med::scan(string v, string t) {
     return;
   }
   ScanParser::OpType op = ScanParser::getOpType(v);
-  string value = ScanParser::getValue(v);
-  if (value.length() == 0)
-    throw MedException("Scan empty string");
-  uint8_t* buffer = NULL;
-  int size = stringToRaw(value, t, &buffer);
-  Med::memScan(this, this->scanAddresses, stoi(selectedProcess.pid), buffer, size, t, op);
-  if(buffer)
-    free(buffer);
+  Bytes bytes = ScanParser::getBytes(v, t);
+
+  Med::memScan(this, this->scanAddresses, stoi(selectedProcess.pid), bytes.data, bytes.size, t, op);
+
+  delete[] bytes.data;
 }
 
 void Med::filter(string v, string t) {
@@ -59,14 +56,10 @@ void Med::filter(string v, string t) {
   }
 
   ScanParser::OpType op = ScanParser::getOpType(v);
-  string value = ScanParser::getValue(v);
-  if (v.length() == 0)
-    throw MedException("Filter empty string");
-  uint8_t* buffer = NULL;
-  int size = stringToRaw(value, t, &buffer);
-  Med::memFilter(this->scanAddresses, stoi(this->selectedProcess.pid), buffer, size, t, op);
-  if(buffer)
-    free(buffer);
+  Bytes bytes = ScanParser::getBytes(v, t);
+
+  Med::memFilter(this->scanAddresses, stoi(this->selectedProcess.pid), bytes.data, bytes.size, t, op);
+  delete[] bytes.data;
 }
 
 void Med::memScanPage(Med* med,
@@ -127,7 +120,7 @@ void Med::memScan(Med* med, vector<MedScan> &scanAddresses, pid_t pid, Byte* dat
 
   ProcMaps maps = getMaps(pid);
   int memFd = getMem(pid);
-  int srcSize = scanTypeToSize(stringToScanType(scanType));
+  int srcSize = size; // TODO: no need srcSize
 
   scanAddresses.clear();
 
@@ -159,7 +152,7 @@ void Med::memFilter(vector<MedScan> &scanAddresses, pid_t pid, Byte* data, int s
 
   int memFd = getMem(pid);
 
-  int srcSize = scanTypeToSize(stringToScanType(scanType));
+  int srcSize = size; // TODO: no need srcSize
 
   uint8_t* buf = (uint8_t*)malloc(size);
   for(unsigned int i=0;i<scanAddresses.size();i++) {

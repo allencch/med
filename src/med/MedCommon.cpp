@@ -144,7 +144,8 @@ int createBufferByScanType(ScanType type, void** buffer, int size) {
   return retsize;
 }
 
-int stringToRaw(string str, ScanType type, uint8_t** buffer) {
+
+int stringToRaw(string str, ScanType type, Byte** buffer) {
   vector<string> tokens = ScanParser::getValues(str);
 
   int size = tokens.size();
@@ -152,32 +153,7 @@ int stringToRaw(string str, ScanType type, uint8_t** buffer) {
   uint8_t* buf = *buffer;
 
   for(unsigned int i=0;i<tokens.size();i++) {
-    stringstream ss(tokens[i]);
-
-    int temp;
-    switch(type) {
-    case Int8:
-      ss >> dec >> temp; //Because it does not handle the uint8_t correctly as integer, but a character.
-      *(uint8_t*)buf = (uint8_t) temp;
-      break;
-    case Int16:
-      ss >> dec >> *(uint16_t*)buf;
-      break;
-    case Int32:
-      ss >> dec >> *(uint32_t*)buf;
-      break;
-    case Float32:
-      ss >> dec >> *(float*)buf;
-      break;
-    case Float64:
-      ss >> dec >> *(double*)buf;
-      break;
-    case Unknown:
-      break;
-    }
-    if(ss.fail()) {
-      printf("Error input: %s\n",tokens[i].c_str());
-    }
+    stringToMemory(tokens[i], type, buf);
     buf += scanTypeToSize(type);
   }
 
@@ -185,7 +161,7 @@ int stringToRaw(string str, ScanType type, uint8_t** buffer) {
 }
 
 
-int stringToRaw(string str, string type, uint8_t **buffer) {
+int stringToRaw(string str, string type, Byte** buffer) {
   ScanType scantype = stringToScanType(type);
   return stringToRaw(str, scantype, buffer);
 }
@@ -365,4 +341,38 @@ void lockValue(string pid, MedAddress* address) {
 void tryUnlock(std::mutex &mutex) {
   mutex.try_lock();
   mutex.unlock();
+}
+
+void stringToMemory(const string& str, const ScanType& type, Byte* buffer) {
+  stringstream ss(str);
+
+  int temp;
+  switch (type) {
+  case Int8:
+    ss >> dec >> temp; //Because it does not handle the uint8_t correctly as integer, but a character.
+    *(uint8_t*)buffer = (uint8_t) temp;
+    break;
+  case Int16:
+    ss >> dec >> *(uint16_t*)buffer;
+    break;
+  case Int32:
+    ss >> dec >> *(uint32_t*)buffer;
+    break;
+  case Float32:
+    ss >> dec >> *(float*)buffer;
+    break;
+  case Float64:
+    ss >> dec >> *(double*)buffer;
+    break;
+  case Unknown:
+    break;
+  }
+  if(ss.fail()) {
+    printf("Error input: %s\n", str.c_str());
+  }
+}
+
+void stringToMemory(const string& str, const string& type, Byte* buffer) {
+  ScanType scanType = stringToScanType(type);
+  stringToMemory(str, scanType, buffer);
 }

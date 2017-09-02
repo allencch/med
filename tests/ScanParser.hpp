@@ -79,4 +79,35 @@ class TestScanParser : public CxxTest::TestSuite {
     TS_ASSERT_EQUALS(values.size(), 1);
     TS_ASSERT_EQUALS(values[0], "10");
   }
+
+  void testGetBytes() {
+    string s = "1";
+    Bytes bytes = ScanParser::getBytes(s, "int8");
+    TS_ASSERT_EQUALS(bytes.data[0], 1);
+    TS_ASSERT_EQUALS(bytes.size, 1);
+    delete[] bytes.data;
+
+    s = "1,2";
+    bytes = ScanParser::getBytes(s, "int8");
+    TS_ASSERT_EQUALS(bytes.data[0], 1);
+    TS_ASSERT_EQUALS(bytes.data[1], 2);
+    TS_ASSERT_EQUALS(bytes.size, 2);
+    delete[] bytes.data;
+
+    s = "3,2";
+    bytes = ScanParser::getBytes(s, "int8");
+    TS_ASSERT_EQUALS(bytes.data[0], 3);
+    TS_ASSERT_EQUALS(bytes.data[1], 2);
+    TS_ASSERT_EQUALS(bytes.size, 2);
+    delete[] bytes.data;
+
+    s = "3, 2";
+    bytes = ScanParser::getBytes(s, "int16");
+    TS_ASSERT_EQUALS(bytes.data[0], 3);
+    TS_ASSERT_EQUALS(bytes.data[1], 0);
+    TS_ASSERT_EQUALS(bytes.data[2], 2);
+    TS_ASSERT_EQUALS(bytes.data[3], 0);
+    TS_ASSERT_EQUALS(bytes.size, 4);
+    delete[] bytes.data;
+  }
 };
