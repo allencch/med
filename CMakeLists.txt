@@ -7,11 +7,12 @@ set(CMAKE_AUTOMOC ON) #automatic moc
 
 include_directories(./include)
 
-add_definitions(${JSONCPP_CFLAGS})
-
 find_package(PkgConfig REQUIRED)
 find_package(Qt5UiTools)
 pkg_search_module(JSONCPP REQUIRED jsoncpp)
+pkg_search_module(ICU REQUIRED icu-uc)
+
+add_definitions(${JSONCPP_CFLAGS} ${ICU_CFLAGS})
 
 add_executable(testfile src/test.c)
 
@@ -22,8 +23,9 @@ add_library(med SHARED
   src/med/ThreadManager.cpp
   src/med/MedScan.cpp
   src/med/MedAddress.cpp
-  src/med/MedCommon.cpp)
-target_link_libraries(med ${JSONCPP_LIBRARIES} -lpthread)
+  src/med/MedCommon.cpp
+  src/med/Coder.cpp)
+target_link_libraries(med ${JSONCPP_LIBRARIES} ${ICU_LIBRARIES} -lpthread)
 
 # Because the header files are located in different location,
 # and these header files use Q_OBJECT, so need to generate
@@ -68,6 +70,10 @@ if(CXXTEST_FOUND)
   CXXTEST_ADD_TEST(testScanParser testScanParser.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/ScanParser.hpp)
   target_link_libraries(testScanParser med)
+
+  CXXTEST_ADD_TEST(testCoder testCoder.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/Coder.hpp)
+  target_link_libraries(testCoder med)
 endif()
 
 install(TARGETS med med-qt
