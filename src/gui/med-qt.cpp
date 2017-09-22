@@ -16,6 +16,7 @@
 #include "gui/CheckBoxDelegate.hpp"
 #include "gui/MemEditor.hpp"
 #include "gui/CommonEventListener.hpp"
+#include "gui/EncodingManager.hpp"
 #include "med/med.hpp"
 
 using namespace std;
@@ -33,6 +34,8 @@ MainUi::MainUi(QApplication* app) {
 
   scanState = UiState::Idle;
   storeState = UiState::Idle;
+
+  encodingManager = new EncodingManager(this);
 }
 
 void MainUi::refresh(MainUi* mainUi) {
@@ -642,7 +645,6 @@ void MainUi::setupSignals() {
 }
 
 void MainUi::setupUi() {
-
   //Set default scan type
   scanTypeCombo->setCurrentIndex(1);
 

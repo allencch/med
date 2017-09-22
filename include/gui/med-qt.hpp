@@ -21,11 +21,11 @@
 #include "gui/CheckBoxDelegate.hpp"
 #include "med/med.hpp"
 
-#include "med/med.hpp"
-
 const QString MAIN_TITLE = "Med";
 
 enum UiState { Idle, Editing };
+
+class EncodingManager; // Forward declaration, because of recursive include
 
 class MainUi : public QObject {
   Q_OBJECT
@@ -59,6 +59,8 @@ public:
   QTreeWidget* processTreeWidget;
   StoreTreeModel* storeModel;
   QStatusBar* statusBar;
+
+  EncodingManager* encodingManager;
 
 public slots:
   void onProcessItemDblClicked(QTreeWidgetItem* item, int column);

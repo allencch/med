@@ -6,7 +6,9 @@
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QPushButton>
+
 #include "gui/med-qt.hpp"
+#include "med/MedTypes.hpp"
 #include "med/med.hpp"
 
 const int MEMORY_SIZE = 384; // 12 lines
@@ -59,7 +61,7 @@ private:
   MemAddr getAddressByCursorPosition(int position);
 
   static std::string memoryToHex(Byte* memory, size_t size);
-  static std::string memoryToString(Byte* memory, size_t size);
+  static std::string memoryToString(Byte* memory, size_t size, EncodingType encodingType = EncodingType::Default);
 };
 
 #endif

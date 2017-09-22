@@ -128,7 +128,7 @@
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <widget class="QWidget" name="">
+         <widget class="QWidget" name="layoutWidget">
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
             <widget class="QTreeView" name="scanTreeView">
@@ -173,7 +173,7 @@
           </property>
          </widget>
         </widget>
-        <widget class="QWidget" name="">
+        <widget class="QWidget" name="layoutWidget">
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
            <widget class="QTreeView" name="storeTreeView"/>
@@ -300,7 +300,16 @@
     <property name="title">
      <string>View</string>
     </property>
+    <widget class="QMenu" name="menu_Encoding">
+     <property name="title">
+      <string>&amp;Encoding</string>
+     </property>
+     <addaction name="actionDefaultEncoding"/>
+     <addaction name="actionBig5Encoding"/>
+    </widget>
     <addaction name="actionShowNotes"/>
+    <addaction name="separator"/>
+    <addaction name="menu_Encoding"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -376,7 +385,26 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Notes</string>
+    <string>&amp;Show Notes</string>
+   </property>
+  </action>
+  <action name="actionDefaultEncoding">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Default</string>
+   </property>
+  </action>
+  <action name="actionBig5Encoding">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Big5</string>
    </property>
   </action>
  </widget>

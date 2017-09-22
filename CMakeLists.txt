@@ -16,43 +16,21 @@ add_definitions(${JSONCPP_CFLAGS} ${ICU_CFLAGS})
 
 add_executable(testfile src/test.c)
 
-add_library(med SHARED
-  src/med/med.cpp
-  src/med/ScanParser.cpp
-  src/med/MemOperator.cpp
-  src/med/ThreadManager.cpp
-  src/med/MedScan.cpp
-  src/med/MedAddress.cpp
-  src/med/MedCommon.cpp
-  src/med/Coder.cpp)
+file(GLOB med_SRC "src/med/*.cpp")
+add_library(med SHARED ${med_SRC})
 target_link_libraries(med ${JSONCPP_LIBRARIES} ${ICU_LIBRARIES} -lpthread)
 
 # Because the header files are located in different location,
 # and these header files use Q_OBJECT, so need to generate
 # moc. And create it as a static library.
-qt5_wrap_cpp(moc_med-qt
-  include/gui/med-qt.hpp
-  include/gui/TreeModel.hpp
-  include/gui/ComboBoxDelegate.hpp
-  include/gui/StoreTreeModel.hpp
-  include/gui/CheckBoxDelegate.hpp
-  include/gui/MemEditor.hpp
-  include/gui/MemEditorEventListener.hpp
-  include/gui/CommonEventListener.hpp)
+file(GLOB gui_HEADER "include/gui/*.hpp")
+qt5_wrap_cpp(moc_med-qt ${gui_HEADER})
 add_library(moc-med-qt ${moc_med-qt})
 qt5_use_modules(moc-med-qt Widgets)
 
 # qt5_generate_moc(src/gui/med-qt.cpp med-qt.moc) #Using automatic moc can solve the Q_OBJECT issue in other cpp files
-add_executable(med-qt
-  src/gui/med-qt.cpp
-  src/gui/TreeItem.cpp
-  src/gui/TreeModel.cpp
-  src/gui/ComboBoxDelegate.cpp
-  src/gui/StoreTreeModel.cpp
-  src/gui/CheckBoxDelegate.cpp
-  src/gui/MemEditor.cpp
-  src/gui/MemEditorEventListener.cpp
-  src/gui/CommonEventListener.cpp)
+file(GLOB gui_SRC "src/gui/*.cpp")
+add_executable(med-qt ${gui_SRC})
 target_link_libraries(med-qt moc-med-qt med Qt5::UiTools)
 
 add_executable(test_thread_manager src/med/ThreadManager.cpp src/test_thread_manager.cpp)
