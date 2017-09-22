@@ -37,8 +37,9 @@ MemEditor::MemEditor(MainUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   textArea = mainChild->findChild<QPlainTextEdit*>("textArea");
   refreshButton = mainChild->findChild<QPushButton*>("refresh");
 
-  QFont font("Monospace");
+  QFont font("FreeMono");
   font.setStyleHint(QFont::Monospace);
+  font.setPixelSize(14);
   memArea->setFont(font);
   memArea->setTextInteractionFlags(memArea->textInteractionFlags() | Qt::TextSelectableByKeyboard);
   addrArea->setFont(font);
@@ -121,7 +122,7 @@ string MemEditor::memoryToHex(Byte* memory, size_t size) {
   string memoryView = "";
   char buffer[4];
   for (int i = 0; i < (int)size; i++) {
-    sprintf(buffer, "%02X", memory[i]);
+    sprintf(buffer, "%02x", memory[i]);
     memoryView += buffer;
     if (i % 16 == 15 && i != MEMORY_SIZE - 1) {
       memoryView += "\n";

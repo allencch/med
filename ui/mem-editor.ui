@@ -91,7 +91,7 @@
        <widget class="QPlainTextEdit" name="addrArea">
         <property name="maximumSize">
          <size>
-          <width>150</width>
+          <width>120</width>
           <height>16777215</height>
          </size>
         </property>
@@ -102,7 +102,7 @@
        <widget class="QPlainTextEdit" name="memArea">
         <property name="minimumSize">
          <size>
-          <width>360</width>
+          <width>420</width>
           <height>0</height>
          </size>
         </property>
@@ -114,6 +114,12 @@
         </property>
        </widget>
        <widget class="QPlainTextEdit" name="textArea">
+        <property name="maximumSize">
+         <size>
+          <width>200</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="readOnly">
          <bool>true</bool>
         </property>
