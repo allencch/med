@@ -91,7 +91,7 @@
        <widget class="QPlainTextEdit" name="addrArea">
         <property name="maximumSize">
          <size>
-          <width>120</width>
+          <width>140</width>
           <height>16777215</height>
          </size>
         </property>

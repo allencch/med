@@ -15,11 +15,12 @@ QWidget* ComboBoxDelegate::createEditor(QWidget* parent,
   QObject::connect(editor, SIGNAL(currentIndexChanged(int)), this, SLOT(setData(int)));
 
   editor->addItems(QStringList() <<
-                    "int8" <<
-                    "int16" <<
-                    "int32" <<
-                    "float32" <<
-                    "float64");
+                   "int8" <<
+                   "int16" <<
+                   "int32" <<
+                   "float32" <<
+                   "float64" <<
+                   "string");
   return editor;
 }
 

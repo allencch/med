@@ -95,6 +95,11 @@
             <string>float64</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>string</string>
+           </property>
+          </item>
          </widget>
         </item>
         <item>

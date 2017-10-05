@@ -41,51 +41,57 @@ string intToHex(long hex) {
 
 
 ScanType stringToScanType(string scanType) {
-  if(scanType == "int8") {
+  if (scanType == SCAN_TYPE_INT_8) {
     return Int8;
   }
-  else if(scanType == "int16") {
+  else if (scanType == SCAN_TYPE_INT_16) {
     return Int16;
   }
-  else if(scanType == "int32") {
+  else if (scanType == SCAN_TYPE_INT_32) {
     return Int32;
   }
-  else if(scanType == "float32") {
+  else if (scanType == SCAN_TYPE_FLOAT_32) {
     return Float32;
   }
-  else if(scanType == "float64") {
+  else if (scanType == SCAN_TYPE_FLOAT_64) {
     return Float64;
+  }
+  else if (scanType == SCAN_TYPE_STRING) {
+    return String;
   }
   return Unknown;
 }
 
 string scanTypeToString(ScanType scanType) {
   string ret;
-  switch(scanType) {
+  switch (scanType) {
   case Int8:
-    ret = "int8";
+    ret = SCAN_TYPE_INT_8;
     break;
   case Int16:
-    ret = "int16";
+    ret = SCAN_TYPE_INT_16;
     break;
   case Int32:
-    ret = "int32";
+    ret = SCAN_TYPE_INT_32;
     break;
   case Float32:
-    ret = "float32";
+    ret = SCAN_TYPE_FLOAT_32;
     break;
   case Float64:
-    ret = "float64";
+    ret = SCAN_TYPE_FLOAT_64;
+    break;
+  case String:
+    ret = SCAN_TYPE_STRING;
     break;
   default:
-    ret = "unknown";
+    ret = SCAN_TYPE_UNKNOWN;
   }
   return ret;
 }
 
 int scanTypeToSize(ScanType type) {
   int ret = 0;
-  switch(type) {
+  switch (type) {
   case Int8:
     ret = sizeof(uint8_t);
     break;
@@ -101,6 +107,9 @@ int scanTypeToSize(ScanType type) {
   case Float64:
     ret = sizeof(double);
     break;
+  case String:
+    ret = 1;
+    break;
   case Unknown:
     ret = 0;
   }
@@ -114,7 +123,7 @@ int scanTypeToSize(string type) {
 int createBufferByScanType(ScanType type, void** buffer, int size) {
   int retsize = scanTypeToSize(type) * size;
   void* buf = NULL;
-  switch(type) {
+  switch (type) {
   case Int8:
     retsize = sizeof(uint8_t) * size;
     buf = malloc(sizeof(uint8_t) * size);
@@ -134,6 +143,9 @@ int createBufferByScanType(ScanType type, void** buffer, int size) {
   case Float64:
     retsize = sizeof(double) * size;
     buf = malloc(sizeof(double) * size);
+    break;
+  case String:
+    retsize = 1;
     break;
   case Unknown:
     retsize = 0;
@@ -364,6 +376,7 @@ void stringToMemory(const string& str, const ScanType& type, Byte* buffer) {
   case Float64:
     ss >> dec >> *(double*)buffer;
     break;
+  case String:
   case Unknown:
     break;
   }

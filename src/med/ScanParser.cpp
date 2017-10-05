@@ -2,6 +2,7 @@
 #include <regex>
 #include <vector>
 #include <sstream>
+#include <iostream>
 
 #include "med/ScanParser.hpp"
 #include "med/MedException.hpp"
@@ -86,6 +87,15 @@ bool ScanParser::isValid(const string &v) {
 }
 
 Bytes ScanParser::getBytes(const string& v, const string& t) {
+  if (t == SCAN_TYPE_STRING) {
+    return ScanParser::getStringBytes(v);
+  }
+  else {
+    return ScanParser::getNumericBytes(v, t);
+  }
+}
+
+Bytes ScanParser::getNumericBytes(const string& v, const string& t) {
   vector<string> values = getValues(v);
   if (values.size() == 0) {
     throw MedException("Scan empty string");
@@ -100,5 +110,22 @@ Bytes ScanParser::getBytes(const string& v, const string& t) {
     pointer += valueLength;
   }
   Bytes bytes(data, valueLength * values.size());
+  return bytes;
+}
+
+Bytes ScanParser::getStringBytes(const string& v) {
+  vector<string> values = getValues(v);
+  if (values.size() == 0) {
+    throw MedException("Scan empty string");
+  }
+  int valueLength = v.size();
+  Byte* data = new Byte[valueLength + 1];
+
+  char* pointer = (char*)data;
+  for (int i = 0; i < (int)v.size(); i++, pointer++) {
+    sprintf(pointer, "%c", v[i]);
+  }
+
+  Bytes bytes(data, valueLength);
   return bytes;
 }

@@ -34,6 +34,10 @@ public:
   static bool isValid(const string &v);
 
   static vector<string> split(const string &s, char delim);
+
+private:
+  static Bytes getNumericBytes(const string& v, const string& t);
+  static Bytes getStringBytes(const string& v);
 };
 
 #endif

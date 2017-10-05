@@ -172,8 +172,8 @@ string memValue(long pid, MemAddr address, string scanType) {
     throw MedException("Address read fail: " + intToHex(address));
   }
 
-  char str[32];
-  switch(stringToScanType(scanType)) {
+  char str[64];
+  switch (stringToScanType(scanType)) {
   case Int8:
     sprintf(str, "%" PRIu8, *(uint8_t*)buf);
     break;
@@ -189,12 +189,15 @@ string memValue(long pid, MemAddr address, string scanType) {
   case Float64:
     sprintf(str, "%lf", *(double*)buf);
     break;
+  case String:
+    sprintf(str, "%s", buf);
+    break;
   case Unknown:
     free(buf);
     close(memFd);
     pidDetach(pid);
     medMutex.unlock();
-    throw MedException("Error Type");
+    throw MedException(string("memValue: Error Type: ") + scanType);
   }
 
   free(buf);
@@ -328,8 +331,8 @@ Byte* memRead(pid_t pid, MemAddr address, size_t size) {
 }
 
 string memToString(Byte* memory, string scanType) {
-  char str[32];
-  switch(stringToScanType(scanType)) {
+  char str[64];
+  switch (stringToScanType(scanType)) {
   case Int8:
     sprintf(str, "%" PRIu8, *(uint8_t*)memory);
     break;
@@ -345,8 +348,11 @@ string memToString(Byte* memory, string scanType) {
   case Float64:
     sprintf(str, "%lf", *(double*)memory);
     break;
+  case String:
+    sprintf(str, "%s", memory);
+    break;
   case Unknown:
-    throw MedException("Error Type");
+    throw MedException("memToString: Error Type");
   }
   return string(str);
 }
