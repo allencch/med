@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include <QAction>
 #include <QMenu>
@@ -6,6 +7,7 @@
 #include "gui/med-qt.hpp"
 #include "gui/EncodingManager.hpp"
 #include "med/MedTypes.hpp"
+#include "med/Coder.hpp"
 
 using namespace std;
 
@@ -49,4 +51,14 @@ void EncodingManager::onBig5EncodingTriggered(bool value) {
 
 EncodingType EncodingManager::getEncodingType() {
   return this->encodingType;
+}
+
+string EncodingManager::convert(string text) {
+  switch (encodingType) {
+  case EncodingType::Default:
+    return text;
+  case EncodingType::Big5:
+    return convertBig5ToUtf8(text);
+  }
+  return text;
 }

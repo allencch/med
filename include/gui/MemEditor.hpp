@@ -61,7 +61,7 @@ private:
   MemAddr getAddressByCursorPosition(int position);
 
   static std::string memoryToHex(Byte* memory, size_t size);
-  static std::string memoryToString(Byte* memory, size_t size, EncodingType encodingType = EncodingType::Default);
+  static std::string memoryToString(Byte* memory, size_t size, EncodingManager* encodingManager);
 };
 
 #endif

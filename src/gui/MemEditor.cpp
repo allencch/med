@@ -10,7 +10,6 @@
 #include "gui/MemEditorEventListener.hpp"
 #include "gui/EncodingManager.hpp"
 #include "med/MemOperator.hpp"
-#include "med/Coder.hpp"
 
 using namespace std;
 
@@ -110,7 +109,7 @@ void MemEditor::updateAddresses() {
 void MemEditor::loadMemory(MemAddr address, size_t size) {
   Byte* memory = med->readMemory(address, size);
   memHex = memoryToHex(memory, size);
-  string textView = memoryToString(memory, size, mainUi->encodingManager->getEncodingType());
+  string textView = memoryToString(memory, size, mainUi->encodingManager);
   storeRawMemory(memory, size);
   free(memory);
 
@@ -134,7 +133,7 @@ string MemEditor::memoryToHex(Byte* memory, size_t size) {
   return memoryView;
 }
 
-string MemEditor::memoryToString(Byte* memory, size_t size, EncodingType encodingType) {
+string MemEditor::memoryToString(Byte* memory, size_t size, EncodingManager* encodingManager) {
   string textView = "";
   for (int i = 0; i < (int)size; i++) {
     if (iscntrl(memory[i])) {
@@ -147,13 +146,8 @@ string MemEditor::memoryToString(Byte* memory, size_t size, EncodingType encodin
       textView += "\n";
     }
   }
-  switch (encodingType) {
-  case EncodingType::Default:
-    return textView;
-  case EncodingType::Big5:
-    return convertBig5ToUtf8(textView);
-  }
-  return textView;
+
+  return encodingManager->convert(textView);
 }
 
 void MemEditor::loadAddresses(MemAddr address, size_t size) {

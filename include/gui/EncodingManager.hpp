@@ -11,6 +11,7 @@ class EncodingManager : public QObject {
 public:
   EncodingManager(MainUi* mainUi);
   EncodingType getEncodingType();
+  string convert(string text);
 
 private slots:
   void onDefaultEncodingTriggered(bool value);
