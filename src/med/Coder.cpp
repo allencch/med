@@ -19,3 +19,11 @@ string convertCode(const string& input, const char* from, const char* to) {
   src.extract(0, src.length(), &result[0], to);
   return string(result.begin(), result.end() - 1);
 }
+
+string convertToUtf8(const string& input, const char* from) {
+  return convertCode(input, from, "utf8");
+}
+
+string convertFromUtf8(const string& input, const char* to) {
+  return convertCode(input, "utf8", to);
+}

@@ -12,6 +12,7 @@ public:
   EncodingManager(MainUi* mainUi);
   EncodingType getEncodingType();
   string convert(string text);
+  string encode(string text);
 
 private slots:
   void onDefaultEncodingTriggered(bool value);

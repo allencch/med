@@ -62,3 +62,13 @@ string EncodingManager::convert(string text) {
   }
   return text;
 }
+
+string EncodingManager::encode(string text) {
+  switch (encodingType) {
+  case EncodingType::Default:
+    return text;
+  case EncodingType::Big5:
+    return convertFromUtf8(text, "big5");
+  }
+  return text;
+}

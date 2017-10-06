@@ -97,6 +97,9 @@ void MainUi::onScanClicked() {
   }
 
   string scanType = scanTypeCombo->currentText().toStdString();
+  if (scanType == SCAN_TYPE_STRING) {
+    scanValue = encodingManager->encode(scanValue);
+  }
 
   scanUpdateMutex.lock();
 
@@ -127,6 +130,9 @@ void MainUi::onFilterClicked() {
   }
 
   string scanType = scanTypeCombo->currentText().toStdString();
+  if (scanType == SCAN_TYPE_STRING) {
+    scanValue = encodingManager->encode(scanValue);
+  }
 
   scanUpdateMutex.lock();
 
