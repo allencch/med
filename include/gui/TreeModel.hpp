@@ -67,6 +67,9 @@ protected:
 
   TreeItem* getItem(const QModelIndex &index) const;
   TreeItem* rootItem;
+
+  void setValue(int row, const QVariant &value);
+  void setType(int row, const QVariant &value, const QModelIndex &index);
 };
 
 #endif // TREEMODEL_H

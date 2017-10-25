@@ -41,30 +41,12 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   if (role != Qt::EditRole)
     return false;
 
-  //Update the med
-  //Update, split this out
   int row = index.row();
-  if(index.column() == SCAN_COL_VALUE) { //value
-    try {
-      med->setValueByAddress(med->scanAddresses[row].address,
-                             value.toString().toStdString(),
-                             med->scanAddresses[row].getScanType());
-    } catch(MedException &e) {
-      cerr << "editScanValue: " << e.what() << endl;
-    }
+  if (index.column() == SCAN_COL_VALUE) {
+    setValue(row, value);
   }
   else if (index.column() == SCAN_COL_TYPE) {
-    try {
-      med->scanAddresses[row].setScanType(value.toString().toStdString());
-      string value2 = med->getValueByAddress(med->scanAddresses[row].address,
-                                             value.toString().toStdString());
-      QVariant valueToSet = QString::fromStdString(value2);
-
-      TreeItem *item = getItem(index);
-      item->setData(SCAN_COL_VALUE, valueToSet); //Update the target value
-    } catch(MedException &e) {
-      cerr << "editScanType: " << e.what() << endl;
-    }
+    setType(row, value, index);
   }
 
   TreeItem *item = getItem(index);
@@ -182,7 +164,9 @@ int TreeModel::columnCount(const QModelIndex &parent) const {
   return rootItem->columnCount();
 }
 
-//My implementation
+
+// My Implementation
+
 void TreeModel::appendRow(TreeItem* treeItem) {
   beginInsertRows(QModelIndex(), rowCount(), rowCount() + 1);  //This is important, else the View will not be updated when the Model is modified by the signal.
   rootItem->appendChild(treeItem);
@@ -212,7 +196,7 @@ void TreeModel::clearAll() {
 
 void TreeModel::addScan(string scanType) {
   this->clearAll();
-  for(int i=0;i<med->scanAddresses.size();i++) {
+  for(int i = 0; i < (int)med->scanAddresses.size(); i++) {
     string address = med->getScanAddressByIndex(i);
     string value = med->getScanAddressValueByIndex(i, scanType);
     QVector<QVariant> data;
@@ -223,8 +207,9 @@ void TreeModel::addScan(string scanType) {
 }
 
 void TreeModel::refreshValues() {
-  if (rowCount() == 0)
+  if (rowCount() == 0) {
     return;
+  }
   QModelIndex first = index(0, SCAN_COL_VALUE);
   QModelIndex last = index(rowCount() - 1, SCAN_COL_VALUE);
   for(int i=0; i < rowCount(); i++) {
@@ -238,4 +223,28 @@ void TreeModel::refreshValues() {
 void TreeModel::empty() {
   med->clearScan();
   clearAll();
+}
+
+void TreeModel::setValue(int row, const QVariant &value) {
+  try {
+    med->setValueByAddress(med->scanAddresses[row].address,
+                           value.toString().toStdString(),
+                           med->scanAddresses[row].getScanType());
+  } catch(MedException &e) {
+    cerr << "editScanValue: " << e.what() << endl;
+  }
+}
+
+void TreeModel::setType(int row, const QVariant &value, const QModelIndex &index) {
+  try {
+    med->scanAddresses[row].setScanType(value.toString().toStdString());
+    string valueByAddress = med->getValueByAddress(med->scanAddresses[row].address,
+                                                   value.toString().toStdString());
+    QVariant valueToSet = QString::fromStdString(valueByAddress);
+
+    TreeItem *item = getItem(index);
+    item->setData(SCAN_COL_VALUE, valueToSet); //Update the target value
+  } catch(MedException &e) {
+    cerr << "editScanType: " << e.what() << endl;
+  }
 }

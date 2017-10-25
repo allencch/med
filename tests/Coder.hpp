@@ -8,14 +8,14 @@ class TestCoder : public CxxTest::TestSuite {
 public:
   void testConvertBig5ToUtf8() {
     char buffer[255];
-    // Big5 臺灣
+    // Big5 臺灣 1472614331
     buffer[0] = 0xbb;
     buffer[1] = 0x4f;
     buffer[2] = 0xc6;
     buffer[3] = 0x57;
     buffer[4] = 0;
 
-    // Utf8
+    // Utf8 12224488
     char expected[255];
     expected[0] = 0xe8;
     expected[1] = 0x87;

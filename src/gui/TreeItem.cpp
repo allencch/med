@@ -63,7 +63,7 @@ bool TreeItem::insertColumns(int position, int columns) {
 bool TreeItem::removeChildren(int position, int count) {
   if(position < 0 || position + count > childItems.size())
     return false;
-  for(int row=0;row<count;row++) {
+  for(int row = 0; row < count; row++) {
     delete childItems.takeAt(position);
   }
   return true;
@@ -88,8 +88,9 @@ int TreeItem::childNumber() const { //Same as row()
 }
 
 bool TreeItem::setData(int column, const QVariant &value) {
-  if(column <0 || column >= itemData.size())
+  if(column <0 || column >= itemData.size()) {
     return false;
+  }
   itemData[column] = value;
   return true;
 }
