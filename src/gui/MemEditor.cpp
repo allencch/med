@@ -147,7 +147,7 @@ string MemEditor::memoryToString(Byte* memory, size_t size, EncodingManager* enc
     }
   }
 
-  return encodingManager->convert(textView);
+  return encodingManager->convertToUtf8(textView);
 }
 
 void MemEditor::loadAddresses(MemAddr address, size_t size) {

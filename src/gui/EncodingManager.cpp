@@ -53,7 +53,7 @@ EncodingType EncodingManager::getEncodingType() {
   return this->encodingType;
 }
 
-string EncodingManager::convert(string text) {
+string EncodingManager::convertToUtf8(string text) {
   switch (encodingType) {
   case EncodingType::Default:
     return text;

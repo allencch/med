@@ -11,7 +11,7 @@ class EncodingManager : public QObject {
 public:
   EncodingManager(MainUi* mainUi);
   EncodingType getEncodingType();
-  string convert(string text);
+  string convertToUtf8(string text);
   string encode(string text);
 
 private slots:
