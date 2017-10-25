@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdio>
 #include "gui/med-qt.hpp"
+#include "gui/EncodingManager.hpp"
 #include "gui/TreeItem.hpp"
 #include "gui/TreeModel.hpp"
 
@@ -49,8 +50,7 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
     setType(index, value);
   }
 
-  TreeItem *item = getItem(index);
-  bool result = item->setData(index.column(), value); //Update the cell
+  bool result = setItemData(index, value); //Update the cell
 
   if (result) {
     emit dataChanged(index, index);
@@ -215,7 +215,7 @@ void TreeModel::refreshValues() {
   for(int i=0; i < rowCount(); i++) {
     string value = med->getScanValueByIndex(i);
     QModelIndex modelIndex = index(i, SCAN_COL_VALUE);
-    getItem(modelIndex)->setData(SCAN_COL_VALUE, QString::fromStdString(value)); // Do not use model setData, because it will modify the med value
+    setItemData(modelIndex, QString::fromStdString(value));
   }
   emit dataChanged(first, last);
 }
@@ -244,9 +244,22 @@ void TreeModel::setType(const QModelIndex &index, const QVariant &value) {
                                                    value.toString().toStdString());
     QVariant valueToSet = QString::fromStdString(valueByAddress);
 
-    TreeItem *item = getItem(index);
-    item->setData(SCAN_COL_VALUE, valueToSet); //Update the target value
+    setItemData(this->index(index.row(), SCAN_COL_VALUE), valueToSet); //Update the target value
   } catch(MedException &e) {
     cerr << "editScanType: " << e.what() << endl;
   }
+}
+
+bool TreeModel::setItemData(const QModelIndex &index, const QVariant &value) {
+  int row = index.row();
+  TreeItem *item = getItem(index);
+  string scanType = med->scanAddresses[row].getScanType();
+
+  QVariant newValue = value;
+
+  if (index.column() == SCAN_COL_VALUE && scanType == SCAN_TYPE_STRING) {
+    QString::fromStdString(mainUi->encodingManager->convertToUtf8(value.toString().toStdString()));
+  }
+
+  return item->setData(index.column(), newValue);
 }

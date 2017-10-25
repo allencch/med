@@ -74,6 +74,8 @@ protected:
 
   void setValue(const QModelIndex &index, const QVariant &value);
   void setType(const QModelIndex &index, const QVariant &value);
+
+  bool setItemData(const QModelIndex &index, const QVariant &value);
 };
 
 #endif // TREEMODEL_H
