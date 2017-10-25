@@ -492,7 +492,7 @@ void MainUi::setupStatusBar() {
 }
 
 void MainUi::setupScanTreeView() {
-  scanModel = new TreeModel(&med, mainWindow);
+  scanModel = new TreeModel(this, mainWindow);
   scanTreeView->setModel(scanModel);
   ComboBoxDelegate* delegate = new ComboBoxDelegate();
   scanTreeView->setItemDelegateForColumn(SCAN_COL_TYPE, delegate);
@@ -513,7 +513,7 @@ void MainUi::setupScanTreeView() {
 }
 
 void MainUi::setupStoreTreeView() {
-  storeModel = new StoreTreeModel(&med, mainWindow);
+  storeModel = new StoreTreeModel(this, mainWindow);
   storeTreeView->setModel(storeModel);
   ComboBoxDelegate* storeDelegate = new ComboBoxDelegate();
   storeTreeView->setItemDelegateForColumn(STORE_COL_TYPE, storeDelegate);

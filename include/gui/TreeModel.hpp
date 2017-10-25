@@ -15,10 +15,13 @@
  * I put Med in the model, so that, instead of writing the interaction through the Main(), it will be
  * easier writing the interactions of Model and Med within the Model itself.
  */
+
+class MainUi;
+
 class TreeModel : public QAbstractItemModel {
   Q_OBJECT
 public:
-  TreeModel(Med* med, QObject* parent = 0);
+  TreeModel(MainUi* mainUi, QObject* parent = 0);
   ~TreeModel();
 
   QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
@@ -60,6 +63,7 @@ public:
   void empty(); //including the med data
 
   TreeItem* root();
+  MainUi* mainUi;
   Med* med;
 
 protected:

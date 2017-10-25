@@ -7,12 +7,13 @@
 
 using namespace std;
 
-TreeModel::TreeModel(Med* med, QObject* parent) : QAbstractItemModel(parent) {
+TreeModel::TreeModel(MainUi* mainUi, QObject* parent) : QAbstractItemModel(parent) {
   QVector<QVariant> rootData;
   rootData << "Address" << "Type" << "Value";
   rootItem = new TreeItem(rootData);
 
-  this->med = med;
+  this->mainUi = mainUi;
+  this->med = &(mainUi->med);
 }
 
 TreeModel::~TreeModel() {

@@ -9,10 +9,12 @@
 #include "gui/TreeModel.hpp"
 #include "med/med.hpp"
 
+class MainUi;
+
 class StoreTreeModel : public TreeModel {
   Q_OBJECT
 public:
-  StoreTreeModel(Med* med, QObject* parent = 0);
+  StoreTreeModel(MainUi* mainUi, QObject* parent = 0);
   ~StoreTreeModel();
   QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) Q_DECL_OVERRIDE;

@@ -8,11 +8,13 @@
 
 using namespace std;
 
-StoreTreeModel::StoreTreeModel(Med* med, QObject* parent) : TreeModel(med, parent) {
+StoreTreeModel::StoreTreeModel(MainUi* mainUi, QObject* parent) : TreeModel(mainUi, parent) {
   QVector<QVariant> rootData;
   rootData << "Description +" << "Address +" << "Type" << "Value" << "Lock";
   rootItem = new TreeItem(rootData);
-  this->med = med;
+
+  this->mainUi = mainUi;
+  this->med = &(mainUi->med);
 }
 
 StoreTreeModel::~StoreTreeModel() {
