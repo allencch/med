@@ -42,40 +42,13 @@ bool StoreTreeModel::setData(const QModelIndex &index, const QVariant &value, in
 
   int row = index.row();
   if(index.column() == STORE_COL_VALUE) {
-    try {
-      //TODO: Refactor
-      med->addresses[row]->setLockedValue(value.toString().toStdString());
-      med->setValueByAddress(med->addresses[row]->address,
-                             value.toString().toStdString(),
-                             med->addresses[row]->getScanType());
-    } catch(MedException &e) {
-      cerr << "editStoreValue: " << e.what() << endl;
-    }
+    setValue(row, value);
   }
   else if (index.column() == STORE_COL_TYPE) {
-    try {
-      //TODO: refactor
-      med->addresses[row]->setScanType(value.toString().toStdString());
-      string valueByAddress = med->getValueByAddress(med->addresses[row]->address,
-                                                     value.toString().toStdString());
-      QVariant valueToSet = QString::fromStdString(valueByAddress);
-
-      TreeItem *item = getItem(index);
-      item->setData(STORE_COL_VALUE, valueToSet); //Update the target value
-    } catch(MedException &e) {
-      cerr << "editStoreType: " << e.what() << endl;
-    }
+    setType(row, value, index);
   }
   else if (index.column() == STORE_COL_ADDRESS) {
-    try {
-      string value2 = med->setStoreAddressByIndex(row, value.toString().toStdString());
-      QVariant valueToSet = QString::fromStdString(value2);
-
-      TreeItem *item = getItem(index);
-      item->setData(STORE_COL_VALUE, valueToSet); //Update the target value
-     } catch(MedException &e) {
-      cerr << "editStoreAddress: " << e.what() << endl;
-    }
+    setAddress(row, value, index);
   }
   else if (index.column() == STORE_COL_LOCK) {
     med->setStoreLockByIndex(row, value.toBool());
@@ -166,4 +139,42 @@ void StoreTreeModel::sortByDescription() {
 void StoreTreeModel::empty() {
   med->clearStore();
   TreeModel::empty();
+}
+
+void StoreTreeModel::setValue(int row, const QVariant &value) {
+  try {
+    med->addresses[row]->setLockedValue(value.toString().toStdString());
+    med->setValueByAddress(med->addresses[row]->address,
+                           value.toString().toStdString(),
+                           med->addresses[row]->getScanType());
+  } catch(MedException &e) {
+    cerr << "editStoreValue: " << e.what() << endl;
+  }
+}
+
+void StoreTreeModel::setType(int row, const QVariant &value, const QModelIndex &index) {
+  try {
+    med->addresses[row]->setScanType(value.toString().toStdString());
+    string valueByAddress = med->getValueByAddress(med->addresses[row]->address,
+                                                   value.toString().toStdString());
+    QVariant valueToSet = QString::fromStdString(valueByAddress);
+
+    TreeItem *item = getItem(index);
+    item->setData(STORE_COL_VALUE, valueToSet); //Update the target value
+  } catch(MedException &e) {
+    cerr << "editStoreType: " << e.what() << endl;
+  }
+}
+
+
+void StoreTreeModel::setAddress(int row, const QVariant &value, const QModelIndex &index) {
+  try {
+    string value2 = med->setStoreAddressByIndex(row, value.toString().toStdString());
+    QVariant valueToSet = QString::fromStdString(value2);
+
+    TreeItem *item = getItem(index);
+    item->setData(STORE_COL_VALUE, valueToSet); //Update the target value
+  } catch(MedException &e) {
+    cerr << "editStoreAddress: " << e.what() << endl;
+  }
 }
