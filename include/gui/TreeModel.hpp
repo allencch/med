@@ -72,8 +72,8 @@ protected:
   TreeItem* getItem(const QModelIndex &index) const;
   TreeItem* rootItem;
 
-  void setValue(int row, const QVariant &value);
-  void setType(int row, const QVariant &value, const QModelIndex &index);
+  void setValue(const QModelIndex &index, const QVariant &value);
+  void setType(const QModelIndex &index, const QVariant &value);
 };
 
 #endif // TREEMODEL_H

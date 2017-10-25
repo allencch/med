@@ -42,12 +42,11 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   if (role != Qt::EditRole)
     return false;
 
-  int row = index.row();
   if (index.column() == SCAN_COL_VALUE) {
-    setValue(row, value);
+    setValue(index, value);
   }
   else if (index.column() == SCAN_COL_TYPE) {
-    setType(row, value, index);
+    setType(index, value);
   }
 
   TreeItem *item = getItem(index);
@@ -226,7 +225,8 @@ void TreeModel::empty() {
   clearAll();
 }
 
-void TreeModel::setValue(int row, const QVariant &value) {
+void TreeModel::setValue(const QModelIndex &index, const QVariant &value) {
+  int row = index.row();
   try {
     med->setValueByAddress(med->scanAddresses[row].address,
                            value.toString().toStdString(),
@@ -236,7 +236,8 @@ void TreeModel::setValue(int row, const QVariant &value) {
   }
 }
 
-void TreeModel::setType(int row, const QVariant &value, const QModelIndex &index) {
+void TreeModel::setType(const QModelIndex &index, const QVariant &value) {
+  int row = index.row();
   try {
     med->scanAddresses[row].setScanType(value.toString().toStdString());
     string valueByAddress = med->getValueByAddress(med->scanAddresses[row].address,
