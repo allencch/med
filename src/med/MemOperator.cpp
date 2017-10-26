@@ -172,7 +172,7 @@ string memValue(long pid, MemAddr address, string scanType) {
     throw MedException("Address read fail: " + intToHex(address));
   }
 
-  char str[64];
+  char str[MAX_STRING_SIZE + 1];
   switch (stringToScanType(scanType)) {
   case Int8:
     sprintf(str, "%" PRIu8, *(uint8_t*)buf);
@@ -331,7 +331,7 @@ Byte* memRead(pid_t pid, MemAddr address, size_t size) {
 }
 
 string memToString(Byte* memory, string scanType) {
-  char str[64];
+  char str[MAX_STRING_SIZE + 1];
   switch (stringToScanType(scanType)) {
   case Int8:
     sprintf(str, "%" PRIu8, *(uint8_t*)memory);

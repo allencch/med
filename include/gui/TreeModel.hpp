@@ -76,6 +76,7 @@ protected:
   void setType(const QModelIndex &index, const QVariant &value);
 
   bool setItemData(const QModelIndex &index, const QVariant &value);
+  QVariant getUtfString(int row, string scanType);
 };
 
 #endif // TREEMODEL_H

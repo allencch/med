@@ -108,7 +108,7 @@ int scanTypeToSize(ScanType type) {
     ret = sizeof(double);
     break;
   case String:
-    ret = 1;
+    ret = MAX_STRING_SIZE;
     break;
   case Unknown:
     ret = 0;

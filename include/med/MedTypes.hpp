@@ -35,6 +35,8 @@ enum ScanType {
   Unknown
 };
 
+const int MAX_STRING_SIZE = 255;
+
 const string SCAN_TYPE_INT_8 = "int8";
 const string SCAN_TYPE_INT_16 = "int16";
 const string SCAN_TYPE_INT_32 = "int32";

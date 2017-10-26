@@ -240,9 +240,8 @@ void TreeModel::setType(const QModelIndex &index, const QVariant &value) {
   int row = index.row();
   try {
     med->scanAddresses[row].setScanType(value.toString().toStdString());
-    string valueByAddress = med->getValueByAddress(med->scanAddresses[row].address,
-                                                   value.toString().toStdString());
-    QVariant valueToSet = QString::fromStdString(valueByAddress);
+
+    QVariant valueToSet = getUtfString(row, value.toString().toStdString());
 
     setItemData(this->index(index.row(), SCAN_COL_VALUE), valueToSet); //Update the target value
   } catch(MedException &e) {
@@ -258,8 +257,13 @@ bool TreeModel::setItemData(const QModelIndex &index, const QVariant &value) {
   QVariant newValue = value;
 
   if (index.column() == SCAN_COL_VALUE && scanType == SCAN_TYPE_STRING) {
-    QString::fromStdString(mainUi->encodingManager->convertToUtf8(value.toString().toStdString()));
+    newValue = getUtfString(row, scanType);
   }
-
   return item->setData(index.column(), newValue);
+}
+
+QVariant TreeModel::getUtfString(int row, string scanType) {
+  string valueByAddress = med->getValueByAddress(med->scanAddresses[row].address, scanType);
+  string utfString = mainUi->encodingManager->convertToUtf8(valueByAddress);
+  return QString::fromStdString(utfString);
 }
