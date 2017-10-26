@@ -228,9 +228,11 @@ void TreeModel::empty() {
 void TreeModel::setValue(const QModelIndex &index, const QVariant &value) {
   int row = index.row();
   try {
+    string scanType = med->scanAddresses[row].getScanType();
+    string newValue = encodeString(value.toString().toStdString(), scanType);
     med->setValueByAddress(med->scanAddresses[row].address,
-                           value.toString().toStdString(),
-                           med->scanAddresses[row].getScanType());
+                           newValue,
+                           scanType);
   } catch(MedException &e) {
     cerr << "editScanValue: " << e.what() << endl;
   }
@@ -266,4 +268,11 @@ QVariant TreeModel::getUtfString(int row, string scanType) {
   string valueByAddress = med->getValueByAddress(med->scanAddresses[row].address, scanType);
   string utfString = mainUi->encodingManager->convertToUtf8(valueByAddress);
   return QString::fromStdString(utfString);
+}
+
+string TreeModel::encodeString(string str, string scanType) {
+  if (scanType == SCAN_TYPE_STRING) {
+    return mainUi->encodingManager->encode(str);
+  }
+  return str;
 }
