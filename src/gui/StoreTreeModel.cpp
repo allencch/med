@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstdio>
 #include "gui/med-qt.hpp"
+#include "gui/EncodingManager.hpp"
 #include "gui/TreeItem.hpp"
 #include "gui/TreeModel.hpp"
 #include "gui/StoreTreeModel.hpp"
@@ -106,10 +107,13 @@ void StoreTreeModel::refresh() {
     try {
       value = med->getStoreValueByIndex(i);
     } catch(MedException &ex) {}
+
     string description = med->getStoreDescriptionByIndex(i);
     bool lock = med->getStoreLockByIndex(i);
+
     QVector<QVariant> data;
     data << description.c_str() << address.c_str() << med->addresses[i]->getScanType().c_str() << value.c_str() << lock;
+
     TreeItem* childItem = new TreeItem(data, this->root());
     this->appendRow(childItem);
   }
@@ -148,10 +152,12 @@ void StoreTreeModel::empty() {
 void StoreTreeModel::setValue(const QModelIndex &index, const QVariant &value) {
   int row = index.row();
   try {
-    med->addresses[row]->setLockedValue(value.toString().toStdString());
+    string scanType = med->addresses[row]->getScanType();
+    string newValue = encodeString(value.toString().toStdString(), scanType);
+
     med->setValueByAddress(med->addresses[row]->address,
-                           value.toString().toStdString(),
-                           med->addresses[row]->getScanType());
+                           newValue,
+                           scanType);
   } catch(MedException &e) {
     cerr << "editStoreValue: " << e.what() << endl;
   }
@@ -196,4 +202,10 @@ bool StoreTreeModel::setItemData(const QModelIndex &index, const QVariant &value
     newValue = getUtfString(row, scanType);
   }
   return item->setData(index.column(), newValue);
+}
+
+QVariant StoreTreeModel::getUtfString(int row, string scanType) {
+  string valueByAddress = med->getValueByAddress(med->addresses[row]->address, scanType);
+  string utfString = mainUi->encodingManager->convertToUtf8(valueByAddress);
+  return QString::fromStdString(utfString);
 }
