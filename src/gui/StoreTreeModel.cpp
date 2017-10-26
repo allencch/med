@@ -1,3 +1,6 @@
+// NOTE: This can hardly be refactored with TreeModel. The main reason is the engine Med will do
+// different work. Unless Med scan address and store address are abstracted.
+
 #include <QtWidgets>
 #include <iostream>
 #include <cstdio>
