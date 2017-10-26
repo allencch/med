@@ -36,5 +36,5 @@ void MedScan::setValue(long pid, string v) {
   uint8_t* buffer;
   int size = stringToRaw(v, this->scanType, &buffer);
   memWrite(pid, this->address, buffer, size);
-  free(buffer);
+  delete[] buffer;
 }

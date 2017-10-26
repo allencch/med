@@ -126,23 +126,23 @@ int createBufferByScanType(ScanType type, void** buffer, int size) {
   switch (type) {
   case Int8:
     retsize = sizeof(uint8_t) * size;
-    buf = malloc(sizeof(uint8_t) * size);
+    buf = new Byte[sizeof(uint8_t) * size];
     break;
   case Int16:
     retsize = sizeof(uint16_t) * size;
-    buf = malloc(sizeof(uint16_t) * size);
+    buf = new Byte[sizeof(uint16_t) * size];
     break;
   case Int32:
     retsize = sizeof(uint32_t) * size;
-    buf = malloc(sizeof(uint32_t) * size);
+    buf = new Byte[sizeof(uint32_t) * size];
     break;
   case Float32:
     retsize = sizeof(float) * size;
-    buf = malloc(sizeof(float) * size);
+    buf = new Byte[sizeof(float) * size];
     break;
   case Float64:
     retsize = sizeof(double) * size;
-    buf = malloc(sizeof(double) * size);
+    buf = new Byte[sizeof(double) * size];
     break;
   case String:
     retsize = 1;
@@ -158,17 +158,44 @@ int createBufferByScanType(ScanType type, void** buffer, int size) {
 
 
 int stringToRaw(string str, ScanType type, Byte** buffer) {
+  int retsize;
+  if (type == ScanType::String) {
+    retsize = stringToRawStringType(str, type, buffer);;
+  }
+  else {
+    retsize = stringToRawNumericType(str, type, buffer);
+  }
+
+  return retsize;
+}
+
+int stringToRawStringType(string str, ScanType type, Byte** buffer) {
+  Bytes bytes = ScanParser::getBytes(str, scanTypeToString(type));
+  int retsize = bytes.size;
+  Byte* buf = bytes.data;
+
+  char* pointer = (char*)buf;
+  for (int i = 0; i < (int)str.size(); i++, pointer++) {
+    sprintf(pointer, "%c", str[i]);
+  }
+  *buffer = buf;
+
+  return retsize;
+}
+
+int stringToRawNumericType(string str, ScanType type, Byte** buffer) {
   vector<string> tokens = ScanParser::getValues(str);
 
+  int retsize;
+  Byte* buf;
   int size = tokens.size();
-  int retsize = createBufferByScanType(type, (void**)buffer, size);
-  uint8_t* buf = *buffer;
 
-  for(unsigned int i=0;i<tokens.size();i++) {
+  retsize = createBufferByScanType(type, (void**)buffer, size);
+  buf = *buffer;
+  for (unsigned int i = 0; i < tokens.size(); i++) {
     stringToMemory(tokens[i], type, buf);
     buf += scanTypeToSize(type);
   }
-
   return retsize;
 }
 

@@ -210,8 +210,9 @@ void Med::setValueByAddress(MemAddr address, string value, string scanType) {
   uint8_t* buffer = NULL;
   int size = stringToRaw(string(value), scanType, &buffer);
   memWrite(stoi(this->selectedProcess.pid), address, buffer, size);
-  if(buffer)
-    free(buffer);
+  if (buffer) {
+    delete[] buffer;
+  }
 }
 
 bool Med::addToStoreByIndex(int index) {
