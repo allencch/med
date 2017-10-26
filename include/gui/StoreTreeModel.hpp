@@ -28,9 +28,11 @@ public:
   void empty();
 
 protected:
-  void setValue(int row, const QVariant &value);
-  void setType(int row, const QVariant &value, const QModelIndex &index);
-  void setAddress(int row, const QVariant &value, const QModelIndex &index);
+  void setValue(const QModelIndex &index, const QVariant &value);
+  void setType(const QModelIndex &index, const QVariant &value);
+  void setAddress(const QModelIndex &index, const QVariant &value);
+
+  bool setItemData(const QModelIndex &index, const QVariant &value);
 };
 
 #endif
