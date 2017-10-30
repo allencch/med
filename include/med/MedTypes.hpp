@@ -3,22 +3,16 @@
 
 #include <string>
 #include <vector>
+
 using namespace std;
 
 typedef unsigned long MemAddr;
 typedef unsigned char Byte;
 
-struct Bytes { // TODO: Consider convert to class
-  Bytes(Byte* data, int size) : data(data), size(size) {}
-  Byte* data;
-  int size;
-};
-
 struct ProcMaps {
   vector<MemAddr> starts;
   vector<MemAddr> ends;
 };
-
 
 enum ScanType {
   Int8,

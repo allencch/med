@@ -7,7 +7,8 @@
 #include <string>
 #include <vector>
 
-#include "MedTypes.hpp"
+#include "med/MedTypes.hpp"
+#include "med/Bytes.hpp"
 
 using namespace std;
 

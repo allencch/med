@@ -1,14 +1,3 @@
-/**
- * @author	Allen Choong
- * @version	0.0.1
- * @date	2012-03-15
- *
- * Changelog:
- * 2015-05-20	Because of 64-bit computer, the address must use long int.
- *
- */
-
-
 //#define _FILE_OFFSET_BITS 64
 #include <iostream>
 #include <string>
@@ -48,7 +37,7 @@ void Med::scan(string v, string t) {
   ScanParser::OpType op = ScanParser::getOpType(v);
 
   if (op == ScanParser::OpType::SnapshotSave) {
-    snapshot->save(selectedProcess.pid);
+    snapshot->save(&selectedProcess);
   }
   else {
     Bytes bytes = ScanParser::getBytes(v, t);
@@ -134,7 +123,7 @@ void Med::memScan(Med* med, vector<MedScan> &scanAddresses, pid_t pid, Byte* dat
 
   scanAddresses.clear();
 
-  for(int i = 0; i < (int)maps.starts.size(); i++) {
+  for (int i = 0; i < (int)maps.starts.size(); i++) {
     TMTask* fn = new TMTask();
     *fn = [med, &maps, i, memFd, srcSize, &scanAddresses, data, size, scanType, op]() {
       Med::memScanMap(med, maps, i, memFd, srcSize, scanAddresses, data, size, scanType, op);

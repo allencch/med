@@ -6,10 +6,10 @@
 
 #include "med/MedTypes.hpp"
 #include "med/MedAddress.hpp"
+#include "med/Process.hpp"
 
 using namespace std;
 
-class Process;
 
 /**
  * Convert string to ScanType, they are "int8", "int16", etc.

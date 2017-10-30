@@ -1,11 +1,12 @@
 #include <iostream>
 
+#include "med/Process.hpp"
 #include "med/Snapshot.hpp"
 
 using namespace std;
 
 Snapshot::Snapshot() {}
 
-void Snapshot::save(string pid) {
+void Snapshot::save(Process* process) {
 
 }

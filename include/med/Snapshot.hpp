@@ -3,10 +3,12 @@
 
 #include <string>
 
+class Process;
+
 class Snapshot {
 public:
   Snapshot();
-  void save(std::string pid);
+  void save(Process* process);
 };
 
 #endif
