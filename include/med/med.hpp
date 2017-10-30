@@ -1,27 +1,3 @@
-/**
- * @author	Allen Choong
- * @version	0.0.1
- * @date	2012-03-15
- *
- * Simple memory editor. The goal is to hack the Android game from adb shell
- * It is inspired by scanmem.
- * Actually intend to write in C, but I need list (vector), so I change
- *
- * TODO: (old)
- * Scan integer, float, little endian, big endian, arrays
- * Edit integer, float, little endian, big endian, arrays
- * Dump with hex position
- * Pause and play the process
- *
- *
- * Search by block
- *
- * Important:
- * pidAttach() must be attach only when scan, else the process is being paused.
- * Regarding "word" in ptrace(), the size of "word" is depending on the architecture. But ptrace() itself is using long. So, "long" datatype is the solution for the word size.
- */
-
-
 #ifndef MED_H
 #define MED_H
 
@@ -40,6 +16,7 @@
 #include "med/MedCommon.hpp"
 #include "med/ScanParser.hpp"
 #include "med/ThreadManager.hpp"
+#include "med/Snapshot.hpp"
 
 using namespace std;
 
@@ -56,14 +33,15 @@ public:
   Med();
   virtual ~Med();
 
-  vector<Process> processes; /**< This is the list of processes */
-  vector<MedScan> scanAddresses; /**< The memory scanner, replace the Scanner*/
+  vector<Process> processes;
+  vector<MedScan> scanAddresses;
   vector<MedAddress*> addresses;
+  Snapshot* snapshot;
 
   void clearStore();
   void clearScan();
 
-  Process selectedProcess; /**< Not using pointer yet */
+  Process selectedProcess;
 
   void scan(string scanValue, string scanType);
   void filter(string scanValue, string scanType);

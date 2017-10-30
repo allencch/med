@@ -30,10 +30,13 @@ std::mutex medMutex;
 
 Med::Med() {
   threadManager = new ThreadManager(8);
+  snapshot = new Snapshot();
 }
+
 Med::~Med() {
   clearStore();
   delete threadManager;
+  delete snapshot;
 }
 
 void Med::scan(string v, string t) {
@@ -41,12 +44,19 @@ void Med::scan(string v, string t) {
     cerr << "Invalid scan string" << endl;
     return;
   }
+
   ScanParser::OpType op = ScanParser::getOpType(v);
-  Bytes bytes = ScanParser::getBytes(v, t);
 
-  Med::memScan(this, this->scanAddresses, stoi(selectedProcess.pid), bytes.data, bytes.size, t, op);
+  if (op == ScanParser::OpType::SnapshotSave) {
+    snapshot->save();
+  }
+  else {
+    Bytes bytes = ScanParser::getBytes(v, t);
 
-  delete[] bytes.data;
+    Med::memScan(this, this->scanAddresses, stoi(selectedProcess.pid), bytes.data, bytes.size, t, op);
+
+    delete[] bytes.data;
+  }
 }
 
 void Med::filter(string v, string t) {

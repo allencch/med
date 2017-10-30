@@ -18,7 +18,7 @@ string ScanParser::trim(const string &s) {
 
 string ScanParser::getOp(const string &v) {
   string value = ScanParser::trim(v);
-  regex r("^(=|>(?=[^=])|<(?=[^=>])|>=|<=|!|<>)");
+  regex r("^(=|>(?=[^=])|<(?=[^=>])|>=|<=|!|<>|\\?)");
   auto begin = sregex_iterator(value.begin(), value.end(), r);
   auto end = sregex_iterator();
 
@@ -43,6 +43,8 @@ ScanParser::OpType ScanParser::stringToOpType(const string &s) {
     return ScanParser::Neq;
   else if (s == "<>")
     return ScanParser::Within;
+  else if (s == "?")
+    return ScanParser::SnapshotSave;
   return ScanParser::Eq;
 }
 

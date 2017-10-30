@@ -20,7 +20,8 @@ public:
     Neq,
     Ge,
     Le,
-    Within
+    Within,
+    SnapshotSave
   };
   static string getOp(const string &v);
   static string trim(const string &s);
