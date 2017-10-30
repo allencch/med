@@ -6,6 +6,6 @@ using namespace std;
 
 Snapshot::Snapshot() {}
 
-void Snapshot::save() {
-  cout << "hello world!" << endl;
+void Snapshot::save(string pid) {
+
 }

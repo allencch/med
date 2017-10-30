@@ -19,11 +19,6 @@ struct ProcMaps {
   vector<MemAddr> ends;
 };
 
-struct Process {
-  string pid;
-  string cmdline; //aka "process" in GUI
-};
-
 
 enum ScanType {
   Int8,

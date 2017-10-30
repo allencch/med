@@ -20,8 +20,8 @@
 
 #include <unistd.h> //getpagesize()
 
-#include "med/med.hpp"
 #include "med/MemOperator.hpp"
+#include "med/med.hpp"
 
 using namespace std;
 
@@ -48,7 +48,7 @@ void Med::scan(string v, string t) {
   ScanParser::OpType op = ScanParser::getOpType(v);
 
   if (op == ScanParser::OpType::SnapshotSave) {
-    snapshot->save();
+    snapshot->save(selectedProcess.pid);
   }
   else {
     Bytes bytes = ScanParser::getBytes(v, t);

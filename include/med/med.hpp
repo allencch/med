@@ -17,6 +17,8 @@
 #include "med/ScanParser.hpp"
 #include "med/ThreadManager.hpp"
 #include "med/Snapshot.hpp"
+#include "med/Process.hpp"
+
 
 using namespace std;
 
@@ -24,6 +26,7 @@ extern std::mutex medMutex; //One and only one, globally accessible
 
 const int REFRESH_RATE = 800;
 const int SCAN_ADDRESS_VISIBLE_SIZE = 800;
+
 
 /**
  * This is the core scanner. Only one scanner

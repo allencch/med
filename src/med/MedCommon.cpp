@@ -8,10 +8,11 @@
 #include <sys/wait.h> //waitpid()
 #include <dirent.h> //read directory
 
-#include "med/med.hpp"
 #include "med/MedCommon.hpp"
 #include "med/MedException.hpp"
 #include "med/ScanParser.hpp"
+#include "med/Process.hpp"
+#include "med/med.hpp"
 
 using namespace std;
 
