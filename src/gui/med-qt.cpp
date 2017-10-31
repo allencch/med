@@ -114,7 +114,12 @@ void MainUi::onScanClicked() {
     scanModel->addScan(scanType);
   }
 
-  updateNumberOfAddresses();
+  if (QString(scanValue.c_str()).trimmed() == "?") {
+    statusBar->showMessage("Snapshot saved");
+  }
+  else {
+    updateNumberOfAddresses();
+  }
   scanUpdateMutex.unlock();
 }
 
