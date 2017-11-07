@@ -47,7 +47,7 @@ class TestScanParser : public CxxTest::TestSuite {
   void testStringToOpType() {
     TS_ASSERT_EQUALS(ScanParser::stringToOpType("<"), ScanParser::SnapshotLt);
     TS_ASSERT_EQUALS(ScanParser::stringToOpType(">"), ScanParser::SnapshotGt);
-    TS_ASSERT_EQUALS(ScanParser::stringToOpType("!="), ScanParser::SnapshotNeq);
+    TS_ASSERT_EQUALS(ScanParser::stringToOpType("!"), ScanParser::SnapshotNeq);
     TS_ASSERT_EQUALS(ScanParser::stringToOpType("="), ScanParser::SnapshotEq);
     TS_ASSERT_EQUALS(ScanParser::stringToOpType(""), ScanParser::Eq);
   }

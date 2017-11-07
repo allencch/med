@@ -13,6 +13,7 @@ public:
 
   virtual void setData(Byte* data, int size);
   void free();
+  int getSize();
 };
 
 

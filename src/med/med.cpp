@@ -57,7 +57,7 @@ void Med::filter(string v, string t) {
   ScanParser::OpType op = ScanParser::getOpType(v);
 
   if (ScanParser::isSnapshotOperator(op)) {
-    snapshot->compare(op);
+    snapshot->compare(op, stringToScanType(t));;
   }
   else {
     Bytes bytes = ScanParser::getBytes(v, t);

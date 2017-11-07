@@ -25,6 +25,10 @@ void Bytes::free() {
   }
 }
 
+int Bytes::getSize() {
+  return size;
+}
+
 
 //// MemoryBlock
 

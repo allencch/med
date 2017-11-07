@@ -39,7 +39,7 @@ ScanParser::OpType ScanParser::stringToOpType(const string &s) {
     return ScanParser::SnapshotGt;
   else if (s == "=")
     return ScanParser::SnapshotEq;
-  else if (s == "!=")
+  else if (s == "!")
     return ScanParser::SnapshotNeq;
   return ScanParser::Eq;
 }
