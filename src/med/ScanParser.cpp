@@ -31,20 +31,16 @@ string ScanParser::getOp(const string &v) {
 }
 
 ScanParser::OpType ScanParser::stringToOpType(const string &s) {
-  if (s == "<")
-    return ScanParser::Lt;
-  else if (s == ">")
-    return ScanParser::Gt;
-  else if (s == "<=")
-    return ScanParser::Le;
-  else if (s == ">=")
-    return ScanParser::Ge;
-  else if (s == "!")
-    return ScanParser::Neq;
-  else if (s == "<>")
-    return ScanParser::Within;
-  else if (s == "?")
+  if (s == "?")
     return ScanParser::SnapshotSave;
+  else if (s == "<")
+    return ScanParser::SnapshotLt;
+  else if (s == ">")
+    return ScanParser::SnapshotGt;
+  else if (s == "=")
+    return ScanParser::SnapshotEq;
+  else if (s == "!=")
+    return ScanParser::SnapshotNeq;
   return ScanParser::Eq;
 }
 
@@ -130,4 +126,14 @@ Bytes ScanParser::getStringBytes(const string& v) {
 
   Bytes bytes(data, valueLength);
   return bytes;
+}
+
+bool ScanParser::isSnapshotOperator(const OpType& opType) {
+  if (opType == SnapshotGt ||
+      opType == SnapshotLt ||
+      opType == SnapshotEq ||
+      opType == SnapshotNeq) {
+    return true;
+  }
+  return false;
 }

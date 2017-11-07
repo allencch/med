@@ -55,10 +55,16 @@ void Med::filter(string v, string t) {
   }
 
   ScanParser::OpType op = ScanParser::getOpType(v);
-  Bytes bytes = ScanParser::getBytes(v, t);
 
-  Med::memFilter(this->scanAddresses, stoi(this->selectedProcess.pid), bytes.data, bytes.size, t, op);
-  delete[] bytes.data;
+  if (ScanParser::isSnapshotOperator(op)) {
+    snapshot->compare(op);
+  }
+  else {
+    Bytes bytes = ScanParser::getBytes(v, t);
+
+    Med::memFilter(this->scanAddresses, stoi(this->selectedProcess.pid), bytes.data, bytes.size, t, op);
+    delete[] bytes.data;
+  }
 }
 
 void Med::memScanPage(Med* med,

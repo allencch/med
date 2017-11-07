@@ -22,7 +22,11 @@ public:
     Ge,
     Le,
     Within,
-    SnapshotSave
+    SnapshotSave,
+    SnapshotGt,
+    SnapshotLt,
+    SnapshotEq,
+    SnapshotNeq
   };
   static string getOp(const string &v);
   static string trim(const string &s);
@@ -34,6 +38,7 @@ public:
   static bool isArray(const string &v);
 
   static bool isValid(const string &v);
+  static bool isSnapshotOperator(const OpType& opType);
 
   static vector<string> split(const string &s, char delim);
 
