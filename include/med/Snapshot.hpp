@@ -7,6 +7,7 @@
 
 #include "med/Process.hpp"
 #include "med/ScanParser.hpp"
+#include "med/MedScan.hpp"
 
 typedef pair<MemoryBlock, MemoryBlock> MemoryBlockPair;
 typedef vector<MemoryBlockPair> MemoryBlockPairs;
@@ -16,10 +17,11 @@ public:
   Snapshot();
   ~Snapshot();
   void save(Process* process);
-  void compare(const ScanParser::OpType& opType, const ScanType& scanType);
-  void filter(const MemoryBlockPairs, const ScanParser::OpType& opType, const ScanType& scanType);
+  vector<MedScan> compare(const ScanParser::OpType& opType, const ScanType& scanType);
+  vector<MedScan> filter(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType);
+  vector<MedScan> comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType);
 
-  static bool blockMatched(MemoryBlock block1, MemoryBlock block2);
+  static bool isBlockMatched(MemoryBlock block1, MemoryBlock block2);
 
 private:
   MemoryBlocks memoryBlocks;

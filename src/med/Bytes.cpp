@@ -29,6 +29,10 @@ int Bytes::getSize() {
   return size;
 }
 
+Byte* Bytes::getData() {
+  return data;
+}
+
 
 //// MemoryBlock
 

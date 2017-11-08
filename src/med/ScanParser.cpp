@@ -18,7 +18,7 @@ string ScanParser::trim(const string &s) {
 
 string ScanParser::getOp(const string &v) {
   string value = ScanParser::trim(v);
-  regex r("^(=|>(?=[^=])|<(?=[^=>])|>=|<=|!|<>|\\?)");
+  regex r("^(=|<|>|!|\\?)");
   auto begin = sregex_iterator(value.begin(), value.end(), r);
   auto end = sregex_iterator();
 
@@ -129,7 +129,8 @@ Bytes ScanParser::getStringBytes(const string& v) {
 }
 
 bool ScanParser::isSnapshotOperator(const OpType& opType) {
-  if (opType == SnapshotGt ||
+  if (opType == SnapshotSave ||
+      opType == SnapshotGt ||
       opType == SnapshotLt ||
       opType == SnapshotEq ||
       opType == SnapshotNeq) {

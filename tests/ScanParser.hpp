@@ -13,35 +13,13 @@ class TestScanParser : public CxxTest::TestSuite {
     TS_ASSERT_EQUALS(res, "foo bar");
     TS_ASSERT_DIFFERS(res, "foo bar ");
   }
-  void testGetOp() {
-    string s = "=1234";
-    string op = ScanParser::getOp(s);
-    TS_ASSERT_EQUALS(op, "=");
 
-    s = "> 1234";
-    op = ScanParser::getOp(s);
-    TS_ASSERT_EQUALS(op, ">");
-
-    s = ">=1234";
-    op = ScanParser::getOp(s);
-    TS_ASSERT_EQUALS(op, ">=");
-
-    s = "!1234";
-    op = ScanParser::getOp(s);
-    TS_ASSERT_EQUALS(op, "!");
-    s = "<=1234";
-    op = ScanParser::getOp(s);
-    TS_ASSERT_EQUALS(op, "<=");
-
-    s = "<1234";
-    op = ScanParser::getOp(s);
-    TS_ASSERT_EQUALS(op, "<");
-
-    s = "1234";
-    op = ScanParser::getOp(s);
-    TS_ASSERT_EQUALS(op, "");
-
-    TS_ASSERT_EQUALS(ScanParser::getOp(" <> 1234, 5432 "), "<>");
+  void testSnapshotGetOp() {
+    TS_ASSERT_EQUALS(ScanParser::getOp(">"), ">");
+    TS_ASSERT_EQUALS(ScanParser::getOp("<"), "<");
+    TS_ASSERT_EQUALS(ScanParser::getOp("!"), "!");
+    TS_ASSERT_EQUALS(ScanParser::getOp("="), "=");
+    TS_ASSERT_EQUALS(ScanParser::getOp("?"), "?");
   }
 
   void testStringToOpType() {
