@@ -23,11 +23,48 @@ class TestScanParser : public CxxTest::TestSuite {
   }
 
   void testStringToOpType() {
-    TS_ASSERT_EQUALS(ScanParser::stringToOpType("<"), ScanParser::SnapshotLt);
-    TS_ASSERT_EQUALS(ScanParser::stringToOpType(">"), ScanParser::SnapshotGt);
-    TS_ASSERT_EQUALS(ScanParser::stringToOpType("!"), ScanParser::SnapshotNeq);
-    TS_ASSERT_EQUALS(ScanParser::stringToOpType("="), ScanParser::SnapshotEq);
+    TS_ASSERT_EQUALS(ScanParser::stringToOpType("<"), ScanParser::Lt);
+    TS_ASSERT_EQUALS(ScanParser::stringToOpType(">"), ScanParser::Gt);
+    TS_ASSERT_EQUALS(ScanParser::stringToOpType("!"), ScanParser::Neq);
+    TS_ASSERT_EQUALS(ScanParser::stringToOpType("="), ScanParser::Eq);
     TS_ASSERT_EQUALS(ScanParser::stringToOpType(""), ScanParser::Eq);
+    TS_ASSERT_EQUALS(ScanParser::stringToOpType("?"), ScanParser::SnapshotSave);
+    TS_ASSERT_EQUALS(ScanParser::stringToOpType(">="), ScanParser::Ge);
+    TS_ASSERT_EQUALS(ScanParser::stringToOpType("<="), ScanParser::Le);
+    TS_ASSERT_EQUALS(ScanParser::stringToOpType("<>"), ScanParser::Within);
+  }
+
+  void testGetOp() {
+    string s = "=1234";
+    string op = ScanParser::getOp(s);
+    TS_ASSERT_EQUALS(op, "=");
+
+    s = "> 1234";
+    op = ScanParser::getOp(s);
+    TS_ASSERT_EQUALS(op, ">");
+
+    s = ">=1234";
+    op = ScanParser::getOp(s);
+    TS_ASSERT_EQUALS(op, ">=");
+
+    s = "!1234";
+    op = ScanParser::getOp(s);
+    TS_ASSERT_EQUALS(op, "!");
+    s = "<=1234";
+    op = ScanParser::getOp(s);
+    TS_ASSERT_EQUALS(op, "<=");
+
+    s = "<1234";
+    op = ScanParser::getOp(s);
+    TS_ASSERT_EQUALS(op, "<");
+
+    s = "1234";
+    op = ScanParser::getOp(s);
+    TS_ASSERT_EQUALS(op, "");
+
+    TS_ASSERT_EQUALS(ScanParser::getOp(" <> 1234, 5432 "), "<>");
+
+    TS_ASSERT_EQUALS(ScanParser::getOp(" < "), "<");
   }
 
   void testGetValue() {
@@ -36,6 +73,7 @@ class TestScanParser : public CxxTest::TestSuite {
     TS_ASSERT_EQUALS(ScanParser::getValue(">=4321"), "4321");
     TS_ASSERT_EQUALS(ScanParser::getValue("4321"), "4321");
     TS_ASSERT_EQUALS(ScanParser::getValue("  >=   4321.1234   "), "4321.1234");
+    TS_ASSERT_EQUALS(ScanParser::getValue("<"), "");
   }
 
   void testIsArray() {

@@ -272,16 +272,14 @@ bool memLe(const void* ptr1, const void* ptr2, size_t size) {
 bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpType op) {
   if (op == ScanParser::Gt)
     return memGt(ptr1, ptr2, size);
-  else if (op == ScanParser::Lt || op == ScanParser::SnapshotLt)
+  else if (op == ScanParser::Lt)
     return memLt(ptr1, ptr2, size);
-  else if (op == ScanParser::Ge || op == ScanParser::SnapshotGt)
+  else if (op == ScanParser::Ge)
     return memGe(ptr1, ptr2, size);
   else if (op == ScanParser::Le)
     return memLe(ptr1, ptr2, size);
-  else if (op == ScanParser::Neq || op == ScanParser::SnapshotNeq)
+  else if (op == ScanParser::Neq)
     return memNeq(ptr1, ptr2, size);
-  else if (op == ScanParser::SnapshotEq)
-    return memEq(ptr1, ptr2, size);
   else
     return memEq(ptr1, ptr2, size);
 }

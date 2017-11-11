@@ -11,6 +11,9 @@
 using namespace std;
 
 string ScanParser::trim(const string &s) {
+  if (s.size() == 0) {
+    return s;
+  }
   size_t first = s.find_first_not_of(' ');
   size_t last = s.find_last_not_of(' ');
   return s.substr(first, (last - first + 1));
@@ -18,7 +21,7 @@ string ScanParser::trim(const string &s) {
 
 string ScanParser::getOp(const string &v) {
   string value = ScanParser::trim(v);
-  regex r("^(=|<|>|!|\\?)");
+  regex r(OP_REGEX);
   auto begin = sregex_iterator(value.begin(), value.end(), r);
   auto end = sregex_iterator();
 
@@ -34,20 +37,27 @@ ScanParser::OpType ScanParser::stringToOpType(const string &s) {
   if (s == "?")
     return ScanParser::SnapshotSave;
   else if (s == "<")
-    return ScanParser::SnapshotLt;
+    return ScanParser::Lt;
   else if (s == ">")
-    return ScanParser::SnapshotGt;
+    return ScanParser::Gt;
   else if (s == "=")
-    return ScanParser::SnapshotEq;
+    return ScanParser::Eq;
   else if (s == "!")
-    return ScanParser::SnapshotNeq;
+    return ScanParser::Neq;
+  else if (s == "<=")
+    return ScanParser::Le;
+  else if (s == ">=")
+    return ScanParser::Ge;
+  else if (s == "<>")
+    return ScanParser::Within;
   return ScanParser::Eq;
 }
 
 string ScanParser::getValue(const string &v) {
   string value = ScanParser::trim(v);
-  regex r("^(=|>(?=[^=])|<(?=[^=>])|>=|<=|!|<>)");
-  return ScanParser::trim(regex_replace(value, r, ""));
+  regex r(OP_REGEX);
+  string result = ScanParser::trim(regex_replace(value, r, ""));
+  return result;
 }
 
 bool ScanParser::isArray(const string &v) {
@@ -130,10 +140,10 @@ Bytes ScanParser::getStringBytes(const string& v) {
 
 bool ScanParser::isSnapshotOperator(const OpType& opType) {
   if (opType == SnapshotSave ||
-      opType == SnapshotGt ||
-      opType == SnapshotLt ||
-      opType == SnapshotEq ||
-      opType == SnapshotNeq) {
+      opType == Gt ||
+      opType == Lt ||
+      opType == Eq ||
+      opType == Neq) {
     return true;
   }
   return false;
