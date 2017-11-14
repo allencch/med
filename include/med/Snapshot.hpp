@@ -19,11 +19,14 @@ public:
   void save(Process* process);
   vector<MedScan> compare(const ScanParser::OpType& opType, const ScanType& scanType);
   vector<MedScan> filter(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType);
-  vector<MedScan> comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType);
+  vector<SnapshotScan> comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType);
+
+  bool isUnknown();
 
   static bool isBlockMatched(MemoryBlock block1, MemoryBlock block2);
 
 private:
+  bool scanUnknown;
   MemoryBlocks memoryBlocks;
   Process* process;
 

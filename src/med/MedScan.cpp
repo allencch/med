@@ -38,3 +38,42 @@ void MedScan::setValue(long pid, string v) {
   memWrite(pid, this->address, buffer, size);
   delete[] buffer;
 }
+
+void MedScan::setAddress(MemAddr address) {
+  this->address = address;
+}
+
+MemAddr MedScan::getAddress() {
+  return address;
+}
+
+
+/******************\
+ SnapshotScan
+\******************/
+SnapshotScan::SnapshotScan() {}
+
+SnapshotScan::SnapshotScan(MemAddr address) : MedScan(address) {}
+
+void SnapshotScan::setScannedValue(Bytes bytes) {
+  scannedValue = bytes;
+}
+
+void SnapshotScan::freeScannedValue() {
+  scannedValue.free();
+}
+
+MedScan SnapshotScan::toMedScan() {
+  MedScan medScan;
+  medScan.setScanType(this->getScanType());
+  medScan.setAddress(this->getAddress());
+  return medScan;
+}
+
+vector<MedScan> SnapshotScan::toMedScans(const vector<SnapshotScan>& snapshotScans) {
+  vector<MedScan> scans;
+  for (auto snapshotScan : snapshotScans) {
+    scans.push_back(snapshotScan.toMedScan());
+  }
+  return scans;
+}

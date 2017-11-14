@@ -9,7 +9,9 @@
 
 using namespace std;
 
-Snapshot::Snapshot() {}
+Snapshot::Snapshot() {
+  scanUnknown = false;
+}
 Snapshot::~Snapshot() {
   memoryBlocks.clear();
 }
@@ -23,6 +25,8 @@ void Snapshot::save(Process* process) {
   }
   memoryBlocks.clear();
   memoryBlocks = process->pullMemory();
+
+  scanUnknown = true;
 }
 
 vector<MedScan> Snapshot::compare(const ScanParser::OpType& opType, const ScanType& scanType) {
@@ -38,10 +42,6 @@ vector<MedScan> Snapshot::compare(const ScanParser::OpType& opType, const ScanTy
   MemoryBlocks currentMemoryBlocks = process->pullMemory();
   MemoryBlockPairs pairs = createMemoryBlockPairs(memoryBlocks, currentMemoryBlocks);
   auto result = filter(pairs, opType, scanType);
-
-  // TODO: clean the previous memory blocks. And replace the previous one wit hteh current one.
-  // Need to convert the vector<MedScan> to memory block, so that can be filter again.
-  // Check back the how previous scan in array work.
   return result;
 }
 
@@ -71,17 +71,18 @@ bool Snapshot::isBlockMatched(MemoryBlock block1, MemoryBlock block2) {
 }
 
 vector<MedScan> Snapshot::filter(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType) {
-  vector<MedScan> scan;
+  vector<SnapshotScan> scan;
   for (size_t i = 0; i < pairs.size(); i++) {
-    vector<MedScan> found = comparePair(pairs[i], opType, scanType);
+    vector<SnapshotScan> found = comparePair(pairs[i], opType, scanType);
 
     scan.insert(scan.end(), found.begin(), found.end());
   }
-  return scan;
+  // TODO: Need to think about whether to return as MedScan
+  return SnapshotScan::toMedScans(scan);
 }
 
 
-vector<MedScan> Snapshot::comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType) {
+vector<SnapshotScan> Snapshot::comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType) {
   auto first = pair.first;
   auto second = pair.second;
   int offset = first.getAddress() - second.getAddress();
@@ -89,14 +90,18 @@ vector<MedScan> Snapshot::comparePair(const MemoryBlockPair& pair, const ScanPar
 
   int typeSize = scanTypeToSize(scanType);
 
-  vector<MedScan> scan;
+  vector<SnapshotScan> scan;
   for (int i = 0; i < length; i++) {
     auto firstData = first.getData();
     auto secondData = second.getData();
     bool result = memCompare(&firstData[i], &secondData[offset + i], typeSize, opType);
     if (result) {
-      scan.push_back(MedScan(first.getAddress() + i));
+      scan.push_back(SnapshotScan(first.getAddress() + i));
     }
   }
   return scan;
+}
+
+bool Snapshot::isUnknown() {
+  return scanUnknown;
 }

@@ -63,6 +63,9 @@ int stringToRaw(string str, string type, Byte** buffer);
 int stringToRawNumericType(string str, ScanType type, Byte** buffer);
 int stringToRawStringType(string str, ScanType type, Byte** buffer);
 
+Bytes stringToBytes(string str, ScanType type);
+Bytes stringToBytes(string str, string type);
+
 /**
  * Convert the size to padded word size.
  */

@@ -417,3 +417,15 @@ void stringToMemory(const string& str, const string& type, Byte* buffer) {
   ScanType scanType = stringToScanType(type);
   stringToMemory(str, scanType, buffer);
 }
+
+
+Bytes stringToBytes(string str, string scanType) {
+  return stringToBytes(str, stringToScanType(scanType));
+}
+
+Bytes stringToBytes(string str, ScanType scanType) {
+  Byte* buffer;
+  int size = stringToRaw(str, scanType, &buffer);
+  Bytes bytes(buffer, size);
+  return bytes;
+}
