@@ -56,7 +56,7 @@ void Med::filter(string v, string t) {
 
   ScanParser::OpType op = ScanParser::getOpType(v);
 
-  if (ScanParser::isSnapshotOperator(op)) {
+  if (ScanParser::isSnapshotOperator(op) && !ScanParser::hasValues(v)) {
     scanAddresses = snapshot->compare(op, stringToScanType(t));
   }
   else {

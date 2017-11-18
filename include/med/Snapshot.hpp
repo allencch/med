@@ -31,7 +31,7 @@ private:
   MemoryBlocks memoryBlocks;
   Process* process;
 
-  vector<SnapshotScan*> scans;
+  vector<SnapshotScan*> scans; // TODO: Need to free SnapshotScan*
 
   MemoryBlockPairs createMemoryBlockPairs(MemoryBlocks prev, MemoryBlocks curr);
 

@@ -109,7 +109,7 @@ vector<SnapshotScan*> Snapshot::comparePair(const MemoryBlockPair& pair, const S
     bool result = memCompare(&firstData[i], &secondData[offset + i], typeSize, opType);
     if (result) {
       SnapshotScan* matched = new SnapshotScan(first.getAddress() + i, scanType);
-      Bytes copied = Bytes::copy(&secondData[offset + i], typeSize);
+      Bytes* copied = Bytes::newCopy(&secondData[offset + i], typeSize);
       matched->setScannedValue(copied);
       scan.push_back(matched);
     }

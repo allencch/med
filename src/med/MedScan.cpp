@@ -50,25 +50,33 @@ MemAddr MedScan::getAddress() {
   return address;
 }
 
-Bytes MedScan::getValueAsBytes(long pid, ScanType scanType) {
-  return stringToBytes(getValue(pid, scanTypeToString(scanType)), scanType);
+Bytes* MedScan::getValueAsNewBytes(long pid, ScanType scanType) {
+  Bytes* bytes = stringToNewBytes(getValue(pid, scanTypeToString(scanType)), scanType);
+  return bytes;
 }
 
 /******************\
  SnapshotScan
 \******************/
-SnapshotScan::SnapshotScan() {}
+SnapshotScan::SnapshotScan() {
+  scannedValue = NULL;
+}
 
 SnapshotScan::SnapshotScan(MemAddr address, ScanType scanType) : MedScan(address) {
   this->scanType = scanType;
+  scannedValue = NULL;
 }
 
-void SnapshotScan::setScannedValue(Bytes bytes) {
+void SnapshotScan::setScannedValue(Bytes* bytes) {
   scannedValue = bytes;
 }
 
 void SnapshotScan::freeScannedValue() {
-  scannedValue.free();
+  if (scannedValue) {
+    scannedValue->dump();
+    scannedValue->free();
+    scannedValue = NULL;
+  }
 }
 
 MedScan SnapshotScan::toMedScan() {
@@ -87,22 +95,23 @@ vector<MedScan> SnapshotScan::toMedScans(const vector<SnapshotScan*>& snapshotSc
 }
 
 bool SnapshotScan::compare(long pid, const ScanParser::OpType& opType, const ScanType& scanType) {
-  Bytes currentBytes = getValueAsBytes(pid, scanType);
-  Byte* currentData = currentBytes.getData();
-  Byte* previousData = scannedValue.getData();
+  Bytes* currentBytes = getValueAsNewBytes(pid, scanType);
+  Byte* currentData = currentBytes->getData();
+  Byte* previousData = scannedValue->getData();
 
   bool result = memCompare(previousData, currentData, scanTypeToSize(scanType), opType);
   cout << 100 << endl;
-  currentBytes.free();
+  currentBytes->free();
+  delete currentBytes;
   cout << 200 << endl;
   return result;
 }
 
 void SnapshotScan::updateScannedValue(long pid, ScanType scanType) {
-  Bytes currentBytes = getValueAsBytes(pid, scanType);
-  currentBytes.dump();
+  Bytes* currentBytes = getValueAsNewBytes(pid, scanType);
+  currentBytes->dump();
   cout << 300 << endl;
-  scannedValue.free();
+  freeScannedValue();
   cout << 400 << endl;
-  scannedValue = currentBytes;
+  setScannedValue(currentBytes);
 }

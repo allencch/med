@@ -87,6 +87,11 @@ vector<string> ScanParser::getValues(const string &v) {
   return values;
 }
 
+bool ScanParser::hasValues(const string& v) {
+  auto values = getValues(v);
+  return values.size() > 0;
+}
+
 bool ScanParser::isValid(const string &v) {
   if (ScanParser::getOpType(v) == ScanParser::Within &&
       !ScanParser::isArray(v))

@@ -429,3 +429,14 @@ Bytes stringToBytes(string str, ScanType scanType) {
   Bytes bytes(buffer, size);
   return bytes;
 }
+
+Bytes* stringToNewBytes(string str, string scanType) {
+  return stringToNewBytes(str, stringToScanType(scanType));
+}
+
+Bytes* stringToNewBytes(string str, ScanType scanType) {
+  Byte* buffer;
+  int size = stringToRaw(str, scanType, &buffer);
+  Bytes* b = new Bytes(buffer, size);
+  return b;
+}

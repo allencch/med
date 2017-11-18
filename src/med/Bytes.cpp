@@ -13,6 +13,10 @@ Bytes::Bytes() {
 
 Bytes::Bytes(Byte* data, int size) : data(data), size(size) {}
 
+Bytes::~Bytes() {
+  // Do not free data directly!!! Because the data is not allocated by its own, but assigned!
+}
+
 void Bytes::setData(Byte* data, int size) {
   this->data = data;
   this->size = size;
@@ -47,6 +51,11 @@ Bytes Bytes::copy(Byte* data, int size) {
   return Bytes(data, size);
 }
 
+Bytes* Bytes::newCopy(Byte* data, int size) {
+  Byte* newData = new Byte[size];
+  memcpy(newData, data, size);
+  return new Bytes(data, size);
+}
 
 //// MemoryBlock
 

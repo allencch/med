@@ -30,7 +30,7 @@ public:
   string getValue(long pid, string scanType);
   void setValue(long pid, string val);
 
-  Bytes getValueAsBytes(long pid, ScanType scanType);
+  Bytes* getValueAsNewBytes(long pid, ScanType scanType);
 };
 
 /**
@@ -40,17 +40,18 @@ class SnapshotScan : public MedScan {
 public:
   SnapshotScan();
   SnapshotScan(MemAddr address, ScanType scanType);
-  void setScannedValue(Bytes bytes);
+  void setScannedValue(Bytes* bytes);
   void freeScannedValue();
   void updateScannedValue(long pid, ScanType scanType);
 
   bool compare(long pid, const ScanParser::OpType& opType, const ScanType& scanType);
 
-  Bytes scannedValue;
-
   MedScan toMedScan();
 
   static vector<MedScan> toMedScans(const vector<SnapshotScan*>& snapshotScans);
+
+private:
+  Bytes* scannedValue; // TODO: need to delete
 };
 
 #endif

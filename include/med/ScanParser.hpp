@@ -31,6 +31,7 @@ public:
   static OpType getOpType(const string &v);
   static string getValue(const string &v);
   static vector<string> getValues(const string &v);
+  static bool hasValues(const string& v);
   static Bytes getBytes(const string &v, const string& t); /**<< Remember to delete[] */
   static bool isArray(const string &v);
 

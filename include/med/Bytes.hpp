@@ -7,6 +7,7 @@ class Bytes {
 public:
   Bytes();
   Bytes(Byte* data, int size);
+  virtual ~Bytes();
 
   Byte* data;
   int size;
@@ -19,6 +20,7 @@ public:
   void dump(FILE* stream = stdout);
 
   static Bytes copy(Byte* data, int size);
+  static Bytes* newCopy(Byte* data, int size);
 };
 
 
