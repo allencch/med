@@ -15,6 +15,10 @@ public:
   Byte* getData();
   void free();
   int getSize();
+
+  void dump(FILE* stream = stdout);
+
+  static Bytes copy(Byte* data, int size);
 };
 
 

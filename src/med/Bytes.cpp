@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdio>
+#include <cstring>
 
 #include "med/Bytes.hpp"
 
@@ -31,6 +32,19 @@ int Bytes::getSize() {
 
 Byte* Bytes::getData() {
   return data;
+}
+
+void Bytes::dump(FILE* stream) {
+  for (int i = 0; i < size; i++) {
+    fprintf(stream, "%02x ", (unsigned int)data[i]);
+  }
+  fprintf(stream, "\n");
+}
+
+Bytes Bytes::copy(Byte* data, int size) {
+  Byte* newData = new Byte[size];
+  memcpy(newData, data, size);
+  return Bytes(data, size);
 }
 
 

@@ -31,17 +31,31 @@ void Snapshot::save(Process* process) {
 
 vector<MedScan> Snapshot::compare(const ScanParser::OpType& opType, const ScanType& scanType) {
   vector<MedScan> emptyScan;
+  if (opType == ScanParser::OpType::SnapshotSave) {
+    cerr << "Filter should not use \"?\"" << endl;
+    return emptyScan;
+  }
+
   if (process->pid.length() == 0) {
-    MedException("Process ID is empty");
+    throw MedException("Process ID is empty");
     return emptyScan;
   }
-  if (memoryBlocks.getSize() == 0) {
-    MedException("Memory blocks is empty");
-    return emptyScan;
+
+  vector<MedScan> result;
+  if (isUnknown()) {
+    if (memoryBlocks.getSize() == 0) {
+      throw MedException("Memory blocks is empty");
+      return emptyScan;
+    }
+
+    MemoryBlocks currentMemoryBlocks = process->pullMemory();
+    MemoryBlockPairs pairs = createMemoryBlockPairs(memoryBlocks, currentMemoryBlocks);
+
+    result = filterUnknown(pairs, opType, scanType);
   }
-  MemoryBlocks currentMemoryBlocks = process->pullMemory();
-  MemoryBlockPairs pairs = createMemoryBlockPairs(memoryBlocks, currentMemoryBlocks);
-  auto result = filter(pairs, opType, scanType);
+  else {
+    result = filter(opType, scanType);
+  }
   return result;
 }
 
@@ -70,15 +84,13 @@ bool Snapshot::isBlockMatched(MemoryBlock block1, MemoryBlock block2) {
     (firstAddress1 <= lastAddress2 && lastAddress1 >= lastAddress2);
 }
 
-vector<MedScan> Snapshot::filter(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType) {
-  vector<SnapshotScan> scan;
+vector<MedScan> Snapshot::filterUnknown(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType) {
   for (size_t i = 0; i < pairs.size(); i++) {
     vector<SnapshotScan> found = comparePair(pairs[i], opType, scanType);
-
-    scan.insert(scan.end(), found.begin(), found.end());
+    scans.insert(scans.end(), found.begin(), found.end());
   }
-  // TODO: Need to think about whether to return as MedScan
-  return SnapshotScan::toMedScans(scan);
+  clearUnknown();
+  return SnapshotScan::toMedScans(scans);
 }
 
 
@@ -96,7 +108,10 @@ vector<SnapshotScan> Snapshot::comparePair(const MemoryBlockPair& pair, const Sc
     auto secondData = second.getData();
     bool result = memCompare(&firstData[i], &secondData[offset + i], typeSize, opType);
     if (result) {
-      scan.push_back(SnapshotScan(first.getAddress() + i));
+      SnapshotScan matched(first.getAddress() + i, scanType);
+      Bytes copied = Bytes::copy(&secondData[offset + i], typeSize);
+      matched.setScannedValue(copied);
+      scan.push_back(matched);
     }
   }
   return scan;
@@ -104,4 +119,31 @@ vector<SnapshotScan> Snapshot::comparePair(const MemoryBlockPair& pair, const Sc
 
 bool Snapshot::isUnknown() {
   return scanUnknown;
+}
+
+void Snapshot::clearUnknown() {
+  scanUnknown = false;
+  memoryBlocks.clear();
+}
+
+vector<MedScan> Snapshot::filter(const ScanParser::OpType& opType, const ScanType& scanType) {
+  vector<SnapshotScan> newScans;
+  cout << "scan size: " << scans.size() << endl;
+  for (size_t i = 0; i < scans.size(); i++) {
+    auto scan = scans[i];
+    long pid = stol(process->pid);
+    if (scan.compare(pid, opType, scanType)) {
+      scan.updateScannedValue(pid, scanType);
+      newScans.push_back(scan);
+    }
+    else {
+      cout << 500 << endl;
+      scan.freeScannedValue();
+      cout << 600 << endl;
+    }
+    printf("%d, %d\n", (int)i, (int)scans.size());
+  }
+
+  scans = newScans;
+  return SnapshotScan::toMedScans(scans);
 }

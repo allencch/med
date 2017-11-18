@@ -5,6 +5,7 @@
 
 #include "med/MedTypes.hpp"
 #include "med/Bytes.hpp"
+#include "med/ScanParser.hpp"
 
 using namespace std;
 
@@ -28,6 +29,8 @@ public:
   string getValue(long pid);
   string getValue(long pid, string scanType);
   void setValue(long pid, string val);
+
+  Bytes getValueAsBytes(long pid, ScanType scanType);
 };
 
 /**
@@ -36,10 +39,12 @@ public:
 class SnapshotScan : public MedScan {
 public:
   SnapshotScan();
-  SnapshotScan(MemAddr address);
+  SnapshotScan(MemAddr address, ScanType scanType);
   void setScannedValue(Bytes bytes);
-
   void freeScannedValue();
+  void updateScannedValue(long pid, ScanType scanType);
+
+  bool compare(long pid, const ScanParser::OpType& opType, const ScanType& scanType);
 
   Bytes scannedValue;
 
