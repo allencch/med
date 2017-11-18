@@ -19,7 +19,7 @@ public:
   void save(Process* process);
   vector<MedScan> compare(const ScanParser::OpType& opType, const ScanType& scanType);
   vector<MedScan> filterUnknown(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType);
-  vector<SnapshotScan> comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType);
+  vector<SnapshotScan*> comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType);
   vector<MedScan> filter(const ScanParser::OpType& opType, const ScanType& scanType);
 
   bool isUnknown();
@@ -31,7 +31,7 @@ private:
   MemoryBlocks memoryBlocks;
   Process* process;
 
-  vector<SnapshotScan> scans;
+  vector<SnapshotScan*> scans;
 
   MemoryBlockPairs createMemoryBlockPairs(MemoryBlocks prev, MemoryBlocks curr);
 

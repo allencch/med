@@ -50,7 +50,7 @@ public:
 
   MedScan toMedScan();
 
-  static vector<MedScan> toMedScans(const vector<SnapshotScan>& snapshotScans);
+  static vector<MedScan> toMedScans(const vector<SnapshotScan*>& snapshotScans);
 };
 
 #endif

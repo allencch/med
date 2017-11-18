@@ -86,7 +86,7 @@ bool Snapshot::isBlockMatched(MemoryBlock block1, MemoryBlock block2) {
 
 vector<MedScan> Snapshot::filterUnknown(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType) {
   for (size_t i = 0; i < pairs.size(); i++) {
-    vector<SnapshotScan> found = comparePair(pairs[i], opType, scanType);
+    vector<SnapshotScan*> found = comparePair(pairs[i], opType, scanType);
     scans.insert(scans.end(), found.begin(), found.end());
   }
   clearUnknown();
@@ -94,7 +94,7 @@ vector<MedScan> Snapshot::filterUnknown(const MemoryBlockPairs& pairs, const Sca
 }
 
 
-vector<SnapshotScan> Snapshot::comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType) {
+vector<SnapshotScan*> Snapshot::comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType) {
   auto first = pair.first;
   auto second = pair.second;
   int offset = first.getAddress() - second.getAddress();
@@ -102,15 +102,15 @@ vector<SnapshotScan> Snapshot::comparePair(const MemoryBlockPair& pair, const Sc
 
   int typeSize = scanTypeToSize(scanType);
 
-  vector<SnapshotScan> scan;
+  vector<SnapshotScan*> scan;
   for (int i = 0; i < length; i++) {
     auto firstData = first.getData();
     auto secondData = second.getData();
     bool result = memCompare(&firstData[i], &secondData[offset + i], typeSize, opType);
     if (result) {
-      SnapshotScan matched(first.getAddress() + i, scanType);
+      SnapshotScan* matched = new SnapshotScan(first.getAddress() + i, scanType);
       Bytes copied = Bytes::copy(&secondData[offset + i], typeSize);
-      matched.setScannedValue(copied);
+      matched->setScannedValue(copied);
       scan.push_back(matched);
     }
   }
@@ -127,18 +127,18 @@ void Snapshot::clearUnknown() {
 }
 
 vector<MedScan> Snapshot::filter(const ScanParser::OpType& opType, const ScanType& scanType) {
-  vector<SnapshotScan> newScans;
+  vector<SnapshotScan*> newScans;
   cout << "scan size: " << scans.size() << endl;
   for (size_t i = 0; i < scans.size(); i++) {
     auto scan = scans[i];
     long pid = stol(process->pid);
-    if (scan.compare(pid, opType, scanType)) {
-      scan.updateScannedValue(pid, scanType);
+    if (scan->compare(pid, opType, scanType)) {
+      scan->updateScannedValue(pid, scanType);
       newScans.push_back(scan);
     }
     else {
       cout << 500 << endl;
-      scan.freeScannedValue();
+      scan->freeScannedValue();
       cout << 600 << endl;
     }
     printf("%d, %d\n", (int)i, (int)scans.size());

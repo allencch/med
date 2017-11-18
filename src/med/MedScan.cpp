@@ -78,10 +78,10 @@ MedScan SnapshotScan::toMedScan() {
   return medScan;
 }
 
-vector<MedScan> SnapshotScan::toMedScans(const vector<SnapshotScan>& snapshotScans) {
+vector<MedScan> SnapshotScan::toMedScans(const vector<SnapshotScan*>& snapshotScans) {
   vector<MedScan> scans;
   for (auto snapshotScan : snapshotScans) {
-    scans.push_back(snapshotScan.toMedScan());
+    scans.push_back(snapshotScan->toMedScan());
   }
   return scans;
 }
