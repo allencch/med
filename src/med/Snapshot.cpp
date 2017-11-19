@@ -20,8 +20,7 @@ void Snapshot::save(Process* process) {
   this->process = process;
 
   if (process->pid.length() == 0) {
-    MedException("Process ID is empty");
-    return;
+    throw MedException("Process ID is empty");
   }
   memoryBlocks.clear();
   memoryBlocks = process->pullMemory();
@@ -38,14 +37,12 @@ vector<MedScan> Snapshot::compare(const ScanParser::OpType& opType, const ScanTy
 
   if (process->pid.length() == 0) {
     throw MedException("Process ID is empty");
-    return emptyScan;
   }
 
   vector<MedScan> result;
   if (isUnknown()) {
     if (memoryBlocks.getSize() == 0) {
       throw MedException("Memory blocks is empty");
-      return emptyScan;
     }
 
     MemoryBlocks currentMemoryBlocks = process->pullMemory();
@@ -95,8 +92,8 @@ vector<MedScan> Snapshot::filterUnknown(const MemoryBlockPairs& pairs, const Sca
 
 
 vector<SnapshotScan*> Snapshot::comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType) {
-  auto first = pair.first;
-  auto second = pair.second;
+  MemoryBlock first = pair.first;
+  MemoryBlock second = pair.second;
   int offset = first.getAddress() - second.getAddress();
   int length = first.getSize();
 
@@ -128,20 +125,20 @@ void Snapshot::clearUnknown() {
 
 vector<MedScan> Snapshot::filter(const ScanParser::OpType& opType, const ScanType& scanType) {
   vector<SnapshotScan*> newScans;
-  cout << "scan size: " << scans.size() << endl;
   for (size_t i = 0; i < scans.size(); i++) {
-    auto scan = scans[i];
+    SnapshotScan* scan = scans[i];
     long pid = stol(process->pid);
     if (scan->compare(pid, opType, scanType)) {
+      // FIXME: Error free invalid pointer
       scan->updateScannedValue(pid, scanType);
       newScans.push_back(scan);
     }
     else {
-      cout << 500 << endl;
+      // FIXME: Error free invalid pointer
       scan->freeScannedValue();
-      cout << 600 << endl;
+      delete scan;
+      scan = NULL;
     }
-    printf("%d, %d\n", (int)i, (int)scans.size());
   }
 
   scans = newScans;

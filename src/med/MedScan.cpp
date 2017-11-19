@@ -73,8 +73,8 @@ void SnapshotScan::setScannedValue(Bytes* bytes) {
 
 void SnapshotScan::freeScannedValue() {
   if (scannedValue) {
-    scannedValue->dump();
     scannedValue->free();
+    delete scannedValue;
     scannedValue = NULL;
   }
 }
@@ -100,18 +100,13 @@ bool SnapshotScan::compare(long pid, const ScanParser::OpType& opType, const Sca
   Byte* previousData = scannedValue->getData();
 
   bool result = memCompare(previousData, currentData, scanTypeToSize(scanType), opType);
-  cout << 100 << endl;
   currentBytes->free();
   delete currentBytes;
-  cout << 200 << endl;
   return result;
 }
 
 void SnapshotScan::updateScannedValue(long pid, ScanType scanType) {
   Bytes* currentBytes = getValueAsNewBytes(pid, scanType);
-  currentBytes->dump();
-  cout << 300 << endl;
   freeScannedValue();
-  cout << 400 << endl;
   setScannedValue(currentBytes);
 }
