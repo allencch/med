@@ -37,7 +37,7 @@ void Med::scan(string v, string t) {
   ScanParser::OpType op = ScanParser::getOpType(v);
 
   if (op == ScanParser::OpType::SnapshotSave) {
-    snapshot->save(&selectedProcess);
+    // snapshot->save(&selectedProcess);
   }
   else {
     Bytes bytes = ScanParser::getBytes(v, t);
@@ -57,7 +57,7 @@ void Med::filter(string v, string t) {
   ScanParser::OpType op = ScanParser::getOpType(v);
 
   if (ScanParser::isSnapshotOperator(op) && !ScanParser::hasValues(v)) {
-    scanAddresses = snapshot->compare(op, stringToScanType(t));
+    // scanAddresses = snapshot->compare(op, stringToScanType(t));
   }
   else {
     Bytes bytes = ScanParser::getBytes(v, t);
