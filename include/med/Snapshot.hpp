@@ -8,6 +8,7 @@
 #include "med/Process.hpp"
 #include "med/ScanParser.hpp"
 #include "med/MedScan.hpp"
+#include "med/SnapshotScan.hpp"
 
 typedef pair<MemoryBlock, MemoryBlock> MemoryBlockPair;
 typedef vector<MemoryBlockPair> MemoryBlockPairs;
