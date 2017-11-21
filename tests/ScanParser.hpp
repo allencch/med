@@ -6,7 +6,7 @@
 using namespace std;
 
 class TestScanParser : public CxxTest::TestSuite {
- public:
+public:
   void testTrim(void) {
     string s = " foo bar   ";
     string res = ScanParser::trim(s);

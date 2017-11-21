@@ -16,26 +16,27 @@ typedef vector<MemoryBlockPair> MemoryBlockPairs;
 class Snapshot {
 public:
   Snapshot();
-  ~Snapshot();
+  virtual ~Snapshot();
   void save(Process* process);
-  vector<MedScan> compare(const ScanParser::OpType& opType, const ScanType& scanType);
-  vector<MedScan> filterUnknown(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType);
+  vector<SnapshotScan*> compare(const ScanParser::OpType& opType, const ScanType& scanType);
+  vector<SnapshotScan*> filterUnknown(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType);
   vector<SnapshotScan*> comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType);
-  vector<MedScan> filter(const ScanParser::OpType& opType, const ScanType& scanType);
+  vector<SnapshotScan*> filter(const ScanParser::OpType& opType, const ScanType& scanType);
 
   bool isUnknown();
+  virtual bool hasProcess();
+  virtual MemoryBlocks pullProcessMemory();
 
   static bool isBlockMatched(MemoryBlock block1, MemoryBlock block2);
 
-private:
   bool scanUnknown;
   MemoryBlocks memoryBlocks;
+
+private:
   Process* process;
 
   vector<SnapshotScan*> scans; // TODO: Need to free SnapshotScan*
-
   MemoryBlockPairs createMemoryBlockPairs(MemoryBlocks prev, MemoryBlocks curr);
-
   void clearUnknown();
 };
 

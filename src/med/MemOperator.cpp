@@ -237,7 +237,6 @@ bool memGt(const void* ptr1, const void* ptr2, size_t size) {
   if (ret > 0)
     return true;
   return false;
-
 }
 
 bool memLt(const void* ptr1, const void* ptr2, size_t size) {

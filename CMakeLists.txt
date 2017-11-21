@@ -52,6 +52,10 @@ if(CXXTEST_FOUND)
   CXXTEST_ADD_TEST(testCoder testCoder.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/Coder.hpp)
   target_link_libraries(testCoder med)
+
+  CXXTEST_ADD_TEST(testSnapshot testSnapshot.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/Snapshot.hpp)
+  target_link_libraries(testSnapshot med)
 endif()
 
 install(TARGETS med med-qt

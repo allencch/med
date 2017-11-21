@@ -7,6 +7,7 @@
 
 #include "med/MedTypes.hpp"
 #include "med/Bytes.hpp"
+#include "med/MemoryBlock.hpp"
 
 using namespace std;
 

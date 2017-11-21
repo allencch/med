@@ -11,6 +11,7 @@ class SnapshotScan : public MedScan {
 public:
   SnapshotScan();
   SnapshotScan(MemAddr address, ScanType scanType);
+  Bytes* getScannedValue();
   void setScannedValue(Bytes* bytes);
   void freeScannedValue();
   void updateScannedValue(long pid, ScanType scanType);

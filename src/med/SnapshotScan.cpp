@@ -53,3 +53,7 @@ void SnapshotScan::updateScannedValue(long pid, ScanType scanType) {
   freeScannedValue();
   setScannedValue(currentBytes);
 }
+
+Bytes* SnapshotScan::getScannedValue() {
+  return scannedValue;
+}
