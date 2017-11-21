@@ -56,6 +56,10 @@ if(CXXTEST_FOUND)
   CXXTEST_ADD_TEST(testSnapshot testSnapshot.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/Snapshot.hpp)
   target_link_libraries(testSnapshot med)
+
+  CXXTEST_ADD_TEST(testSnapshotScan testSnapshotScan.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/SnapshotScan.hpp)
+  target_link_libraries(testSnapshotScan med)
 endif()
 
 install(TARGETS med med-qt

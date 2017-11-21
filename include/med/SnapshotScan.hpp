@@ -11,6 +11,7 @@ class SnapshotScan : public MedScan {
 public:
   SnapshotScan();
   SnapshotScan(MemAddr address, ScanType scanType);
+  virtual ~SnapshotScan();
   Bytes* getScannedValue();
   void setScannedValue(Bytes* bytes);
   void freeScannedValue();
@@ -22,7 +23,6 @@ public:
 
   static vector<MedScan> toMedScans(const vector<SnapshotScan*>& snapshotScans);
 
-private:
   Bytes* scannedValue; // TODO: need to delete
 };
 

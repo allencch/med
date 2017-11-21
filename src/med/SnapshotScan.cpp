@@ -10,6 +10,10 @@ SnapshotScan::SnapshotScan(MemAddr address, ScanType scanType) : MedScan(address
   scannedValue = NULL;
 }
 
+SnapshotScan::~SnapshotScan() {
+  freeScannedValue();
+}
+
 void SnapshotScan::setScannedValue(Bytes* bytes) {
   scannedValue = bytes;
 }
@@ -42,7 +46,7 @@ bool SnapshotScan::compare(long pid, const ScanParser::OpType& opType, const Sca
   Byte* currentData = currentBytes->getData();
   Byte* previousData = scannedValue->getData();
 
-  bool result = memCompare(previousData, currentData, scanTypeToSize(scanType), opType);
+  bool result = memCompare(currentData, previousData, scanTypeToSize(scanType), opType);
   currentBytes->free();
   delete currentBytes;
   return result;

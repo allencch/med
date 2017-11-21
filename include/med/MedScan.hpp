@@ -30,7 +30,7 @@ public:
   string getValue(long pid, string scanType);
   void setValue(long pid, string val);
 
-  Bytes* getValueAsNewBytes(long pid, ScanType scanType);
+  virtual Bytes* getValueAsNewBytes(long pid, ScanType scanType);
 };
 
 #endif
