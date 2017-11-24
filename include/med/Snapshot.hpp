@@ -9,13 +9,14 @@
 #include "med/ScanParser.hpp"
 #include "med/MedScan.hpp"
 #include "med/SnapshotScan.hpp"
+#include "med/SnapshotScanService.hpp"
 
 typedef pair<MemoryBlock, MemoryBlock> MemoryBlockPair;
 typedef vector<MemoryBlockPair> MemoryBlockPairs;
 
 class Snapshot {
 public:
-  Snapshot();
+  Snapshot(SnapshotScanService* service = NULL);
   virtual ~Snapshot();
   void save(Process* process);
   vector<SnapshotScan*> compare(const ScanParser::OpType& opType, const ScanType& scanType);
@@ -29,6 +30,8 @@ public:
 
   static bool isBlockMatched(MemoryBlock block1, MemoryBlock block2);
 
+  virtual long getProcessPid();
+
   bool scanUnknown;
   MemoryBlocks memoryBlocks;
 
@@ -38,6 +41,8 @@ private:
   vector<SnapshotScan*> scans; // TODO: Need to free SnapshotScan*
   MemoryBlockPairs createMemoryBlockPairs(MemoryBlocks prev, MemoryBlocks curr);
   void clearUnknown();
+
+  SnapshotScanService* service;
 };
 
 #endif

@@ -9,11 +9,15 @@
 
 using namespace std;
 
-Snapshot::Snapshot() {
+Snapshot::Snapshot(SnapshotScanService* service) {
+  if (service == NULL) {
+    this->service = new SnapshotScanService();
+  }
   scanUnknown = false;
 }
 Snapshot::~Snapshot() {
   memoryBlocks.clear();
+  delete this->service;
 }
 
 void Snapshot::save(Process* process) {
@@ -39,18 +43,20 @@ vector<SnapshotScan*> Snapshot::compare(const ScanParser::OpType& opType, const 
     throw MedException("Process ID is empty");
   }
 
+
   if (isUnknown()) {
     if (memoryBlocks.getSize() == 0) {
       throw MedException("Memory blocks is empty");
     }
 
     MemoryBlocks currentMemoryBlocks = pullProcessMemory();
-    MemoryBlockPairs pairs = createMemoryBlockPairs(memoryBlocks, currentMemoryBlocks);
 
-    result = filterUnknown(pairs, opType, scanType);
+    // MemoryBlockPairs pairs = createMemoryBlockPairs(memoryBlocks, currentMemoryBlocks);
+
+    // result = filterUnknown(pairs, opType, scanType);
   }
   else {
-    result = filter(opType, scanType);
+    //  result = filter(opType, scanType);
   }
   return result;
 }
@@ -137,10 +143,10 @@ vector<SnapshotScan*> Snapshot::filter(const ScanParser::OpType& opType, const S
   vector<SnapshotScan*> newScans;
   for (size_t i = 0; i < scans.size(); i++) {
     SnapshotScan* scan = scans[i];
-    long pid = stol(process->pid);
-    if (scan->compare(pid, opType, scanType)) {
+    long pid = getProcessPid();
+    if (service->compareScan(scan, pid, opType, scanType)) {
       // FIXME: Error free invalid pointer
-      scan->updateScannedValue(pid, scanType);
+      service->updateScannedValue(scan, pid, scanType);
       newScans.push_back(scan);
     }
     else {
@@ -161,4 +167,8 @@ bool Snapshot::hasProcess() {
 
 MemoryBlocks Snapshot::pullProcessMemory() {
   return process->pullMemory();
+}
+
+long Snapshot::getProcessPid() {
+  return stol(process->pid);
 }

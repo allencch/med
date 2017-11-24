@@ -9,6 +9,7 @@ class MemoryBlock : public Bytes {
 public:
   MemoryBlock();
   MemoryBlock(Byte* data, int size);
+  virtual ~MemoryBlock();
 
   void setDataWithAddress(Byte* data, int size, MemAddr address);
   void setAddress(MemAddr address);

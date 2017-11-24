@@ -18,12 +18,14 @@ Bytes::~Bytes() {
 }
 
 void Bytes::setData(Byte* data, int size) {
-  this->data = data;
-  this->size = size;
+  if (size > 0) {
+    this->data = data;
+    this->size = size;
+  }
 }
 
 void Bytes::free() {
-  if (data) {
+  if (size > 0 && data) {
     delete[] data;
     data = NULL;
     size = 0;

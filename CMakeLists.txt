@@ -36,6 +36,9 @@ target_link_libraries(med-qt moc-med-qt med Qt5::UiTools)
 add_executable(test_thread_manager src/med/ThreadManager.cpp src/test_thread_manager.cpp)
 target_link_libraries(test_thread_manager -lpthread)
 
+add_executable(test_snapshot src/test_snapshot.cpp)
+target_link_libraries(test_snapshot med)
+
 #https://cmake.org/cmake/help/v3.7/module/FindCxxTest.html
 find_package(CxxTest)
 if(CXXTEST_FOUND)

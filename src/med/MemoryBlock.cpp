@@ -6,6 +6,10 @@ MemoryBlock::MemoryBlock() : Bytes() {}
 
 MemoryBlock::MemoryBlock(Byte* data, int size) : Bytes(data, size) {}
 
+MemoryBlock::~MemoryBlock() {
+  // Do not free Byte
+}
+
 void MemoryBlock::setAddress(MemAddr address) {
   this->address = address;
 }
@@ -35,8 +39,8 @@ void MemoryBlocks::push(MemoryBlock block) {
 }
 
 void MemoryBlocks::clear() {
-  free();
-  data.clear();
+  free(); // Will call MemoryBlock.free(), which will delete Byte
+  data.clear(); // This will clear the vector of MemoryBlock
 }
 
 int MemoryBlocks::getSize() {
