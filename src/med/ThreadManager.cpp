@@ -15,6 +15,15 @@ ThreadManager::ThreadManager(int maxThreads) {
 
 ThreadManager::~ThreadManager() {}
 
+ThreadManager& ThreadManager::getInstance() {
+  static ThreadManager instance;
+  return instance;
+}
+
+void ThreadManager::setMaxThreads(int num) {
+  maxThreads = num;
+}
+
 void ThreadManager::queueTask(TMTask* fn) {
   container.push_back(fn);
 }

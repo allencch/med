@@ -13,10 +13,14 @@ class ThreadManager {
 public:
   ThreadManager(int maxThread = 4);
   virtual ~ThreadManager();
+  ThreadManager(const ThreadManager&) = delete; // Disable copy or assign
+  static ThreadManager& getInstance(); // Singleton
 
   void queueTask(TMTask* fn);
   void clear();
   void start();
+
+  void setMaxThreads(int num);
 
 private:
   std::vector<TMTask*> container;

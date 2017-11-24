@@ -19,13 +19,14 @@ const int STEP = 1;
 std::mutex medMutex;
 
 Med::Med() {
-  threadManager = new ThreadManager(8);
+  threadManager = &ThreadManager::getInstance();
+  threadManager->setMaxThreads(8);
   snapshot = new Snapshot();
 }
 
 Med::~Med() {
   clearStore();
-  delete threadManager;
+  // delete threadManager;
   delete snapshot;
 }
 
