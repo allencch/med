@@ -4,6 +4,7 @@
 #include "med/MedScan.hpp"
 #include "med/MemOperator.hpp"
 #include "med/MedCommon.hpp"
+#include "med/ByteManager.hpp"
 
 using namespace std;
 
@@ -36,10 +37,12 @@ string MedScan::getValue(long pid, string scanType) {
 }
 
 void MedScan::setValue(long pid, string v) {
-  uint8_t* buffer;
+  Byte* buffer;
   int size = stringToRaw(v, this->scanType, &buffer);
   memWrite(pid, this->address, buffer, size);
-  delete[] buffer;
+
+  ByteManager& bm = ByteManager::getInstance();
+  bm.deleteByte(buffer);
 }
 
 void MedScan::setAddress(MemAddr address) {

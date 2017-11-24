@@ -39,6 +39,9 @@ target_link_libraries(test_thread_manager -lpthread)
 add_executable(test_snapshot src/test_snapshot.cpp)
 target_link_libraries(test_snapshot med)
 
+add_executable(test_byte_manager src/test_byte_manager.cpp)
+target_link_libraries(test_byte_manager med)
+
 #https://cmake.org/cmake/help/v3.7/module/FindCxxTest.html
 find_package(CxxTest)
 if(CXXTEST_FOUND)

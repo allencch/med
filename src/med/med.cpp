@@ -12,6 +12,7 @@
 #include "med/MemOperator.hpp"
 #include "med/med.hpp"
 #include "med/SnapshotScan.hpp"
+#include "med/ByteManager.hpp"
 
 using namespace std;
 
@@ -46,7 +47,8 @@ void Med::scan(string v, string t) {
 
     Med::memScan(this, this->scanAddresses, stoi(selectedProcess.pid), bytes.data, bytes.size, t, op);
 
-    delete[] bytes.data;
+    ByteManager& bm = ByteManager::getInstance();
+    bm.deleteByte(bytes.data);
   }
 }
 
@@ -65,7 +67,9 @@ void Med::filter(string v, string t) {
     Bytes bytes = ScanParser::getBytes(v, t);
 
     Med::memFilter(this->scanAddresses, stoi(this->selectedProcess.pid), bytes.data, bytes.size, t, op);
-    delete[] bytes.data;
+
+    ByteManager& bm = ByteManager::getInstance();
+    bm.deleteByte(bytes.data);
   }
 }
 
@@ -214,11 +218,12 @@ string Med::getValueByAddress(MemAddr address, string scanType) {
 }
 
 void Med::setValueByAddress(MemAddr address, string value, string scanType) {
-  uint8_t* buffer = NULL;
+  Byte* buffer = NULL;
   int size = stringToRaw(string(value), scanType, &buffer);
   memWrite(stoi(this->selectedProcess.pid), address, buffer, size);
   if (buffer) {
-    delete[] buffer;
+    ByteManager& bm = ByteManager::getInstance();
+    bm.deleteByte(buffer);
   }
 }
 

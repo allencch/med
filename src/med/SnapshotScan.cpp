@@ -61,3 +61,10 @@ void SnapshotScan::updateScannedValue(long pid, ScanType scanType) {
 Bytes* SnapshotScan::getScannedValue() {
   return scannedValue;
 }
+
+void SnapshotScan::freeSnapshotScans(const vector<SnapshotScan*>& snapshotScans) {
+  for (size_t i = 0; i < snapshotScans.size(); i++) {
+    snapshotScans[i]->freeScannedValue();
+    delete snapshotScans[i];
+  }
+}

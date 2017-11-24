@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "med/Bytes.hpp"
+#include "med/ByteManager.hpp"
 
 using namespace std;
 
@@ -26,7 +27,8 @@ void Bytes::setData(Byte* data, int size) {
 
 void Bytes::free() {
   if (size > 0 && data) {
-    delete[] data;
+    ByteManager& bm = ByteManager::getInstance();
+    bm.deleteByte(data);
     data = NULL;
     size = 0;
   }
@@ -48,13 +50,15 @@ void Bytes::dump(FILE* stream) {
 }
 
 Bytes Bytes::copy(Byte* data, int size) {
-  Byte* newData = new Byte[size];
+  ByteManager& bm = ByteManager::getInstance();
+  Byte* newData = bm.newByte(size);
   memcpy(newData, data, size);
   return Bytes(data, size);
 }
 
 Bytes* Bytes::newCopy(Byte* data, int size) {
-  Byte* newData = new Byte[size];
+  ByteManager& bm = ByteManager::getInstance();
+  Byte* newData = bm.newByte(size);
   memcpy(newData, data, size);
   return new Bytes(data, size);
 }

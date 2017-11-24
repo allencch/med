@@ -23,6 +23,8 @@ public:
 
   static vector<MedScan> toMedScans(const vector<SnapshotScan*>& snapshotScans);
 
+  static void freeSnapshotScans(const vector<SnapshotScan*>& snapshotScans);
+
   Bytes* scannedValue; // TODO: need to delete
 };
 

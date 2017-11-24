@@ -7,6 +7,7 @@
 #include "med/ScanParser.hpp"
 #include "med/MedException.hpp"
 #include "med/MedCommon.hpp"
+#include "med/ByteManager.hpp"
 
 using namespace std;
 
@@ -115,7 +116,9 @@ Bytes ScanParser::getNumericBytes(const string& v, const string& t) {
   }
 
   int valueLength = scanTypeToSize(t);
-  Byte* data = new Byte[valueLength * values.size()];
+
+  ByteManager& bm = ByteManager::getInstance();
+  Byte* data = bm.newByte(valueLength * values.size());
 
   Byte* pointer = data;
   for (int i = 0; i < (int)values.size(); i++) {
@@ -132,7 +135,9 @@ Bytes ScanParser::getStringBytes(const string& v) {
     throw MedException("Scan empty string");
   }
   int valueLength = v.size();
-  Byte* data = new Byte[valueLength + 1];
+
+  ByteManager& bm = ByteManager::getInstance();
+  Byte* data = bm.newByte(valueLength + 1);
 
   char* pointer = (char*)data;
   for (int i = 0; i < (int)v.size(); i++, pointer++) {

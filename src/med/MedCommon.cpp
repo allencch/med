@@ -12,6 +12,7 @@
 #include "med/MedException.hpp"
 #include "med/ScanParser.hpp"
 #include "med/Process.hpp"
+#include "med/ByteManager.hpp"
 #include "med/med.hpp"
 
 using namespace std;
@@ -124,26 +125,27 @@ int scanTypeToSize(string type) {
 int createBufferByScanType(ScanType type, void** buffer, int size) {
   int retsize = scanTypeToSize(type) * size;
   void* buf = NULL;
+  ByteManager& bm = ByteManager::getInstance();
   switch (type) {
   case Int8:
     retsize = sizeof(uint8_t) * size;
-    buf = new Byte[sizeof(uint8_t) * size];
+    buf = bm.newByte(sizeof(uint8_t) * size);
     break;
   case Int16:
     retsize = sizeof(uint16_t) * size;
-    buf = new Byte[sizeof(uint16_t) * size];
+    buf = bm.newByte(sizeof(uint16_t) * size);
     break;
   case Int32:
     retsize = sizeof(uint32_t) * size;
-    buf = new Byte[sizeof(uint32_t) * size];
+    buf = bm.newByte(sizeof(uint32_t) * size);
     break;
   case Float32:
     retsize = sizeof(float) * size;
-    buf = new Byte[sizeof(float) * size];
+    buf = bm.newByte(sizeof(float) * size);
     break;
   case Float64:
     retsize = sizeof(double) * size;
-    buf = new Byte[sizeof(double) * size];
+    buf = bm.newByte(sizeof(double) * size);
     break;
   case String:
     retsize = 1;

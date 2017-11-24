@@ -1,4 +1,7 @@
 #include "med/SnapshotScan.hpp"
+#include "med/ByteManager.hpp"
+
+ByteManager& bm = ByteManager::getInstance();
 
 class SnapshotScanTester : public SnapshotScan {
 public:
@@ -6,7 +9,7 @@ public:
     scannedValue = NULL;
   }
   virtual Bytes* getValueAsNewBytes(long pid, ScanType scanType) {
-    Byte* data = new Byte[8];
+    Byte* data = bm.newByte(8);
     memset(data, 0, 8);
     data[0] = 20;
     Bytes* bytes = new Bytes(data, 8);
@@ -19,7 +22,7 @@ public:
   void testCompare() {
     SnapshotScanTester* snapshotScan = new SnapshotScanTester();
 
-    Byte* data = new Byte[8];
+    Byte* data = bm.newByte(8);
     memset(data, 0, 8);
     data[0] = 10;
     Bytes* bytes = new Bytes(data, 8);
@@ -35,7 +38,7 @@ public:
   void testCompareThenUpdateScannedValue() {
     SnapshotScanTester* snapshotScan = new SnapshotScanTester();
 
-    Byte* data = new Byte[8];
+    Byte* data = bm.newByte(8);
     memset(data, 0, 8);
     data[0] = 10;
     Bytes* bytes = new Bytes(data, 8);
@@ -55,7 +58,7 @@ public:
   void testCompareThenFreeScannedValue() {
     SnapshotScanTester* snapshotScan = new SnapshotScanTester();
 
-    Byte* data = new Byte[8];
+    Byte* data = bm.newByte(8);
     memset(data, 0, 8);
     data[0] = 30;
     Bytes* bytes = new Bytes(data, 8);

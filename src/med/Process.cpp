@@ -2,6 +2,7 @@
 
 #include "med/Process.hpp"
 #include "med/MemOperator.hpp"
+#include "med/ByteManager.hpp"
 
 Process::Process() {}
 
@@ -38,7 +39,8 @@ MemoryBlocks Process::pullMemory() {
 void Process::pullMemoryByMap(const ProcMaps& maps, int mapIndex, int memFd, MemoryBlocks& blocks) {
   int totalSize = maps.ends[mapIndex] - maps.starts[mapIndex];
 
-  Byte* byte = new Byte[totalSize];
+  ByteManager& bm = ByteManager::getInstance();
+  Byte* byte = bm.newByte(totalSize);
 
   MemoryBlock block;
 

@@ -2,23 +2,26 @@
 #include <iostream>
 
 #include "med/Snapshot.hpp"
+#include "med/ByteManager.hpp"
 
 using namespace std;
+
+ByteManager& bm = ByteManager::getInstance();
 
 class SnapshotTester : public Snapshot {
 public:
   SnapshotTester() : Snapshot() {
-    data1 = new Byte[12];
-    data2 = new Byte[20];
+    data1 = bm.newByte(12);
+    data2 = bm.newByte(20);
   }
   SnapshotTester(SnapshotScanService* service) : Snapshot(service) {
-    data1 = new Byte[12];
-    data2 = new Byte[20];
+    data1 = bm.newByte(12);
+    data2 = bm.newByte(20);
   }
   virtual ~SnapshotTester() {
     cout << " This is the problem " << endl;
-    delete[] data1;
-    delete[] data2;
+    bm.deleteByte(data1);
+    bm.deleteByte(data2);
     memoryBlocks.clear();
   }
 
@@ -60,13 +63,13 @@ namespace TestSnapshot {
     snapshot->scanUnknown = true;
 
     // Set the memory blocks
-    Byte* data1 = new Byte[12];
+    Byte* data1 = bm.newByte(12);
     memset(data1, 0, 12);
     data1[0] = 20;
     MemoryBlock block1(data1, 12);
     block1.setAddress(0x08002000);
 
-    Byte* data2 = new Byte[20];
+    Byte* data2 = bm.newByte(20);
     memset(data2, 0, 20);
     data2[0] = 30;
     MemoryBlock block2(data1, 20);
@@ -80,8 +83,8 @@ namespace TestSnapshot {
 
     vector<SnapshotScan*> output = snapshot->compare(ScanParser::OpType::Gt, ScanType::Int32);
 
-    delete[] data1;
-    delete[] data2;
+    bm.deleteByte(data1);
+    bm.deleteByte(data2);
 
     delete snapshot;
   }
