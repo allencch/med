@@ -125,6 +125,7 @@ vector<SnapshotScan*> Snapshot::comparePair(const MemoryBlockPair& pair, const S
 
     bool result = memCompare(&currData[i + currOffset], &prevData[i - prevOffset], typeSize, opType);
     if (result) {
+      // TODO: Should use shared_ptr, so that I need not to care to free it.
       SnapshotScan* matched = new SnapshotScan(curr.getAddress() + i + currOffset, scanType);
       Bytes* copied = Bytes::newCopy(&currData[i + currOffset], typeSize);
       matched->setScannedValue(copied);
