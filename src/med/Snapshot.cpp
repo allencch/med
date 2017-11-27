@@ -35,8 +35,8 @@ void Snapshot::save(Process* process) {
   scanUnknown = true;
 }
 
-vector<SnapshotScan*> Snapshot::compare(const ScanParser::OpType& opType, const ScanType& scanType) {
-  vector<SnapshotScan*> result;
+vector<SnapshotScanPtr> Snapshot::compare(const ScanParser::OpType& opType, const ScanType& scanType) {
+  vector<SnapshotScanPtr> result;
   if (opType == ScanParser::OpType::SnapshotSave) {
     cerr << "Filter should not use \"?\"" << endl;
     return result;
@@ -89,16 +89,16 @@ bool Snapshot::isBlockMatched(MemoryBlock block1, MemoryBlock block2) {
     (firstAddress1 <= lastAddress2 && lastAddress1 >= lastAddress2);
 }
 
-vector<SnapshotScan*> Snapshot::filterUnknown(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType) {
+vector<SnapshotScanPtr> Snapshot::filterUnknown(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType) {
   for (size_t i = 0; i < pairs.size(); i++) {
-    vector<SnapshotScan*> found = comparePair(pairs[i], opType, scanType);
+    vector<SnapshotScanPtr> found = comparePair(pairs[i], opType, scanType);
     scans.insert(scans.end(), found.begin(), found.end());
   }
   clearUnknown();
   return scans;
 }
 
-vector<SnapshotScan*> Snapshot::comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType) {
+vector<SnapshotScanPtr> Snapshot::comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType) {
   MemoryBlock curr = pair.first;
   MemoryBlock prev = pair.second;
 
@@ -120,13 +120,13 @@ vector<SnapshotScan*> Snapshot::comparePair(const MemoryBlockPair& pair, const S
   auto currData = curr.getData();
   auto prevData = prev.getData();
 
-  vector<SnapshotScan*> scan;
+  vector<SnapshotScanPtr> scan;
   for (int i = 0; (i < currLength - typeSize + 1 - currOffset) && (i < prevLength - typeSize + 1 + prevOffset); i++) {
 
     bool result = memCompare(&currData[i + currOffset], &prevData[i - prevOffset], typeSize, opType);
     if (result) {
       // TODO: Should use shared_ptr, so that I need not to care to free it.
-      SnapshotScan* matched = new SnapshotScan(curr.getAddress() + i + currOffset, scanType);
+      SnapshotScanPtr matched = SnapshotScanPtr(new SnapshotScan(curr.getAddress() + i + currOffset, scanType));
       Bytes* copied = Bytes::newCopy(&currData[i + currOffset], typeSize);
       matched->setScannedValue(copied);
       scan.push_back(matched);
@@ -144,21 +144,19 @@ void Snapshot::clearUnknown() {
   memoryBlocks.clear();
 }
 
-vector<SnapshotScan*> Snapshot::filter(const ScanParser::OpType& opType, const ScanType& scanType) {
-  vector<SnapshotScan*> newScans;
+vector<SnapshotScanPtr> Snapshot::filter(const ScanParser::OpType& opType, const ScanType& scanType) {
+  vector<SnapshotScanPtr> newScans;
   for (size_t i = 0; i < scans.size(); i++) {
-    SnapshotScan* scan = scans[i];
+    SnapshotScanPtr scan = scans[i];
     long pid = getProcessPid();
-    if (service->compareScan(scan, pid, opType, scanType)) {
+    if (service->compareScan(scan.get(), pid, opType, scanType)) {
       // FIXME: Error free invalid pointer
-      service->updateScannedValue(scan, pid, scanType);
+      service->updateScannedValue(scan.get(), pid, scanType);
       newScans.push_back(scan);
     }
     else {
       // FIXME: Error free invalid pointer
       scan->freeScannedValue();
-      delete scan;
-      scan = NULL;
     }
   }
 

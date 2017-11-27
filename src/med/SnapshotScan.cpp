@@ -33,7 +33,7 @@ MedScan SnapshotScan::toMedScan() {
   return medScan;
 }
 
-vector<MedScan> SnapshotScan::toMedScans(const vector<SnapshotScan*>& snapshotScans) {
+vector<MedScan> SnapshotScan::toMedScans(const vector<SnapshotScanPtr>& snapshotScans) {
   vector<MedScan> scans;
   for (auto snapshotScan : snapshotScans) {
     scans.push_back(snapshotScan->toMedScan());
@@ -62,9 +62,8 @@ Bytes* SnapshotScan::getScannedValue() {
   return scannedValue;
 }
 
-void SnapshotScan::freeSnapshotScans(const vector<SnapshotScan*>& snapshotScans) {
+void SnapshotScan::freeSnapshotScans(const vector<SnapshotScanPtr>& snapshotScans) {
   for (size_t i = 0; i < snapshotScans.size(); i++) {
     snapshotScans[i]->freeScannedValue();
-    delete snapshotScans[i];
   }
 }

@@ -94,10 +94,10 @@ namespace TestSnapshot {
 
     snapshot->memoryBlocks = blocks;
 
-    vector<SnapshotScan*> output = snapshot->compare(ScanParser::OpType::Gt, ScanType::Int32);
+    vector<SnapshotScanPtr> output = snapshot->compare(ScanParser::OpType::Gt, ScanType::Int32);
 
-    SnapshotScan* scan1 = output[0];
-    SnapshotScan* scan2 = output[1];
+    SnapshotScan* scan1 = output[0].get();
+    SnapshotScan* scan2 = output[1].get();
 
     Byte* bytes1 = scan1->getScannedValue()->getData();
     Byte* bytes2 = scan2->getScannedValue()->getData();
@@ -132,11 +132,11 @@ namespace TestSnapshot {
 
     snapshot->compare(ScanParser::OpType::Gt, ScanType::Int32);
 
-    vector<SnapshotScan*> output = snapshot->filter(ScanParser::OpType::Gt, ScanType::Int32);
+    vector<SnapshotScanPtr> output = snapshot->filter(ScanParser::OpType::Gt, ScanType::Int32);
 
 
-    SnapshotScan* scan1 = output[0];
-    SnapshotScan* scan2 = output[1];
+    SnapshotScan* scan1 = output[0].get();
+    SnapshotScan* scan2 = output[1].get();
 
     Byte* bytes1 = scan1->getScannedValue()->getData();
     Byte* bytes2 = scan2->getScannedValue()->getData();

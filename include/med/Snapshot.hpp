@@ -19,10 +19,10 @@ public:
   Snapshot(SnapshotScanService* service = NULL);
   virtual ~Snapshot();
   void save(Process* process);
-  vector<SnapshotScan*> compare(const ScanParser::OpType& opType, const ScanType& scanType);
-  vector<SnapshotScan*> filterUnknown(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType);
-  vector<SnapshotScan*> comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType);
-  vector<SnapshotScan*> filter(const ScanParser::OpType& opType, const ScanType& scanType);
+  vector<SnapshotScanPtr> compare(const ScanParser::OpType& opType, const ScanType& scanType);
+  vector<SnapshotScanPtr> filterUnknown(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType);
+  vector<SnapshotScanPtr> comparePair(const MemoryBlockPair& pair, const ScanParser::OpType& opType, const ScanType& scanType);
+  vector<SnapshotScanPtr> filter(const ScanParser::OpType& opType, const ScanType& scanType);
 
   bool isUnknown();
   virtual bool hasProcess();
@@ -38,7 +38,7 @@ public:
 private:
   Process* process;
 
-  vector<SnapshotScan*> scans; // TODO: Need to free SnapshotScan*
+  vector<SnapshotScanPtr> scans; // TODO: Need to free SnapshotScan*
   MemoryBlockPairs createMemoryBlockPairs(MemoryBlocks prev, MemoryBlocks curr);
   void clearUnknown();
 

@@ -82,13 +82,13 @@ public:
     MemoryBlockPair pair(block1, block2);
 
     SnapshotTester* snapshot = new SnapshotTester();
-    vector<SnapshotScan*> output = snapshot->comparePair(pair, ScanParser::OpType::Gt, ScanType::Int32);
+    vector<SnapshotScanPtr> output = snapshot->comparePair(pair, ScanParser::OpType::Gt, ScanType::Int32);
 
     TS_ASSERT_EQUALS(output.size(), 1);
 
-    Byte* data = output[0]->getScannedValue()->getData();
+    Byte* data = output[0].get()->getScannedValue()->getData();
     TS_ASSERT_EQUALS(data[0], 40);
-    TS_ASSERT_EQUALS(output[0]->getAddress(), 0x08002000);
+    TS_ASSERT_EQUALS(output[0].get()->getAddress(), 0x08002000);
 
     SnapshotScan::freeSnapshotScans(output);
 
@@ -111,13 +111,13 @@ public:
     MemoryBlockPair pair(block1, block2);
 
     SnapshotTester* snapshot = new SnapshotTester();
-    vector<SnapshotScan*> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
+    vector<SnapshotScanPtr> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
 
     TS_ASSERT_EQUALS(output.size(), 1);
 
-    Byte* data = output[0]->getScannedValue()->getData();
+    Byte* data = output[0].get()->getScannedValue()->getData();
     TS_ASSERT_EQUALS(data[0], 10);
-    TS_ASSERT_EQUALS(output[0]->getAddress(), 0x08002000);
+    TS_ASSERT_EQUALS(output[0].get()->getAddress(), 0x08002000);
 
     SnapshotScan::freeSnapshotScans(output);
     delete snapshot;
@@ -145,12 +145,12 @@ public:
     */
 
     SnapshotTester* snapshot = new SnapshotTester();
-    vector<SnapshotScan*> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
+    vector<SnapshotScanPtr> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
 
     TS_ASSERT_EQUALS(output.size(), 1);
-    Byte* data = output[0]->getScannedValue()->getData();
+    Byte* data = output[0].get()->getScannedValue()->getData();
     TS_ASSERT_EQUALS(data[0], 10);
-    TS_ASSERT_EQUALS(output[0]->getAddress(), 0x08002001);
+    TS_ASSERT_EQUALS(output[0].get()->getAddress(), 0x08002001);
 
     SnapshotScan::freeSnapshotScans(output);
     delete snapshot;
@@ -177,12 +177,12 @@ public:
     */
 
     SnapshotTester* snapshot = new SnapshotTester();
-    vector<SnapshotScan*> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
+    vector<SnapshotScanPtr> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
 
     TS_ASSERT_EQUALS(output.size(), 1);
-    Byte* data = output[0]->getScannedValue()->getData();
+    Byte* data = output[0].get()->getScannedValue()->getData();
     TS_ASSERT_EQUALS(data[0], 10);
-    TS_ASSERT_EQUALS(output[0]->getAddress(), 0x08002001);
+    TS_ASSERT_EQUALS(output[0].get()->getAddress(), 0x08002001);
 
     SnapshotScan::freeSnapshotScans(output);
     delete snapshot;
@@ -209,12 +209,12 @@ public:
     */
 
     SnapshotTester* snapshot = new SnapshotTester();
-    vector<SnapshotScan*> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
+    vector<SnapshotScanPtr> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
 
     TS_ASSERT_EQUALS(output.size(), 1);
-    Byte* data = output[0]->getScannedValue()->getData();
+    Byte* data = output[0].get()->getScannedValue()->getData();
     TS_ASSERT_EQUALS(data[0], 10);
-    TS_ASSERT_EQUALS(output[0]->getAddress(), 0x08002001);
+    TS_ASSERT_EQUALS(output[0].get()->getAddress(), 0x08002001);
 
     SnapshotScan::freeSnapshotScans(output);
     delete snapshot;
@@ -241,12 +241,12 @@ public:
     */
 
     SnapshotTester* snapshot = new SnapshotTester();
-    vector<SnapshotScan*> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
+    vector<SnapshotScanPtr> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
 
     TS_ASSERT_EQUALS(output.size(), 1);
-    Byte* data = output[0]->getScannedValue()->getData();
+    Byte* data = output[0].get()->getScannedValue()->getData();
     TS_ASSERT_EQUALS(data[0], 10);
-    TS_ASSERT_EQUALS(output[0]->getAddress(), 0x08002001);
+    TS_ASSERT_EQUALS(output[0].get()->getAddress(), 0x08002001);
 
     SnapshotScan::freeSnapshotScans(output);
     delete snapshot;
@@ -276,16 +276,16 @@ public:
     */
 
     SnapshotTester* snapshot = new SnapshotTester();
-    vector<SnapshotScan*> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
+    vector<SnapshotScanPtr> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
 
     TS_ASSERT_EQUALS(output.size(), 5);
-    Byte* scanned1 = output[0]->getScannedValue()->getData();
+    Byte* scanned1 = output[0].get()->getScannedValue()->getData();
     TS_ASSERT_EQUALS(scanned1[0], 10);
-    TS_ASSERT_EQUALS(output[0]->getAddress(), 0x08002000);
+    TS_ASSERT_EQUALS(output[0].get()->getAddress(), 0x08002000);
 
-    Byte* scanned2 = output[4]->getScannedValue()->getData();
+    Byte* scanned2 = output[4].get()->getScannedValue()->getData();
     TS_ASSERT_EQUALS(scanned2[0], 20);
-    TS_ASSERT_EQUALS(output[4]->getAddress(), 0x08002004);
+    TS_ASSERT_EQUALS(output[4].get()->getAddress(), 0x08002004);
 
     SnapshotScan::freeSnapshotScans(output);
     delete snapshot;
@@ -315,16 +315,16 @@ public:
     */
 
     SnapshotTester* snapshot = new SnapshotTester();
-    vector<SnapshotScan*> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
+    vector<SnapshotScanPtr> output = snapshot->comparePair(pair, ScanParser::OpType::Lt, ScanType::Int32);
 
     TS_ASSERT_EQUALS(output.size(), 5);
-    Byte* scanned1 = output[0]->getScannedValue()->getData();
+    Byte* scanned1 = output[0].get()->getScannedValue()->getData();
     TS_ASSERT_EQUALS(scanned1[0], 20);
-    TS_ASSERT_EQUALS(output[0]->getAddress(), 0x08002004);
+    TS_ASSERT_EQUALS(output[0].get()->getAddress(), 0x08002004);
 
-    Byte* scanned2 = output[4]->getScannedValue()->getData();
+    Byte* scanned2 = output[4].get()->getScannedValue()->getData();
     TS_ASSERT_EQUALS(scanned2[0], 0);
-    TS_ASSERT_EQUALS(output[4]->getAddress(), 0x08002008);
+    TS_ASSERT_EQUALS(output[4].get()->getAddress(), 0x08002008);
 
     SnapshotScan::freeSnapshotScans(output);
     delete snapshot;
@@ -354,12 +354,12 @@ public:
 
     snapshot->memoryBlocks = blocks;
 
-    vector<SnapshotScan*> output = snapshot->compare(ScanParser::OpType::Gt, ScanType::Int32);
+    vector<SnapshotScanPtr> output = snapshot->compare(ScanParser::OpType::Gt, ScanType::Int32);
 
     TS_ASSERT_EQUALS(output.size(), 2);
-    SnapshotScan* scan1 = output[0];
+    SnapshotScan* scan1 = output[0].get();
     TS_ASSERT_EQUALS(scan1->getAddress(), 0x8002000);
-    SnapshotScan* scan2 = output[1];
+    SnapshotScan* scan2 = output[1].get();
     TS_ASSERT_EQUALS(scan2->getAddress(), 0x8003000);
 
     Byte* bytes1 = scan1->getScannedValue()->getData();
@@ -397,12 +397,12 @@ public:
 
     snapshot->compare(ScanParser::OpType::Gt, ScanType::Int32);
 
-    vector<SnapshotScan*> output = snapshot->filter(ScanParser::OpType::Gt, ScanType::Int32);
+    vector<SnapshotScanPtr> output = snapshot->filter(ScanParser::OpType::Gt, ScanType::Int32);
 
     TS_ASSERT_EQUALS(output.size(), 2);
-    SnapshotScan* scan1 = output[0];
+    SnapshotScan* scan1 = output[0].get();
     TS_ASSERT_EQUALS(scan1->getAddress(), 0x8002000);
-    SnapshotScan* scan2 = output[1];
+    SnapshotScan* scan2 = output[1].get();
     TS_ASSERT_EQUALS(scan2->getAddress(), 0x8003000);
 
     Byte* bytes1 = scan1->getScannedValue()->getData();
