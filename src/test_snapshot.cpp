@@ -30,12 +30,12 @@ public:
   }
 
   virtual MemoryBlocks pullProcessMemory() { // Assuming it always pull the same data
-    memset(data1, 0, 12);
+    memset(data1, 1, 12);
     data1[0] = 40;
     MemoryBlock block1(data1, 12);
     block1.setAddress(0x08002000);
 
-    memset(data2, 0, 20);
+    memset(data2, 1, 20);
     data2[0] = 50;
     MemoryBlock block2(data2, 20);
     block2.setAddress(0x08003000);
@@ -64,15 +64,15 @@ namespace TestSnapshot {
 
     // Set the memory blocks
     Byte* data1 = bm.newByte(12);
-    memset(data1, 0, 12);
+    memset(data1, 1, 12);
     data1[0] = 20;
     MemoryBlock block1(data1, 12);
     block1.setAddress(0x08002000);
 
     Byte* data2 = bm.newByte(20);
-    memset(data2, 0, 20);
+    memset(data2, 1, 20);
     data2[0] = 30;
-    MemoryBlock block2(data1, 20);
+    MemoryBlock block2(data2, 20);
     block2.setAddress(0x08003000);
 
     MemoryBlocks blocks;
@@ -83,9 +83,13 @@ namespace TestSnapshot {
 
     vector<SnapshotScan*> output = snapshot->compare(ScanParser::OpType::Gt, ScanType::Int32);
 
-    bm.deleteByte(data1);
-    bm.deleteByte(data2);
+    SnapshotScan* scan1 = output[0];
+    SnapshotScan* scan2 = output[1];
 
+    Byte* bytes1 = scan1->getScannedValue()->getData();
+    Byte* bytes2 = scan2->getScannedValue()->getData();
+
+    SnapshotScan::freeSnapshotScans(output);
     delete snapshot;
   }
 }

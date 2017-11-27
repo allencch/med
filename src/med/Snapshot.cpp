@@ -51,12 +51,12 @@ vector<SnapshotScan*> Snapshot::compare(const ScanParser::OpType& opType, const 
 
     MemoryBlocks currentMemoryBlocks = pullProcessMemory();
 
-    // MemoryBlockPairs pairs = createMemoryBlockPairs(memoryBlocks, currentMemoryBlocks);
+    MemoryBlockPairs pairs = createMemoryBlockPairs(memoryBlocks, currentMemoryBlocks);
 
-    // result = filterUnknown(pairs, opType, scanType);
+    result = filterUnknown(pairs, opType, scanType);
   }
   else {
-    // result = filter(opType, scanType);
+    result = filter(opType, scanType);
   }
   return result;
 }
@@ -117,16 +117,8 @@ vector<SnapshotScan*> Snapshot::comparePair(const MemoryBlockPair& pair, const S
   auto currData = curr.getData();
   auto prevData = prev.getData();
 
-  printf("offsets: %d %d\n", prevOffset, currOffset);
-  printf("length: %d %d\n", currLength, prevLength);
-
   vector<SnapshotScan*> scan;
   for (int i = 0; (i < currLength - typeSize + 1 - currOffset) && (i < prevLength - typeSize + 1 + prevOffset); i++) {
-
-    printHex(stdout, &currData[i + currOffset], 4);
-    printf(" ");
-    printHex(stdout, &prevData[i - prevOffset], 4);
-    printf("\n");
 
     bool result = memCompare(&currData[i + currOffset], &prevData[i - prevOffset], typeSize, opType);
     if (result) {
