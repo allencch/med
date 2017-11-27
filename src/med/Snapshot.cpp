@@ -13,6 +13,9 @@ Snapshot::Snapshot(SnapshotScanService* service) {
   if (service == NULL) {
     this->service = new SnapshotScanService();
   }
+  else {
+    this->service = service;
+  }
   scanUnknown = false;
 }
 Snapshot::~Snapshot() {

@@ -36,11 +36,24 @@ public:
     blocks.push(block2);
     return blocks;
   }
+
+  virtual long getProcessPid() {
+    return 1000;
+  }
 };
 
 class SnapshotScanServiceTester : public SnapshotScanService {
 public:
   SnapshotScanServiceTester() {}
+
+  virtual bool compareScan(SnapshotScan*, long, const ScanParser::OpType&, const ScanType&) {
+    return true;
+  }
+  virtual void updateScannedValue(SnapshotScan* scan, long pid, const ScanType& scanType) {
+    Bytes* currentBytes = Bytes::create(20);
+    scan->freeScannedValue();
+    scan->setScannedValue(currentBytes);
+  }
 };
 
 class TestSnapshot : public CxxTest::TestSuite {
@@ -358,45 +371,46 @@ public:
     delete snapshot;
   }
 
-  // void testFilter() {
-  //   SnapshotScanService* service = new SnapshotScanServiceTester();
-  //   SnapshotTester* snapshot = new SnapshotTester(service);
-  //   snapshot->scanUnknown = true;
+  void testFilter() {
+    SnapshotScanService* service = new SnapshotScanServiceTester();
+    SnapshotTester* snapshot = new SnapshotTester(service);
+    snapshot->scanUnknown = true;
 
-  //   // Set the memory blocks
-  //   Byte* data1 = bm.newByte(12);
-  //   memset(data1, 0, 12);
-  //   data1[0] = 20;
-  //   MemoryBlock block1(data1, 12);
-  //   block1.setAddress(0x08002000);
+    // Set the memory blocks
+    Byte* data1 = bm.newByte(12);
+    memset(data1, 0, 12);
+    data1[0] = 20;
+    MemoryBlock block1(data1, 12);
+    block1.setAddress(0x08002000);
 
-  //   Byte* data2 = bm.newByte(20);
-  //   memset(data2, 0, 20);
-  //   data2[0] = 30;
-  //   MemoryBlock block2(data2, 20);
-  //   block2.setAddress(0x08003000);
+    Byte* data2 = bm.newByte(20);
+    memset(data2, 0, 20);
+    data2[0] = 30;
+    MemoryBlock block2(data2, 20);
+    block2.setAddress(0x08003000);
 
-  //   MemoryBlocks blocks;
-  //   blocks.push(block1);
-  //   blocks.push(block2);
+    MemoryBlocks blocks;
+    blocks.push(block1);
+    blocks.push(block2);
 
-  //   snapshot->memoryBlocks = blocks;
+    snapshot->memoryBlocks = blocks;
 
-  //   snapshot->compare(ScanParser::OpType::Gt, ScanType::Int32);
+    snapshot->compare(ScanParser::OpType::Gt, ScanType::Int32);
 
-  //   vector<SnapshotScan*> output = snapshot->filter(ScanParser::OpType::Gt, ScanType::Int32);
+    vector<SnapshotScan*> output = snapshot->filter(ScanParser::OpType::Gt, ScanType::Int32);
 
-  //   delete snapshot;
+    TS_ASSERT_EQUALS(output.size(), 2);
+    SnapshotScan* scan1 = output[0];
+    TS_ASSERT_EQUALS(scan1->getAddress(), 0x8002000);
+    SnapshotScan* scan2 = output[1];
+    TS_ASSERT_EQUALS(scan2->getAddress(), 0x8003000);
 
-  //   TS_ASSERT_EQUALS(output.size(), 2);
-  //   SnapshotScan* scan1 = output[0];
-  //   TS_ASSERT_EQUALS(scan1->getAddress(), 0x8002000);
-  //   SnapshotScan* scan2 = output[1];
-  //   TS_ASSERT_EQUALS(scan2->getAddress(), 0x8003000);
+    Byte* bytes1 = scan1->getScannedValue()->getData();
+    Byte* bytes2 = scan2->getScannedValue()->getData();
+    TS_ASSERT_EQUALS(bytes1[0], 40);
+    TS_ASSERT_EQUALS(bytes2[0], 50);
 
-  //   Byte* bytes1 = scan1->getScannedValue()->getData();
-  //   Byte* bytes2 = scan2->getScannedValue()->getData();
-  //   TS_ASSERT_EQUALS(bytes1[0], 40);
-  //   TS_ASSERT_EQUALS(bytes2[0], 50);
-  // }
+    SnapshotScan::freeSnapshotScans(output);
+    delete snapshot;
+  }
 };

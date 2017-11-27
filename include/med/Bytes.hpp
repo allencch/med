@@ -21,6 +21,8 @@ public:
 
   static Bytes copy(Byte* data, int size);
   static Bytes* newCopy(Byte* data, int size);
+
+  static Bytes* create(int size, Byte value = 0);
 };
 
 #endif

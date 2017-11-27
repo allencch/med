@@ -53,12 +53,19 @@ Bytes Bytes::copy(Byte* data, int size) {
   ByteManager& bm = ByteManager::getInstance();
   Byte* newData = bm.newByte(size);
   memcpy(newData, data, size);
-  return Bytes(data, size);
+  return Bytes(newData, size); // FIXED: This suppose to be the one caused the unknown bug which I failed to fix.
 }
 
 Bytes* Bytes::newCopy(Byte* data, int size) {
   ByteManager& bm = ByteManager::getInstance();
   Byte* newData = bm.newByte(size);
   memcpy(newData, data, size);
-  return new Bytes(data, size);
+  return new Bytes(newData, size);
+}
+
+Bytes* Bytes::create(int size, Byte value) {
+  ByteManager& bm = ByteManager::getInstance();
+  Byte* newData = bm.newByte(size);
+  memset(newData, value, size);
+  return new Bytes(newData, size);
 }
