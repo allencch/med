@@ -85,8 +85,8 @@ bool Snapshot::isBlockMatched(MemoryBlock block1, MemoryBlock block2) {
   MemAddr lastAddress1 = firstAddress1 + block1.getSize();
   MemAddr firstAddress2 = block2.getAddress();
   MemAddr lastAddress2 = firstAddress2 + block2.getSize();
-  return (firstAddress1 <= firstAddress2 && lastAddress1 >= firstAddress2) ||
-    (firstAddress1 <= lastAddress2 && lastAddress1 >= lastAddress2);
+  return (firstAddress1 <= firstAddress2 && lastAddress1 > firstAddress2) ||
+    (firstAddress1 < lastAddress2 && lastAddress1 >= lastAddress2);
 }
 
 vector<SnapshotScanPtr> Snapshot::filterUnknown(const MemoryBlockPairs& pairs, const ScanParser::OpType& opType, const ScanType& scanType) {
