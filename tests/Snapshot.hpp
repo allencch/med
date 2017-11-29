@@ -51,10 +51,21 @@ public:
   }
   virtual void updateScannedValue(SnapshotScan* scan, long pid, const ScanType& scanType) {
     Bytes* currentBytes = Bytes::create(20);
+    currentBytes->getData()[0] = 60;
     scan->freeScannedValue();
     scan->setScannedValue(currentBytes);
   }
 };
+
+class SnapshotScanServiceComplement : public SnapshotScanService {
+public:
+  SnapshotScanServiceComplement() {}
+
+  virtual bool compareScan(SnapshotScan*, long, const ScanParser::OpType&, const ScanType&) {
+    return false;
+  }
+};
+
 
 class TestSnapshot : public CxxTest::TestSuite {
 public:
@@ -407,8 +418,42 @@ public:
 
     Byte* bytes1 = scan1->getScannedValue()->getData();
     Byte* bytes2 = scan2->getScannedValue()->getData();
-    TS_ASSERT_EQUALS(bytes1[0], 40);
-    TS_ASSERT_EQUALS(bytes2[0], 50);
+    TS_ASSERT_EQUALS(bytes1[0], 60);
+    TS_ASSERT_EQUALS(bytes2[0], 60);
+
+    SnapshotScan::freeSnapshotScans(output);
+    delete snapshot;
+  }
+
+  void testFilterFalse() {
+    SnapshotScanService* service = new SnapshotScanServiceComplement();
+    SnapshotTester* snapshot = new SnapshotTester(service);
+    snapshot->scanUnknown = true;
+
+    // Set the memory blocks
+    Byte* data1 = bm.newByte(12);
+    memset(data1, 0, 12);
+    data1[0] = 20;
+    MemoryBlock block1(data1, 12);
+    block1.setAddress(0x08002000);
+
+    Byte* data2 = bm.newByte(20);
+    memset(data2, 0, 20);
+    data2[0] = 30;
+    MemoryBlock block2(data2, 20);
+    block2.setAddress(0x08003000);
+
+    MemoryBlocks blocks;
+    blocks.push(block1);
+    blocks.push(block2);
+
+    snapshot->memoryBlocks = blocks;
+
+    snapshot->compare(ScanParser::OpType::Gt, ScanType::Int32);
+
+    vector<SnapshotScanPtr> output = snapshot->filter(ScanParser::OpType::Gt, ScanType::Int32);
+
+    TS_ASSERT_EQUALS(output.size(), 0);
 
     SnapshotScan::freeSnapshotScans(output);
     delete snapshot;

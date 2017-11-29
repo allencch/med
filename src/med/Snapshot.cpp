@@ -150,12 +150,10 @@ vector<SnapshotScanPtr> Snapshot::filter(const ScanParser::OpType& opType, const
     SnapshotScanPtr scan = scans[i];
     long pid = getProcessPid();
     if (service->compareScan(scan.get(), pid, opType, scanType)) {
-      // FIXME: Error free invalid pointer
       service->updateScannedValue(scan.get(), pid, scanType);
       newScans.push_back(scan);
     }
     else {
-      // FIXME: Error free invalid pointer
       scan->freeScannedValue();
     }
   }
