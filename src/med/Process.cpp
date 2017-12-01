@@ -1,4 +1,5 @@
 #include <unistd.h> //getpagesize()
+#include <cstring>
 
 #include "med/Process.hpp"
 #include "med/MemOperator.hpp"
@@ -46,11 +47,17 @@ void Process::pullMemoryByMap(const ProcMaps& maps, int mapIndex, int memFd, Mem
 
   int pageSize = getpagesize();
   for (MemAddr j = maps.starts[mapIndex]; j < maps.ends[mapIndex]; j += pageSize) {
-    Byte* pointer = byte + j;
-    if (read(memFd, pointer, pageSize == -1) == -1) {
-      continue;
+    Byte* pointer = byte + j - maps.starts[mapIndex];
+    if (lseek(memFd, j, SEEK_SET) == -1) {
+      fprintf(stderr, "pullMemoryByMap() fail to lseek %lx. %s\n", j, strerror(errno));
+      break;
+    }
+    if (read(memFd, pointer, pageSize) == -1) {
+      fprintf(stderr, "pullMemoryByMap() fail to read %lx. %s\n", j, strerror(errno));
+      break;
     }
   }
+  // printf("h: %lx, %d\n", maps.starts[mapIndex], totalSize);
   block.setDataWithAddress(byte, totalSize, maps.starts[mapIndex]);
   blocks.push(block);
 }

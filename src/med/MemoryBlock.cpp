@@ -1,4 +1,5 @@
-#include "med/MemoryBlock.hpp"
+// #include "med/MemoryBlock.hpp"
+#include "med/MedCommon.hpp"
 
 //// MemoryBlock
 
@@ -23,6 +24,16 @@ void MemoryBlock::setDataWithAddress(Byte* data, int size, MemAddr address) {
   setAddress(address);
 }
 
+void MemoryBlock::dumpByAddress(MemAddr address, int size, FILE* stream) {
+  MemAddr start = getAddress();
+  MemAddr end = start + getSize();
+  if (address < start || address + size >= end) {
+    return;
+  }
+  Byte* ptr = getData();
+  long offset = address - start;
+  printHex(stream, ptr + offset, size);
+}
 
 /// MemoryBlocks
 
@@ -49,4 +60,21 @@ int MemoryBlocks::getSize() {
 
 vector<MemoryBlock> MemoryBlocks::getData() {
   return data;
+}
+
+void MemoryBlocks::dumpByAddress(MemAddr address, int size, FILE* stream) {
+  MemoryBlock* block = getMemoryBlockByAddress(address);
+  block->dumpByAddress(address, size, stream);
+}
+
+MemoryBlock* MemoryBlocks::getMemoryBlockByAddress(MemAddr address) {
+  for (size_t i = 0; i < data.size(); i++) {
+    MemAddr start = data[i].getAddress();
+    MemAddr end = start + data[i].getSize();
+    if (address < start || address >= end) {
+      continue;
+    }
+    return &(data[i]);
+  }
+  return NULL;
 }

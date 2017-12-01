@@ -71,6 +71,7 @@ MemoryBlockPairs Snapshot::createMemoryBlockPairs(MemoryBlocks prev, MemoryBlock
   for (size_t i = 0; i < prevBlocks.size(); i++) {
     for (size_t j = 0; j < currBlocks.size(); j++) {
       if (isBlockMatched(prevBlocks[i], currBlocks[j])) {
+        // printf("currblocks: %d\n", (int)j);
         MemoryBlockPair pair(currBlocks[j], prevBlocks[i]); // The current one compare to the previous one.
         pairs.push_back(pair);
         break;
@@ -115,6 +116,9 @@ vector<SnapshotScanPtr> Snapshot::comparePair(const MemoryBlockPair& pair, const
   int currLength = curr.getSize();
   int prevLength = prev.getSize();
 
+  // long address = curr.getAddress();
+  // printf("%lx, %d, %d\n", address, currLength, currOffset);
+
   int typeSize = scanTypeToSize(scanType);
 
   auto currData = curr.getData();
@@ -125,7 +129,6 @@ vector<SnapshotScanPtr> Snapshot::comparePair(const MemoryBlockPair& pair, const
 
     bool result = memCompare(&currData[i + currOffset], &prevData[i - prevOffset], typeSize, opType);
     if (result) {
-      // TODO: Should use shared_ptr, so that I need not to care to free it.
       SnapshotScanPtr matched = SnapshotScanPtr(new SnapshotScan(curr.getAddress() + i + currOffset, scanType));
       Bytes* copied = Bytes::newCopy(&currData[i + currOffset], typeSize);
       matched->setScannedValue(copied);

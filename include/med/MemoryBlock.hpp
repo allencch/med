@@ -15,6 +15,8 @@ public:
   void setAddress(MemAddr address);
   MemAddr getAddress();
 
+  void dumpByAddress(MemAddr address, int size, FILE* stream = stdout);
+
 private:
   MemAddr address;
 };
@@ -27,7 +29,10 @@ public:
   void clear();
   int getSize();
 
+  void dumpByAddress(MemAddr address, int size, FILE* stream = stdout);
+
   vector<MemoryBlock> getData();
 private:
   vector<MemoryBlock> data;
+  MemoryBlock* getMemoryBlockByAddress(MemAddr address);
 };
