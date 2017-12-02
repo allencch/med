@@ -74,7 +74,7 @@ void MemEditor::setupSignals() {
 
 void MemEditor::onBaseAddressEdited() {
   QString addr = baseAddress->text();
-  if (addr == "") {
+  if (addr.trimmed() == "") {
     return;
   }
 
@@ -96,6 +96,9 @@ void MemEditor::onBaseAddressEdited() {
 
 void MemEditor::refresh() {
   QString addr = baseAddress->text();
+  if (addr.trimmed() == "") {
+    return;
+  }
   MemAddr roundedAddr = addressRoundDown(hexToInt(addr.toStdString()));
   baseAddress->setText(intToHex(roundedAddr).c_str());
   loadMemory(roundedAddr);
@@ -103,6 +106,9 @@ void MemEditor::refresh() {
 
 void MemEditor::updateAddresses() {
   QString addr = baseAddress->text();
+  if (addr.trimmed() == "") {
+    return;
+  }
   loadAddresses(hexToInt(addr.toStdString()));
 }
 
@@ -165,15 +171,21 @@ void MemEditor::onMemAreaCursorPositionChanged() {
 }
 
 MemAddr MemEditor::getAddressByCursorPosition(int position) {
+  QString addr = baseAddress->text();
+  if (addr.trimmed() == "") {
+    return 0;
+  }
   int distance = position / 3;
-
-  MemAddr base = hexToInt(baseAddress->text().toStdString());
+  MemAddr base = hexToInt(addr.toStdString());
   return base + distance;
 }
 
 void MemEditor::updateCurrAddress() {
   int position = memArea->textCursor().position();
   MemAddr curr = getAddressByCursorPosition(position);
+  if (curr == 0) {
+    return;
+  }
   currAddress->setText(intToHex(curr).c_str());
 }
 
@@ -200,7 +212,9 @@ void MemEditor::writeToProcessMemory(int position, char ch) {
   string value = to_string(hexToInt(hexaString));
 
   MemAddr address = getAddressByCursorPosition(position);
-  mainUi->med.setValueByAddress(address, value, "int8");
+  if (address) {
+    mainUi->med.setValueByAddress(address, value, "int8");
+  }
 
   refresh();
 }

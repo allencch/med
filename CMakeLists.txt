@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 2.8.11)
 project (Med)
 
+cmake_policy(SET CMP0071 NEW) # 3.10.1 introduced policy, "cmake --help-policy CMP0071" for detail.
+
 set(CMAKE_CXX_FLAGS "-std=c++14")
 set(CMAKE_INCLUDE_CURRENT_DIR ON) #required for qt moc
 set(CMAKE_AUTOMOC ON) #automatic moc
@@ -27,6 +29,8 @@ file(GLOB gui_HEADER "include/gui/*.hpp")
 qt5_wrap_cpp(moc_med-qt ${gui_HEADER})
 add_library(moc-med-qt ${moc_med-qt})
 qt5_use_modules(moc-med-qt Widgets)
+
+set_property(SOURCE ${gui_HEADER} PROPERTY SKIP_AUTOMOC ON)
 
 # qt5_generate_moc(src/gui/med-qt.cpp med-qt.moc) #Using automatic moc can solve the Q_OBJECT issue in other cpp files
 file(GLOB gui_SRC "src/gui/*.cpp")
@@ -66,6 +70,9 @@ if(CXXTEST_FOUND)
   CXXTEST_ADD_TEST(testSnapshotScan testSnapshotScan.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/SnapshotScan.hpp)
   target_link_libraries(testSnapshotScan med)
+
+  file(GLOB test_HEADER "tests/*.hpp")
+  set_property(SOURCE ${gui_HEADER} PROPERTY SKIP_AUTOMOC ON)
 endif()
 
 install(TARGETS med med-qt
