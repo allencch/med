@@ -11,6 +11,9 @@ public:
   ~Mem();
 
   void dump();
+  void setValue(int value);
+
+  int getValueAsInt();
 
   Byte* data;
   size_t size;

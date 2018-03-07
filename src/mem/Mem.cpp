@@ -22,8 +22,20 @@ void Mem::initialize(size_t size) {
 }
 
 void Mem::dump() {
-  for(size_t i = 0; i < size ; i++) {
+  for (size_t i = 0; i < size ; i++) {
     printf("%x ", data[i]);
   }
   printf("\n");
+}
+
+void Mem::setValue(int value) {
+  Byte* ptr = (Byte*)&value;
+  memcpy(data, ptr, size);
+}
+
+int Mem::getValueAsInt() {
+  int value = 0;
+  Byte* ptr = (Byte*)&value;
+  memcpy(ptr, data, size);
+  return value;
 }

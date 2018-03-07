@@ -12,6 +12,7 @@ public:
   void setPid(pid_t);
   pid_t getPid();
   MemPtr read(Address addr, size_t size);
+  void write(Address addr, MemPtr mem, size_t size = 0);
 
 private:
   pid_t pid;

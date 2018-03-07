@@ -16,4 +16,16 @@ public:
     TS_ASSERT_EQUALS(mem->data[2], ptr1[2]);
     TS_ASSERT_EQUALS(mem->size, 3);
   }
+
+  void testWrite() {
+    unsigned char ptr1[] = { 0x64, 0x65, 0x66 };
+    MemIO memIO;
+    MemPtr mem = memIO.read((Address)ptr1, 3);
+    mem->setValue(0x6867);
+    memIO.write((Address)ptr1, mem, 2);
+
+    TS_ASSERT_EQUALS(ptr1[0], 0x67);
+    TS_ASSERT_EQUALS(ptr1[1], 0x68);
+    TS_ASSERT_EQUALS(ptr1[2], 0x66);
+  }
 };
