@@ -315,9 +315,10 @@ Byte* memRead(pid_t pid, MemAddr address, size_t size) {
     free(buf);
     close(memFd);
     pidDetach(pid);
+    medMutex.unlock();
     throw MedException("Failed lseek");
   }
-  else if(read(memFd, buf, size) == -1) {
+  if(read(memFd, buf, size) == -1) {
     free(buf);
     close(memFd);
     pidDetach(pid);
