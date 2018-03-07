@@ -5,8 +5,6 @@
 #include "med/MedTypes.hpp"
 #include "mem/Mem.hpp"
 
-using namespace std;
-
 class MemIO {
 public:
   MemIO();

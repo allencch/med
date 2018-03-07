@@ -6,7 +6,7 @@
 
 class Mem {
 public:
-  Mem(size_t size);
+  explicit Mem(size_t size);
   Mem(Address addr, size_t size);
   ~Mem();
 
