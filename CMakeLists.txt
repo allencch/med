@@ -4,7 +4,8 @@ project (Med)
 cmake_policy(SET CMP0071 NEW) # 3.10.1 introduced policy, "cmake --help-policy CMP0071" for detail.
 
 # set(CMAKE_CXX_FLAGS "-std=c++14")
-set(CMAKE_CXX_FLAGS "-std=c++14 -g -rdynamic") # for debugging purpose
+set(CMAKE_CXX_FLAGS "-std=c++14 -g") # for debugging purpose
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,-export-dynamic")
 set(CMAKE_INCLUDE_CURRENT_DIR ON) #required for qt moc
 set(CMAKE_AUTOMOC ON) #automatic moc
 
