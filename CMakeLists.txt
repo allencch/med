@@ -49,6 +49,9 @@ target_link_libraries(test_snapshot med)
 add_executable(test_byte_manager src/test_byte_manager.cpp)
 target_link_libraries(test_byte_manager med)
 
+add_executable(test_memio src/test_memio.cpp)
+target_link_libraries(test_memio med)
+
 #https://cmake.org/cmake/help/v3.7/module/FindCxxTest.html
 find_package(CxxTest)
 if(CXXTEST_FOUND)
