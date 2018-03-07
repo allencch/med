@@ -8,6 +8,7 @@ using namespace std;
 
 typedef unsigned long MemAddr;
 typedef unsigned char Byte;
+typedef unsigned long Address;
 
 struct ProcMaps {
   vector<MemAddr> starts;

@@ -21,7 +21,8 @@ add_definitions(${JSONCPP_CFLAGS} ${ICU_CFLAGS})
 add_executable(testfile src/test.c)
 
 file(GLOB med_SRC "src/med/*.cpp")
-add_library(med SHARED ${med_SRC})
+file(GLOB mem_SRC "src/mem/*.cpp")
+add_library(med SHARED ${med_SRC} ${mem_SRC})
 target_link_libraries(med ${JSONCPP_LIBRARIES} ${ICU_LIBRARIES} -lpthread)
 
 # Because the header files are located in different location,
@@ -72,6 +73,10 @@ if(CXXTEST_FOUND)
   CXXTEST_ADD_TEST(testSnapshotScan testSnapshotScan.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/SnapshotScan.hpp)
   target_link_libraries(testSnapshotScan med)
+
+  CXXTEST_ADD_TEST(testMemIO testMemIO.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/MemIO.hpp)
+  target_link_libraries(testMemIO med)
 
   file(GLOB test_HEADER "tests/*.hpp")
   set_property(SOURCE ${gui_HEADER} PROPERTY SKIP_AUTOMOC ON)
