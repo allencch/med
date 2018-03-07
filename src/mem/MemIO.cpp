@@ -1,5 +1,7 @@
 #include <cstring>
 #include <string>
+#include <sys/ptrace.h> //ptrace()
+#include <sys/prctl.h> //prctl()
 #include <unistd.h> //open, read, lseek
 
 #include "med/MedException.hpp"
@@ -70,5 +72,48 @@ void MemIO::writeDirect(Address addr, MemPtr mem, size_t size) {
 }
 
 void MemIO::writeProcess(Address addr, MemPtr mem, size_t size) {
+  mutex.lock();
+  pidAttach(pid);
 
+  int writeSize = size ? size : mem->size;
+
+  int psize = padWordSize(writeSize);
+  Byte* buf = (uint8_t*)malloc(writeSize);
+
+  long word;
+  for (int i = 0; i < psize; i += sizeof(long)) {
+    errno = 0;
+    word = ptrace(PTRACE_PEEKDATA, pid, (Byte*)(addr) + i, NULL);
+
+    if(errno) {
+      printf("PEEKDATA error: %p, %s\n", (void*)addr, strerror(errno));
+      free(buf);
+      pidDetach(pid);
+      mutex.unlock();
+    }
+
+    //Write word to the buffer
+    memcpy((Byte*)buf + i, &word, sizeof(long));
+  }
+
+  memcpy(buf, mem->data, writeSize); //over-write on top of it, so that the last padding byte will preserved
+
+  for (int i = 0; i < writeSize; i += sizeof(long)) {
+    // This writes as uint32, it should be uint8
+    // According to manual, it reads "word". Depend on the CPU.
+    // If the OS is 32bit, then word is 32bit; if 64bit, then 64bit.
+    // Thus, the best solution is peek first, then only over write the position
+    // Therefore, the value should be the WORD size.
+
+    if (ptrace(PTRACE_POKEDATA, pid, (Byte*)(addr) + i, *(long*)((Byte*)buf + i) ) == -1L) {
+      printf("POKEDATA error: %s\n", strerror(errno));
+      free(buf);
+      pidDetach(pid);
+      mutex.unlock();
+    }
+  }
+
+  free(buf);
+  pidDetach(pid);
+  mutex.unlock();
 }

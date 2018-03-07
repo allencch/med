@@ -7,7 +7,7 @@
 using namespace std;
 
 typedef unsigned long MemAddr;
-typedef unsigned char Byte;
+typedef uint8_t Byte;
 typedef unsigned long Address;
 
 struct ProcMaps {

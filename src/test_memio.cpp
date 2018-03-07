@@ -20,5 +20,11 @@ int main(int argc, char** argv) {
   MemPtr mem = memIO->read(addr, 4);
   mem->dump();
 
+  mem->setValue(value);
+  memIO->write(addr, mem, 4);
+
+  mem = memIO->read(addr, 4);
+  mem->dump();
+
   return 0;
 }
