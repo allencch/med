@@ -11,48 +11,68 @@ const int STEP = 1;
 
 MemScanner::MemScanner() {
   pid = 0;
-  threadManager = &ThreadManager::getInstance();
-  threadManager->setMaxThreads(8);
+  initialize();
 }
 
 MemScanner::MemScanner(pid_t pid) {
   this->pid = pid;
+  initialize();
+  memio->setPid(pid);
+}
+
+MemScanner::~MemScanner() {
+  pid = 0;
+  delete memio;
+}
+
+void MemScanner::initialize() {
+  threadManager = &ThreadManager::getInstance();
+  threadManager->setMaxThreads(8);
+  memio = new MemIO();
 }
 
 void MemScanner::setPid(pid_t pid) {
   this->pid = pid;
+  memio->setPid(pid);
 }
 
 pid_t MemScanner::getPid() {
   return pid;
 }
 
+MemIO* MemScanner::getMemIO() {
+  return memio;
+}
+
 vector<MemPtr> MemScanner::scan(Byte* value, int size, string scanType, ScanParser::OpType op) {
   vector<MemPtr> list;
-  mutex.lock();
-  pidAttach(pid);
 
   ProcMaps maps = getMaps(pid);
   int memFd = getMem(pid);
+  MemIO* memio = getMemIO();
 
   for (size_t i = 0; i < maps.starts.size(); i++) {
     TMTask* fn = new TMTask();
-    *fn = [&list, &maps, i, memFd, value, size, scanType, op]() {
-      scanMap(list, maps, i, memFd, value, size, scanType, op);
+    *fn = [memio, &list, &maps, i, memFd, value, size, scanType, op]() {
+      scanMap(memio, list, maps, i, memFd, value, size, scanType, op);
     };
     threadManager->queueTask(fn);
   }
+  threadManager->start();
+  threadManager->clear();
+
   return list;
 }
 
-void MemScanner::scanMap(vector<MemPtr>& list,
-                      ProcMaps& maps,
-                      int mapIndex,
-                      int fd,
-                      Byte* value,
-                      int size,
-                      string scanType,
-                      ScanParser::OpType op) {
+void MemScanner::scanMap(MemIO* memio,
+                         vector<MemPtr>& list,
+                         ProcMaps& maps,
+                         int mapIndex,
+                         int fd,
+                         Byte* value,
+                         int size,
+                         string scanType,
+                         ScanParser::OpType op) {
   for (MemAddr j = maps.starts[mapIndex]; j < maps.ends[mapIndex]; j += getpagesize()) {
       if(lseek(fd, j, SEEK_SET) == -1) {
       continue;
@@ -63,23 +83,25 @@ void MemScanner::scanMap(vector<MemPtr>& list,
     if(read(fd, page, getpagesize()) == -1) {
       continue;
     }
-    scanPage(list, page, j, value, size, scanType, op);
+    scanPage(memio, list, page, j, value, size, scanType, op);
 
     free(page);
   }
 }
 
-void MemScanner::scanPage(vector<MemPtr>& list,
-                       Byte* page,
-                       Address start,
-                       Byte* value,
-                       int size,
-                       string scanType, // not using it right now
-                       ScanParser::OpType op) {
+void MemScanner::scanPage(MemIO* memio,
+                          vector<MemPtr>& list,
+                          Byte* page,
+                          Address start,
+                          Byte* value,
+                          int size,
+                          string scanType, // not using it right now
+                          ScanParser::OpType op) {
   for(int k = 0; k <= getpagesize() - size; k += STEP) {
     try {
       if(memCompare(page + k, size, value, size, op)) {
-        MemPtr mem = MemPtr(new Mem(start + k, size));
+        printf("%lx\n", (Address)(start + k));
+        MemPtr mem = memio->read((Address)(start + k), size);
         list.push_back(mem);
       }
     } catch(MedException& ex) {
