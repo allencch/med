@@ -36,9 +36,15 @@ void scan(const string& value) {
   int v = stol(value);
   vector<MemPtr> mems = scanner->scan((Byte*)&v, 4, "int32", ScanParser::OpType::Eq);
   manager->setMems(mems);
+  printf("Scanned %zu\n", mems.size());
 }
 
-void filter(const string& value) {}
+void filter(const string& value) {
+  int v = stol(value);
+  vector<MemPtr> mems = scanner->filter(manager->getMems(), (Byte*)&v, 4, "int32", ScanParser::OpType::Eq);
+  manager->setMems(mems);
+  printf("Filtered %zu\n", mems.size());
+}
 
 void showList() {
   vector<MemPtr>& mems = manager->getMems();
@@ -51,12 +57,15 @@ void showList() {
 
 void interpretLine(string command) {
   vector<string> splitted = StringUtil::split(command, ' ');
+
+  if (splitted.size() == 0) return;
+
   int cmd = interpretCommand(splitted[0]);
   if (cmd == COMMAND_SCAN) {
     scan(splitted[1]);
   }
   else if (cmd == COMMAND_FILTER) {
-    filter(splitted[2]);
+    filter(splitted[1]);
   }
   else {
     showList();

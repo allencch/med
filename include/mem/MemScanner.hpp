@@ -21,6 +21,7 @@ public:
   pid_t getPid();
   MemIO* getMemIO();
   vector<MemPtr> scan(Byte* value, int size, string scanType, ScanParser::OpType op);
+  vector<MemPtr> filter(const vector<MemPtr>& list, Byte* value, int size, string scanType, ScanParser::OpType op);
 
 private:
   void initialize();

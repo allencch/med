@@ -79,7 +79,7 @@ void MemIO::writeProcess(Address addr, MemPtr mem, size_t size) {
   int writeSize = size ? size : mem->size;
 
   int psize = padWordSize(writeSize);
-  Byte* buf = (uint8_t*)malloc(writeSize);
+  Byte* buf = new Byte[writeSize];
 
   long word;
   for (int i = 0; i < psize; i += sizeof(long)) {
@@ -88,9 +88,6 @@ void MemIO::writeProcess(Address addr, MemPtr mem, size_t size) {
 
     if(errno) {
       printf("PEEKDATA error: %p, %s\n", (void*)addr, strerror(errno));
-      free(buf);
-      pidDetach(pid);
-      mutex.unlock();
     }
 
     //Write word to the buffer
@@ -108,13 +105,10 @@ void MemIO::writeProcess(Address addr, MemPtr mem, size_t size) {
 
     if (ptrace(PTRACE_POKEDATA, pid, (Byte*)(addr) + i, *(long*)((Byte*)buf + i) ) == -1L) {
       printf("POKEDATA error: %s\n", strerror(errno));
-      free(buf);
-      pidDetach(pid);
-      mutex.unlock();
     }
   }
 
-  free(buf);
+  delete[] buf;
   pidDetach(pid);
   mutex.unlock();
 }

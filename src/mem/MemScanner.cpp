@@ -78,14 +78,14 @@ void MemScanner::scanMap(MemIO* memio,
       continue;
     }
 
-    Byte* page = (Byte*)malloc(getpagesize()); //For block of memory
+    Byte* page = new Byte[getpagesize()]; //For block of memory
 
     if(read(fd, page, getpagesize()) == -1) {
       continue;
     }
     scanPage(memio, list, page, j, value, size, scanType, op);
 
-    free(page);
+    delete[] page;
   }
 }
 
@@ -100,7 +100,6 @@ void MemScanner::scanPage(MemIO* memio,
   for(int k = 0; k <= getpagesize() - size; k += STEP) {
     try {
       if(memCompare(page + k, size, value, size, op)) {
-        printf("%lx\n", (Address)(start + k));
         MemPtr mem = memio->read((Address)(start + k), size);
         list.push_back(mem);
       }
@@ -108,4 +107,26 @@ void MemScanner::scanPage(MemIO* memio,
       cerr << ex.getMessage() << endl;
     }
   }
+}
+
+vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list, Byte* value, int size, string scanType, ScanParser::OpType op) {
+  vector<MemPtr> newList;
+  int memFd = getMem(pid);
+
+  Byte* buf = new Byte[size];
+  for (size_t i = 0; i < list.size(); i++) {
+    if (lseek(memFd, list[i]->getAddress(), SEEK_SET) == -1) {
+      continue;
+    }
+    if (read(memFd, buf, size) == -1) {
+      continue;
+    }
+
+    if (memCompare(buf, size, value, size, op)) {
+      newList.push_back(list[i]);
+    }
+  }
+
+  delete[] buf;
+  return newList;
 }
