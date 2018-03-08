@@ -10,13 +10,17 @@ public:
   Mem(Address addr, size_t size);
   ~Mem();
 
-  void dump();
+  void dump(bool newline = true);
   void setValue(int value);
 
+  Address getAddress();
+  string getAddressAsString();
+  void setAddress(Address addr);
   int getValueAsInt();
 
   Byte* data;
   size_t size;
+  Address address;
 private:
   void initialize(size_t size);
 };

@@ -37,6 +37,7 @@ MemPtr MemIO::readProcess(Address addr, size_t size) {
   pidAttach(pid);
 
   MemPtr mem = MemPtr(new Mem(size));
+  mem->setAddress(addr);
 
   int memFd = getMem(pid);
   if(lseek(memFd, addr, SEEK_SET) == -1) {
