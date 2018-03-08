@@ -40,6 +40,11 @@ file(GLOB gui_SRC "src/gui/*.cpp")
 add_executable(med-qt ${gui_SRC})
 target_link_libraries(med-qt moc-med-qt med Qt5::UiTools)
 
+file(GLOB cli_SRC "src/cli/*.cpp")
+add_executable(med-cli ${cli_SRC})
+target_link_libraries(med-cli med readline)
+
+# Executable test files
 add_executable(test_thread_manager src/med/ThreadManager.cpp src/test_thread_manager.cpp)
 target_link_libraries(test_thread_manager -lpthread)
 
