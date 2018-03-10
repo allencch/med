@@ -12,13 +12,12 @@ public:
   ~MemEd();
   void setPid(pid_t pid);
   pid_t getPid();
-  vector<MemPtr> scan(const string& value);
+  vector<MemPtr> scan(const string& value, const string& scanType);
   vector<MemPtr> filter(const string& value);
   vector<MemPtr>& getMems();
 
   vector<Process> listProcesses();
   Process selectProcessByIndex(int index);
-
   vector<Process> processes;
   Process selectedProcess;
   

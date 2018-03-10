@@ -11,6 +11,7 @@
 
 using namespace std;
 
+// TODO: Replace by StringUtil
 string ScanParser::trim(const string &s) {
   if (s.size() == 0) {
     return s;
@@ -72,6 +73,7 @@ ScanParser::OpType ScanParser::getOpType(const string &v) {
   return stringToOpType(getOp(v));
 }
 
+// TODO: Replace by StringUtil
 vector<string> ScanParser::split(const string &s, char delim) {
   stringstream ss(s);
   string token;
@@ -100,6 +102,7 @@ bool ScanParser::isValid(const string &v) {
   return true;
 }
 
+// @deprecated
 Bytes ScanParser::getBytes(const string& v, const string& t) {
   if (t == SCAN_TYPE_STRING) {
     return ScanParser::getStringBytes(v);
@@ -109,6 +112,16 @@ Bytes ScanParser::getBytes(const string& v, const string& t) {
   }
 }
 
+tuple<Byte*, size_t> ScanParser::valueToBytes(const string& v, const string& t) {
+  // if (t == SCAN_TYPE_STRING) {
+    // TODO: get string bytes
+  // }
+  // else {
+    return ScanParser::numericToBytes(v, t);
+    // }
+}
+
+// @deprecated
 Bytes ScanParser::getNumericBytes(const string& v, const string& t) {
   vector<string> values = getValues(v);
   if (values.size() == 0) {
@@ -127,6 +140,21 @@ Bytes ScanParser::getNumericBytes(const string& v, const string& t) {
   }
   Bytes bytes(data, valueLength * values.size());
   return bytes;
+}
+
+tuple<Byte*, size_t> ScanParser::numericToBytes(const string& v, const string& t) {
+  vector<string> values = getValues(v);
+  if (values.size() == 0) {
+    throw MedException("Scan empty string");
+  }
+  int valueLength = scanTypeToSize(t);
+  Byte* data = new Byte[valueLength];
+  Byte* pointer = data;
+  for (size_t i = 0; i < values.size(); i++) {
+    stringToMemory(values[i], t, pointer);
+    pointer += valueLength;
+  }
+  return make_tuple(data, valueLength * values.size()); // Remember to delete[]
 }
 
 Bytes ScanParser::getStringBytes(const string& v) {

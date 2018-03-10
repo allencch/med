@@ -14,6 +14,7 @@
 #include <QTreeWidgetItem>
 #include <QStatusBar>
 #include <QPlainTextEdit>
+#include <QComboBox>
 
 #include "mem/MemEd.hpp"
 
@@ -33,6 +34,8 @@ public:
   QDialog* processDialog; // This is the processSelector container
   QTreeWidget* processTreeWidget;
   QLineEdit* selectedProcessLine;
+  QStatusBar* statusBar;
+  QComboBox* scanTypeCombo;
 
   MemEd* med;
 
@@ -41,12 +44,15 @@ public slots:
 
 private slots:
   void onProcessClicked();
+  void onScanClicked();
+  void onFilterClicked();
 
 private:
   void loadUiFiles();
-  void setupUi();
   void loadProcessUi();
+  void setupStatusBar();
   void setupSignals();
+  void setupUi();
 
   QApplication* app;
   QWidget* mainWindow;

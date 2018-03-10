@@ -30,10 +30,14 @@ pid_t MemEd::getPid() {
   return pid;
 }
 
-vector<MemPtr> MemEd::scan(const string& value) {
-  int v = stol(value);
-  vector<MemPtr> mems = scanner->scan((Byte*)&v, 4, "int32", ScanParser::OpType::Eq);
+vector<MemPtr> MemEd::scan(const string& value, const string& scanType) {
+  auto buffer = ScanParser::valueToBytes(value, scanType);
+  size_t size = std::get<1>(buffer);
+
+  vector<MemPtr> mems = scanner->scan(std::get<0>(buffer), size, scanType, ScanParser::OpType::Eq);
   manager->setMems(mems);
+
+  delete[] std::get<0>(buffer);
   return mems;
 }
 
@@ -55,5 +59,6 @@ vector<Process> MemEd::listProcesses() {
 
 Process MemEd::selectProcessByIndex(int index) {
   selectedProcess = processes[index];
+  setPid(stoi(selectedProcess.pid));
   return selectedProcess;
 }

@@ -1,10 +1,14 @@
 #include <cstdio>
+#include <iostream>
 
 #include <QtUiTools>
 #include <QtDebug>
 
+#include "med/MedException.hpp"
 #include "ui/Ui.hpp"
 #include "ui/ProcessEventListener.hpp"
+
+using namespace std;
 
 MedUi::MedUi(QApplication* app) {
   this->app = app;
@@ -12,6 +16,7 @@ MedUi::MedUi(QApplication* app) {
 
   loadUiFiles();
   loadProcessUi();
+  setupStatusBar();
   setupSignals();
   setupUi();
   // TODO: other action here
@@ -29,18 +34,8 @@ void MedUi::loadUiFiles() {
   file.close();
 
   selectedProcessLine = mainWindow->findChild<QLineEdit*>("selectedProcess");
+  scanTypeCombo = mainWindow->findChild<QComboBox*>("scanType");
   // TODO: other setup here
-}
-
-void MedUi::setupUi() {
-  mainWindow->show();
-}
-
-void MedUi::setupSignals() {
-  QObject::connect(mainWindow->findChild<QWidget*>("process"),
-                   SIGNAL(clicked()),
-                   this,
-                   SLOT(onProcessClicked()));
 }
 
 void MedUi::loadProcessUi() {
@@ -67,14 +62,39 @@ void MedUi::loadProcessUi() {
   processTreeWidget->installEventFilter(new ProcessDialogEventListener(this));
 }
 
+void MedUi::setupUi() {
+  scanTypeCombo->setCurrentIndex(1);
+  mainWindow->show();
+}
+
+void MedUi::setupStatusBar() {
+  //Statusbar message
+  statusBar = mainWindow->findChild<QStatusBar*>("statusbar");
+  statusBar->showMessage("Tips: Left panel is scanned address. Right panel is stored address.");
+}
+
+void MedUi::setupSignals() {
+  QObject::connect(mainWindow->findChild<QWidget*>("process"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onProcessClicked()));
+
+  QObject::connect(mainWindow->findChild<QWidget*>("scanButton"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onScanClicked()));
+
+  QObject::connect(mainWindow->findChild<QWidget*>("filterButton"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onFilterClicked()));
+}
+
 void MedUi::onProcessClicked() {
   med->listProcesses();
-
   processDialog->show();
+  processTreeWidget->clear();
 
-  processTreeWidget->clear(); //Remove all items
-
-  //Add all the process into the tree widget
   for (int i = med->processes.size() - 1; i >= 0; i--) {
     QTreeWidgetItem* item = new QTreeWidgetItem(processTreeWidget);
     item->setText(0, med->processes[i].pid.c_str());
@@ -90,4 +110,31 @@ void MedUi::onProcessItemDblClicked(QTreeWidgetItem* item, int) {
   selectedProcessLine->setText(QString::fromLatin1((process.pid + " " + process.cmdline).c_str())); //Do not use fromStdString(), it will append with some unknown characters
 
   processDialog->hide();
+}
+
+void MedUi::onScanClicked() {
+  if(med->selectedProcess.pid == "") {
+    statusBar->showMessage("No process selected");
+    return;
+  }
+
+  string scanValue = mainWindow->findChild<QLineEdit*>("scanEntry")->text().toStdString();
+  if (QString(scanValue.c_str()).trimmed() == "") {
+    return;
+  }
+
+  string scanType = scanTypeCombo->currentText().toStdString();
+  // TODO: Encoding manager here
+
+  try {
+    med->scan(scanValue, scanType);
+  } catch(MedException &ex) {
+    cerr << "scan: "<< ex.what() <<endl;
+  }
+
+  // TODO: Update the scanned
+}
+
+
+void MedUi::onFilterClicked() {
 }

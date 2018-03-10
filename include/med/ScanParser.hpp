@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <tuple>
 
 #include "med/MedTypes.hpp"
 #include "med/Bytes.hpp"
@@ -40,9 +41,13 @@ public:
 
   static vector<string> split(const string &s, char delim);
 
+  static tuple<Byte*, size_t> valueToBytes(const string& v, const string& t);
+
 private:
   static Bytes getNumericBytes(const string& v, const string& t);
   static Bytes getStringBytes(const string& v);
+
+  static tuple<Byte*, size_t> numericToBytes(const string& v, const string& t);
 };
 
 #endif

@@ -33,7 +33,7 @@ int interpretCommand(const string& command) {
 }
 
 void scan(const string& value) {
-  vector<MemPtr> mems = memed->scan(value);
+  vector<MemPtr> mems = memed->scan(value, "int32");
   printf("Scanned %zu\n", mems.size());
 }
 
