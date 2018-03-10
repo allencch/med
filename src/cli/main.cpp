@@ -13,6 +13,7 @@
 #include "mem/StringUtil.hpp"
 #include "mem/MemScanner.hpp"
 #include "mem/MemManager.hpp"
+#include "mem/MemEd.hpp"
 
 #define COMMAND_SCAN 1
 #define COMMAND_FILTER 2
@@ -23,8 +24,7 @@ using namespace std;
 int const PROMPT_BUFFER = 255;
 
 pid_t g_pid;
-MemScanner* scanner;
-MemManager* manager;
+MemEd* memed;
 
 int interpretCommand(const string& command) {
   if (command == "s") return COMMAND_SCAN;
@@ -33,21 +33,17 @@ int interpretCommand(const string& command) {
 }
 
 void scan(const string& value) {
-  int v = stol(value);
-  vector<MemPtr> mems = scanner->scan((Byte*)&v, 4, "int32", ScanParser::OpType::Eq);
-  manager->setMems(mems);
+  vector<MemPtr> mems = memed->scan(value);
   printf("Scanned %zu\n", mems.size());
 }
 
 void filter(const string& value) {
-  int v = stol(value);
-  vector<MemPtr> mems = scanner->filter(manager->getMems(), (Byte*)&v, 4, "int32", ScanParser::OpType::Eq);
-  manager->setMems(mems);
+  vector<MemPtr> mems = memed->filter(value);
   printf("Filtered %zu\n", mems.size());
 }
 
 void showList() {
-  vector<MemPtr>& mems = manager->getMems();
+  vector<MemPtr>& mems = memed->getMems();
   for (size_t i = 0; i < mems.size(); i++) {
     cout << mems[i]->getAddressAsString() << "\t";
     mems[i]->dump(false);
@@ -92,8 +88,7 @@ int main(int argc, char** argv) {
   signal(SIGSEGV, handler);
 
   g_pid = stol(string(argv[1]));
-  scanner = new MemScanner(g_pid);
-  manager = new MemManager();
+  memed = new MemEd(g_pid);
 
   char shellPrompt[PROMPT_BUFFER];
   cout << "Med CLI" <<endl;
@@ -109,8 +104,7 @@ int main(int argc, char** argv) {
 
     free(input);
   }
-  delete scanner;
-  delete manager;
+  delete memed;
 
   return 0;
 }
