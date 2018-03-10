@@ -156,3 +156,11 @@ make
 6. ~~Scan by string.~~
 7. ~~Scan by changes.~~
 8. Scan by pointer(?)
+
+# Developer notes
+
+For the process maps, read `man procfs`. To view maps,
+
+```
+sudo cat /proc/[pid]/maps
+```
