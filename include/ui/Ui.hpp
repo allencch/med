@@ -53,6 +53,7 @@ private:
   void setupStatusBar();
   void setupSignals();
   void setupUi();
+  void updateNumberOfAddresses();
 
   QApplication* app;
   QWidget* mainWindow;

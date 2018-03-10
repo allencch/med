@@ -41,10 +41,14 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType) {
   return mems;
 }
 
-vector<MemPtr> MemEd::filter(const string& value) {
-  int v = stol(value);
-  vector<MemPtr> mems = scanner->filter(manager->getMems(), (Byte*)&v, 4, "int32", ScanParser::OpType::Eq);
+vector<MemPtr> MemEd::filter(const string& value, const string& scanType) {
+  auto buffer = ScanParser::valueToBytes(value, scanType);
+  size_t size = std::get<1>(buffer);
+
+  vector<MemPtr> mems = scanner->filter(manager->getMems(), std::get<0>(buffer), size, scanType, ScanParser::OpType::Eq);
   manager->setMems(mems);
+
+  delete[] std::get<0>(buffer);
   return mems;
 }
 

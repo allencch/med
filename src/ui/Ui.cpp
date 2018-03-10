@@ -133,8 +133,36 @@ void MedUi::onScanClicked() {
   }
 
   // TODO: Update the scanned
+
+  if (QString(scanValue.c_str()).trimmed() == "?") {
+    statusBar->showMessage("Snapshot saved");
+  }
+  else {
+    updateNumberOfAddresses();
+  }
 }
 
 
 void MedUi::onFilterClicked() {
+  if(med->selectedProcess.pid == "") {
+    statusBar->showMessage("No process selected");
+    return;
+  }
+
+  string scanValue = mainWindow->findChild<QLineEdit*>("scanEntry")->text().toStdString();
+  if (QString(scanValue.c_str()).trimmed() == "") {
+    return;
+  }
+
+  string scanType = scanTypeCombo->currentText().toStdString();
+
+  med->filter(scanValue, scanType);
+
+  updateNumberOfAddresses();
+}
+
+void MedUi::updateNumberOfAddresses() {
+  char message[128];
+  sprintf(message, "%ld", med->getMems().size());
+  mainWindow->findChild<QLabel*>("found")->setText(message);
 }

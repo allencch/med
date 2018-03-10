@@ -13,7 +13,7 @@ public:
   void setPid(pid_t pid);
   pid_t getPid();
   vector<MemPtr> scan(const string& value, const string& scanType);
-  vector<MemPtr> filter(const string& value);
+  vector<MemPtr> filter(const string& value, const string& scanType);
   vector<MemPtr>& getMems();
 
   vector<Process> listProcesses();

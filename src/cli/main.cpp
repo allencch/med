@@ -38,7 +38,7 @@ void scan(const string& value) {
 }
 
 void filter(const string& value) {
-  vector<MemPtr> mems = memed->filter(value);
+  vector<MemPtr> mems = memed->filter(value, "int32");
   printf("Filtered %zu\n", mems.size());
 }
 
