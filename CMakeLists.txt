@@ -40,6 +40,20 @@ file(GLOB gui_SRC "src/gui/*.cpp")
 add_executable(med-qt ${gui_SRC})
 target_link_libraries(med-qt moc-med-qt med Qt5::UiTools)
 
+
+# med-ui
+file(GLOB ui_HEADER "include/ui/*.hpp")
+qt5_wrap_cpp(moc_med-ui ${ui_HEADER})
+add_library(moc-med-ui ${moc_med-ui})
+qt5_use_modules(moc-med-ui Widgets)
+set_property(SOURCE ${ui_HEADER} PROPERTY SKIP_AUTOMOC ON)
+
+file(GLOB ui_SRC "src/ui/*.cpp")
+add_executable(med-ui ${ui_SRC})
+target_link_libraries(med-ui moc-med-ui med Qt5::UiTools)
+
+
+# CLI
 file(GLOB cli_SRC "src/cli/*.cpp")
 add_executable(med-cli ${cli_SRC})
 target_link_libraries(med-cli med readline)
