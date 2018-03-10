@@ -27,13 +27,29 @@ class MedUi : public QObject {
 
 public:
   explicit MedUi(QApplication* app);
+  ~MedUi();
 
-  MemEd med;
+  QWidget* processSelector;
+  QDialog* processDialog; // This is the processSelector container
+  QTreeWidget* processTreeWidget;
+  QLineEdit* selectedProcessLine;
+
+  MemEd* med;
+
+public slots:
+  void onProcessItemDblClicked(QTreeWidgetItem* item, int column);
+
+private slots:
+  void onProcessClicked();
+
 private:
-  QApplication* app;
-  QWidget* mainWindow;
   void loadUiFiles();
   void setupUi();
+  void loadProcessUi();
+  void setupSignals();
+
+  QApplication* app;
+  QWidget* mainWindow;
 };
 
 

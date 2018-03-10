@@ -1,4 +1,5 @@
 #include "mem/MemEd.hpp"
+#include "med/MedCommon.hpp"
 
 MemEd::MemEd() {
   initialize();
@@ -45,4 +46,14 @@ vector<MemPtr> MemEd::filter(const string& value) {
 
 vector<MemPtr>& MemEd::getMems() {
   return manager->getMems();
+}
+
+vector<Process> MemEd::listProcesses() {
+  processes = pidList();
+  return processes;
+}
+
+Process MemEd::selectProcessByIndex(int index) {
+  selectedProcess = processes[index];
+  return selectedProcess;
 }
