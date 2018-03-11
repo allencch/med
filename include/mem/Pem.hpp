@@ -10,12 +10,15 @@ public:
   string getScanType();
   void setValue(const string& value, const string& scanType);
   void setScanType(const string& scanType);
+  bool isLocked();
+  void lock(bool value);
 
 private:
   static string bytesToString(Byte* value, const string& scanType);
   static tuple<Byte*, size_t> stringToBytes(const string& value, const string& scanType);
   ScanType scanType;
   MemIO* memio;
+  bool locked;
 };
 
 typedef std::shared_ptr<Pem> PemPtr;

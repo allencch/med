@@ -218,7 +218,7 @@ void TreeModel::refreshValues() {
   QModelIndex first = index(0, SCAN_COL_VALUE);
   QModelIndex last = index(rowCount() - 1, SCAN_COL_VALUE);
   auto scans = med->getScans();
-  for(int i=0; i < rowCount(); i++) {
+  for (int i = 0; i < rowCount(); i++) {
     string value = scans.getValue(i);
     QModelIndex modelIndex = index(i, SCAN_COL_VALUE);
     setItemData(modelIndex, QString::fromStdString(value));

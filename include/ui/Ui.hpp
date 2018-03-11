@@ -19,6 +19,7 @@
 #include <QComboBox>
 
 #include "ui/TreeModel.hpp"
+#include "ui/StoreTreeModel.hpp"
 #include "mem/MemEd.hpp"
 
 const int REFRESH_RATE = 800;
@@ -73,17 +74,22 @@ private slots:
   void onScanTreeViewDoubleClicked(const QModelIndex &index);
   void onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
 
+  void onScanAddClicked();
+
+
 private:
   void loadUiFiles();
   void loadProcessUi();
   void setupStatusBar();
   void setupScanTreeView();
+  void setupStoreTreeView();
   void setupSignals();
   void setupUi();
   void updateNumberOfAddresses();
 
   QApplication* app;
   TreeModel* scanModel;
+  StoreTreeModel* storeModel;
   UiState scanState;
   UiState storeState;
 };

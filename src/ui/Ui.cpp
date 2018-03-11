@@ -9,7 +9,9 @@
 #include "ui/Ui.hpp"
 #include "ui/ProcessEventListener.hpp"
 #include "ui/ScanTreeEventListener.hpp"
+#include "ui/StoreTreeEventListener.hpp"
 #include "ui/ComboBoxDelegate.hpp"
+#include "ui/CheckBoxDelegate.hpp"
 #include "ui/EncodingManager.hpp"
 
 using namespace std;
@@ -22,10 +24,13 @@ MedUi::MedUi(QApplication* app) {
   loadProcessUi();
   setupStatusBar();
   setupScanTreeView();
+  setupStoreTreeView();
   setupSignals();
   setupUi();
 
   encodingManager = new EncodingManager(this);
+  setScanState(UiState::Idle);
+  setStoreState(UiState::Idle);
 
   // TODO: other action here
 }
@@ -48,10 +53,12 @@ void MedUi::loadUiFiles() {
   selectedProcessLine = mainWindow->findChild<QLineEdit*>("selectedProcess");
   scanTypeCombo = mainWindow->findChild<QComboBox*>("scanType");
   scanTreeView = mainWindow->findChild<QTreeView*>("scanTreeView");
+  storeTreeView = mainWindow->findChild<QTreeView*>("storeTreeView");
 
   scanTreeView->installEventFilter(new ScanTreeEventListener(scanTreeView, this));
+  storeTreeView->installEventFilter(new StoreTreeEventListener(storeTreeView, this));
 
-  // TODO: other setup here
+  // TODO: Notes
 }
 
 void MedUi::loadProcessUi() {
@@ -107,6 +114,13 @@ void MedUi::setupSignals() {
                    SIGNAL(clicked()),
                    this,
                    SLOT(onFilterClicked()));
+
+  QObject::connect(mainWindow->findChild<QPushButton*>("scanAdd"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onScanAddClicked())
+                   );
+
 }
 
 void MedUi::setupScanTreeView() {
@@ -128,6 +142,37 @@ void MedUi::setupScanTreeView() {
                    this,
                    SLOT(onScanTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
   scanTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+}
+
+void MedUi::setupStoreTreeView() {
+  storeModel = new StoreTreeModel(this, mainWindow);
+  storeTreeView->setModel(storeModel);
+  ComboBoxDelegate* storeDelegate = new ComboBoxDelegate();
+  storeTreeView->setItemDelegateForColumn(STORE_COL_TYPE, storeDelegate);
+  CheckBoxDelegate* storeLockDelegate = new CheckBoxDelegate();
+  storeTreeView->setItemDelegateForColumn(STORE_COL_LOCK, storeLockDelegate);
+  QObject::connect(storeTreeView,
+                   SIGNAL(clicked(QModelIndex)),
+                   this,
+                   SLOT(onStoreTreeViewClicked(QModelIndex)));
+  QObject::connect(storeTreeView,
+                   SIGNAL(doubleClicked(QModelIndex)),
+                   this,
+                   SLOT(onStoreTreeViewDoubleClicked(QModelIndex)));
+
+  QObject::connect(storeModel,
+                   SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
+                   this,
+                   SLOT(onStoreTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
+
+  auto* header = storeTreeView->header();
+  header->setSectionsClickable(true);
+  QObject::connect(header,
+                   SIGNAL(sectionClicked(int)),
+                   this,
+                   SLOT(onStoreHeaderClicked(int)));
+
+  storeTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 }
 
 void MedUi::onProcessClicked() {
@@ -232,6 +277,20 @@ void MedUi::onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIn
     tryUnlock(scanUpdateMutex);
     setScanState(UiState::Idle);
   }
+}
+
+void MedUi::onScanAddClicked() {
+  auto indexes = scanTreeView
+    ->selectionModel()
+    ->selectedRows(SCAN_COL_ADDRESS);
+
+  scanUpdateMutex.lock();
+  for (int i = 0; i < indexes.size(); i++) {
+    med->addToStoreByIndex(indexes[i].row());
+  }
+
+  storeModel->refresh();
+  scanUpdateMutex.unlock();
 }
 
 void MedUi::updateNumberOfAddresses() {

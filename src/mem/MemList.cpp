@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <algorithm>
 
 #include "mem/MemList.hpp"
 #include "med/MedCommon.hpp"
@@ -49,4 +50,40 @@ void MemList::setValue(int index, const string& value, const string& scanType) {
 void MemList::setScanType(int index, const string& scanType) {
   PemPtr pem = static_pointer_cast<Pem>(list[index]);
   pem->setScanType(scanType);
+}
+
+int MemList::getLastIndex() {
+  return list.size() - 1;
+}
+
+void MemList::sortByAddress() {
+  MemList::sortByAddress(list);
+}
+
+void MemList::clear() {
+  list.clear();
+}
+
+void MemList::setAddress(int index, const string& address) {
+  list[index]->setAddress(hexToInt(address));
+}
+
+vector<MemPtr> MemList::sortByAddress(vector<MemPtr>& list) {
+  sort(list.begin(), list.end(), [](MemPtr a, MemPtr b) {
+      return a->address < b->address;
+    });
+
+  return list;
+}
+
+MemPtr MemList::getMemPtr(int index) {
+  return list[index];
+}
+
+void MemList::addMemPtr(MemPtr mem) {
+  list.push_back(mem);
+}
+
+void MemList::setList(const vector<MemPtr>& list) {
+  this->list = list;
 }

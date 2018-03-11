@@ -1,6 +1,7 @@
 #include <cinttypes>
 #include <cstring>
 #include <cstdio>
+#include <iostream>
 
 #include "mem/Pem.hpp"
 #include "med/MedCommon.hpp"
@@ -8,11 +9,13 @@
 
 Pem::Pem(size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
+  locked = false;
 }
 
 Pem::Pem(Address addr, size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
   setAddress(addr);
+  locked = false;
 }
 
 string Pem::bytesToString(Byte* buf, const string& scanType) {

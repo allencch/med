@@ -17,6 +17,8 @@ public:
   vector<MemPtr> filter(const string& value, const string& scanType);
   MemList getScans();
   void clearScans();
+  MemList* getStore();
+  void addToStoreByIndex(int index);
 
   vector<Process> listProcesses();
   Process selectProcessByIndex(int index);
@@ -28,6 +30,7 @@ private:
   pid_t pid;
   MemScanner* scanner;
   MemManager* manager;
+  MemList* store;
 };
 
 #endif

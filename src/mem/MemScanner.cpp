@@ -5,6 +5,7 @@
 #include "med/MemOperator.hpp"
 #include "med/MedCommon.hpp"
 #include "mem/Pem.hpp"
+#include "mem/MemList.hpp"
 
 using namespace std;
 
@@ -62,7 +63,7 @@ vector<MemPtr> MemScanner::scan(Byte* value, int size, string scanType, ScanPars
   threadManager->start();
   threadManager->clear();
 
-  return list;
+  return MemList::sortByAddress(list);
 }
 
 void MemScanner::scanMap(MemIO* memio,

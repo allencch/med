@@ -13,12 +13,17 @@ MemEd::MemEd(pid_t pid) {
 MemEd::~MemEd() {
   delete scanner;
   delete manager;
+
+  delete store;
 }
 
 void MemEd::initialize() {
   pid = 0;
   scanner = new MemScanner();
   manager = new MemManager();
+
+  vector<MemPtr> emptyMems;
+  store = new MemList(emptyMems);
 }
 
 void MemEd::setPid(pid_t pid) {
@@ -70,4 +75,13 @@ Process MemEd::selectProcessByIndex(int index) {
 
 void MemEd::clearScans() {
   manager->clear();
+}
+
+MemList* MemEd::getStore() {
+  return store;
+}
+
+void MemEd::addToStoreByIndex(int index) {
+  auto scans = getScans();
+  getStore()->addMemPtr(scans.getMemPtr(index));;
 }
