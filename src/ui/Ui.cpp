@@ -185,6 +185,10 @@ void MedUi::onFilterClicked() {
 
   med->filter(scanValue, scanType);
 
+  if(med->getScans().size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
+    scanModel->addScan(scanType);
+  }
+
   updateNumberOfAddresses();
 }
 
