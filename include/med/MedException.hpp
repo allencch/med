@@ -2,14 +2,13 @@
 #define MED_EXCEPTION_H
 
 #include <string>
+#include <exception>
 
 using namespace std;
 
-class MedException: public exception {
+class MedException: public std::nested_exception {
 public:
-  MedException(string message) {
-    this->message = message;
-  }
+  explicit MedException(const string& message) : message(message) { }
   virtual const char* what() const throw() {
     return message.c_str();
   }

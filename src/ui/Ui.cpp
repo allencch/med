@@ -258,6 +258,7 @@ void MedUi::refreshScanTreeView() {
 UiState MedUi::getScanState() {
   return scanState;
 }
+
 UiState MedUi::getStoreState() {
   return storeState;
 }
@@ -265,6 +266,7 @@ UiState MedUi::getStoreState() {
 void MedUi::setScanState(UiState state) {
   scanState = state;
 }
+
 void MedUi::setStoreState(UiState state) {
   storeState = state;
 }
