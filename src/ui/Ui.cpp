@@ -5,6 +5,7 @@
 #include <QtDebug>
 
 #include "med/MedException.hpp"
+#include "med/MedCommon.hpp"
 #include "ui/Ui.hpp"
 #include "ui/ProcessEventListener.hpp"
 #include "ui/ScanTreeEventListener.hpp"
@@ -220,16 +221,16 @@ void MedUi::onScanTreeViewClicked(const QModelIndex &index) {
 
 void MedUi::onScanTreeViewDoubleClicked(const QModelIndex &index) {
   if (index.column() == SCAN_COL_VALUE) {
-    // TODO: lock state
+    scanUpdateMutex.lock();
+    setScanState(UiState::Editing);
   }
 }
 
 void MedUi::onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles) {
   // qDebug() << topLeft << bottomRight << roles;
   if (topLeft.column() == SCAN_COL_VALUE) {
-    // TODO: unlock state
-    // tryUnlock(scanUpdateMutex);
-    // scanState = UiState::Idle;
+    tryUnlock(scanUpdateMutex);
+    setScanState(UiState::Idle);
   }
 }
 
@@ -248,7 +249,22 @@ void MedUi::refresh(MedUi* mainUi) {
 }
 
 void MedUi::refreshScanTreeView() {
-  // scanUpdateMutex.lock();
+  scanUpdateMutex.lock();
   scanModel->refreshValues();
-  // scanUpdateMutex.unlock();
+  scanUpdateMutex.unlock();
+}
+
+
+UiState MedUi::getScanState() {
+  return scanState;
+}
+UiState MedUi::getStoreState() {
+  return storeState;
+}
+
+void MedUi::setScanState(UiState state) {
+  scanState = state;
+}
+void MedUi::setStoreState(UiState state) {
+  storeState = state;
 }

@@ -37,7 +37,7 @@ string Pem::bytesToString(Byte* buf, const string& scanType) {
     sprintf(str, "%s", buf);
     break;
   case Unknown:
-    throw MedException(string("memValue: Error Type: ") + scanType);
+    throw_with_nested(MedException(string("bytesToString: Error Type: ") + scanType));
   }
   return string(str);
 }

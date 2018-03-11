@@ -53,6 +53,14 @@ public:
   MemEd* med;
   std::thread* refreshThread;
 
+  UiState getScanState();
+  void setScanState(UiState);
+  UiState getStoreState();
+  void setStoreState(UiState);
+
+  std::mutex scanUpdateMutex;
+  std::mutex storeUpdateMutex;
+
 public slots:
   void onProcessItemDblClicked(QTreeWidgetItem* item, int column);
 
@@ -76,6 +84,8 @@ private:
 
   QApplication* app;
   TreeModel* scanModel;
+  UiState scanState;
+  UiState storeState;
 };
 
 
