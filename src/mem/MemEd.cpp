@@ -52,8 +52,9 @@ vector<MemPtr> MemEd::filter(const string& value, const string& scanType) {
   return mems;
 }
 
-vector<MemPtr>& MemEd::getMems() {
-  return manager->getMems();
+MemList MemEd::getScans() {
+  MemList list(manager->getMems());
+  return list;
 }
 
 vector<Process> MemEd::listProcesses() {
@@ -65,4 +66,8 @@ Process MemEd::selectProcessByIndex(int index) {
   selectedProcess = processes[index];
   setPid(stoi(selectedProcess.pid));
   return selectedProcess;
+}
+
+void MemEd::clearScans() {
+  manager->clear();
 }

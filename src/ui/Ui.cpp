@@ -7,6 +7,7 @@
 #include "med/MedException.hpp"
 #include "ui/Ui.hpp"
 #include "ui/ProcessEventListener.hpp"
+#include "ui/ComboBoxDelegate.hpp"
 
 using namespace std;
 
@@ -17,6 +18,7 @@ MedUi::MedUi(QApplication* app) {
   loadUiFiles();
   loadProcessUi();
   setupStatusBar();
+  setupScanTreeView();
   setupSignals();
   setupUi();
   // TODO: other action here
@@ -35,6 +37,7 @@ void MedUi::loadUiFiles() {
 
   selectedProcessLine = mainWindow->findChild<QLineEdit*>("selectedProcess");
   scanTypeCombo = mainWindow->findChild<QComboBox*>("scanType");
+  scanTreeView = mainWindow->findChild<QTreeView*>("scanTreeView");
   // TODO: other setup here
 }
 
@@ -90,6 +93,27 @@ void MedUi::setupSignals() {
                    SLOT(onFilterClicked()));
 }
 
+void MedUi::setupScanTreeView() {
+  scanModel = new TreeModel(this, mainWindow);
+  scanTreeView->setModel(scanModel);
+  ComboBoxDelegate* delegate = new ComboBoxDelegate();
+  scanTreeView->setItemDelegateForColumn(SCAN_COL_TYPE, delegate);
+  QObject::connect(scanTreeView,
+                   SIGNAL(clicked(QModelIndex)),
+                   this,
+                   SLOT(onScanTreeViewClicked(QModelIndex)));
+  QObject::connect(scanTreeView,
+                   SIGNAL(doubleClicked(QModelIndex)),
+                   this,
+                   SLOT(onScanTreeViewDoubleClicked(QModelIndex)));
+
+  QObject::connect(scanModel,
+                   SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
+                   this,
+                   SLOT(onScanTreeViewDataChanged(QModelIndex, QModelIndex, QVector<int>)));
+  scanTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+}
+
 void MedUi::onProcessClicked() {
   med->listProcesses();
   processDialog->show();
@@ -132,7 +156,10 @@ void MedUi::onScanClicked() {
     cerr << "scan: "<< ex.what() <<endl;
   }
 
-  // TODO: Update the scanned
+  scanModel->clearAll();
+  if(med->getScans().size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
+    scanModel->addScan(scanType);
+  }
 
   if (QString(scanValue.c_str()).trimmed() == "?") {
     statusBar->showMessage("Snapshot saved");
@@ -163,6 +190,6 @@ void MedUi::onFilterClicked() {
 
 void MedUi::updateNumberOfAddresses() {
   char message[128];
-  sprintf(message, "%ld", med->getMems().size());
+  sprintf(message, "%ld", med->getScans().size());
   mainWindow->findChild<QLabel*>("found")->setText(message);
 }

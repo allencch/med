@@ -3,6 +3,7 @@
 
 #include "mem/MemScanner.hpp"
 #include "mem/MemManager.hpp"
+#include "mem/MemList.hpp"
 #include "med/Process.hpp"
 
 class MemEd {
@@ -14,7 +15,8 @@ public:
   pid_t getPid();
   vector<MemPtr> scan(const string& value, const string& scanType);
   vector<MemPtr> filter(const string& value, const string& scanType);
-  vector<MemPtr>& getMems();
+  MemList getScans();
+  void clearScans();
 
   vector<Process> listProcesses();
   Process selectProcessByIndex(int index);

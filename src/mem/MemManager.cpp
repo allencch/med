@@ -9,3 +9,7 @@ vector<MemPtr>& MemManager::getMems() {
 void MemManager::setMems(const vector<MemPtr>& mems) {
   this->mems = mems;
 }
+
+void MemManager::clear() {
+  mems.clear();
+}

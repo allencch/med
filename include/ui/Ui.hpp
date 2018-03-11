@@ -11,11 +11,14 @@
 #define STORE_COL_VALUE 3
 #define STORE_COL_LOCK 4
 
+#define SCAN_ADDRESS_VISIBLE_SIZE 400
+
 #include <QTreeWidgetItem>
 #include <QStatusBar>
 #include <QPlainTextEdit>
 #include <QComboBox>
 
+#include "ui/TreeModel.hpp"
 #include "mem/MemEd.hpp"
 
 
@@ -30,12 +33,15 @@ public:
   explicit MedUi(QApplication* app);
   ~MedUi();
 
+  QWidget* mainWindow;
   QWidget* processSelector;
   QDialog* processDialog; // This is the processSelector container
   QTreeWidget* processTreeWidget;
   QLineEdit* selectedProcessLine;
   QStatusBar* statusBar;
   QComboBox* scanTypeCombo;
+  QTreeView* scanTreeView;
+  QTreeView* storeTreeView;
 
   MemEd* med;
 
@@ -51,12 +57,13 @@ private:
   void loadUiFiles();
   void loadProcessUi();
   void setupStatusBar();
+  void setupScanTreeView();
   void setupSignals();
   void setupUi();
   void updateNumberOfAddresses();
 
   QApplication* app;
-  QWidget* mainWindow;
+  TreeModel* scanModel;
 };
 
 

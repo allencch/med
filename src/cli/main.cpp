@@ -43,11 +43,11 @@ void filter(const string& value) {
 }
 
 void showList() {
-  vector<MemPtr>& mems = memed->getMems();
-  for (size_t i = 0; i < mems.size(); i++) {
-    cout << mems[i]->getAddressAsString() << "\t";
-    mems[i]->dump(false);
-    cout << mems[i]->getValueAsInt() << endl;
+  auto scans = memed->getScans();
+  for (size_t i = 0; i < scans.size(); i++) {
+    cout << scans.getAddress(i) << "\t";
+    scans.dump(i, false);
+    cout << scans.getValue(i) << endl;
   }
 }
 

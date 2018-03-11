@@ -12,6 +12,7 @@ public:
   MemManager();
   vector<MemPtr>& getMems();
   void setMems(const vector<MemPtr>& mems);
+  void clear();
 
 private:
   vector<MemPtr> mems;
