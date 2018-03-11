@@ -9,6 +9,7 @@ public:
   string getValue(const string& scanType);
   string getScanType();
   void setValue(const string& value, const string& scanType);
+  void setScanType(const string& scanType);
 
 private:
   static string bytesToString(Byte* value, const string& scanType);

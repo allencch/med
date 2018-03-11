@@ -245,11 +245,11 @@ void TreeModel::setValue(const QModelIndex &index, const QVariant &value) {
 void TreeModel::setType(const QModelIndex &index, const QVariant &value) {
   int row = index.row();
   try {
-    // med->scanAddresses[row].setScanType(value.toString().toStdString());
+    med->getScans().setScanType(row, value.toString().toStdString());
 
-    // QVariant valueToSet = getUtfString(row, value.toString().toStdString());
+    QVariant valueToSet = getUtfString(row, value.toString().toStdString());
 
-    // setItemData(this->index(index.row(), SCAN_COL_VALUE), valueToSet); //Update the target value
+    setItemData(this->index(index.row(), SCAN_COL_VALUE), valueToSet); //Update the target value
   } catch(MedException &e) {
     cerr << "editScanType: " << e.what() << endl;
   }
@@ -258,8 +258,7 @@ void TreeModel::setType(const QModelIndex &index, const QVariant &value) {
 bool TreeModel::setItemData(const QModelIndex &index, const QVariant &value) {
   int row = index.row();
   TreeItem *item = getItem(index);
-  // string scanType = med->scanAddresses[row].getScanType();
-  string scanType = "int32";
+  string scanType = med->getScans().getScanType(row);
 
   QVariant newValue = value;
 
@@ -270,9 +269,10 @@ bool TreeModel::setItemData(const QModelIndex &index, const QVariant &value) {
 }
 
 QVariant TreeModel::getUtfString(int row, string scanType) {
-  // string valueByAddress = med->getValueByAddress(med->scanAddresses[row].address, scanType);
+  string valueByAddress = med->getScans().getValue(row, scanType);
+  string utfString = valueByAddress;
+  // TODO: encoding
   // string utfString = mainUi->encodingManager->convertToUtf8(valueByAddress);
-  string utfString = "hello";
   return QString::fromStdString(utfString);
 }
 

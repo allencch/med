@@ -14,7 +14,9 @@ public:
   string getValue(int index);
   string getScanType(int index);
   void dump(int index, bool newline = true);
+
   void setValue(int index, const string& value, const string& scanType);
+  void setScanType(int index, const string& scanType);
 
 private:
   vector<MemPtr> list;

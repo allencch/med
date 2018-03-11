@@ -46,3 +46,8 @@ void MemList::setValue(int index, const string& value, const string& scanType) {
   PemPtr pem = static_pointer_cast<Pem>(list[index]);
   pem->setValue(value, scanType);
 }
+
+void MemList::setScanType(int index, const string& scanType) {
+  PemPtr pem = static_pointer_cast<Pem>(list[index]);
+  pem->setScanType(scanType);
+}

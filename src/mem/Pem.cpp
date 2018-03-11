@@ -77,3 +77,7 @@ void Pem::setValue(const string& value, const string& scanType) {
 
   memio->write(address, mem, size);
 }
+
+void Pem::setScanType(const string& scanType) {
+  this->scanType = stringToScanType(scanType);
+}
