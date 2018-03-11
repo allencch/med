@@ -7,6 +7,7 @@
 #include "med/MedException.hpp"
 #include "ui/Ui.hpp"
 #include "ui/ProcessEventListener.hpp"
+#include "ui/ScanTreeEventListener.hpp"
 #include "ui/ComboBoxDelegate.hpp"
 #include "ui/EncodingManager.hpp"
 
@@ -31,6 +32,9 @@ MedUi::MedUi(QApplication* app) {
 MedUi::~MedUi() {
   delete med;
   delete encodingManager;
+
+  refreshThread->join();
+  delete refreshThread;
 }
 
 void MedUi::loadUiFiles() {
@@ -43,6 +47,9 @@ void MedUi::loadUiFiles() {
   selectedProcessLine = mainWindow->findChild<QLineEdit*>("selectedProcess");
   scanTypeCombo = mainWindow->findChild<QComboBox*>("scanType");
   scanTreeView = mainWindow->findChild<QTreeView*>("scanTreeView");
+
+  scanTreeView->installEventFilter(new ScanTreeEventListener(scanTreeView, this));
+
   // TODO: other setup here
 }
 
@@ -73,6 +80,9 @@ void MedUi::loadProcessUi() {
 void MedUi::setupUi() {
   scanTypeCombo->setCurrentIndex(1);
   mainWindow->show();
+  qRegisterMetaType<QVector<int>>(); //For multithreading.
+
+  refreshThread = new std::thread(MedUi::refresh, this);
 }
 
 void MedUi::setupStatusBar() {
@@ -227,4 +237,18 @@ void MedUi::updateNumberOfAddresses() {
   char message[128];
   sprintf(message, "%ld", med->getScans().size());
   mainWindow->findChild<QLabel*>("found")->setText(message);
+}
+
+void MedUi::refresh(MedUi* mainUi) {
+  while(1) {
+    mainUi->refreshScanTreeView();
+    // mainUi->refreshStoreTreeView();
+    std::this_thread::sleep_for(chrono::milliseconds(REFRESH_RATE));
+  }
+}
+
+void MedUi::refreshScanTreeView() {
+  // scanUpdateMutex.lock();
+  scanModel->refreshValues();
+  // scanUpdateMutex.unlock();
 }

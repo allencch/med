@@ -21,6 +21,7 @@
 #include "ui/TreeModel.hpp"
 #include "mem/MemEd.hpp"
 
+const int REFRESH_RATE = 800;
 
 const QString MAIN_TITLE = "Med UI";
 
@@ -45,8 +46,12 @@ public:
   QTreeView* scanTreeView;
   QTreeView* storeTreeView;
 
+  static void refresh(MedUi* mainUi);
+  void refreshScanTreeView();
+
   EncodingManager* encodingManager;
   MemEd* med;
+  std::thread* refreshThread;
 
 public slots:
   void onProcessItemDblClicked(QTreeWidgetItem* item, int column);

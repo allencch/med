@@ -27,10 +27,9 @@ string MemList::getValue(int index, const string& scanType) {
   return pem->getValue(scanType);
 }
 
-// TODO: Fix get value based on stored scanType
 string MemList::getValue(int index) {
-  int value = list[index]->getValueAsInt();
-  return std::to_string(value);
+  PemPtr pem = static_pointer_cast<Pem>(list[index]);
+  return pem->getValue(pem->getScanType());
 }
 
 void MemList::dump(int index, bool newline) {
