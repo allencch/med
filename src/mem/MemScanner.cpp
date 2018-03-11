@@ -102,6 +102,8 @@ void MemScanner::scanPage(MemIO* memio,
     try {
       if(memCompare(page + k, size, value, size, op)) {
         MemPtr mem = memio->read((Address)(start + k), size);
+        PemPtr pem = static_pointer_cast<Pem>(mem);
+        pem->setScanType(scanType);
         list.push_back(mem);
       }
     } catch(MedException& ex) {
