@@ -53,6 +53,10 @@ private slots:
   void onScanClicked();
   void onFilterClicked();
 
+  void onScanTreeViewClicked(const QModelIndex &index);
+  void onScanTreeViewDoubleClicked(const QModelIndex &index);
+  void onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
+
 private:
   void loadUiFiles();
   void loadProcessUi();

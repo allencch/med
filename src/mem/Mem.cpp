@@ -1,5 +1,6 @@
 #include <cstring>
 #include <cstdio>
+#include <iostream>
 #include "mem/Mem.hpp"
 #include "med/MedCommon.hpp"
 

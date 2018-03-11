@@ -45,7 +45,7 @@ void filter(const string& value) {
 void showList() {
   auto scans = memed->getScans();
   for (size_t i = 0; i < scans.size(); i++) {
-    cout << scans.getAddress(i) << "\t";
+    cout << scans.getAddressAsString(i) << "\t";
     scans.dump(i, false);
     cout << scans.getValue(i) << endl;
   }

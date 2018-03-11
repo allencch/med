@@ -199,7 +199,7 @@ void TreeModel::addScan(string scanType) {
   this->clearAll();
   auto scans = med->getScans();
   for(size_t i = 0; i < scans.size(); i++) {
-    string address = scans.getAddress(i);
+    string address = scans.getAddressAsString(i);
     string value = scans.getValue(i, scanType);
     QVector<QVariant> data;
     data << address.c_str() << scanType.c_str() << value.c_str();
@@ -231,11 +231,12 @@ void TreeModel::empty() {
 void TreeModel::setValue(const QModelIndex &index, const QVariant &value) {
   int row = index.row();
   try {
+    // TODO: Encoding
+    string scanType = med->getScans().getScanType(row);
+    string newValue = value.toString().toStdString();
     // string scanType = med->scanAddresses[row].getScanType();
     // string newValue = encodeString(value.toString().toStdString(), scanType);
-    // med->setValueByAddress(med->scanAddresses[row].address,
-    //                        newValue,
-    //                        scanType);
+    med->getScans().setValue(row, newValue, scanType);
   } catch(MedException &e) {
     cerr << "editScanValue: " << e.what() << endl;
   }

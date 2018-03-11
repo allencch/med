@@ -2,6 +2,7 @@
 
 #include "mem/MemList.hpp"
 #include "med/MedCommon.hpp"
+#include "mem/Pem.hpp"
 
 using namespace std;
 
@@ -13,14 +14,17 @@ size_t MemList::size() {
   return list.size();
 }
 
-string MemList::getAddress(int index) {
+string MemList::getAddressAsString(int index) {
   return list[index]->getAddressAsString();
 }
 
-// TODO: Fix this so that can by any scanType
+Address MemList::getAddress(int index) {
+  return list[index]->getAddress();
+}
+
 string MemList::getValue(int index, const string& scanType) {
-  int value = list[index]->getValueAsInt();
-  return std::to_string(value);
+  PemPtr pem = static_pointer_cast<Pem>(list[index]);
+  return pem->getValue(scanType);
 }
 
 // TODO: Fix get value based on stored scanType
@@ -31,4 +35,14 @@ string MemList::getValue(int index) {
 
 void MemList::dump(int index, bool newline) {
   list[index]->dump(newline);
+}
+
+string MemList::getScanType(int index) {
+  PemPtr pem = static_pointer_cast<Pem>(list[index]);
+  return pem->getScanType();
+}
+
+void MemList::setValue(int index, const string& value, const string& scanType) {
+  PemPtr pem = static_pointer_cast<Pem>(list[index]);
+  pem->setValue(value, scanType);
 }

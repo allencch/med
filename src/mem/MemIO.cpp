@@ -7,6 +7,7 @@
 #include "med/MedException.hpp"
 #include "med/MedCommon.hpp"
 #include "mem/MemIO.hpp"
+#include "mem/Pem.hpp"
 
 MemIO::MemIO() {
   pid = 0;
@@ -36,7 +37,9 @@ MemPtr MemIO::readProcess(Address addr, size_t size) {
   mutex.lock();
   pidAttach(pid);
 
-  MemPtr mem = MemPtr(new Mem(size));
+  // When read process, use Pem so that the PemPtr can get data
+  // from process through MemIO.
+  MemPtr mem = MemPtr(new Pem(size, this));
   mem->setAddress(addr);
 
   int memFd = getMem(pid);

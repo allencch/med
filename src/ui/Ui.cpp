@@ -192,6 +192,27 @@ void MedUi::onFilterClicked() {
   updateNumberOfAddresses();
 }
 
+void MedUi::onScanTreeViewClicked(const QModelIndex &index) {
+  if(index.column() == SCAN_COL_TYPE) {
+    scanTreeView->edit(index); //Trigger edit by 1 click
+  }
+}
+
+void MedUi::onScanTreeViewDoubleClicked(const QModelIndex &index) {
+  if (index.column() == SCAN_COL_VALUE) {
+    // TODO: lock state
+  }
+}
+
+void MedUi::onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles) {
+  // qDebug() << topLeft << bottomRight << roles;
+  if (topLeft.column() == SCAN_COL_VALUE) {
+    // TODO: unlock state
+    // tryUnlock(scanUpdateMutex);
+    // scanState = UiState::Idle;
+  }
+}
+
 void MedUi::updateNumberOfAddresses() {
   char message[128];
   sprintf(message, "%ld", med->getScans().size());

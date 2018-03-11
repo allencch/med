@@ -154,7 +154,7 @@ tuple<Byte*, size_t> ScanParser::numericToBytes(const string& v, const string& t
     stringToMemory(values[i], t, pointer);
     pointer += valueLength;
   }
-  return make_tuple(data, valueLength * values.size()); // Remember to delete[]
+  return make_tuple(data, valueLength * values.size()); // delete
 }
 
 Bytes ScanParser::getStringBytes(const string& v) {
