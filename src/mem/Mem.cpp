@@ -20,7 +20,8 @@ Mem::~Mem() {
 }
 
 void Mem::initialize(size_t size) {
-  data = new Byte[size];
+  data = new Byte[size + 1]; // Add one more space for the string case
+  memset(data, 0, size + 1);
   this->size = size;
   address = 0;
 }

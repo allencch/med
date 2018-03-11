@@ -4,7 +4,7 @@
 
 #include "med/MedException.hpp"
 #include "ui/Ui.hpp"
-// #include "gui/EncodingManager.hpp"
+#include "ui/EncodingManager.hpp"
 #include "ui/TreeItem.hpp"
 #include "ui/TreeModel.hpp"
 
@@ -231,11 +231,8 @@ void TreeModel::empty() {
 void TreeModel::setValue(const QModelIndex &index, const QVariant &value) {
   int row = index.row();
   try {
-    // TODO: Encoding
     string scanType = med->getScans().getScanType(row);
-    string newValue = value.toString().toStdString();
-    // string scanType = med->scanAddresses[row].getScanType();
-    // string newValue = encodeString(value.toString().toStdString(), scanType);
+    string newValue = encodeString(value.toString().toStdString(), scanType);
     med->getScans().setValue(row, newValue, scanType);
   } catch(MedException &e) {
     cerr << "editScanValue: " << e.what() << endl;
@@ -270,15 +267,13 @@ bool TreeModel::setItemData(const QModelIndex &index, const QVariant &value) {
 
 QVariant TreeModel::getUtfString(int row, string scanType) {
   string valueByAddress = med->getScans().getValue(row, scanType);
-  string utfString = valueByAddress;
-  // TODO: encoding
-  // string utfString = mainUi->encodingManager->convertToUtf8(valueByAddress);
+  string utfString = mainUi->encodingManager->convertToUtf8(valueByAddress);
   return QString::fromStdString(utfString);
 }
 
 string TreeModel::encodeString(string str, string scanType) {
   if (scanType == SCAN_TYPE_STRING) {
-    // return mainUi->encodingManager->encode(str);
+    return mainUi->encodingManager->encode(str);
   }
   return str;
 }

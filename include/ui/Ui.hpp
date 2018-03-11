@@ -26,6 +26,8 @@ const QString MAIN_TITLE = "Med UI";
 
 enum UiState { Idle, Editing };
 
+class EncodingManager; // Forward declaration, because of recursive include
+
 class MedUi : public QObject {
   Q_OBJECT
 
@@ -43,6 +45,7 @@ public:
   QTreeView* scanTreeView;
   QTreeView* storeTreeView;
 
+  EncodingManager* encodingManager;
   MemEd* med;
 
 public slots:

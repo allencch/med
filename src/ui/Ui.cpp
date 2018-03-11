@@ -8,6 +8,7 @@
 #include "ui/Ui.hpp"
 #include "ui/ProcessEventListener.hpp"
 #include "ui/ComboBoxDelegate.hpp"
+#include "ui/EncodingManager.hpp"
 
 using namespace std;
 
@@ -21,11 +22,15 @@ MedUi::MedUi(QApplication* app) {
   setupScanTreeView();
   setupSignals();
   setupUi();
+
+  encodingManager = new EncodingManager(this);
+
   // TODO: other action here
 }
 
 MedUi::~MedUi() {
   delete med;
+  delete encodingManager;
 }
 
 void MedUi::loadUiFiles() {
@@ -148,7 +153,9 @@ void MedUi::onScanClicked() {
   }
 
   string scanType = scanTypeCombo->currentText().toStdString();
-  // TODO: Encoding manager here
+  if (scanType == SCAN_TYPE_STRING) {
+    scanValue = encodingManager->encode(scanValue);
+  }
 
   try {
     med->scan(scanValue, scanType);
@@ -182,6 +189,9 @@ void MedUi::onFilterClicked() {
   }
 
   string scanType = scanTypeCombo->currentText().toStdString();
+  if (scanType == SCAN_TYPE_STRING) {
+    scanValue = encodingManager->encode(scanValue);
+  }
 
   med->filter(scanValue, scanType);
 
