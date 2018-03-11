@@ -113,12 +113,12 @@ Bytes ScanParser::getBytes(const string& v, const string& t) {
 }
 
 tuple<Byte*, size_t> ScanParser::valueToBytes(const string& v, const string& t) {
-  // if (t == SCAN_TYPE_STRING) {
-    // TODO: get string bytes
-  // }
-  // else {
+  if (t == SCAN_TYPE_STRING) {
+    return ScanParser::stringToBytes(v);
+  }
+  else {
     return ScanParser::numericToBytes(v, t);
-    // }
+  }
 }
 
 // @deprecated
@@ -174,6 +174,23 @@ Bytes ScanParser::getStringBytes(const string& v) {
 
   Bytes bytes(data, valueLength);
   return bytes;
+}
+
+tuple<Byte*, size_t> ScanParser::stringToBytes(const string& v) {
+  vector<string> values = getValues(v);
+  if (values.size() == 0) {
+    throw MedException("Scan empty string");
+  }
+  int valueLength = v.size();
+
+  Byte* data = new Byte[valueLength];
+
+  char* pointer = (char*)data;
+  for (int i = 0; i < (int)v.size(); i++, pointer++) {
+    sprintf(pointer, "%c", v[i]);
+  }
+
+  return make_tuple(data, valueLength);
 }
 
 bool ScanParser::isSnapshotOperator(const OpType& opType) {

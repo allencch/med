@@ -48,6 +48,7 @@ private:
   static Bytes getStringBytes(const string& v);
 
   static tuple<Byte*, size_t> numericToBytes(const string& v, const string& t);
+  static tuple<Byte*, size_t> stringToBytes(const string& v);
 };
 
 #endif

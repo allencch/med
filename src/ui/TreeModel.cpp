@@ -201,8 +201,11 @@ void TreeModel::addScan(string scanType) {
   for(size_t i = 0; i < scans.size(); i++) {
     string address = scans.getAddressAsString(i);
     string value = scans.getValue(i, scanType);
+
+    string newValue = convertToUtf8(value, scanType);
+
     QVector<QVariant> data;
-    data << address.c_str() << scanType.c_str() << value.c_str();
+    data << address.c_str() << scanType.c_str() << newValue.c_str();
     TreeItem* childItem = new TreeItem(data, this->root());
     this->appendRow(childItem);
   }
@@ -246,7 +249,7 @@ void TreeModel::setType(const QModelIndex &index, const QVariant &value) {
 
     QVariant valueToSet = getUtfString(row, value.toString().toStdString());
 
-    setItemData(this->index(index.row(), SCAN_COL_VALUE), valueToSet); //Update the target value
+    setItemData(this->index(index.row(), SCAN_COL_VALUE), valueToSet); // Update the target value
   } catch(MedException &e) {
     cerr << "editScanType: " << e.what() << endl;
   }
@@ -271,9 +274,16 @@ QVariant TreeModel::getUtfString(int row, string scanType) {
   return QString::fromStdString(utfString);
 }
 
-string TreeModel::encodeString(string str, string scanType) {
+string TreeModel::encodeString(const string& str, const string& scanType) {
   if (scanType == SCAN_TYPE_STRING) {
     return mainUi->encodingManager->encode(str);
+  }
+  return str;
+}
+
+string TreeModel::convertToUtf8(const string& str, const string& scanType) {
+  if (scanType == SCAN_TYPE_STRING) {
+    return mainUi->encodingManager->convertToUtf8(str);
   }
   return str;
 }
