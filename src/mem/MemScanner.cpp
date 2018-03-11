@@ -4,6 +4,7 @@
 #include "mem/MemScanner.hpp"
 #include "med/MemOperator.hpp"
 #include "med/MedCommon.hpp"
+#include "mem/Pem.hpp"
 
 using namespace std;
 
@@ -123,7 +124,9 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list, Byte* value, int s
     }
 
     if (memCompare(buf, size, value, size, op)) {
-      newList.push_back(list[i]);
+      PemPtr pem = static_pointer_cast<Pem>(list[i]);
+      pem->setScanType(scanType);
+      newList.push_back(pem);
     }
   }
 
