@@ -72,7 +72,12 @@ private slots:
 
   void onScanTreeViewClicked(const QModelIndex &index);
   void onScanTreeViewDoubleClicked(const QModelIndex &index);
+
+  void onStoreTreeViewDoubleClicked(const QModelIndex &index);
+  void onStoreTreeViewClicked(const QModelIndex &index);
+
   void onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
+  void onStoreTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
 
   void onScanAddClicked();
 

@@ -3,12 +3,13 @@
 
 using namespace std;
 
-// List is actually PemPtr
+// List that will use methods from PemPtr and SemPtr
 class MemList {
 public:
   explicit MemList(vector<MemPtr> list);
   size_t size();
   void setList(const vector<MemPtr>& list);
+  vector<MemPtr>& getList();
   string getAddressAsString(int index);
   Address getAddress(int index);
   string getValue(int index, const string& scanType);

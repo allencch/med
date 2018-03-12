@@ -11,6 +11,7 @@
 #include "ui/TreeItem.hpp"
 #include "ui/TreeModel.hpp"
 #include "ui/StoreTreeModel.hpp"
+#include "mem/Sem.hpp"
 
 using namespace std;
 
@@ -58,8 +59,8 @@ bool StoreTreeModel::setData(const QModelIndex &index, const QVariant &value, in
     setAddress(index, value);
   }
   else if (index.column() == STORE_COL_LOCK) {
-    // TODO: set lock
-    // med->setStoreLockByIndex(index.row(), value.toBool());
+    auto sem = static_pointer_cast<Sem>(med->getStore()->getList()[index.row()]);
+    sem->lock(value.toBool());
   }
   else if (index.column() == STORE_COL_DESCRIPTION) {
     // TODO set description
@@ -191,7 +192,6 @@ void StoreTreeModel::setType(const QModelIndex &index, const QVariant &value) {
   int row = index.row();
   try {
     med->getStore()->setScanType(row, value.toString().toStdString());
-    string valueByAddress = med->getStore()->getValue(row, value.toString().toStdString());
     QVariant valueToSet = getUtfString(row, value.toString().toStdString());
 
     setItemData(this->index(index.row(), STORE_COL_VALUE), valueToSet); //Update the target value

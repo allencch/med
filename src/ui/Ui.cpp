@@ -279,6 +279,30 @@ void MedUi::onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIn
   }
 }
 
+void MedUi::onStoreTreeViewDoubleClicked(const QModelIndex &index) {
+  if (index.column() == STORE_COL_VALUE) {
+    storeUpdateMutex.lock();
+    storeState = UiState::Editing;
+  }
+}
+
+void MedUi::onStoreTreeViewClicked(const QModelIndex &index) {
+  if (index.column() == STORE_COL_TYPE) {
+    storeTreeView->edit(index);
+  }
+  else if (index.column() == STORE_COL_LOCK) {
+    storeTreeView->edit(index);
+  }
+}
+
+void MedUi::onStoreTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles) {
+  // qDebug() << topLeft << bottomRight << roles;
+  if (topLeft.column() == STORE_COL_VALUE) {
+    tryUnlock(storeUpdateMutex);
+    storeState = UiState::Idle;
+  }
+}
+
 void MedUi::onScanAddClicked() {
   auto indexes = scanTreeView
     ->selectionModel()

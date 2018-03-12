@@ -87,3 +87,6 @@ void MemList::addMemPtr(MemPtr mem) {
 void MemList::setList(const vector<MemPtr>& list) {
   this->list = list;
 }
+vector<MemPtr>& MemList::getList() {
+  return list;
+}
