@@ -1,5 +1,6 @@
 #include "mem/MemEd.hpp"
 #include "med/MedCommon.hpp"
+#include "mem/Sem.hpp"
 
 MemEd::MemEd() {
   initialize();
@@ -83,5 +84,7 @@ MemList* MemEd::getStore() {
 
 void MemEd::addToStoreByIndex(int index) {
   auto scans = getScans();
-  getStore()->addMemPtr(scans.getMemPtr(index));;
+  PemPtr pem = static_pointer_cast<Pem>(scans.getMemPtr(index));
+  MemPtr sem = MemPtr(new Sem(pem));
+  getStore()->addMemPtr(sem);
 }

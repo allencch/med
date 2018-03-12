@@ -18,6 +18,8 @@ public:
   void setAddress(Address addr);
   int getValueAsInt();
 
+  size_t getSize();
+
   Byte* data;
   size_t size;
   Address address;

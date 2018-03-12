@@ -56,3 +56,7 @@ string Mem::getAddressAsString() {
 void Mem::setAddress(Address addr) {
   address = addr;
 }
+
+size_t Mem::getSize() {
+  return size;
+}

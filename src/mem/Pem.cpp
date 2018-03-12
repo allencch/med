@@ -9,13 +9,11 @@
 
 Pem::Pem(size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
-  locked = false;
 }
 
 Pem::Pem(Address addr, size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
   setAddress(addr);
-  locked = false;
 }
 
 string Pem::bytesToString(Byte* buf, const string& scanType) {
@@ -83,4 +81,8 @@ void Pem::setValue(const string& value, const string& scanType) {
 
 void Pem::setScanType(const string& scanType) {
   this->scanType = stringToScanType(scanType);
+}
+
+MemIO* Pem::getMemIO() {
+  return memio;
 }
