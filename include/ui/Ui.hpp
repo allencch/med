@@ -49,6 +49,7 @@ public:
 
   static void refresh(MedUi* mainUi);
   void refreshScanTreeView();
+  void refreshStoreTreeView();
 
   EncodingManager* encodingManager;
   MemEd* med;
