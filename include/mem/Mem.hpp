@@ -19,10 +19,13 @@ public:
   int getValueAsInt();
 
   size_t getSize();
+  Byte* getData();
 
+protected:
   Byte* data;
   size_t size;
   Address address;
+
 private:
   void initialize(size_t size);
 };

@@ -49,7 +49,7 @@ MemPtr MemIO::readProcess(Address addr, size_t size) {
     mutex.unlock();
     throw MedException("Failed lseek");
   }
-  if(::read(memFd, mem->data, size) == -1) {
+  if(::read(memFd, mem->getData(), size) == -1) {
     close(memFd);
     pidDetach(pid);
     mutex.unlock();
@@ -71,15 +71,15 @@ void MemIO::write(Address addr, MemPtr mem, size_t size) {
 
 void MemIO::writeDirect(Address addr, MemPtr mem, size_t size) {
   Byte* ptr = (Byte*)addr;
-  int writeSize = size ? size : mem->size;
-  memcpy(ptr, mem->data, writeSize);
+  int writeSize = size ? size : mem->getSize();
+  memcpy(ptr, mem->getData(), writeSize);
 }
 
 void MemIO::writeProcess(Address addr, MemPtr mem, size_t size) {
   mutex.lock();
   pidAttach(pid);
 
-  int writeSize = size ? size : mem->size;
+  int writeSize = size ? size : mem->getSize();
 
   int psize = padWordSize(writeSize);
   Byte* buf = new Byte[writeSize];
@@ -97,7 +97,7 @@ void MemIO::writeProcess(Address addr, MemPtr mem, size_t size) {
     memcpy((Byte*)buf + i, &word, sizeof(long));
   }
 
-  memcpy(buf, mem->data, writeSize); //over-write on top of it, so that the last padding byte will preserved
+  memcpy(buf, mem->getData(), writeSize); //over-write on top of it, so that the last padding byte will preserved
 
   for (int i = 0; i < writeSize; i += sizeof(long)) {
     // This writes as uint32, it should be uint8

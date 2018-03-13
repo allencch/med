@@ -70,7 +70,7 @@ void MemList::setAddress(int index, const string& address) {
 
 vector<MemPtr> MemList::sortByAddress(vector<MemPtr>& list) {
   sort(list.begin(), list.end(), [](MemPtr a, MemPtr b) {
-      return a->address < b->address;
+      return a->getAddress() < b->getAddress();
     });
 
   return list;

@@ -2,7 +2,7 @@
 #include "mem/Sem.hpp"
 
 Sem::Sem(PemPtr pem) : Pem(pem->getSize(), pem->getMemIO()) {
-  memcpy(data, pem->data, size);
+  memcpy(data, pem->getData(), size);
   setAddress(pem->getAddress());
   setScanType(pem->getScanType());
   getValue(pem->getScanType());

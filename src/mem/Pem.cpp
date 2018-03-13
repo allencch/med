@@ -45,7 +45,7 @@ string Pem::bytesToString(Byte* buf, const string& scanType) {
 
 string Pem::getValue(const string& scanType) {
   MemPtr pem = memio->read(address, size);
-  Byte* buf = pem->data;
+  Byte* buf = pem->getData();
   return Pem::bytesToString(buf, scanType);
 }
 
@@ -73,7 +73,7 @@ void Pem::setValue(const string& value, const string& scanType) {
 
   MemPtr mem = MemPtr(new Mem(size));
   mem->setAddress(address);
-  memcpy(mem->data, bytes, size);
+  memcpy(mem->getData(), bytes, size);
   delete[] bytes;
 
   memio->write(address, mem, size);

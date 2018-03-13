@@ -60,3 +60,7 @@ void Mem::setAddress(Address addr) {
 size_t Mem::getSize() {
   return size;
 }
+
+Byte* Mem::getData() {
+  return data;
+}
