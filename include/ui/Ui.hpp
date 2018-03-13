@@ -81,6 +81,7 @@ private slots:
 
   void onScanAddClicked();
 
+  void onStoreHeaderClicked(int logicalIndex);
 
 private:
   void loadUiFiles();

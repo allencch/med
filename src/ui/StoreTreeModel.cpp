@@ -164,7 +164,7 @@ void StoreTreeModel::sortByAddress() {
 }
 
 void StoreTreeModel::sortByDescription() {
-  // med->sortStoreByDescription(); // TODO: sort by description
+  med->getStore()->sortByDescription();
   refresh();
 }
 

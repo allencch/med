@@ -3,7 +3,7 @@
 
 #include "mem/MemList.hpp"
 #include "med/MedCommon.hpp"
-#include "mem/Pem.hpp"
+#include "mem/Sem.hpp"
 
 using namespace std;
 
@@ -71,6 +71,20 @@ void MemList::setAddress(int index, const string& address) {
 vector<MemPtr> MemList::sortByAddress(vector<MemPtr>& list) {
   sort(list.begin(), list.end(), [](MemPtr a, MemPtr b) {
       return a->getAddress() < b->getAddress();
+    });
+
+  return list;
+}
+
+void MemList::sortByDescription() {
+  MemList::sortByDescription(list);
+}
+
+vector<MemPtr> MemList::sortByDescription(vector<MemPtr>& list) {
+  sort(list.begin(), list.end(), [](MemPtr a, MemPtr b) {
+      auto sem_a = static_pointer_cast<Sem>(a);
+      auto sem_b = static_pointer_cast<Sem>(b);
+      return sem_a->getDescription() < sem_b->getDescription();
     });
 
   return list;

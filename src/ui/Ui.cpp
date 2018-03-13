@@ -317,6 +317,15 @@ void MedUi::onScanAddClicked() {
   scanUpdateMutex.unlock();
 }
 
+void MedUi::onStoreHeaderClicked(int logicalIndex) {
+  if (logicalIndex == STORE_COL_DESCRIPTION) {
+    storeModel->sortByDescription();
+  }
+  else if (logicalIndex == STORE_COL_ADDRESS) {
+    storeModel->sortByAddress();
+  }
+}
+
 void MedUi::updateNumberOfAddresses() {
   char message[128];
   sprintf(message, "%ld", med->getScans().size());

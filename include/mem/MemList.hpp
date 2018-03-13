@@ -22,11 +22,13 @@ public:
   void setAddress(int index, const string& address);
   int getLastIndex();
   void sortByAddress();
+  void sortByDescription();
   void clear();
   MemPtr getMemPtr(int index);
   void addMemPtr(MemPtr mem);
 
   static vector<MemPtr> sortByAddress(vector<MemPtr>& list);
+  static vector<MemPtr> sortByDescription(vector<MemPtr>& list);
 
 private:
   vector<MemPtr> list;
