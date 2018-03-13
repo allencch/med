@@ -63,8 +63,8 @@ bool StoreTreeModel::setData(const QModelIndex &index, const QVariant &value, in
     sem->lock(value.toBool());
   }
   else if (index.column() == STORE_COL_DESCRIPTION) {
-    // TODO set description
-    // med->setStoreDescriptionByIndex(index.row(), value.toString().toStdString());
+    auto sem = static_pointer_cast<Sem>(med->getStore()->getList()[index.row()]);
+    sem->setDescription(value.toString().toStdString());
   }
 
   bool result = setItemData(index, value); //Update the cell
@@ -117,11 +117,9 @@ void StoreTreeModel::refresh() {
       cerr << "Exception throw in refresh" << endl;
     }
 
-    // TODO: description and lock
-    // string description = med->getStoreDescriptionByIndex(i);
-    // bool lock = med->getStoreLockByIndex(i);
-    string description = "nothing";
-    bool lock = false;
+    auto sem = static_pointer_cast<Sem>(med->getStore()->getList()[i]);
+    string description = sem->getDescription();
+    bool lock = sem->isLocked();
 
     QVector<QVariant> data;
     data << description.c_str() <<
@@ -145,12 +143,11 @@ void StoreTreeModel::addRow() {
   } catch(MedException &ex) {
     cerr << "Add row no value" << endl;
   }
-  // TODO: get description and lock
-  // string description = med->getStoreDescriptionByIndex(lastIndex);
-  // bool lock = med->getStoreLockByIndex(lastIndex);
 
-  string description = "nothing more";
-  bool lock = false;
+  auto sem = static_pointer_cast<Sem>(med->getStore()->getList()[lastIndex]);
+  string description = sem->getDescription();
+  bool lock = sem->isLocked();
+
   QVector<QVariant> data;
   data << description.c_str() <<
     address.c_str() <<

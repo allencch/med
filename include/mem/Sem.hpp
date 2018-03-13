@@ -9,9 +9,12 @@ public:
   Sem(Address addr, size_t size, MemIO* memio);
   bool isLocked();
   void lock(bool value);
+  string getDescription();
+  void setDescription(string s);
 
 private:
   bool locked;
+  string description;
 };
 
 typedef std::shared_ptr<Sem> SemPtr;

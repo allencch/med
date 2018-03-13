@@ -6,6 +6,8 @@ Sem::Sem(PemPtr pem) : Pem(pem->getSize(), pem->getMemIO()) {
   setAddress(pem->getAddress());
   setScanType(pem->getScanType());
   getValue(pem->getScanType());
+  locked = false;
+  description = "No description";
 }
 
 Sem::Sem(size_t size, MemIO* memio) : Pem(size, memio) {
@@ -22,4 +24,12 @@ bool Sem::isLocked() {
 
 void Sem::lock(bool value) {
   locked = value;
+}
+
+string Sem::getDescription() {
+  return description;
+}
+
+void Sem::setDescription(string s) {
+  description = s;
 }
