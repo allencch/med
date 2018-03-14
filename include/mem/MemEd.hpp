@@ -1,10 +1,15 @@
 #ifndef MEM_ED_HPP
 #define MEM_ED_HPP
 
+#include <mutex>
+#include <thread>
+
 #include "mem/MemScanner.hpp"
 #include "mem/MemManager.hpp"
 #include "mem/MemList.hpp"
 #include "med/Process.hpp"
+
+const int LOCK_REFRESH_RATE = 800;
 
 class MemEd {
 public:
@@ -24,6 +29,10 @@ public:
   Process selectProcessByIndex(int index);
   vector<Process> processes;
   Process selectedProcess;
+
+  void lockValue();
+
+  static void callLockValue(MemEd* med);
   
 private:
   void initialize();
@@ -31,6 +40,8 @@ private:
   MemScanner* scanner;
   MemManager* manager;
   MemList* store;
+  std::mutex storeMutex;
+  std::thread* lockValueThread;
 };
 
 #endif

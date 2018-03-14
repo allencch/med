@@ -25,6 +25,8 @@ void MemEd::initialize() {
 
   vector<MemPtr> emptyMems;
   store = new MemList(emptyMems);
+
+  lockValueThread = new std::thread(MemEd::callLockValue, this);
 }
 
 void MemEd::setPid(pid_t pid) {
@@ -87,4 +89,14 @@ void MemEd::addToStoreByIndex(int index) {
   PemPtr pem = static_pointer_cast<Pem>(scans.getMemPtr(index));
   MemPtr sem = MemPtr(new Sem(pem));
   getStore()->addMemPtr(sem);
+}
+
+void MemEd::callLockValue(MemEd* med) {
+  med->lockValue();
+}
+
+void MemEd::lockValue() {
+  storeMutex.lock();
+
+  storeMutex.unlock();
 }

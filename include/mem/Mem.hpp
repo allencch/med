@@ -11,7 +11,7 @@ public:
   ~Mem();
 
   void dump(bool newline = true);
-  void setValue(int value);
+  void setValue(int value); // Deprecated
 
   Address getAddress();
   string getAddressAsString();

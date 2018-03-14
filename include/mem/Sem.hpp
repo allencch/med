@@ -12,9 +12,14 @@ public:
   string getDescription();
   void setDescription(string s);
 
+  void setLockedValue(string s);
+  string& getLockedValue();
+  void lockValue();
+
 private:
   bool locked;
   string description;
+  string lockedValue;
 };
 
 typedef std::shared_ptr<Sem> SemPtr;

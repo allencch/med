@@ -23,6 +23,9 @@ bool Sem::isLocked() {
 }
 
 void Sem::lock(bool value) {
+  if (value) {
+    setLockedValue(getValue(getScanType()));
+  }
   locked = value;
 }
 
@@ -32,4 +35,16 @@ string Sem::getDescription() {
 
 void Sem::setDescription(string s) {
   description = s;
+}
+
+void Sem::setLockedValue(string s) {
+  lockedValue = s;
+}
+
+string& Sem::getLockedValue() {
+  return lockedValue;
+}
+
+void Sem::lockValue() {
+  setValue(getLockedValue(), getScanType());
 }
