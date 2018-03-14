@@ -334,7 +334,7 @@ void MedUi::updateNumberOfAddresses() {
 
 void MedUi::refresh(MedUi* mainUi) {
   // TODO: Store refresh if closing
-  while(1) {
+  while (1) {
     mainUi->refreshScanTreeView();
     mainUi->refreshStoreTreeView();
     std::this_thread::sleep_for(chrono::milliseconds(REFRESH_RATE));

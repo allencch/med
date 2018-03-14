@@ -16,6 +16,9 @@ MemEd::~MemEd() {
   delete manager;
 
   delete store;
+
+  lockValueThread->join();
+  delete lockValueThread;
 }
 
 void MemEd::initialize() {
@@ -26,7 +29,7 @@ void MemEd::initialize() {
   vector<MemPtr> emptyMems;
   store = new MemList(emptyMems);
 
-  lockValueThread = new std::thread(MemEd::callLockValue, this);
+  lockValueThread = new std::thread(MemEd::callLockValues, this);
 }
 
 void MemEd::setPid(pid_t pid) {
@@ -91,12 +94,21 @@ void MemEd::addToStoreByIndex(int index) {
   getStore()->addMemPtr(sem);
 }
 
-void MemEd::callLockValue(MemEd* med) {
-  med->lockValue();
+void MemEd::callLockValues(MemEd* med) {
+  while (1) {
+    med->lockValues();
+    std::this_thread::sleep_for(chrono::milliseconds(LOCK_REFRESH_RATE));
+  }
 }
 
-void MemEd::lockValue() {
+void MemEd::lockValues() {
   storeMutex.lock();
-
+  auto list = getStore()->getList();
+  for (size_t i = 0; i < list.size(); i++) {
+    auto sem = static_pointer_cast<Sem>(list[i]);
+    if (sem->isLocked()) {
+      sem->lockValue();
+    }
+  }
   storeMutex.unlock();
 }

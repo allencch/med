@@ -25,15 +25,16 @@ public:
   MemList* getStore();
   void addToStoreByIndex(int index);
 
+  // Process
   vector<Process> listProcesses();
   Process selectProcessByIndex(int index);
   vector<Process> processes;
   Process selectedProcess;
 
-  void lockValue();
+  void lockValues();
 
-  static void callLockValue(MemEd* med);
-  
+  static void callLockValues(MemEd* med);
+
 private:
   void initialize();
   pid_t pid;
