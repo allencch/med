@@ -58,6 +58,7 @@ void MedUi::loadUiFiles() {
   scanTreeView->installEventFilter(new ScanTreeEventListener(scanTreeView, this));
   storeTreeView->installEventFilter(new StoreTreeEventListener(storeTreeView, this));
 
+  notesArea = mainWindow->findChild<QPlainTextEdit*>("notes");
   // TODO: Notes
 }
 
@@ -118,8 +119,38 @@ void MedUi::setupSignals() {
   QObject::connect(mainWindow->findChild<QPushButton*>("scanAdd"),
                    SIGNAL(clicked()),
                    this,
-                   SLOT(onScanAddClicked())
-                   );
+                   SLOT(onScanAddClicked()));
+
+  QObject::connect(mainWindow->findChild<QAction*>("actionSaveAs"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onSaveAsTriggered()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionOpen"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onOpenTriggered()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionSave"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onSaveTriggered()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionQuit"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onQuitTriggered()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionReload"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onReloadTriggered()));
+
+  QObject::connect(mainWindow->findChild<QAction*>("actionShowNotes"),
+                   SIGNAL(triggered(bool)),
+                   this,
+                   SLOT(onShowNotesTriggered(bool)));
+  QObject::connect(notesArea,
+                   SIGNAL(textChanged()),
+                   this,
+                   SLOT(onNotesAreaChanged()));
+
 
 }
 
@@ -325,6 +356,110 @@ void MedUi::onStoreHeaderClicked(int logicalIndex) {
     storeModel->sortByAddress();
   }
 }
+
+
+///////////////////
+// Menu items    //
+///////////////////
+
+void MedUi::onSaveAsTriggered() {
+  if(med->selectedProcess.pid == "") {
+    statusBar->showMessage("No process selected");
+    return;
+  }
+  QString filename = QFileDialog::getSaveFileName(mainWindow,
+                                                  QString("Save JSON"),
+                                                  "./",
+                                                  QString("Save JSON (*.json)"));
+
+  if (filename == "") {
+    return;
+  }
+  this->filename = filename;
+  setWindowTitle();
+
+  med->saveFile(filename.toStdString().c_str());
+}
+
+void MedUi::onOpenTriggered() {
+  if(med->selectedProcess.pid == "") {
+    statusBar->showMessage("No process selected");
+    return;
+  }
+  QString filename = QFileDialog::getOpenFileName(mainWindow,
+                                                  QString("Open JSON"),
+                                                  "./",
+                                                  QString("Open JSON (*.json)"));
+  if (filename == "") {
+    return;
+  }
+
+  openFile(filename);
+}
+
+void MedUi::onReloadTriggered() {
+  if(med->selectedProcess.pid == "") {
+    statusBar->showMessage("No process selected");
+    return;
+  }
+  if (filename == "") {
+    return;
+  }
+
+  openFile(filename);
+}
+
+void MedUi::openFile(QString filename) {
+  this->filename = filename;
+  setWindowTitle();
+
+  med->openFile(filename.toStdString().c_str());
+
+  storeUpdateMutex.lock();
+  storeModel->clearAll();
+  storeModel->refresh();
+  storeUpdateMutex.unlock();
+
+  notesArea->setPlainText(QString::fromStdString(med->getNotes()));
+}
+
+void MedUi::setWindowTitle() {
+  if (filename.length() > 0) {
+    mainWindow->setWindowTitle(MAIN_TITLE + ": " + filename);
+  }
+  else {
+    mainWindow->setWindowTitle(MAIN_TITLE);
+  }
+}
+
+void MedUi::onSaveTriggered() {
+  if (filename == "") {
+    return;
+  }
+  med->saveFile(filename.toStdString().c_str());
+  statusBar->showMessage("Saved");
+}
+
+
+////// End Menu > File ////////////
+
+void MedUi::onShowNotesTriggered(bool checked) {
+  if (checked) {
+    notesArea->show();
+  }
+  else {
+    notesArea->hide();
+  }
+}
+
+void MedUi::onNotesAreaChanged() {
+  med->setNotes(notesArea->toPlainText().toStdString());
+}
+
+void MedUi::onQuitTriggered() {
+  app->quit();
+}
+
 
 void MedUi::updateNumberOfAddresses() {
   char message[128];

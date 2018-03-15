@@ -1,6 +1,12 @@
+#include <iostream>
+#include <fstream>
+
 #include "mem/MemEd.hpp"
 #include "med/MedCommon.hpp"
+#include "med/MedException.hpp"
 #include "mem/Sem.hpp"
+
+using namespace std;
 
 MemEd::MemEd() {
   initialize();
@@ -111,4 +117,100 @@ void MemEd::lockValues() {
     }
   }
   storeMutex.unlock();
+}
+
+
+void MemEd::saveFile(const char* filename) {
+  Json::Value root;
+  Json::Value addresses;
+  root["addresses"] = addresses;
+
+  auto list = getStore()->getList();
+  for (auto address: list) {
+    auto sem = static_pointer_cast<Sem>(address);
+    Json::Value pairs;
+    pairs["description"] = sem->getDescription();
+    pairs["address"] = sem->getAddressAsString();
+    pairs["type"] = sem->getScanType();
+    try {
+      pairs["value"] = sem->getValue();
+    } catch(MedException &ex) {
+      pairs["value"] = "";
+    }
+    pairs["lock"] = sem->isLocked();
+    root["addresses"].append(pairs);
+  }
+  root["notes"] = getNotes();
+
+  ofstream ofs;
+  ofs.open(filename);
+  if (ofs.fail()) {
+    throw MedException(string("Save JSON: Fail to open file ") + filename);
+  }
+  ofs << root << endl;
+  ofs.close();
+}
+
+void MemEd::loadLegacyJson(Json::Value& root) {
+  MemIO* memio = scanner->getMemIO();
+  for (int i = 0; i < (int)root.size(); i++) {
+    string scanType = root[i]["type"].asString();
+    int size = scanTypeToSize(scanType);
+
+    SemPtr sem = SemPtr(new Sem(size, memio));
+    sem->setAddress(hexToInt(root[i]["address"].asString()));
+    sem->setScanType(scanType);
+    sem->setDescription(root[i]["description"].asString());
+    sem->lock(false); // always open as false, so that do not update the value
+
+    getStore()->getList().push_back(sem);
+  }
+}
+
+void MemEd::loadJson(Json::Value& root) {
+  MemIO* memio = scanner->getMemIO();
+  auto& addresses = root["addresses"];
+  for (int i = 0; i < (int)addresses.size(); i++) {
+    string scanType = addresses[i]["type"].asString();
+    int size = scanTypeToSize(scanType);
+
+    SemPtr sem = SemPtr(new Sem(size, memio));
+    sem->setAddress(hexToInt(addresses[i]["address"].asString()));
+    sem->setScanType(scanType);
+    sem->setDescription(addresses[i]["description"].asString());
+    sem->lock(false); // always open as false, so that do not update the value
+
+    getStore()->getList().push_back(sem);
+  }
+  notes = root["notes"].asString();
+}
+
+void MemEd::openFile(const char* filename) {
+  Json::Value root;
+
+  ifstream ifs;
+  ifs.open(filename);
+  if (ifs.fail()) {
+    throw MedException(string("Open JSON: Fail to open file ") + filename);
+  }
+  ifs >> root;
+  ifs.close();
+
+  storeMutex.lock();
+  getStore()->clear();
+  if (root.isArray()) {
+    loadLegacyJson(root);
+  }
+  else {
+    loadJson(root);
+  }
+  storeMutex.unlock();
+}
+
+string& MemEd::getNotes() {
+  return notes;
+}
+
+void MemEd::setNotes(const string& notes) {
+  this->notes = notes;
 }

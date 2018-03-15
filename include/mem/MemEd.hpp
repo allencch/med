@@ -4,6 +4,8 @@
 #include <mutex>
 #include <thread>
 
+#include <json/json.h>
+
 #include "mem/MemScanner.hpp"
 #include "mem/MemManager.hpp"
 #include "mem/MemList.hpp"
@@ -35,6 +37,14 @@ public:
 
   static void callLockValues(MemEd* med);
 
+  void saveFile(const char* filename);
+  void openFile(const char* filename);
+  void loadLegacyJson(Json::Value& root);
+  void loadJson(Json::Value& root);
+
+  string& getNotes();
+  void setNotes(const string& notes);
+
 private:
   void initialize();
   pid_t pid;
@@ -43,6 +53,8 @@ private:
   MemList* store;
   std::mutex storeMutex;
   std::thread* lockValueThread;
+
+  string notes;
 };
 
 #endif

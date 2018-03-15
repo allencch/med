@@ -49,6 +49,13 @@ string Pem::getValue(const string& scanType) {
   return Pem::bytesToString(buf, scanType);
 }
 
+string Pem::getValue() {
+  string scanType = getScanType();
+  MemPtr pem = memio->read(address, size);
+  Byte* buf = pem->getData();
+  return Pem::bytesToString(buf, scanType);
+}
+
 string Pem::getScanType() {
   return scanTypeToString(scanType);
 }

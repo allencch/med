@@ -46,6 +46,7 @@ public:
   QComboBox* scanTypeCombo;
   QTreeView* scanTreeView;
   QTreeView* storeTreeView;
+  QPlainTextEdit* notesArea;
 
   static void refresh(MedUi* mainUi);
   void refreshScanTreeView();
@@ -62,6 +63,9 @@ public:
 
   std::mutex scanUpdateMutex;
   std::mutex storeUpdateMutex;
+
+  void setWindowTitle();
+  void openFile(QString filename);
 
 public slots:
   void onProcessItemDblClicked(QTreeWidgetItem* item, int column);
@@ -84,6 +88,14 @@ private slots:
 
   void onStoreHeaderClicked(int logicalIndex);
 
+  void onSaveAsTriggered();
+  void onSaveTriggered();
+  void onOpenTriggered();
+  void onReloadTriggered();
+  void onQuitTriggered();
+  void onShowNotesTriggered(bool checked);
+  void onNotesAreaChanged();
+
 private:
   void loadUiFiles();
   void loadProcessUi();
@@ -99,6 +111,8 @@ private:
   StoreTreeModel* storeModel;
   UiState scanState;
   UiState storeState;
+
+  QString filename;
 };
 
 
