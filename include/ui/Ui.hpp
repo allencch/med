@@ -86,6 +86,7 @@ private slots:
 
   void onScanAddClicked();
   void onScanAddAllClicked();
+  void onScanClearClicked();
 
   void onStoreHeaderClicked(int logicalIndex);
 

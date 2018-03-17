@@ -124,6 +124,10 @@ void MedUi::setupSignals() {
                    SIGNAL(clicked()),
                    this,
                    SLOT(onScanAddAllClicked()));
+  QObject::connect(mainWindow->findChild<QWidget*>("scanClear"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onScanClearClicked()));
 
   QObject::connect(mainWindow->findChild<QAction*>("actionSaveAs"),
                    SIGNAL(triggered()),
@@ -358,6 +362,13 @@ void MedUi::onScanAddAllClicked() {
     med->addToStoreByIndex(i);
   }
   storeModel->refresh();
+  scanUpdateMutex.unlock();
+}
+
+void MedUi::onScanClearClicked() {
+  scanUpdateMutex.lock();
+  scanModel->empty();
+  statusBar->showMessage("Scan cleared");
   scanUpdateMutex.unlock();
 }
 
