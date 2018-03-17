@@ -159,7 +159,7 @@ int createBufferByScanType(ScanType type, void** buffer, int size) {
   return retsize;
 }
 
-
+// @deprecated
 int stringToRaw(string str, ScanType type, Byte** buffer) {
   int retsize;
   if (type == ScanType::String) {
@@ -172,6 +172,7 @@ int stringToRaw(string str, ScanType type, Byte** buffer) {
   return retsize;
 }
 
+// @deprecated
 int stringToRawStringType(string str, ScanType type, Byte** buffer) {
   Bytes bytes = ScanParser::getBytes(str, scanTypeToString(type));
   int retsize = bytes.size;
@@ -186,6 +187,7 @@ int stringToRawStringType(string str, ScanType type, Byte** buffer) {
   return retsize;
 }
 
+// @deprecated
 int stringToRawNumericType(string str, ScanType type, Byte** buffer) {
   vector<string> tokens = ScanParser::getValues(str);
 
@@ -202,7 +204,7 @@ int stringToRawNumericType(string str, ScanType type, Byte** buffer) {
   return retsize;
 }
 
-
+// @deprecated
 int stringToRaw(string str, string type, Byte** buffer) {
   ScanType scantype = stringToScanType(type);
   return stringToRaw(str, scantype, buffer);
