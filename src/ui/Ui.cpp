@@ -247,7 +247,7 @@ void MedUi::onScanClicked() {
   try {
     med->scan(scanValue, scanType);
   } catch(MedException &ex) {
-    cerr << "scan: "<< ex.what() <<endl;
+    cerr << "scan: "<< ex.what() << endl;
   }
 
   scanModel->clearAll();

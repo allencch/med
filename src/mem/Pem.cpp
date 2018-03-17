@@ -61,16 +61,30 @@ string Pem::getScanType() {
 }
 
 tuple<Byte*, size_t> Pem::stringToBytes(const string& value, const string& scanType) {
-  int size = scanTypeToSize(stringToScanType(scanType));
-  vector<string> tokens = ScanParser::getValues(value);
-  Byte* buf = new Byte[size * tokens.size()];
+  Byte* buf;
+  int size;
 
-  Byte* ptr = buf;
-  for (size_t i = 0; i < tokens.size(); i++) {
-    stringToMemory(tokens[i], stringToScanType(scanType), ptr);
-    ptr += size;
+  // If scanType is string, it will just compy  all
+  if (scanType == SCAN_TYPE_STRING) {
+    size = MAX_STRING_SIZE;
+    buf = new Byte[size];
+    sprintf((char*)buf, "%s", value.c_str());
+
+    return make_tuple(buf, size);
   }
-  return make_tuple(buf, size * tokens.size()); // delete
+  else { // Allows parse comma
+    size = scanTypeToSize(stringToScanType(scanType));
+    vector<string> tokens = ScanParser::getValues(value);
+    buf = new Byte[size * tokens.size()];
+
+    Byte* ptr = buf;
+    for (size_t i = 0; i < tokens.size(); i++) {
+      stringToMemory(tokens[i], stringToScanType(scanType), ptr);
+      ptr += size;
+    }
+
+    return make_tuple(buf, size * tokens.size()); // delete
+  }
 }
 
 void Pem::setValue(const string& value, const string& scanType) {
