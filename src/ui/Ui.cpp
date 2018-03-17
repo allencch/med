@@ -166,7 +166,30 @@ void MedUi::setupSignals() {
                    this,
                    SLOT(onNotesAreaChanged()));
 
-
+  QObject::connect(mainWindow->findChild<QPushButton*>("storeClear"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onStoreClearClicked()));
+  QObject::connect(mainWindow->findChild<QPushButton*>("nextAddress"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onStoreNextClicked()));
+  QObject::connect(mainWindow->findChild<QPushButton*>("prevAddress"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onStorePrevClicked()));
+  QObject::connect(mainWindow->findChild<QPushButton*>("storeShift"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onStoreShiftClicked()));
+  QObject::connect(mainWindow->findChild<QPushButton*>("storeUnshift"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onStoreUnshiftClicked()));
+  QObject::connect(mainWindow->findChild<QPushButton*>("moveAddress"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onStoreMoveClicked()));
 }
 
 void MedUi::setupScanTreeView() {
@@ -386,6 +409,117 @@ void MedUi::onStoreHeaderClicked(int logicalIndex) {
   else if (logicalIndex == STORE_COL_ADDRESS) {
     storeModel->sortByAddress();
   }
+}
+
+///////////////////
+// Store buttons //
+///////////////////
+
+void MedUi::onStoreClearClicked() {
+  storeUpdateMutex.lock();
+  storeModel->empty();
+  storeUpdateMutex.unlock();
+}
+
+void MedUi::onStoreNextClicked() {
+  auto indexes = storeTreeView->selectionModel()->selectedRows(STORE_COL_ADDRESS);
+  if (indexes.size() == 0) {
+    cerr << "onStoreNextClicked: nothing selected" << endl;
+    return;
+  }
+
+  storeUpdateMutex.lock();
+  med->getStore()->addNextAddress(indexes[0].row());
+  storeModel->addRow();
+  storeUpdateMutex.unlock();
+}
+
+void MedUi::onStorePrevClicked() {
+  auto indexes = storeTreeView->selectionModel()->selectedRows(STORE_COL_ADDRESS);
+  if (indexes.size() == 0) {
+    cerr << "onStorePrevClicked: nothing selected" << endl;
+    return;
+  }
+
+  storeUpdateMutex.lock();
+  med->getStore()->addPrevAddress(indexes[0].row());
+  storeModel->addRow();
+  storeUpdateMutex.unlock();
+}
+
+
+void storeShift(MedUi* mainUi, bool reverse = false) {
+  auto mainWindow = mainUi->mainWindow;
+  auto &med = mainUi->med;
+  auto storeTreeView = mainUi->storeTreeView;
+  auto &storeUpdateMutex = mainUi->storeUpdateMutex;
+  auto storeModel = mainUi->storeModel;
+  auto statusBar = mainUi->statusBar;
+
+  long difference;
+  try {
+    long shiftFrom = hexToInt(mainWindow->findChild<QLineEdit*>("shiftFrom")->text().toStdString());
+    long shiftTo = hexToInt(mainWindow->findChild<QLineEdit*>("shiftTo")->text().toStdString());
+    if (reverse) {
+      difference = shiftFrom - shiftTo;
+    }
+    else {
+      difference = shiftTo - shiftFrom;
+    }
+  } catch(MedException &e) {
+    cerr << e.what() << endl;
+  }
+
+  //Get PID
+  if(med->selectedProcess.pid == "") {
+    statusBar->showMessage("No process selected");
+    return;
+  }
+
+  auto indexes = storeTreeView
+    ->selectionModel()
+    ->selectedRows(STORE_COL_ADDRESS);
+
+  storeUpdateMutex.lock();
+  for (auto i = 0; i < indexes.size(); i++) {
+    med->getStore()->shiftAddress(indexes[i].row(), difference);
+  }
+  storeModel->refresh();
+  storeUpdateMutex.unlock();
+}
+
+void MedUi::onStoreShiftClicked() {
+  storeShift(this);
+}
+
+void MedUi::onStoreUnshiftClicked() {
+  storeShift(this, true);
+}
+
+void MedUi::onStoreMoveClicked() {
+  long moveSteps;
+  try {
+    moveSteps = mainWindow->findChild<QLineEdit*>("shiftTo")->text().toInt();
+  } catch(MedException &e) {
+    cerr << e.what() << endl;
+  }
+
+  //Get PID
+  if(med->selectedProcess.pid == "") {
+    statusBar->showMessage("No process selected");
+    return;
+  }
+
+  auto indexes = storeTreeView
+    ->selectionModel()
+    ->selectedRows(STORE_COL_ADDRESS);
+
+  storeUpdateMutex.lock();
+  for (auto i = 0; i < indexes.size(); i++) {
+    med->getStore()->shiftAddress(indexes[i].row(), moveSteps);
+  }
+  storeModel->refresh();
+  storeUpdateMutex.unlock();
 }
 
 

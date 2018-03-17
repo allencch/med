@@ -47,6 +47,7 @@ public:
   QTreeView* scanTreeView;
   QTreeView* storeTreeView;
   QPlainTextEdit* notesArea;
+  StoreTreeModel* storeModel;
 
   static void refresh(MedUi* mainUi);
   void refreshScanTreeView();
@@ -89,6 +90,13 @@ private slots:
   void onScanClearClicked();
 
   void onStoreHeaderClicked(int logicalIndex);
+  void onStoreClearClicked();
+
+  void onStoreNextClicked();
+  void onStorePrevClicked();
+  void onStoreShiftClicked();
+  void onStoreUnshiftClicked();
+  void onStoreMoveClicked();
 
   void onSaveAsTriggered();
   void onSaveTriggered();
@@ -110,7 +118,6 @@ private:
 
   QApplication* app;
   TreeModel* scanModel;
-  StoreTreeModel* storeModel;
   UiState scanState;
   UiState storeState;
 

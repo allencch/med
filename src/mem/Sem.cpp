@@ -5,9 +5,16 @@ Sem::Sem(PemPtr pem) : Pem(pem->getSize(), pem->getMemIO()) {
   memcpy(data, pem->getData(), size);
   setAddress(pem->getAddress());
   setScanType(pem->getScanType());
-  getValue(pem->getScanType());
   locked = false;
   description = "No description";
+}
+
+Sem::Sem(Sem& sem) : Pem(sem.getSize(), sem.getMemIO()) {
+  memcpy(data, sem.getData(), size);
+  setAddress(sem.getAddress());
+  setScanType(sem.getScanType());
+  locked = false;
+  description = sem.getDescription();
 }
 
 Sem::Sem(size_t size, MemIO* memio) : Pem(size, memio) {
@@ -47,4 +54,14 @@ string& Sem::getLockedValue() {
 
 void Sem::lockValue() {
   setValue(getLockedValue(), getScanType());
+}
+
+SemPtr Sem::clone(SemPtr semPtr) {
+  // It is:
+  // Sem* storedPtr = semPtr.get();
+  // Sem* newSem = new Sem(*storedPtr); // copy constructor
+  // SemPtr newSemPtr = SemPtr(new Sem(newSem)); // convert to SemPtr
+  // Finally, push to the list.
+  // Simplify it as following line
+  return SemPtr(new Sem(*semPtr.get()));
 }

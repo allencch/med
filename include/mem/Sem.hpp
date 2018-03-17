@@ -5,6 +5,7 @@
 class Sem : public Pem {
 public:
   explicit Sem(PemPtr pem);
+  Sem(Sem& sem);
   Sem(size_t size, MemIO* memio);
   Sem(Address addr, size_t size, MemIO* memio);
   bool isLocked();
@@ -15,6 +16,8 @@ public:
   void setLockedValue(string s);
   string& getLockedValue();
   void lockValue();
+
+  static std::shared_ptr<Sem> clone(shared_ptr<Sem> semPtr);
 
 private:
   bool locked;

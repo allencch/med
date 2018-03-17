@@ -104,3 +104,33 @@ void MemList::setList(const vector<MemPtr>& list) {
 vector<MemPtr>& MemList::getList() {
   return list;
 }
+
+void MemList::addNextAddress(int index) {
+  auto mem = list[index];
+  SemPtr semPtr = static_pointer_cast<Sem>(mem);
+  SemPtr newSem = Sem::clone(semPtr);
+
+  int step = scanTypeToSize(semPtr->getScanType());
+  Address addr = semPtr->getAddress();
+  newSem->setAddress(addr + step);
+
+  list.push_back(newSem);
+}
+
+void MemList::addPrevAddress(int index) {
+  auto mem = list[index];
+  SemPtr semPtr = static_pointer_cast<Sem>(mem);
+  SemPtr newSem = Sem::clone(semPtr);
+
+  int step = scanTypeToSize(semPtr->getScanType());
+  Address addr = semPtr->getAddress();
+  newSem->setAddress(addr - step);
+
+  list.push_back(newSem);
+}
+
+void MemList::shiftAddress(int index, long diff) {
+  auto mem = list[index];
+  Address addr = mem->getAddress();
+  mem->setAddress(addr + diff);
+}

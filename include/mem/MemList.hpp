@@ -27,6 +27,10 @@ public:
   MemPtr getMemPtr(int index);
   void addMemPtr(MemPtr mem);
 
+  void addNextAddress(int index);
+  void addPrevAddress(int index);
+  void shiftAddress(int index, long diff);
+
   static vector<MemPtr> sortByAddress(vector<MemPtr>& list);
   static vector<MemPtr> sortByDescription(vector<MemPtr>& list);
 
