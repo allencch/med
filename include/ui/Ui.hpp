@@ -85,6 +85,7 @@ private slots:
   void onStoreTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
 
   void onScanAddClicked();
+  void onScanAddAllClicked();
 
   void onStoreHeaderClicked(int logicalIndex);
 

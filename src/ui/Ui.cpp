@@ -120,6 +120,10 @@ void MedUi::setupSignals() {
                    SIGNAL(clicked()),
                    this,
                    SLOT(onScanAddClicked()));
+  QObject::connect(mainWindow->findChild<QPushButton*>("scanAddAll"),
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onScanAddAllClicked()));
 
   QObject::connect(mainWindow->findChild<QAction*>("actionSaveAs"),
                    SIGNAL(triggered()),
@@ -344,6 +348,15 @@ void MedUi::onScanAddClicked() {
     med->addToStoreByIndex(indexes[i].row());
   }
 
+  storeModel->refresh();
+  scanUpdateMutex.unlock();
+}
+
+void MedUi::onScanAddAllClicked() {
+  scanUpdateMutex.lock();
+  for (size_t i = 0; i < med->getScans().size(); i++) {
+    med->addToStoreByIndex(i);
+  }
   storeModel->refresh();
   scanUpdateMutex.unlock();
 }
