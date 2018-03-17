@@ -170,7 +170,7 @@ void StoreTreeModel::sortByDescription() {
 
 void StoreTreeModel::empty() {
   med->getStore()->clear();
-  TreeModel::empty();
+  clearAll();
 }
 
 void StoreTreeModel::setValue(const QModelIndex &index, const QVariant &value) {
