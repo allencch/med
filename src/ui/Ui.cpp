@@ -92,6 +92,13 @@ void MedUi::setupUi() {
   qRegisterMetaType<QVector<int>>(); //For multithreading.
 
   refreshThread = new std::thread(MedUi::refresh, this);
+  QAction* showNotesAction = mainWindow->findChild<QAction*>("actionShowNotes");
+  if (showNotesAction->isChecked()) {
+    notesArea->show();
+  }
+  else {
+    notesArea->hide();
+  }
 }
 
 void MedUi::setupStatusBar() {
