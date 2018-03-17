@@ -88,6 +88,23 @@ void Pem::setValue(const string& value, const string& scanType) {
 
 void Pem::setScanType(const string& scanType) {
   this->scanType = stringToScanType(scanType);
+  size_t newSize;
+  Byte* newData;
+  Byte* temp;
+
+  if (this->scanType == ScanType::String) {
+    newSize = MAX_STRING_SIZE;
+    newData = new Byte[newSize];
+  }
+  else {
+    newSize = scanTypeToSize(this->scanType);
+    newData = new Byte[newSize];
+  }
+
+  temp = data;
+  data = newData;
+  size = newSize;
+  delete[] temp;
 }
 
 MemIO* Pem::getMemIO() {
