@@ -13,6 +13,7 @@ using namespace std;
 
 EncodingManager::EncodingManager(MedUi* mainUi) {
   this->mainUi = mainUi;
+  encodingType = EncodingType::Default;
   mainWindow = mainUi->mainWindow;
   setupSubmenu();
   setupSignals();
