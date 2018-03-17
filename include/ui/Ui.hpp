@@ -106,6 +106,9 @@ private slots:
   void onShowNotesTriggered(bool checked);
   void onNotesAreaChanged();
 
+  void onNewAddressTriggered();
+  void onDeleteAddressTriggered();
+
 private:
   void loadUiFiles();
   void loadProcessUi();

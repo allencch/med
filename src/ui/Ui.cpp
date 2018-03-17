@@ -190,6 +190,19 @@ void MedUi::setupSignals() {
                    SIGNAL(clicked()),
                    this,
                    SLOT(onStoreMoveClicked()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionNewAddress"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onNewAddressTriggered()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionDeleteAddress"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onDeleteAddressTriggered()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionMemEditor"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onMemEditorTriggered()));
+
 }
 
 void MedUi::setupScanTreeView() {
@@ -623,6 +636,41 @@ void MedUi::onNotesAreaChanged() {
 
 void MedUi::onQuitTriggered() {
   app->quit();
+}
+
+
+//////////////////
+// Edit address //
+//////////////////
+
+
+void MedUi::onNewAddressTriggered() {
+  if(med->selectedProcess.pid == "") {
+    statusBar->showMessage("No process selected");
+    return;
+  }
+  storeUpdateMutex.lock();
+  med->addNewAddress();
+  storeModel->addRow();
+  storeUpdateMutex.unlock();
+}
+
+void MedUi::onDeleteAddressTriggered() {
+  auto indexes = storeTreeView
+    ->selectionModel()
+    ->selectedRows(STORE_COL_ADDRESS);
+
+  //Sort and reverse
+  sort(indexes.begin(), indexes.end(), [](QModelIndex a, QModelIndex b) {
+      return a.row() > b.row();
+    });
+
+  storeUpdateMutex.lock();
+  for (auto i = 0; i < indexes.size(); i++) {
+    med->getStore()->deleteAddress(indexes[i].row());
+  }
+  storeModel->refresh();
+  storeUpdateMutex.unlock();
 }
 
 

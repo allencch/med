@@ -30,6 +30,7 @@ public:
   void addNextAddress(int index);
   void addPrevAddress(int index);
   void shiftAddress(int index, long diff);
+  void deleteAddress(int index);
 
   static vector<MemPtr> sortByAddress(vector<MemPtr>& list);
   static vector<MemPtr> sortByDescription(vector<MemPtr>& list);

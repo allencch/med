@@ -26,6 +26,7 @@ public:
   void clearScans();
   MemList* getStore();
   void addToStoreByIndex(int index);
+  void addNewAddress();
 
   // Process
   vector<Process> listProcesses();

@@ -214,3 +214,9 @@ string& MemEd::getNotes() {
 void MemEd::setNotes(const string& notes) {
   this->notes = notes;
 }
+
+void MemEd::addNewAddress() {
+  auto memio = scanner->getMemIO();
+  SemPtr sem = SemPtr(new Sem(scanTypeToSize(ScanType::Int16), memio));
+  store->getList().push_back(sem);
+}

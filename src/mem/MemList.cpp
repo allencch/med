@@ -134,3 +134,7 @@ void MemList::shiftAddress(int index, long diff) {
   Address addr = mem->getAddress();
   mem->setAddress(addr + diff);
 }
+
+void MemList::deleteAddress(int index) {
+  list.erase(list.begin() + index);
+}
