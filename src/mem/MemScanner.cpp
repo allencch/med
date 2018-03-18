@@ -25,10 +25,11 @@ MemScanner::MemScanner(pid_t pid) {
 MemScanner::~MemScanner() {
   pid = 0;
   delete memio;
+  delete threadManager;
 }
 
 void MemScanner::initialize() {
-  threadManager = &ThreadManager::getInstance();
+  threadManager = new ThreadManager();
   threadManager->setMaxThreads(8);
   memio = new MemIO();
 }

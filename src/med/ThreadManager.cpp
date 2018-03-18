@@ -15,11 +15,6 @@ ThreadManager::ThreadManager(int maxThreads) {
 
 ThreadManager::~ThreadManager() {}
 
-ThreadManager& ThreadManager::getInstance() {
-  static ThreadManager instance;
-  return instance;
-}
-
 void ThreadManager::setMaxThreads(int num) {
   maxThreads = num;
 }
