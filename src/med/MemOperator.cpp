@@ -21,7 +21,7 @@ void memDump(pid_t pid,Address address,int size) {
   pidAttach(pid);
   printf("%d\n",size);
   int memFd = getMem(pid);
-  uint8_t* buf = (uint8_t*)malloc(size);
+  Byte* buf = new Byte[size];
 
   if(lseek(memFd, address, SEEK_SET) == -1) {
     printf("lseek error: %p, %s\n",(void*)address,strerror(errno));
@@ -37,19 +37,19 @@ void memDump(pid_t pid,Address address,int size) {
     printf("%02x ",buf[i]);
   }
   printf("\n");
-  free(buf);
+  delete[] buf;
   close(memFd);
   pidDetach(pid);
 }
 
 void memDirectDump(Byte* byteStart, int size) {
-  uint8_t* buf = (uint8_t*)malloc(size);
+  Byte* buf = new Byte[size];
   memcpy(buf, (void*)byteStart, size);
   for(int i = 0; i < size ; i++) {
     printf("%x ", buf[i]);
   }
   printf("\n");
-  free(buf);
+  delete[] buf;
 }
 
 
@@ -57,14 +57,14 @@ void memDirectDump(Byte* byteStart, int size) {
  * Reverse the memory (Big to Little Endian or vice versa)
  */
 void memReverse(uint8_t* buf,int size) {
-  uint8_t* temp = (uint8_t*)malloc(size);
+  Byte* temp = new Byte[size];
   memcpy(temp,buf,size);
 
   for(int i=0;i<size;i++) {
     buf[size-i-1] = temp[i];
   }
 
-  free(temp);
+  delete[] temp;
 }
 
 
@@ -79,8 +79,8 @@ bool memGt(const void* ptr1, const void* ptr2, size_t size) {
   //This is tricky, because of the little endianness, memcmp should check from right to left, not from left to right
   // Thus, need to reverse the memory
 
-  uint8_t* rev1 = (uint8_t*)malloc(size);
-  uint8_t* rev2 = (uint8_t*)malloc(size);
+  Byte* rev1 = new Byte[size];
+  Byte* rev2 = new Byte[size];
   memcpy(rev1, ptr1, size);
   memcpy(rev2, ptr2, size);
 
@@ -89,17 +89,17 @@ bool memGt(const void* ptr1, const void* ptr2, size_t size) {
 
   int ret = memcmp(rev1, rev2, size);
 
-  free(rev1);
-  free(rev2);
+  delete[] rev1;
+  delete[] rev2;
 
-  if (ret > 0)
-    return true;
+  if (ret > 0) return true;
+
   return false;
 }
 
 bool memLt(const void* ptr1, const void* ptr2, size_t size) {
-  uint8_t* rev1 = (uint8_t*)malloc(size);
-  uint8_t* rev2 = (uint8_t*)malloc(size);
+  Byte* rev1 = new Byte[size];
+  Byte* rev2 = new Byte[size];
   memcpy(rev1, ptr1, size);
   memcpy(rev2, ptr2, size);
 
@@ -108,11 +108,11 @@ bool memLt(const void* ptr1, const void* ptr2, size_t size) {
 
   int ret = memcmp(rev1, rev2, size);
 
-  free(rev1);
-  free(rev2);
+  delete[] rev1;
+  delete[] rev2;
 
-  if (ret < 0)
-    return true;
+  if (ret < 0) return true;
+
   return false;
 }
 
@@ -157,7 +157,7 @@ bool memWithin(const void* src, const void* low, const void* up, size_t size) {
 }
 
 string memToString(Byte* memory, string scanType) {
-  char str[MAX_STRING_SIZE + 1];
+  char str[MAX_STRING_SIZE];
   switch (stringToScanType(scanType)) {
   case Int8:
     sprintf(str, "%" PRIu8, *(uint8_t*)memory);
