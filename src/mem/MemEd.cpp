@@ -52,6 +52,7 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType) {
   size_t size = std::get<1>(buffer);
 
   vector<MemPtr> mems = scanner->scan(std::get<0>(buffer), size, scanType, ScanParser::OpType::Eq);
+
   manager->setMems(mems);
 
   delete[] std::get<0>(buffer);

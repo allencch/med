@@ -55,12 +55,14 @@ vector<MemPtr> MemScanner::scan(Byte* value, int size, string scanType, ScanPars
   int memFd = getMem(pid);
   MemIO* memio = getMemIO();
 
+  auto& mutex = listMutex;
+
   // TODO: Scan for unknown value
 
   for (size_t i = 0; i < maps.starts.size(); i++) {
     TMTask* fn = new TMTask();
-    *fn = [memio, &list, &maps, i, memFd, value, size, scanType, op]() {
-      scanMap(memio, list, maps, i, memFd, value, size, scanType, op);
+    *fn = [memio, &mutex, &list, &maps, i, memFd, value, size, scanType, op]() {
+      scanMap(memio, mutex, list, maps, i, memFd, value, size, scanType, op);
     };
     threadManager->queueTask(fn);
   }
@@ -71,6 +73,7 @@ vector<MemPtr> MemScanner::scan(Byte* value, int size, string scanType, ScanPars
 }
 
 void MemScanner::scanMap(MemIO* memio,
+                         std::mutex& mutex,
                          vector<MemPtr>& list,
                          ProcMaps& maps,
                          int mapIndex,
@@ -89,13 +92,14 @@ void MemScanner::scanMap(MemIO* memio,
     if(read(fd, page, getpagesize()) == -1) {
       continue;
     }
-    scanPage(memio, list, page, j, value, size, scanType, op);
+    scanPage(memio, mutex, list, page, j, value, size, scanType, op);
 
     delete[] page;
   }
 }
 
 void MemScanner::scanPage(MemIO* memio,
+                          std::mutex& mutex,
                           vector<MemPtr>& list,
                           Byte* page,
                           Address start,
@@ -109,7 +113,10 @@ void MemScanner::scanPage(MemIO* memio,
         MemPtr mem = memio->read((Address)(start + k), size);
         PemPtr pem = static_pointer_cast<Pem>(mem);
         pem->setScanType(scanType);
+
+        mutex.lock();
         list.push_back(mem);
+        mutex.unlock();
       }
     } catch(MedException& ex) {
       cerr << ex.getMessage() << endl;
@@ -121,7 +128,7 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list, Byte* value, int s
   vector<MemPtr> newList;
   int memFd = getMem(pid);
 
-  auto& mutex = this->filterMutex;
+  auto& mutex = listMutex;
 
   for (size_t i = 0; i < list.size(); i += CHUNK_SIZE) {
     TMTask* fn = new TMTask();

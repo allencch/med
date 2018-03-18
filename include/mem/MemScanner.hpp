@@ -24,11 +24,12 @@ public:
   vector<MemPtr> scan(Byte* value, int size, string scanType, ScanParser::OpType op);
   vector<MemPtr> filter(const vector<MemPtr>& list, Byte* value, int size, string scanType, ScanParser::OpType op);
 
-  std::mutex filterMutex;
+  std::mutex listMutex;
 
 private:
   void initialize();
   static void scanMap(MemIO* memio,
+                      std::mutex& mutex,
                       vector<MemPtr>& list,
                       ProcMaps& maps,
                       int mapIndex,
@@ -38,6 +39,7 @@ private:
                       string scanType,
                       ScanParser::OpType op);
   static void scanPage(MemIO* memio,
+                       std::mutex& mutex,
                        vector<MemPtr>& list,
                        Byte* page,
                        Address start,
