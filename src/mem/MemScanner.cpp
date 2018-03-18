@@ -77,7 +77,7 @@ void MemScanner::scanMap(MemIO* memio,
                          int size,
                          string scanType,
                          ScanParser::OpType op) {
-  for (MemAddr j = maps.starts[mapIndex]; j < maps.ends[mapIndex]; j += getpagesize()) {
+  for (Address j = maps.starts[mapIndex]; j < maps.ends[mapIndex]; j += getpagesize()) {
       if(lseek(fd, j, SEEK_SET) == -1) {
       continue;
     }

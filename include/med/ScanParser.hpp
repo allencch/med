@@ -26,7 +26,6 @@ public:
     SnapshotSave
   };
   static string getOp(const string &v);
-  static string trim(const string &s);
   static OpType stringToOpType(const string &s);
   static OpType getOpType(const string &v);
   static string getValue(const string &v);
@@ -36,8 +35,6 @@ public:
 
   static bool isValid(const string &v);
   static bool isSnapshotOperator(const OpType& opType);
-
-  static vector<string> split(const string &s, char delim);
 
   static tuple<Byte*, size_t> valueToBytes(const string& v, const string& t);
 

@@ -6,13 +6,12 @@
 
 using namespace std;
 
-typedef unsigned long MemAddr;
 typedef uint8_t Byte;
 typedef unsigned long Address;
 
 struct ProcMaps {
-  vector<MemAddr> starts;
-  vector<MemAddr> ends;
+  vector<Address> starts;
+  vector<Address> ends;
 };
 
 enum ScanType {

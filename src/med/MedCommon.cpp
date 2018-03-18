@@ -143,7 +143,7 @@ ProcMaps getMaps(pid_t pid) {
   }
 
   char useless[64];
-  MemAddr start, end;
+  Address start, end;
   char rd, wr;
   unsigned int inode;
   char sp; //shared or private
@@ -220,8 +220,8 @@ pid_t pidDetach(pid_t pid){
  * Convert the size to padded word size.
  */
 int padWordSize(int x) {
-  if(x % sizeof(MemAddr))
-    return x + sizeof(MemAddr) - x % sizeof(MemAddr);
+  if(x % sizeof(Address))
+    return x + sizeof(Address) - x % sizeof(Address);
   return x;
 }
 

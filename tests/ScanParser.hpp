@@ -2,6 +2,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "med/ScanParser.hpp"
+#include "mem/StringUtil.hpp"
 
 using namespace std;
 
@@ -9,7 +10,7 @@ class TestScanParser : public CxxTest::TestSuite {
 public:
   void testTrim(void) {
     string s = " foo bar   ";
-    string res = ScanParser::trim(s);
+    string res = StringUtil::trim(s);
     TS_ASSERT_EQUALS(res, "foo bar");
     TS_ASSERT_DIFFERS(res, "foo bar ");
   }

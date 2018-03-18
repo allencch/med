@@ -7,21 +7,12 @@
 #include "med/ScanParser.hpp"
 #include "med/MedException.hpp"
 #include "med/MedCommon.hpp"
+#include "mem/StringUtil.hpp"
 
 using namespace std;
 
-// TODO: Replace by StringUtil
-string ScanParser::trim(const string &s) {
-  if (s.size() == 0) {
-    return s;
-  }
-  size_t first = s.find_first_not_of(' ');
-  size_t last = s.find_last_not_of(' ');
-  return s.substr(first, (last - first + 1));
-}
-
 string ScanParser::getOp(const string &v) {
-  string value = ScanParser::trim(v);
+  string value = StringUtil::trim(v);
   regex r(OP_REGEX);
   auto begin = sregex_iterator(value.begin(), value.end(), r);
   auto end = sregex_iterator();
@@ -55,14 +46,14 @@ ScanParser::OpType ScanParser::stringToOpType(const string &s) {
 }
 
 string ScanParser::getValue(const string &v) {
-  string value = ScanParser::trim(v);
+  string value = StringUtil::trim(v);
   regex r(OP_REGEX);
-  string result = ScanParser::trim(regex_replace(value, r, ""));
+  string result = StringUtil::trim(regex_replace(value, r, ""));
   return result;
 }
 
 bool ScanParser::isArray(const string &v) {
-  string value = ScanParser::trim(v);
+  string value = StringUtil::trim(v);
   if (value.find(",") != string::npos)
     return true;
   return false;
@@ -72,20 +63,9 @@ ScanParser::OpType ScanParser::getOpType(const string &v) {
   return stringToOpType(getOp(v));
 }
 
-// TODO: Replace by StringUtil
-vector<string> ScanParser::split(const string &s, char delim) {
-  stringstream ss(s);
-  string token;
-  vector<string> tokens;
-  while (getline(ss, token, delim)) {
-    tokens.push_back(ScanParser::trim(token));
-  }
-  return tokens;
-}
-
 vector<string> ScanParser::getValues(const string &v) {
   string value = ScanParser::getValue(v);
-  vector<string> values = ScanParser::split(value, ',');
+  vector<string> values = StringUtil::split(value, ',');
   return values;
 }
 

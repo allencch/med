@@ -60,8 +60,8 @@ public:
   }
 
   void testAddressRoundDown() {
-    MemAddr addr = 0x11112222;
-    MemAddr rounded = addressRoundDown(addr);
+    Address addr = 0x11112222;
+    Address rounded = addressRoundDown(addr);
     TS_ASSERT_EQUALS(rounded, 0x11112220);
 
     addr = 0xaaaabbb8;
