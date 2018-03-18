@@ -1,6 +1,5 @@
 #include <iostream>
 #include <unistd.h> //getpagesize()
-#include <mutex>
 
 #include "mem/MemScanner.hpp"
 #include "med/MemOperator.hpp"
@@ -12,7 +11,6 @@ using namespace std;
 
 const int STEP = 1;
 const int CHUNK_SIZE = 128;
-std::mutex filterMutex;
 
 MemScanner::MemScanner() {
   pid = 0;
@@ -123,10 +121,12 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list, Byte* value, int s
   vector<MemPtr> newList;
   int memFd = getMem(pid);
 
+  auto& mutex = this->filterMutex;
+
   for (size_t i = 0; i < list.size(); i += CHUNK_SIZE) {
     TMTask* fn = new TMTask();
-    *fn = [&list, &newList, i, memFd, value, size, scanType, op]() {
-      filterByChunk(list, newList, i, memFd, value, size, scanType, op);
+    *fn = [&mutex, &list, &newList, i, memFd, value, size, scanType, op]() {
+      filterByChunk(mutex, list, newList, i, memFd, value, size, scanType, op);
     };
     threadManager->queueTask(fn);
   }
@@ -136,7 +136,8 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list, Byte* value, int s
   return MemList::sortByAddress(newList);
 }
 
-void MemScanner::filterByChunk(const vector<MemPtr>& list,
+void MemScanner::filterByChunk(std::mutex& mutex,
+                               const vector<MemPtr>& list,
                                vector<MemPtr>& newList,
                                int listIndex,
                                int fd,
@@ -157,9 +158,9 @@ void MemScanner::filterByChunk(const vector<MemPtr>& list,
       PemPtr pem = static_pointer_cast<Pem>(list[i]);
       pem->setScanType(scanType);
 
-      filterMutex.lock();
+      mutex.lock();
       newList.push_back(pem);
-      filterMutex.unlock();
+      mutex.unlock();
     }
   }
   delete[] buf;

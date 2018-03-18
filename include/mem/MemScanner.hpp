@@ -4,6 +4,7 @@
 #include <mutex>
 #include <vector>
 #include <string>
+#include <mutex>
 #include "med/MedTypes.hpp"
 #include "med/ScanParser.hpp"
 #include "med/ThreadManager.hpp"
@@ -23,7 +24,7 @@ public:
   vector<MemPtr> scan(Byte* value, int size, string scanType, ScanParser::OpType op);
   vector<MemPtr> filter(const vector<MemPtr>& list, Byte* value, int size, string scanType, ScanParser::OpType op);
 
-
+  std::mutex filterMutex;
 
 private:
   void initialize();
@@ -44,7 +45,8 @@ private:
                        int size,
                        string scanType,
                        ScanParser::OpType op);
-  static void filterByChunk(const vector<MemPtr>& list,
+  static void filterByChunk(std::mutex& mutex,
+                            const vector<MemPtr>& list,
                             vector<MemPtr>& newList,
                             int listIndex,
                             int fd,
