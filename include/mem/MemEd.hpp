@@ -27,6 +27,8 @@ public:
   MemList* getStore();
   void addToStoreByIndex(int index);
   void addNewAddress();
+  MemPtr readMemory(Address addr, size_t size);
+  void setValueByAddress(Address addr, const string& value, const string& scanType);
 
   // Process
   vector<Process> listProcesses();

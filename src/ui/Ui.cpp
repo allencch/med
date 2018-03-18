@@ -13,6 +13,7 @@
 #include "ui/ComboBoxDelegate.hpp"
 #include "ui/CheckBoxDelegate.hpp"
 #include "ui/EncodingManager.hpp"
+#include "ui/MemEditor.hpp"
 
 using namespace std;
 
@@ -22,6 +23,7 @@ MedUi::MedUi(QApplication* app) {
 
   loadUiFiles();
   loadProcessUi();
+  loadMemEditor();
   setupStatusBar();
   setupScanTreeView();
   setupStoreTreeView();
@@ -84,6 +86,10 @@ void MedUi::loadProcessUi() {
   QObject::connect(processTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(onProcessItemDblClicked(QTreeWidgetItem*, int)));
 
   processTreeWidget->installEventFilter(new ProcessDialogEventListener(this));
+}
+
+void MedUi::loadMemEditor() {
+  memEditor = new MemEditor(this);
 }
 
 void MedUi::setupUi() {
@@ -673,6 +679,9 @@ void MedUi::onDeleteAddressTriggered() {
   storeUpdateMutex.unlock();
 }
 
+void MedUi::onMemEditorTriggered() {
+  memEditor->show();
+}
 
 void MedUi::updateNumberOfAddresses() {
   char message[128];

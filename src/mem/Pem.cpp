@@ -17,7 +17,7 @@ Pem::Pem(Address addr, size_t size, MemIO* memio) : Mem(size) {
 }
 
 string Pem::bytesToString(Byte* buf, const string& scanType) {
-  char str[MAX_STRING_SIZE + 1];
+  char str[MAX_STRING_SIZE];
   switch (stringToScanType(scanType)) {
   case Int8:
     sprintf(str, "%" PRIu8, *(uint8_t*)buf);

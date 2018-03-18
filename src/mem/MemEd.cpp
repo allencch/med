@@ -220,3 +220,15 @@ void MemEd::addNewAddress() {
   SemPtr sem = SemPtr(new Sem(scanTypeToSize(ScanType::Int16), memio));
   store->getList().push_back(sem);
 }
+
+MemPtr MemEd::readMemory(Address addr, size_t size) {
+  auto memio = scanner->getMemIO();
+  return memio->read(addr, size);
+}
+
+void MemEd::setValueByAddress(Address addr, const string& value, const string& scanType) {
+  auto memio = scanner->getMemIO();
+  size_t size = scanTypeToSize(scanType);
+  PemPtr pem = PemPtr(new Pem(addr, size, memio));
+  pem->setValue(value, scanType);
+}

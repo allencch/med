@@ -109,9 +109,12 @@ private slots:
   void onNewAddressTriggered();
   void onDeleteAddressTriggered();
 
+  void onMemEditorTriggered();
+
 private:
   void loadUiFiles();
   void loadProcessUi();
+  void loadMemEditor();
   void setupStatusBar();
   void setupScanTreeView();
   void setupStoreTreeView();
@@ -123,6 +126,7 @@ private:
   TreeModel* scanModel;
   UiState scanState;
   UiState storeState;
+  QWidget* memEditor;
 
   QString filename;
 };

@@ -16,10 +16,10 @@ public:
   void setScanType(const string& scanType);
 
   MemIO* getMemIO();
-
-private:
   static string bytesToString(Byte* value, const string& scanType);
   static tuple<Byte*, size_t> stringToBytes(const string& value, const string& scanType);
+
+private:
   ScanType scanType;
   MemIO* memio;
 };
