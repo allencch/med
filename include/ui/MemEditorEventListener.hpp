@@ -1,4 +1,4 @@
-#include "gui/MemEditor.hpp"
+#include "ui/MemEditor.hpp"
 
 class MemEditorEventListener : public QObject {
   Q_OBJECT

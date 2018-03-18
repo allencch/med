@@ -28,18 +28,9 @@ target_link_libraries(med ${JSONCPP_LIBRARIES} ${ICU_LIBRARIES} -lpthread)
 # Because the header files are located in different location,
 # and these header files use Q_OBJECT, so need to generate
 # moc. And create it as a static library.
-file(GLOB gui_HEADER "include/gui/*.hpp")
-qt5_wrap_cpp(moc_med-qt ${gui_HEADER})
-add_library(moc-med-qt ${moc_med-qt})
-qt5_use_modules(moc-med-qt Widgets)
-
-set_property(SOURCE ${gui_HEADER} PROPERTY SKIP_AUTOMOC ON)
-
-# qt5_generate_moc(src/gui/med-qt.cpp med-qt.moc) #Using automatic moc can solve the Q_OBJECT issue in other cpp files
-file(GLOB gui_SRC "src/gui/*.cpp")
-add_executable(med-qt ${gui_SRC})
-target_link_libraries(med-qt moc-med-qt med Qt5::UiTools)
-
+# To generate moc,
+# qt5_generate_moc(src/gui/med-qt.cpp med-qt.moc)
+# But using automatic moc can solve the Q_OBJECT issue in other cpp files
 
 # med-ui
 file(GLOB ui_HEADER "include/ui/*.hpp")
@@ -108,7 +99,7 @@ if(CXXTEST_FOUND)
   set_property(SOURCE ${gui_HEADER} PROPERTY SKIP_AUTOMOC ON)
 endif()
 
-install(TARGETS med med-qt
+install(TARGETS med med-ui
   RUNTIME DESTINATION /opt/med
   LIBRARY DESTINATION lib)
 install(FILES ui/main-qt.ui ui/process.ui ui/mem-editor.ui

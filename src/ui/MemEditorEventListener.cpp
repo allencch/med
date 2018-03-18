@@ -1,6 +1,7 @@
 #include <cctype>
 #include <iostream>
-#include "gui/MemEditorEventListener.hpp"
+#include "ui/MemEditorEventListener.hpp"
+#include "med/MedCommon.hpp"
 
 MemEditorEventListener::MemEditorEventListener(MemEditor* memEditor) {
   this->memEditor = memEditor;
@@ -110,7 +111,7 @@ void MemEditorEventListener::moveCursorUpward() {
     return;
   }
 
-  MemAddr base = hexToInt(memEditor->baseAddress->text().toStdString());
+  Address base = hexToInt(memEditor->baseAddress->text().toStdString());
   base -= 16;
   memEditor->baseAddress->setText(intToHex(base).c_str());
   memEditor->refresh();
@@ -126,7 +127,7 @@ void MemEditorEventListener::moveCursorDownward() {
     return;
   }
 
-  MemAddr base = hexToInt(memEditor->baseAddress->text().toStdString());
+  Address base = hexToInt(memEditor->baseAddress->text().toStdString());
   base += 16;
   memEditor->baseAddress->setText(intToHex(base).c_str());
   memEditor->refresh();
