@@ -1,5 +1,6 @@
 #include <iostream>
 #include <unistd.h> //getpagesize()
+#include <mutex>
 
 #include "mem/MemScanner.hpp"
 #include "med/MemOperator.hpp"
@@ -10,6 +11,8 @@
 using namespace std;
 
 const int STEP = 1;
+const int CHUNK_SIZE = 128;
+std::mutex filterMutex;
 
 MemScanner::MemScanner() {
   pid = 0;
@@ -100,7 +103,7 @@ void MemScanner::scanPage(MemIO* memio,
                           Address start,
                           Byte* value,
                           int size,
-                          string scanType, // not using it right now
+                          string scanType,
                           ScanParser::OpType op) {
   for(int k = 0; k <= getpagesize() - size; k += STEP) {
     try {
@@ -120,22 +123,44 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list, Byte* value, int s
   vector<MemPtr> newList;
   int memFd = getMem(pid);
 
+  for (size_t i = 0; i < list.size(); i += CHUNK_SIZE) {
+    TMTask* fn = new TMTask();
+    *fn = [&list, &newList, i, memFd, value, size, scanType, op]() {
+      filterByChunk(list, newList, i, memFd, value, size, scanType, op);
+    };
+    threadManager->queueTask(fn);
+  }
+  threadManager->start();
+  threadManager->clear();
+
+  return MemList::sortByAddress(newList);
+}
+
+void MemScanner::filterByChunk(const vector<MemPtr>& list,
+                               vector<MemPtr>& newList,
+                               int listIndex,
+                               int fd,
+                               Byte* value,
+                               int size,
+                               string scanType,
+                               ScanParser::OpType op) {
   Byte* buf = new Byte[size];
-  for (size_t i = 0; i < list.size(); i++) {
-    if (lseek(memFd, list[i]->getAddress(), SEEK_SET) == -1) {
+  for (int i = listIndex; i < listIndex + CHUNK_SIZE && i < (int)list.size(); i++) {
+    if (lseek(fd, list[i]->getAddress(), SEEK_SET) == -1) {
       continue;
     }
-    if (read(memFd, buf, size) == -1) {
+    if (read(fd, buf, size) == -1) {
       continue;
     }
 
     if (memCompare(buf, size, value, size, op)) {
       PemPtr pem = static_pointer_cast<Pem>(list[i]);
       pem->setScanType(scanType);
+
+      filterMutex.lock();
       newList.push_back(pem);
+      filterMutex.unlock();
     }
   }
-
   delete[] buf;
-  return newList;
 }

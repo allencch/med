@@ -23,6 +23,8 @@ public:
   vector<MemPtr> scan(Byte* value, int size, string scanType, ScanParser::OpType op);
   vector<MemPtr> filter(const vector<MemPtr>& list, Byte* value, int size, string scanType, ScanParser::OpType op);
 
+
+
 private:
   void initialize();
   static void scanMap(MemIO* memio,
@@ -42,6 +44,14 @@ private:
                        int size,
                        string scanType,
                        ScanParser::OpType op);
+  static void filterByChunk(const vector<MemPtr>& list,
+                            vector<MemPtr>& newList,
+                            int listIndex,
+                            int fd,
+                            Byte* value,
+                            int size,
+                            string scanType,
+                            ScanParser::OpType op);
   pid_t pid;
   ThreadManager* threadManager;
   MemIO* memio;
