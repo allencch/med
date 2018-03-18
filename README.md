@@ -9,7 +9,7 @@ Med is still in the development, it is not stable. Anyone can help to improve th
 
 ## Usage
 
-`med-qt` is a GUI memory editor. In order to use it, please use **sudo**.
+`med-ui` is a GUI memory editor. In order to use it, please use **sudo**.
 
 Before scanning or opening a JSON file, one must select a target process.
 
@@ -113,22 +113,6 @@ For example, if a game uses Big5 encoding, we can change the encoding to Big5 an
 Note: Qt5 application run as root doesn't support IME like Fcitx. Please use copy-paste instead.
 
 
-## Search for unknown value (experimental)
-
-If we are interested on a value of the game, but it is not a numerical value, such as a hero of the game is poisoned or normal. We can use unknown search.
-
-0. Suggest to choose the Scan type as "int8".
-1. Enter "?", and press "Scan" button. You should get the statusbar showing "Snapshot saved".
-2. Now make the changes of the status, like from poisoned to normal or vice versa.
-3. Enter "!" which indicates "changed", and press "Filter" button.
-4. The scanner will scan for the memory address with the value changed.
-5. Continue to filter until you get the potential memory address that handles the status.
-
-Other operators are ">" and "<".
-">" with "Filter" will scan for the value that is increased.
-"<" with "Filter" will scan for the value that is decreased.
-
-
 # Build Instruction
 
 This program requires **GCC** (C++ compiler), **Qt5**, and **JSONPP**.
@@ -143,7 +127,7 @@ make
 
 1. To run the GUI, make sure the `*.ui` files are together with the compiled binary files, and enter
 
-`sudo ./med-qt`
+`sudo ./med-ui`
 
 
 # TODO
@@ -154,7 +138,7 @@ make
 4. Arithmetic operation with prefix notation.
 5. Scan by struct, supports data type syntax
 6. ~~Scan by string.~~
-7. ~~Scan by changes.~~
+7. Scan by changes (scan unknown).
 8. Scan by pointer(?)
 
 # Developer notes

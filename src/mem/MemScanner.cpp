@@ -53,6 +53,8 @@ vector<MemPtr> MemScanner::scan(Byte* value, int size, string scanType, ScanPars
   int memFd = getMem(pid);
   MemIO* memio = getMemIO();
 
+  // TODO: Scan for unknown value
+
   for (size_t i = 0; i < maps.starts.size(); i++) {
     TMTask* fn = new TMTask();
     *fn = [memio, &list, &maps, i, memFd, value, size, scanType, op]() {
