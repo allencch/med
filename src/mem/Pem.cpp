@@ -70,8 +70,9 @@ tuple<Byte*, size_t> Pem::stringToBytes(const string& value, const string& scanT
     size = MAX_STRING_SIZE;
     buf = new Byte[size];
     sprintf((char*)buf, "%s", value.c_str());
+    int length = strlen((char*)buf);
 
-    return make_tuple(buf, size);
+    return make_tuple(buf, length);
   }
   else { // Allows parse comma
     size = scanTypeToSize(stringToScanType(scanType));
