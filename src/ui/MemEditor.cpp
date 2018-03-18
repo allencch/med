@@ -9,7 +9,7 @@
 #include "ui/MemEditor.hpp"
 #include "ui/MemEditorEventListener.hpp"
 #include "ui/EncodingManager.hpp"
-// #include "med/MemOperator.hpp"
+#include "med/MemOperator.hpp"
 #include "med/MedCommon.hpp"
 #include "med/MedException.hpp"
 #include "mem/Pem.hpp"
@@ -86,7 +86,7 @@ void MemEditor::onBaseAddressEdited() {
   }
 
   try {
-    Address roundedAddr = MemEditor::addressRoundDown(hexToInt(addr.toStdString()));
+    Address roundedAddr = addressRoundDown(hexToInt(addr.toStdString()));
     baseAddress->setText(intToHex(roundedAddr).c_str());
     loadMemory(roundedAddr);
     loadAddresses(roundedAddr);
@@ -227,8 +227,4 @@ string MemEditor::getHexString(int position) {
 
 void MemEditor::onRefreshButtonClicked() {
   refresh();
-}
-
-Address MemEditor::addressRoundDown(Address addr) {
-  return addr - (addr % 16);
 }

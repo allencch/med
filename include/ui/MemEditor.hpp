@@ -29,8 +29,6 @@ public:
   void refresh();
   void updateAddresses();
 
-  static Address addressRoundDown(Address addr);
-
 private slots:
   void onBaseAddressEdited();
   void onMemAreaCursorPositionChanged();

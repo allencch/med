@@ -7,7 +7,6 @@
 #include "med/ScanParser.hpp"
 #include "med/MedException.hpp"
 #include "med/MedCommon.hpp"
-#include "med/ByteManager.hpp"
 
 using namespace std;
 
@@ -102,16 +101,6 @@ bool ScanParser::isValid(const string &v) {
   return true;
 }
 
-// @deprecated
-Bytes ScanParser::getBytes(const string& v, const string& t) {
-  if (t == SCAN_TYPE_STRING) {
-    return ScanParser::getStringBytes(v);
-  }
-  else {
-    return ScanParser::getNumericBytes(v, t);
-  }
-}
-
 tuple<Byte*, size_t> ScanParser::valueToBytes(const string& v, const string& t) {
   if (t == SCAN_TYPE_STRING) {
     return ScanParser::stringToBytes(v);
@@ -119,27 +108,6 @@ tuple<Byte*, size_t> ScanParser::valueToBytes(const string& v, const string& t) 
   else {
     return ScanParser::numericToBytes(v, t);
   }
-}
-
-// @deprecated
-Bytes ScanParser::getNumericBytes(const string& v, const string& t) {
-  vector<string> values = getValues(v);
-  if (values.size() == 0) {
-    throw MedException("Scan empty string");
-  }
-
-  int valueLength = scanTypeToSize(t);
-
-  ByteManager& bm = ByteManager::getInstance();
-  Byte* data = bm.newByte(valueLength * values.size());
-
-  Byte* pointer = data;
-  for (int i = 0; i < (int)values.size(); i++) {
-    stringToMemory(values[i], t, pointer);
-    pointer += valueLength;
-  }
-  Bytes bytes(data, valueLength * values.size());
-  return bytes;
 }
 
 tuple<Byte*, size_t> ScanParser::numericToBytes(const string& v, const string& t) {
@@ -155,25 +123,6 @@ tuple<Byte*, size_t> ScanParser::numericToBytes(const string& v, const string& t
     pointer += valueLength;
   }
   return make_tuple(data, valueLength * values.size()); // delete
-}
-
-Bytes ScanParser::getStringBytes(const string& v) {
-  vector<string> values = getValues(v);
-  if (values.size() == 0) {
-    throw MedException("Scan empty string");
-  }
-  int valueLength = v.size();
-
-  ByteManager& bm = ByteManager::getInstance();
-  Byte* data = bm.newByte(valueLength + 1);
-
-  char* pointer = (char*)data;
-  for (int i = 0; i < (int)v.size(); i++, pointer++) {
-    sprintf(pointer, "%c", v[i]);
-  }
-
-  Bytes bytes(data, valueLength);
-  return bytes;
 }
 
 tuple<Byte*, size_t> ScanParser::stringToBytes(const string& v) {

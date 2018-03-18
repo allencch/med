@@ -1,8 +1,9 @@
 #include <string>
 #include <cxxtest/TestSuite.h>
 
-#include "med/med.hpp"
 #include "med/Coder.hpp"
+
+using namespace std;
 
 class TestCoder : public CxxTest::TestSuite {
 public:

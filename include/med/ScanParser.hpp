@@ -9,7 +9,6 @@
 #include <tuple>
 
 #include "med/MedTypes.hpp"
-#include "med/Bytes.hpp"
 
 using namespace std;
 
@@ -33,7 +32,6 @@ public:
   static string getValue(const string &v);
   static vector<string> getValues(const string &v);
   static bool hasValues(const string& v);
-  static Bytes getBytes(const string &v, const string& t); /**<< Remember to delete[] */
   static bool isArray(const string &v);
 
   static bool isValid(const string &v);
@@ -44,9 +42,6 @@ public:
   static tuple<Byte*, size_t> valueToBytes(const string& v, const string& t);
 
 private:
-  static Bytes getNumericBytes(const string& v, const string& t);
-  static Bytes getStringBytes(const string& v);
-
   static tuple<Byte*, size_t> numericToBytes(const string& v, const string& t);
   static tuple<Byte*, size_t> stringToBytes(const string& v);
 };

@@ -12,8 +12,6 @@
 #include "med/MedException.hpp"
 #include "med/ScanParser.hpp"
 #include "med/Process.hpp"
-#include "med/ByteManager.hpp"
-#include "med/med.hpp"
 
 using namespace std;
 
@@ -42,7 +40,7 @@ string intToHex(long hex) {
 }
 
 
-ScanType stringToScanType(string scanType) {
+ScanType stringToScanType(const string& scanType) {
   if (scanType == SCAN_TYPE_INT_8) {
     return Int8;
   }
@@ -64,7 +62,7 @@ ScanType stringToScanType(string scanType) {
   return Unknown;
 }
 
-string scanTypeToString(ScanType scanType) {
+string scanTypeToString(const ScanType& scanType) {
   string ret;
   switch (scanType) {
   case Int8:
@@ -91,7 +89,7 @@ string scanTypeToString(ScanType scanType) {
   return ret;
 }
 
-int scanTypeToSize(ScanType type) {
+int scanTypeToSize(const ScanType& type) {
   int ret = 0;
   switch (type) {
   case Int8:
@@ -118,98 +116,9 @@ int scanTypeToSize(ScanType type) {
   return ret;
 }
 
-int scanTypeToSize(string type) {
+int scanTypeToSize(const string& type) {
   return scanTypeToSize(stringToScanType(type));
 }
-
-int createBufferByScanType(ScanType type, void** buffer, int size) {
-  int retsize = scanTypeToSize(type) * size;
-  void* buf = NULL;
-  ByteManager& bm = ByteManager::getInstance();
-  switch (type) {
-  case Int8:
-    retsize = sizeof(uint8_t) * size;
-    buf = bm.newByte(sizeof(uint8_t) * size);
-    break;
-  case Int16:
-    retsize = sizeof(uint16_t) * size;
-    buf = bm.newByte(sizeof(uint16_t) * size);
-    break;
-  case Int32:
-    retsize = sizeof(uint32_t) * size;
-    buf = bm.newByte(sizeof(uint32_t) * size);
-    break;
-  case Float32:
-    retsize = sizeof(float) * size;
-    buf = bm.newByte(sizeof(float) * size);
-    break;
-  case Float64:
-    retsize = sizeof(double) * size;
-    buf = bm.newByte(sizeof(double) * size);
-    break;
-  case String:
-    retsize = 1;
-    break;
-  case Unknown:
-    retsize = 0;
-    break;
-  }
-  *buffer = buf;
-
-  return retsize;
-}
-
-// @deprecated
-int stringToRaw(string str, ScanType type, Byte** buffer) {
-  int retsize;
-  if (type == ScanType::String) {
-    retsize = stringToRawStringType(str, type, buffer);;
-  }
-  else {
-    retsize = stringToRawNumericType(str, type, buffer);
-  }
-
-  return retsize;
-}
-
-// @deprecated
-int stringToRawStringType(string str, ScanType type, Byte** buffer) {
-  Bytes bytes = ScanParser::getBytes(str, scanTypeToString(type));
-  int retsize = bytes.size;
-  Byte* buf = bytes.data;
-
-  char* pointer = (char*)buf;
-  for (int i = 0; i < (int)str.size(); i++, pointer++) {
-    sprintf(pointer, "%c", str[i]);
-  }
-  *buffer = buf;
-
-  return retsize;
-}
-
-// @deprecated
-int stringToRawNumericType(string str, ScanType type, Byte** buffer) {
-  vector<string> tokens = ScanParser::getValues(str);
-
-  int retsize;
-  Byte* buf;
-  int size = tokens.size();
-
-  retsize = createBufferByScanType(type, (void**)buffer, size);
-  buf = *buffer;
-  for (unsigned int i = 0; i < tokens.size(); i++) {
-    stringToMemory(tokens[i], type, buf);
-    buf += scanTypeToSize(type);
-  }
-  return retsize;
-}
-
-// @deprecated
-int stringToRaw(string str, string type, Byte** buffer) {
-  ScanType scantype = stringToScanType(type);
-  return stringToRaw(str, scantype, buffer);
-}
-
 
 /**
  * @brief Print the hexadecimal data
@@ -351,7 +260,7 @@ vector<Process> pidList() {
 /**
  * Get the cmdline from PID
  */
-string pidName(string pid) {
+string pidName(const string& pid) {
   string ret;
   ifstream ifile;
   ifile.open(string("/proc/") + pid + "/cmdline");
@@ -363,21 +272,6 @@ string pidName(string pid) {
 
   return ret;
 }
-
-void lockValue(string pid, MedAddress* address) {
-  while(1) {
-    if(!address->lock) {
-      return; //End
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(REFRESH_RATE));
-    try {
-      address->setValue(stol(pid), address->getLockedValue());
-    } catch(MedException& ex) {
-      cerr << "Lock value failed: " << ex.getMessage() << endl;
-    }
-  }
-}
-
 
 /**
  * This will just perform the unlock by force
@@ -420,27 +314,4 @@ void stringToMemory(const string& str, const ScanType& type, Byte* buffer) {
 void stringToMemory(const string& str, const string& type, Byte* buffer) {
   ScanType scanType = stringToScanType(type);
   stringToMemory(str, scanType, buffer);
-}
-
-
-Bytes stringToBytes(string str, string scanType) {
-  return stringToBytes(str, stringToScanType(scanType));
-}
-
-Bytes stringToBytes(string str, ScanType scanType) {
-  Byte* buffer;
-  int size = stringToRaw(str, scanType, &buffer);
-  Bytes bytes(buffer, size);
-  return bytes;
-}
-
-Bytes* stringToNewBytes(string str, string scanType) {
-  return stringToNewBytes(str, stringToScanType(scanType));
-}
-
-Bytes* stringToNewBytes(string str, ScanType scanType) {
-  Byte* buffer;
-  int size = stringToRaw(str, scanType, &buffer);
-  Bytes* b = new Bytes(buffer, size);
-  return b;
 }

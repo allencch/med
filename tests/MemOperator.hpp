@@ -1,7 +1,6 @@
 #include <string>
 #include <cxxtest/TestSuite.h>
 
-#include "med/med.hpp"
 #include "med/MemOperator.hpp"
 
 using namespace std;

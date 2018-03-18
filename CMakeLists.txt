@@ -53,12 +53,6 @@ target_link_libraries(med-cli med readline)
 add_executable(test_thread_manager src/med/ThreadManager.cpp src/test_thread_manager.cpp)
 target_link_libraries(test_thread_manager -lpthread)
 
-add_executable(test_snapshot src/test_snapshot.cpp)
-target_link_libraries(test_snapshot med)
-
-add_executable(test_byte_manager src/test_byte_manager.cpp)
-target_link_libraries(test_byte_manager med)
-
 add_executable(test_memio src/test_memio.cpp)
 target_link_libraries(test_memio med)
 
@@ -78,14 +72,6 @@ if(CXXTEST_FOUND)
   CXXTEST_ADD_TEST(testCoder testCoder.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/Coder.hpp)
   target_link_libraries(testCoder med)
-
-  CXXTEST_ADD_TEST(testSnapshot testSnapshot.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/Snapshot.hpp)
-  target_link_libraries(testSnapshot med)
-
-  CXXTEST_ADD_TEST(testSnapshotScan testSnapshotScan.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/SnapshotScan.hpp)
-  target_link_libraries(testSnapshotScan med)
 
   CXXTEST_ADD_TEST(testMemIO testMemIO.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/MemIO.hpp)

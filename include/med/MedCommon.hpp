@@ -5,24 +5,22 @@
 #include <mutex>
 
 #include "med/MedTypes.hpp"
-#include "med/MedAddress.hpp"
 #include "med/Process.hpp"
 
 using namespace std;
 
-
 /**
  * Convert string to ScanType, they are "int8", "int16", etc.
  */
-ScanType stringToScanType(string scanType);
+ScanType stringToScanType(const string& scanType);
 
 /**
  * Convert ScanType to sizeof
  */
-int scanTypeToSize(ScanType type);
-int scanTypeToSize(string type);
+int scanTypeToSize(const ScanType& type);
+int scanTypeToSize(const string& type);
 
-string scanTypeToString(ScanType scanType);
+string scanTypeToString(const ScanType& scanType);
 
 /**
  * @brief Convert hexadecimal string to integer value
@@ -44,30 +42,6 @@ void printHex(FILE* file, void* addr, int size);
  */
 ProcMaps getMaps(pid_t pid);
 
-// Create buffer by scan type. Remember to free()
-int createBufferByScanType(ScanType type, void** buffer, int size = 1);
-
-/**
- * Convert numerical string to raw data (hexadecimal).
- * @param s is a string which can separated by space
- * @param buffer is to store the output address, must be free() if not used.
- * @return number of values to be scanned
- */
-int stringToRaw(string str, ScanType type, Byte** buffer);
-
-/**
- * @param type is string in "int8", "int16", etc
- */
-int stringToRaw(string str, string type, Byte** buffer);
-
-int stringToRawNumericType(string str, ScanType type, Byte** buffer);
-int stringToRawStringType(string str, ScanType type, Byte** buffer);
-
-Bytes stringToBytes(string str, ScanType type);
-Bytes stringToBytes(string str, string type);
-Bytes* stringToNewBytes(string str, string type);
-Bytes* stringToNewBytes(string str, ScanType type);
-
 /**
  * Convert the size to padded word size.
  */
@@ -86,14 +60,9 @@ pid_t pidDetach(pid_t pid);
 /**
  * Get the cmdline from PID
  */
-string pidName(string pid);
+string pidName(const string& pid);
 
 vector<Process> pidList();
-
-/**
- * Lock value thread
- */
-void lockValue(string pid, MedAddress* address);
 
 /**
  * This will just perform the unlock by force

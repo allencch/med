@@ -6,6 +6,7 @@
 #include "mem/Pem.hpp"
 #include "med/MedCommon.hpp"
 #include "med/MedException.hpp"
+#include "med/ScanParser.hpp"
 
 Pem::Pem(size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
