@@ -60,7 +60,8 @@ vector<MemPtr> MemScanner::scanInner(Byte* value,
       MemPtr mem = memio->read(addr, size);
       PemPtr pem = Pem::convertToPemPtr(mem, memio);
       pem->setScanType(scanType);
-      list.push_back(mem);
+
+      list.push_back(pem);
     }
   }
   return list;
@@ -132,11 +133,12 @@ void MemScanner::scanPage(MemIO* memio,
     try {
       if (memCompare(page + k, size, value, size, op)) {
         MemPtr mem = memio->read((Address)(start + k), size);
-        PemPtr pem = static_pointer_cast<Pem>(mem);
+
+        PemPtr pem = Pem::convertToPemPtr(mem, memio);
         pem->setScanType(scanType);
 
         mutex.lock();
-        list.push_back(mem);
+        list.push_back(pem);
         mutex.unlock();
       }
     } catch(MedException& ex) {

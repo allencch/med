@@ -65,3 +65,7 @@ SemPtr Sem::clone(SemPtr semPtr) {
   // Simplify it as following line
   return SemPtr(new Sem(*semPtr.get()));
 }
+
+SemPtr Sem::convertToSemPtr(PemPtr pem) {
+  return SemPtr(new Sem(pem));
+}

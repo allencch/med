@@ -97,7 +97,7 @@ MemList* MemEd::getStore() {
 void MemEd::addToStoreByIndex(int index) {
   auto scans = getScans();
   PemPtr pem = static_pointer_cast<Pem>(scans.getMemPtr(index));
-  SemPtr sem = SemPtr(new Sem(pem));
+  SemPtr sem = Sem::convertToSemPtr(pem);
   getStore()->addMemPtr(sem);
 }
 

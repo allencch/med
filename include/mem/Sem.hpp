@@ -18,6 +18,7 @@ public:
   void lockValue();
 
   static std::shared_ptr<Sem> clone(shared_ptr<Sem> semPtr);
+  static std::shared_ptr<Sem> convertToSemPtr(PemPtr);
 
 private:
   bool locked;
