@@ -81,6 +81,7 @@ bool ScanParser::isValid(const string &v) {
   return true;
 }
 
+// TODO: Similar to Pem's method. Refactoring
 tuple<Byte*, size_t> ScanParser::valueToBytes(const string& v, const string& t) {
   if (t == SCAN_TYPE_STRING) {
     return ScanParser::stringToBytes(v);

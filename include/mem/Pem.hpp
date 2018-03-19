@@ -24,6 +24,8 @@ public:
   static string bytesToString(Byte* value, const string& scanType);
   static tuple<Byte*, size_t> stringToBytes(const string& value, const string& scanType);
 
+  static std::shared_ptr<Pem> convertToPemPtr(MemPtr mem, MemIO* memio);
+
 private:
   ScanType scanType;
   MemIO* memio;

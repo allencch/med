@@ -7,16 +7,19 @@
 #include "med/MedCommon.hpp"
 #include "med/MedException.hpp"
 #include "med/ScanParser.hpp"
+#include "med/MedTypes.hpp"
 
 Pem::Pem(size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
   rememberedValue = NULL;
+  scanType = ScanType::Unknown;
 }
 
 Pem::Pem(Address addr, size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
   rememberedValue = NULL;
   setAddress(addr);
+  scanType = ScanType::Unknown;
 }
 
 Pem::~Pem() {
@@ -148,4 +151,8 @@ string Pem::recallValue(const string& scanType) {
     return "";
   }
   return Pem::bytesToString(rememberedValue, scanType);
+}
+
+PemPtr Pem::convertToPemPtr(MemPtr mem, MemIO* memio) {
+  return PemPtr(new Pem(mem->getAddress(), mem->getSize(), memio));
 }

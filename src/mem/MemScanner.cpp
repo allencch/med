@@ -48,7 +48,28 @@ MemIO* MemScanner::getMemIO() {
   return memio;
 }
 
-vector<MemPtr> MemScanner::scan(Byte* value, int size, string scanType, ScanParser::OpType op) {
+vector<MemPtr> MemScanner::scanInner(Byte* value,
+                                     int size,
+                                     Address base,
+                                     int blockSize,
+                                     const string& scanType,
+                                     const ScanParser::OpType& op) {
+  vector<MemPtr> list;
+  for (Address addr = base; addr + size <= base + blockSize; addr += STEP) {
+    if (memCompare((void*)addr, size, value, size, op)) {
+      MemPtr mem = memio->read(addr, size);
+      PemPtr pem = Pem::convertToPemPtr(mem, memio);
+      pem->setScanType(scanType);
+      list.push_back(mem);
+    }
+  }
+  return list;
+}
+
+vector<MemPtr> MemScanner::scan(Byte* value,
+                                int size,
+                                const string& scanType,
+                                const ScanParser::OpType& op) {
   vector<MemPtr> list;
 
   ProcMaps maps = getMaps(pid);
@@ -80,8 +101,8 @@ void MemScanner::scanMap(MemIO* memio,
                          int fd,
                          Byte* value,
                          int size,
-                         string scanType,
-                         ScanParser::OpType op) {
+                         const string& scanType,
+                         const ScanParser::OpType& op) {
   for (Address j = maps.starts[mapIndex]; j < maps.ends[mapIndex]; j += getpagesize()) {
       if(lseek(fd, j, SEEK_SET) == -1) {
       continue;
@@ -89,7 +110,7 @@ void MemScanner::scanMap(MemIO* memio,
 
     Byte* page = new Byte[getpagesize()]; //For block of memory
 
-    if(read(fd, page, getpagesize()) == -1) {
+    if (read(fd, page, getpagesize()) == -1) {
       continue;
     }
     scanPage(memio, mutex, list, page, j, value, size, scanType, op);
@@ -105,11 +126,11 @@ void MemScanner::scanPage(MemIO* memio,
                           Address start,
                           Byte* value,
                           int size,
-                          string scanType,
-                          ScanParser::OpType op) {
-  for(int k = 0; k <= getpagesize() - size; k += STEP) {
+                          const string& scanType,
+                          const ScanParser::OpType& op) {
+  for (int k = 0; k <= getpagesize() - size; k += STEP) {
     try {
-      if(memCompare(page + k, size, value, size, op)) {
+      if (memCompare(page + k, size, value, size, op)) {
         MemPtr mem = memio->read((Address)(start + k), size);
         PemPtr pem = static_pointer_cast<Pem>(mem);
         pem->setScanType(scanType);
@@ -124,7 +145,11 @@ void MemScanner::scanPage(MemIO* memio,
   }
 }
 
-vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list, Byte* value, int size, string scanType, ScanParser::OpType op) {
+vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
+                                  Byte* value,
+                                  int size,
+                                  const string& scanType,
+                                  const ScanParser::OpType& op) {
   vector<MemPtr> newList;
   int memFd = getMem(pid);
 
@@ -150,8 +175,8 @@ void MemScanner::filterByChunk(std::mutex& mutex,
                                int fd,
                                Byte* value,
                                int size,
-                               string scanType,
-                               ScanParser::OpType op) {
+                               const string& scanType,
+                               const ScanParser::OpType& op) {
   Byte* buf = new Byte[size];
   for (int i = listIndex; i < listIndex + CHUNK_SIZE && i < (int)list.size(); i++) {
     if (lseek(fd, list[i]->getAddress(), SEEK_SET) == -1) {

@@ -21,8 +21,21 @@ public:
   void setPid(pid_t pid);
   pid_t getPid();
   MemIO* getMemIO();
-  vector<MemPtr> scan(Byte* value, int size, string scanType, ScanParser::OpType op);
-  vector<MemPtr> filter(const vector<MemPtr>& list, Byte* value, int size, string scanType, ScanParser::OpType op);
+  vector<MemPtr> scan(Byte* value,
+                      int size,
+                      const string& scanType,
+                      const ScanParser::OpType& op);
+  vector<MemPtr> filter(const vector<MemPtr>& list,
+                        Byte* value, int size,
+                        const string& scanType,
+                        const ScanParser::OpType& op);
+
+  vector<MemPtr> scanInner(Byte* value,
+                           int size,
+                           Address base,
+                           int blockSize,
+                           const string& scanType,
+                           const ScanParser::OpType& op);
 
   std::mutex listMutex;
 
@@ -36,8 +49,8 @@ private:
                       int fd,
                       Byte* data,
                       int size,
-                      string scanType,
-                      ScanParser::OpType op);
+                      const string& scanType,
+                      const ScanParser::OpType& op);
   static void scanPage(MemIO* memio,
                        std::mutex& mutex,
                        vector<MemPtr>& list,
@@ -45,8 +58,8 @@ private:
                        Address start,
                        Byte* value,
                        int size,
-                       string scanType,
-                       ScanParser::OpType op);
+                       const string& scanType,
+                       const ScanParser::OpType& op);
   static void filterByChunk(std::mutex& mutex,
                             const vector<MemPtr>& list,
                             vector<MemPtr>& newList,
@@ -54,8 +67,8 @@ private:
                             int fd,
                             Byte* value,
                             int size,
-                            string scanType,
-                            ScanParser::OpType op);
+                            const string& scanType,
+                            const ScanParser::OpType& op);
   pid_t pid;
   ThreadManager* threadManager;
   MemIO* memio;

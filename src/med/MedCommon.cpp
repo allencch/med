@@ -303,6 +303,8 @@ void stringToMemory(const string& str, const ScanType& type, Byte* buffer) {
     ss >> dec >> *(double*)buffer;
     break;
   case String:
+    printf("Warning: stringToMemory with String type\n");
+    break;
   case Unknown:
     break;
   }
