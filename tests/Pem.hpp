@@ -20,4 +20,16 @@ public:
 
     delete memio;
   }
+
+  void testSetValue() {
+    MemIO* memio = new MemIO();
+
+    int memory = 100;
+    PemPtr pem = PemPtr(new Pem((Address)&memory, 4, memio));
+    pem->setValue("30", "int32");
+    string value = pem->getValue("int32");
+    TS_ASSERT_EQUALS(value, "30");
+
+    delete memio;
+  }
 };
