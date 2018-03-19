@@ -81,6 +81,10 @@ if(CXXTEST_FOUND)
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/Mem.hpp)
   target_link_libraries(testMem med)
 
+  CXXTEST_ADD_TEST(testPem testPem.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/Pem.hpp)
+  target_link_libraries(testPem med)
+
   file(GLOB test_HEADER "tests/*.hpp")
   set_property(SOURCE ${gui_HEADER} PROPERTY SKIP_AUTOMOC ON)
 endif()

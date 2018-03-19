@@ -3,11 +3,14 @@
 #include <sys/ptrace.h> //ptrace()
 #include <sys/prctl.h> //prctl()
 #include <unistd.h> //open, read, lseek
+#include <iostream>
 
 #include "med/MedException.hpp"
 #include "med/MedCommon.hpp"
 #include "mem/MemIO.hpp"
 #include "mem/Pem.hpp"
+
+using namespace std;
 
 MemIO::MemIO() {
   pid = 0;
