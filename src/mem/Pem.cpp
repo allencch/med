@@ -10,11 +10,19 @@
 
 Pem::Pem(size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
+  rememberedValue = NULL;
 }
 
 Pem::Pem(Address addr, size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
+  rememberedValue = NULL;
   setAddress(addr);
+}
+
+Pem::~Pem() {
+  if (rememberedValue) {
+    delete[] rememberedValue;
+  }
 }
 
 string Pem::bytesToString(Byte* buf, const string& scanType) {
@@ -125,4 +133,19 @@ void Pem::setScanType(const string& scanType) {
 
 MemIO* Pem::getMemIO() {
   return memio;
+}
+
+void Pem::rememberValue(const string& value, const string& scanType) {
+  auto bytes = Pem::stringToBytes(value, scanType);
+  if (rememberedValue) {
+    delete[] rememberedValue;
+  }
+  rememberedValue = std::get<0>(bytes);
+}
+
+string Pem::recallValue(const string& scanType) {
+  if (rememberedValue == NULL) {
+    return "";
+  }
+  return Pem::bytesToString(rememberedValue, scanType);
 }
