@@ -26,7 +26,8 @@ public:
                       const string& scanType,
                       const ScanParser::OpType& op);
   vector<MemPtr> filter(const vector<MemPtr>& list,
-                        Byte* value, int size,
+                        Byte* value,
+                        int size,
                         const string& scanType,
                         const ScanParser::OpType& op);
 
@@ -36,6 +37,11 @@ public:
                            int blockSize,
                            const string& scanType,
                            const ScanParser::OpType& op);
+  vector<MemPtr> filterInner(const vector<MemPtr>& list,
+                             Byte* value,
+                             int size,
+                             const string& scanType,
+                             const ScanParser::OpType& op);
 
   std::mutex listMutex;
 

@@ -67,6 +67,24 @@ vector<MemPtr> MemScanner::scanInner(Byte* value,
   return list;
 }
 
+vector<MemPtr> MemScanner::filterInner(const vector<MemPtr>& list,
+                                       Byte* value,
+                                       int size,
+                                       const string& scanType,
+                                       const ScanParser::OpType& op) {
+  vector<MemPtr> newList;
+  for (size_t i = 0; i < list.size(); i++) {
+    MemPtr mem = memio->read(list[i]->getAddress(), list[i]->getSize());
+
+    if (memCompare(mem->getData(), size, value, size, op)) {
+      PemPtr pem = Pem::convertToPemPtr(mem, memio);
+      pem->setScanType(scanType);
+      newList.push_back(pem);
+    }
+  }
+  return newList;
+}
+
 vector<MemPtr> MemScanner::scan(Byte* value,
                                 int size,
                                 const string& scanType,
