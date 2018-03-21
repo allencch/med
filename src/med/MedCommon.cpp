@@ -179,10 +179,9 @@ ProcMaps getMaps(pid_t pid) {
  */
 int getMem(pid_t pid) {
   char filename[32];
-  sprintf(filename,"/proc/%d/mem",pid);
-  //printf("filename: %s\n",filename);
-  int ret = open(filename,O_RDONLY);
-  if(ret == -1) {
+  sprintf(filename, "/proc/%d/mem", pid);
+  int ret = open(filename, O_RDONLY);
+  if (ret == -1) {
     printf("Open failed: %s\n", strerror(errno));
   }
   return ret;

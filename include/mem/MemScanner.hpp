@@ -70,7 +70,6 @@ private:
                             const vector<MemPtr>& list,
                             vector<MemPtr>& newList,
                             int listIndex,
-                            int fd,
                             Byte* value,
                             int size,
                             const string& scanType,

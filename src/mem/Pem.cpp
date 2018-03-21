@@ -68,6 +68,13 @@ string Pem::getValue() {
   return Pem::bytesToString(buf, scanType);
 }
 
+Byte* Pem::getValuePtr() {
+  Byte* buf = new Byte[size];
+  MemPtr pem = memio->read(address, size);
+  memcpy(buf, pem->getData(), size);
+  return buf;
+}
+
 string Pem::getScanType() {
   return scanTypeToString(scanType);
 }

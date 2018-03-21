@@ -13,6 +13,7 @@ public:
 
   string getValue(const string& scanType);
   string getValue();
+  Byte* getValuePtr(); // delete[]
   string getScanType();
   void setValue(const string& value, const string& scanType);
   void setScanType(const string& scanType);
