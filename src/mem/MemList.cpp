@@ -113,6 +113,7 @@ void MemList::addNextAddress(int index) {
   int step = scanTypeToSize(semPtr->getScanType());
   Address addr = semPtr->getAddress();
   newSem->setAddress(addr + step);
+  newSem->setDescription("No description");
 
   list.push_back(newSem);
 }
@@ -125,6 +126,7 @@ void MemList::addPrevAddress(int index) {
   int step = scanTypeToSize(semPtr->getScanType());
   Address addr = semPtr->getAddress();
   newSem->setAddress(addr - step);
+  newSem->setDescription("No description");
 
   list.push_back(newSem);
 }

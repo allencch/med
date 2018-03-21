@@ -11,6 +11,7 @@ using namespace std;
 
 const int STEP = 1;
 const int CHUNK_SIZE = 128;
+const int ADDRESS_SORTABLE_SIZE = 400;
 
 MemScanner::MemScanner() {
   pid = 0;
@@ -109,7 +110,10 @@ vector<MemPtr> MemScanner::scan(Byte* value,
   threadManager->start();
   threadManager->clear();
 
-  return MemList::sortByAddress(list);
+  if (list.size() <= ADDRESS_SORTABLE_SIZE) {
+    return MemList::sortByAddress(list);
+  }
+  return list;
 }
 
 void MemScanner::scanMap(MemIO* memio,
@@ -185,7 +189,10 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
   threadManager->start();
   threadManager->clear();
 
-  return MemList::sortByAddress(newList);
+  if (newList.size() <= ADDRESS_SORTABLE_SIZE) {
+    return MemList::sortByAddress(newList);
+  }
+  return newList;
 }
 
 void MemScanner::filterByChunk(std::mutex& mutex,
