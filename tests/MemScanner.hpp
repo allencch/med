@@ -96,4 +96,29 @@ public:
     TS_ASSERT_EQUALS(list.size(), 1);
     TS_ASSERT_EQUALS(list[0]->getAddress(), (Address)(&memory[2]));
   }
+
+  void testScanUnknown() {
+    MemScanner scanner;
+    int memory[] = {100, 200, 100};
+
+    auto list = scanner.scanUnknownInner((Address)memory, 4 * 3, "int32");
+
+    TS_ASSERT_EQUALS(list.size(), 9);
+  }
+
+  void testFilterUnknown() {
+    MemScanner scanner;
+    int memory[] = {100, 200, 100};
+
+    auto list = scanner.scanUnknownInner((Address)memory, 4 * 3, "int32");
+
+    memory[1] = 201;
+    list = scanner.filterUnknownInner(list,
+                                      "int32",
+                                      ScanParser::OpType::Gt);
+
+    TS_ASSERT_EQUALS(list.size(), 4);
+    TS_ASSERT_EQUALS(list[0]->getAddress(), (Address)memory + 1);
+    TS_ASSERT_EQUALS(list[3]->getAddress(), (Address)memory + 4);
+  }
 };

@@ -40,6 +40,9 @@ public:
                            int blockSize,
                            const string& scanType,
                            const ScanParser::OpType& op);
+  vector<MemPtr> scanUnknownInner(Address base,
+                                  int blockSize,
+                                  const string& scanType);
   vector<MemPtr> filterInner(const vector<MemPtr>& list,
                              Byte* value,
                              int size,

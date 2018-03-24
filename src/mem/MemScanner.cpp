@@ -69,6 +69,22 @@ vector<MemPtr> MemScanner::scanInner(Byte* value,
   return list;
 }
 
+vector<MemPtr> MemScanner::scanUnknownInner(Address base,
+                                            int blockSize,
+                                            const string& scanType) {
+  int size = scanTypeToSize(scanType);
+  vector<MemPtr> list;
+  for (Address addr = base; addr + size <= base + blockSize; addr += STEP) {
+    MemPtr mem = memio->read(addr, size);
+    PemPtr pem = Pem::convertToPemPtr(mem, memio);
+    pem->setScanType(scanType);
+    pem->rememberValue((Byte*)addr, size);
+
+    list.push_back(pem);
+  }
+  return list;
+}
+
 vector<MemPtr> MemScanner::filterInner(const vector<MemPtr>& list,
                                        Byte* value,
                                        int size,
