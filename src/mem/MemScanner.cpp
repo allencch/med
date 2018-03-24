@@ -181,6 +181,7 @@ void MemScanner::scanPage(MemIO* memio,
 
         PemPtr pem = Pem::convertToPemPtr(mem, memio);
         pem->setScanType(scanType);
+        pem->rememberValue(page + k, size);
 
         mutex.lock();
         list.push_back(pem);
@@ -217,6 +218,30 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
   return newList;
 }
 
+
+vector<MemPtr> MemScanner::filterUnknown(const vector<MemPtr>& list,
+                                         const string& scanType,
+                                         const ScanParser::OpType& op) {
+  vector<MemPtr> newList;
+
+  auto& mutex = listMutex;
+
+  for (size_t i = 0; i < list.size(); i += CHUNK_SIZE) {
+    TMTask* fn = new TMTask();
+    *fn = [&mutex, &list, &newList, i, scanType, op]() {
+      filterUnknownByChunk(mutex, list, newList, i, scanType, op);
+    };
+    threadManager->queueTask(fn);
+  }
+  threadManager->start();
+  threadManager->clear();
+
+  if (newList.size() <= ADDRESS_SORTABLE_SIZE) {
+    return MemList::sortByAddress(newList);
+  }
+  return newList;
+}
+
 void MemScanner::filterByChunk(std::mutex& mutex,
                                const vector<MemPtr>& list,
                                vector<MemPtr>& newList,
@@ -231,6 +256,33 @@ void MemScanner::filterByChunk(std::mutex& mutex,
 
     if (memCompare(data, size, value, size, op)) {
       pem->setScanType(scanType);
+      pem->rememberValue(data, size);
+
+      mutex.lock();
+      newList.push_back(pem);
+      mutex.unlock();
+    }
+    delete[] data;
+  }
+}
+
+
+
+void MemScanner::filterUnknownByChunk(std::mutex& mutex,
+                                      const vector<MemPtr>& list,
+                                      vector<MemPtr>& newList,
+                                      int listIndex,
+                                      const string& scanType,
+                                      const ScanParser::OpType& op) {
+  for (int i = listIndex; i < listIndex + CHUNK_SIZE && i < (int)list.size(); i++) {
+    int size = scanTypeToSize(scanType);
+    PemPtr pem = static_pointer_cast<Pem>(list[i]);
+    Byte* data = pem->getValuePtr();
+    Byte* oldValue = pem->recallValuePtr();
+
+    if (memCompare(data, size, oldValue, size, op)) {
+      pem->setScanType(scanType);
+      pem->rememberValue(data, size);
 
       mutex.lock();
       newList.push_back(pem);

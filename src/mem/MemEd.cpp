@@ -60,13 +60,26 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType) {
 }
 
 vector<MemPtr> MemEd::filter(const string& value, const string& scanType) {
-  auto buffer = ScanParser::valueToBytes(value, scanType);
-  size_t size = std::get<1>(buffer);
+  if (!ScanParser::isValid(value)) {
+    throw MedException("Invalid scan string");
+  }
 
-  vector<MemPtr> mems = scanner->filter(manager->getMems(), std::get<0>(buffer), size, scanType, ScanParser::OpType::Eq);
+  vector<MemPtr> mems;
+  ScanParser::OpType op = ScanParser::getOpType(value);
+  if (ScanParser::isUnknownOperator(op) && !ScanParser::hasValues(value)) {
+    mems = scanner->filterUnknown(manager->getMems(), scanType, op);
+
+  }
+  else {
+    auto buffer = ScanParser::valueToBytes(value, scanType);
+    size_t size = std::get<1>(buffer);
+
+    mems = scanner->filter(manager->getMems(), std::get<0>(buffer), size, scanType, ScanParser::OpType::Eq);
+
+    delete[] std::get<0>(buffer);
+  }
+
   manager->setMems(mems);
-
-  delete[] std::get<0>(buffer);
   return mems;
 }
 

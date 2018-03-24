@@ -30,6 +30,9 @@ public:
                         int size,
                         const string& scanType,
                         const ScanParser::OpType& op);
+  vector<MemPtr> filterUnknown(const vector<MemPtr>& list,
+                               const string& scanType,
+                               const ScanParser::OpType& op);
 
   vector<MemPtr> scanInner(Byte* value,
                            int size,
@@ -76,6 +79,12 @@ private:
                             int size,
                             const string& scanType,
                             const ScanParser::OpType& op);
+  static void filterUnknownByChunk(std::mutex& mutex,
+                                   const vector<MemPtr>& list,
+                                   vector<MemPtr>& newList,
+                                   int listIndex,
+                                   const string& scanType,
+                                   const ScanParser::OpType& op);
   pid_t pid;
   ThreadManager* threadManager;
   MemIO* memio;
