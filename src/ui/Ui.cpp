@@ -315,9 +315,7 @@ void MedUi::onScanClicked() {
   if (QString(scanValue.c_str()).trimmed() == "?") {
     statusBar->showMessage("Snapshot saved");
   }
-  else {
-    updateNumberOfAddresses();
-  }
+  updateNumberOfAddresses();
 }
 
 

@@ -1,11 +1,13 @@
 #include <iostream>
 #include <unistd.h> //getpagesize()
+#include <utility>
 
 #include "mem/MemScanner.hpp"
 #include "med/MemOperator.hpp"
 #include "med/MedCommon.hpp"
 #include "mem/Pem.hpp"
 #include "mem/MemList.hpp"
+#include "mem/Maps.hpp"
 
 using namespace std;
 
@@ -130,17 +132,49 @@ vector<MemPtr> MemScanner::scan(Byte* value,
   vector<MemPtr> list;
 
   ProcMaps maps = getMaps(pid);
+  cout << "scan: " << maps.starts.size() <<endl;
+
   int memFd = getMem(pid);
   MemIO* memio = getMemIO();
 
   auto& mutex = listMutex;
 
-  // TODO: Scan for unknown value
-
   for (size_t i = 0; i < maps.starts.size(); i++) {
     TMTask* fn = new TMTask();
     *fn = [memio, &mutex, &list, &maps, i, memFd, value, size, scanType, op]() {
       scanMap(memio, mutex, list, maps, i, memFd, value, size, scanType, op);
+    };
+    threadManager->queueTask(fn);
+  }
+  threadManager->start();
+  threadManager->clear();
+
+  close(memFd);
+
+  if (list.size() <= ADDRESS_SORTABLE_SIZE) {
+    return MemList::sortByAddress(list);
+  }
+  return list;
+}
+
+vector<MemPtr> MemScanner::scanUnknown(const vector<MemPtr>& baseList,
+                                       const string& scanType) {
+  if (!baseList.size()) {
+    throw MedException("Should not scan unknown with empty list");
+  }
+  vector<MemPtr> list;
+  ProcMaps allMaps = getMaps(pid);
+  ProcMaps maps = getInterestedMaps(allMaps, baseList);
+
+  int memFd = getMem(pid);
+  MemIO* memio = getMemIO();
+
+  auto& mutex = listMutex;
+
+  for (size_t i = 0; i < maps.starts.size(); i++) {
+    TMTask* fn = new TMTask();
+    *fn = [memio, &mutex, &list, &maps, i, memFd, scanType]() {
+      scanMapUnknown(memio, mutex, list, maps, i, memFd, scanType);
     };
     threadManager->queueTask(fn);
   }
@@ -166,7 +200,7 @@ void MemScanner::scanMap(MemIO* memio,
                          const string& scanType,
                          const ScanParser::OpType& op) {
   for (Address j = maps.starts[mapIndex]; j < maps.ends[mapIndex]; j += getpagesize()) {
-    if(lseek(fd, j, SEEK_SET) == -1) {
+    if (lseek(fd, j, SEEK_SET) == -1) {
       continue;
     }
 
@@ -176,6 +210,29 @@ void MemScanner::scanMap(MemIO* memio,
       continue;
     }
     scanPage(memio, mutex, list, page, j, value, size, scanType, op);
+
+    delete[] page;
+  }
+}
+
+void MemScanner::scanMapUnknown(MemIO* memio,
+                                std::mutex& mutex,
+                                vector<MemPtr>& list,
+                                ProcMaps& maps,
+                                int mapIndex,
+                                int fd,
+                                const string& scanType) {
+  for (Address j = maps.starts[mapIndex]; j < maps.ends[mapIndex]; j += getpagesize()) {
+    if (lseek(fd, j, SEEK_SET) == -1) {
+      continue;
+    }
+
+    Byte* page = new Byte[getpagesize()]; //For block of memory
+
+    if (read(fd, page, getpagesize()) == -1) {
+      continue;
+    }
+    scanPageUnknown(memio, mutex, list, page, j, scanType);
 
     delete[] page;
   }
@@ -203,6 +260,30 @@ void MemScanner::scanPage(MemIO* memio,
         list.push_back(pem);
         mutex.unlock();
       }
+    } catch(MedException& ex) {
+      cerr << ex.getMessage() << endl;
+    }
+  }
+}
+
+void MemScanner::scanPageUnknown(MemIO* memio,
+                                 std::mutex& mutex,
+                                 vector<MemPtr>& list,
+                                 Byte* page,
+                                 Address start,
+                                 const string& scanType) {
+  int size = scanTypeToSize(scanType);
+  for (int k = 0; k <= getpagesize() - size; k += STEP) {
+    try {
+      MemPtr mem = memio->read((Address)(start + k), size);
+
+      PemPtr pem = Pem::convertToPemPtr(mem, memio);
+      pem->setScanType(scanType);
+      pem->rememberValue(page + k, size);
+
+      mutex.lock();
+      list.push_back(pem);
+      mutex.unlock();
     } catch(MedException& ex) {
       cerr << ex.getMessage() << endl;
     }
@@ -306,4 +387,25 @@ void MemScanner::filterUnknownByChunk(std::mutex& mutex,
     }
     delete[] data;
   }
+}
+
+ProcMaps MemScanner::getInterestedMaps(const ProcMaps& maps, const vector<MemPtr>& list) {
+  Maps interested;
+  for (size_t i = 0; i < list.size(); i++) {
+    const auto& mapStarts = maps.starts;
+    const auto& mapEnds = maps.ends;
+
+    for (size_t j = 0; j < mapStarts.size(); j++) {
+      bool inRegion = list[i]->getAddress() >=  mapStarts[j] && list[i]->getAddress() <= mapEnds[j];
+
+      if (inRegion) {
+        AddressPair pair(mapStarts[j], mapEnds[j]);
+        if (!interested.hasPair(pair)) {
+          interested.push(pair);
+        }
+        break;
+      }
+    }
+  }
+  return interested.toProcMaps();
 }

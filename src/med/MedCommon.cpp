@@ -152,7 +152,7 @@ ProcMaps getMaps(pid_t pid) {
   //Get line
   char line[256];
 
-  while(fgets(line,255,file)) {
+  while (fgets(line, 255, file)) {
     //parse line
     //the empty pathname has to be scan also
     if (sscanf(line, "%lx-%lx %c%c%c%c %8s %5s %u %127s",
