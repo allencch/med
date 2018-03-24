@@ -19,7 +19,9 @@ public:
   void setScanType(const string& scanType);
 
   void rememberValue(const string& value, const string& scanType);
+  void rememberValue(Byte* value, size_t size);
   string recallValue(const string& scanType);
+  Byte* recallValuePtr();
 
   MemIO* getMemIO();
   static string bytesToString(Byte* value, const string& scanType);
@@ -31,6 +33,7 @@ private:
   ScanType scanType;
   MemIO* memio;
   Byte* rememberedValue;
+  size_t rememberedSize;
 };
 
 typedef std::shared_ptr<Pem> PemPtr;

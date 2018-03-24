@@ -123,7 +123,7 @@ tuple<Byte*, size_t> ScanParser::stringToBytes(const string& v) {
   return make_tuple(data, valueLength);
 }
 
-bool ScanParser::isSnapshotOperator(const OpType& opType) {
+bool ScanParser::isUnknownOperator(const OpType& opType) {
   if (opType == SnapshotSave ||
       opType == Gt ||
       opType == Lt ||
@@ -132,4 +132,8 @@ bool ScanParser::isSnapshotOperator(const OpType& opType) {
     return true;
   }
   return false;
+}
+
+bool ScanParser::isSnapshotOperator(const OpType& opType) {
+  return ScanParser::isUnknownOperator(opType);
 }

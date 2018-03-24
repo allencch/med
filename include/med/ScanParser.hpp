@@ -33,7 +33,8 @@ namespace ScanParser {
   bool isArray(const string &v);
 
   bool isValid(const string &v);
-  bool isSnapshotOperator(const OpType& opType);
+  bool isUnknownOperator(const OpType& opType);
+  bool isSnapshotOperator(const OpType& opType); // @deprecated
 
   tuple<Byte*, size_t> valueToBytes(const string& v, const string& t);
 

@@ -12,12 +12,14 @@
 Pem::Pem(size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
   rememberedValue = NULL;
+  rememberedSize = 0;
   scanType = ScanType::Unknown;
 }
 
 Pem::Pem(Address addr, size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
   rememberedValue = NULL;
+  rememberedSize = 0;
   setAddress(addr);
   scanType = ScanType::Unknown;
 }
@@ -151,6 +153,16 @@ void Pem::rememberValue(const string& value, const string& scanType) {
     delete[] rememberedValue;
   }
   rememberedValue = std::get<0>(bytes);
+  rememberedSize = std::get<1>(bytes);
+}
+
+void Pem::rememberValue(Byte* value, size_t size) {
+  if (rememberedValue) {
+    delete[] rememberedValue;
+  }
+  rememberedValue = new Byte[size];
+  rememberedSize = size;
+  memcpy(rememberedValue, value, size);
 }
 
 string Pem::recallValue(const string& scanType) {
@@ -158,6 +170,10 @@ string Pem::recallValue(const string& scanType) {
     return "";
   }
   return Pem::bytesToString(rememberedValue, scanType);
+}
+
+Byte* Pem::recallValuePtr() {
+  return rememberedValue;
 }
 
 PemPtr Pem::convertToPemPtr(MemPtr mem, MemIO* memio) {

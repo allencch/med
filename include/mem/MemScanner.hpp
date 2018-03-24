@@ -42,7 +42,9 @@ public:
                              int size,
                              const string& scanType,
                              const ScanParser::OpType& op);
-
+  vector<MemPtr> filterUnknownInner(const vector<MemPtr>& list,
+                                    const string& scanType,
+                                    const ScanParser::OpType& op);
   std::mutex listMutex;
 
 private:

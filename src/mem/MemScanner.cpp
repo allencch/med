@@ -61,6 +61,7 @@ vector<MemPtr> MemScanner::scanInner(Byte* value,
       MemPtr mem = memio->read(addr, size);
       PemPtr pem = Pem::convertToPemPtr(mem, memio);
       pem->setScanType(scanType);
+      pem->rememberValue((Byte*)addr, size);
 
       list.push_back(pem);
     }
@@ -81,6 +82,26 @@ vector<MemPtr> MemScanner::filterInner(const vector<MemPtr>& list,
       PemPtr pem = Pem::convertToPemPtr(mem, memio);
       pem->setScanType(scanType);
       newList.push_back(pem);
+    }
+  }
+  return newList;
+}
+
+vector<MemPtr> MemScanner::filterUnknownInner(const vector<MemPtr>& list,
+                                              const string& scanType,
+                                              const ScanParser::OpType& op) {
+  int size = scanTypeToSize(scanType);
+  vector<MemPtr> newList;
+  for (size_t i = 0; i < list.size(); i++) {
+    MemPtr mem = memio->read(list[i]->getAddress(), list[i]->getSize());
+    PemPtr pem = static_pointer_cast<Pem>(list[i]);
+    Byte* oldValue = pem->recallValuePtr();
+
+    if (memCompare(mem->getData(), size, oldValue, size, op)) {
+      PemPtr newPem = Pem::convertToPemPtr(mem, memio);
+      newPem->setScanType(scanType);
+      newPem->rememberValue(mem->getData(), size);
+      newList.push_back(newPem);
     }
   }
   return newList;
