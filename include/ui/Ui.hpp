@@ -11,7 +11,7 @@
 #define STORE_COL_VALUE 3
 #define STORE_COL_LOCK 4
 
-#define SCAN_ADDRESS_VISIBLE_SIZE 400
+#define SCAN_ADDRESS_VISIBLE_SIZE 800
 
 #include <QTreeWidgetItem>
 #include <QStatusBar>

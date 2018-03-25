@@ -13,7 +13,7 @@ using namespace std;
 
 const int STEP = 1;
 const int CHUNK_SIZE = 128;
-const int ADDRESS_SORTABLE_SIZE = 400;
+const int ADDRESS_SORTABLE_SIZE = 800;
 
 MemScanner::MemScanner() {
   pid = 0;
