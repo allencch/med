@@ -56,7 +56,7 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType) {
 
   vector<MemPtr> mems;
   if (op == ScanParser::OpType::SnapshotSave) {
-    mems = scanner->scanUnknown(store->getList(), scanType);
+    scanner->saveSnapshot(store->getList());
   }
   else {
     auto buffer = ScanParser::valueToBytes(value, scanType);
@@ -76,7 +76,7 @@ vector<MemPtr> MemEd::filter(const string& value, const string& scanType) {
 
   vector<MemPtr> mems;
   ScanParser::OpType op = ScanParser::getOpType(value);
-  if (ScanParser::isUnknownOperator(op) && !ScanParser::hasValues(value)) {
+  if (ScanParser::isSnapshotOperator(op) && !ScanParser::hasValues(value)) {
     mems = scanner->filterUnknown(manager->getMems(), scanType, op);
   }
   else {

@@ -132,7 +132,6 @@ vector<MemPtr> MemScanner::scan(Byte* value,
   vector<MemPtr> list;
 
   ProcMaps maps = getMaps(pid);
-  cout << "scan: " << maps.starts.size() <<endl;
 
   int memFd = getMem(pid);
   MemIO* memio = getMemIO();
@@ -157,36 +156,19 @@ vector<MemPtr> MemScanner::scan(Byte* value,
   return list;
 }
 
-vector<MemPtr> MemScanner::scanUnknown(const vector<MemPtr>& baseList,
-                                       const string& scanType) {
+vector<MemPtr>& MemScanner::saveSnapshot(const vector<MemPtr>& baseList) {
   if (!baseList.size()) {
     throw MedException("Should not scan unknown with empty list");
   }
-  vector<MemPtr> list;
   ProcMaps allMaps = getMaps(pid);
   ProcMaps maps = getInterestedMaps(allMaps, baseList);
 
-  int memFd = getMem(pid);
   MemIO* memio = getMemIO();
 
-  auto& mutex = listMutex;
-
   for (size_t i = 0; i < maps.starts.size(); i++) {
-    TMTask* fn = new TMTask();
-    *fn = [memio, &mutex, &list, &maps, i, memFd, scanType]() {
-      scanMapUnknown(memio, mutex, list, maps, i, memFd, scanType);
-    };
-    threadManager->queueTask(fn);
+    saveSnapshotMap(memio, snapshot, maps, i);
   }
-  threadManager->start();
-  threadManager->clear();
-
-  close(memFd);
-
-  if (list.size() <= ADDRESS_SORTABLE_SIZE) {
-    return MemList::sortByAddress(list);
-  }
-  return list;
+  return snapshot;
 }
 
 void MemScanner::scanMap(MemIO* memio,
@@ -215,26 +197,18 @@ void MemScanner::scanMap(MemIO* memio,
   }
 }
 
-void MemScanner::scanMapUnknown(MemIO* memio,
-                                std::mutex& mutex,
-                                vector<MemPtr>& list,
-                                ProcMaps& maps,
-                                int mapIndex,
-                                int fd,
-                                const string& scanType) {
+void MemScanner::saveSnapshotMap(MemIO* memio,
+                                 vector<MemPtr>& snapshot,
+                                 ProcMaps& maps,
+                                 int mapIndex) {
+  int size = getpagesize();
   for (Address j = maps.starts[mapIndex]; j < maps.ends[mapIndex]; j += getpagesize()) {
-    if (lseek(fd, j, SEEK_SET) == -1) {
-      continue;
+    try {
+      MemPtr mem = memio->read(j, size);
+      snapshot.push_back(mem);
+    } catch(MedException& ex) {
+      cerr << ex.getMessage() << endl;
     }
-
-    Byte* page = new Byte[getpagesize()]; //For block of memory
-
-    if (read(fd, page, getpagesize()) == -1) {
-      continue;
-    }
-    scanPageUnknown(memio, mutex, list, page, j, scanType);
-
-    delete[] page;
   }
 }
 
@@ -266,30 +240,6 @@ void MemScanner::scanPage(MemIO* memio,
   }
 }
 
-void MemScanner::scanPageUnknown(MemIO* memio,
-                                 std::mutex& mutex,
-                                 vector<MemPtr>& list,
-                                 Byte* page,
-                                 Address start,
-                                 const string& scanType) {
-  int size = scanTypeToSize(scanType);
-  for (int k = 0; k <= getpagesize() - size; k += STEP) {
-    try {
-      MemPtr mem = memio->read((Address)(start + k), size);
-
-      PemPtr pem = Pem::convertToPemPtr(mem, memio);
-      pem->setScanType(scanType);
-      pem->rememberValue(page + k, size);
-
-      mutex.lock();
-      list.push_back(pem);
-      mutex.unlock();
-    } catch(MedException& ex) {
-      cerr << ex.getMessage() << endl;
-    }
-  }
-}
-
 vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
                                   Byte* value,
                                   int size,
@@ -315,10 +265,20 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
   return newList;
 }
 
-
 vector<MemPtr> MemScanner::filterUnknown(const vector<MemPtr>& list,
-                                         const string& scanType,
-                                         const ScanParser::OpType& op) {
+                                                 const string& scanType,
+                                                 const ScanParser::OpType& op) {
+  if (snapshot.size()) {
+    return filterSnapshot(scanType, op);
+  }
+  else {
+    return filterUnknownWithList(list, scanType, op);
+  }
+}
+
+vector<MemPtr> MemScanner::filterUnknownWithList(const vector<MemPtr>& list,
+                                                 const string& scanType,
+                                                 const ScanParser::OpType& op) {
   vector<MemPtr> newList;
 
   auto& mutex = listMutex;
@@ -408,4 +368,31 @@ ProcMaps MemScanner::getInterestedMaps(const ProcMaps& maps, const vector<MemPtr
     }
   }
   return interested.toProcMaps();
+}
+
+vector<MemPtr> MemScanner::filterSnapshot(const string& scanType, const ScanParser::OpType& op) {
+  vector<MemPtr> list;
+  for (size_t i = 0; i < snapshot.size(); i++) {
+    auto block = memio->read(snapshot[i]->getAddress(), snapshot[i]->getSize());
+    compareBlocks(list, snapshot[i], block, scanType, op);
+  }
+  snapshot.clear();
+  return list;
+}
+
+void MemScanner::compareBlocks(vector<MemPtr>& list, MemPtr& oldBlock, MemPtr& newBlock, const string& scanType, const ScanParser::OpType& op) {
+  size_t blockSize = oldBlock->getSize();
+  int size = scanTypeToSize(scanType);
+  Byte* oldBlockPtr = oldBlock->getData();
+  Byte* newBlockPtr = newBlock->getData();
+  for (size_t i = 0; i <= blockSize - size; i += STEP) {
+    if (memCompare(newBlockPtr + i, size, oldBlockPtr + i, size, op)) {
+      MemPtr mem = memio->read(oldBlock->getAddress() + i, size);
+      PemPtr pem = Pem::convertToPemPtr(mem, memio);
+      pem->setScanType(scanType);
+      pem->rememberValue(mem->getData(), size);
+
+      list.push_back(pem);
+    }
+  }
 }

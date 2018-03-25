@@ -25,8 +25,6 @@ public:
                       int size,
                       const string& scanType,
                       const ScanParser::OpType& op);
-  vector<MemPtr> scanUnknown(const vector<MemPtr>& baseList,
-                             const string& scanType);
   vector<MemPtr> filter(const vector<MemPtr>& list,
                         Byte* value,
                         int size,
@@ -35,6 +33,11 @@ public:
   vector<MemPtr> filterUnknown(const vector<MemPtr>& list,
                                const string& scanType,
                                const ScanParser::OpType& op);
+  vector<MemPtr> filterUnknownWithList(const vector<MemPtr>& list,
+                                       const string& scanType,
+                                       const ScanParser::OpType& op);
+  vector<MemPtr>& saveSnapshot(const vector<MemPtr>& baseList);
+  vector<MemPtr> filterSnapshot(const string& scanType, const ScanParser::OpType& op);
 
   vector<MemPtr> scanInner(Byte* value,
                            int size,
@@ -58,6 +61,7 @@ public:
 private:
   void initialize();
   ProcMaps getInterestedMaps(const ProcMaps& maps, const vector<MemPtr>& list);
+  void compareBlocks(vector<MemPtr>& list, MemPtr& oldBlock, MemPtr& newBlock, const string& scanType, const ScanParser::OpType& op);
 
   static void scanMap(MemIO* memio,
                       std::mutex& mutex,
@@ -69,13 +73,10 @@ private:
                       int size,
                       const string& scanType,
                       const ScanParser::OpType& op);
-  static void scanMapUnknown(MemIO* memio,
-                             std::mutex& mutex,
-                             vector<MemPtr>& list,
-                             ProcMaps& maps,
-                             int mapIndex,
-                             int fd,
-                             const string& scanType);
+  static void saveSnapshotMap(MemIO* memio,
+                              vector<MemPtr>& snapshot,
+                              ProcMaps& maps,
+                              int mapIndex);
   static void scanPage(MemIO* memio,
                        std::mutex& mutex,
                        vector<MemPtr>& list,
@@ -86,12 +87,6 @@ private:
                        const string& scanType,
                        const ScanParser::OpType& op);
 
-  static void scanPageUnknown(MemIO* memio,
-                              std::mutex& mutex,
-                              vector<MemPtr>& list,
-                              Byte* page,
-                              Address start,
-                              const string& scanType);
   static void filterByChunk(std::mutex& mutex,
                             const vector<MemPtr>& list,
                             vector<MemPtr>& newList,
@@ -109,6 +104,7 @@ private:
   pid_t pid;
   ThreadManager* threadManager;
   MemIO* memio;
+  vector<MemPtr> snapshot;
 };
 
 #endif
