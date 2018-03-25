@@ -301,21 +301,21 @@ void MedUi::onScanClicked() {
     scanValue = encodingManager->encode(scanValue);
   }
 
+  scanModel->clearAll();
   try {
     med->scan(scanValue, scanType);
   } catch(MedException &ex) {
     cerr << "scan: "<< ex.what() << endl;
   }
 
-  scanModel->clearAll();
   if(med->getScans().size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
     scanModel->addScan(scanType);
   }
 
   if (QString(scanValue.c_str()).trimmed() == "?") {
     statusBar->showMessage("Snapshot saved");
-    updateNumberOfAddresses();
   }
+  updateNumberOfAddresses();
 }
 
 
