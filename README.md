@@ -113,9 +113,28 @@ For example, if a game uses Big5 encoding, we can change the encoding to Big5 an
 Note: Qt5 application run as root doesn't support IME like Fcitx. Please use copy-paste instead.
 
 
+## Search for unknown value (experimental v2)
+
+If we are interested on a value of the game, but it is not a numerical value, such as a hero of the game is poisoned or normal. We can use unknown search.
+
+1. It requires at least one address in the store (the right panel) for heuristic search.
+2. Enter "?", and press "Scan" button. You should get the statusbar showing "Snapshot saved".
+3. Now make the changes of the status, like from poisoned to normal or vice versa.
+4. Enter "!" which indicates "changed", and press "Filter" button.
+5. The scanner will scan for the memory address with the value changed.
+6. Continue to filter until you get the potential memory address that handles the status.
+
+Other operators are ">" and "<".
+
+* ">" with "Filter" will scan for the value that is increased.
+* "<" with "Filter" will scan for the value that is decreased.
+
+Notes: This feature is tested on Dosbox game.
+
+
 # Build Instruction
 
-This program requires **GCC** (C++ compiler), **Qt5**, and **JSONPP**.
+This program requires **GCC** (C++ compiler) (or **clang**), **Qt5**, and **JSONPP**.
 
 1. In the directory that contains the source code including `CMakeLists.txt`,
 
@@ -134,11 +153,11 @@ make
 
 1. ~~Scan by array.~~
 2. ~~Memory editor dialog (view any memory as block).~~
-3. Scan within memory block range.
-4. Arithmetic operation with prefix notation.
-5. Scan by struct, supports data type syntax
-6. ~~Scan by string.~~
-7. Scan by changes (scan unknown).
+3. ~~Scan by string.~~
+4. ~~Scan by changes (scan unknown).~~
+5. Scan within memory block range.
+6. Arithmetic operation with prefix notation.
+7. Scan by struct, supports data type syntax
 8. Scan by pointer(?)
 
 # Developer notes
