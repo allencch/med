@@ -301,7 +301,10 @@ void MedUi::onScanClicked() {
     scanValue = encodingManager->encode(scanValue);
   }
 
+  scanUpdateMutex.lock();
   scanModel->clearAll();
+  scanUpdateMutex.unlock();
+
   try {
     med->scan(scanValue, scanType);
   } catch(MedException &ex) {
@@ -309,7 +312,9 @@ void MedUi::onScanClicked() {
   }
 
   if(med->getScans().size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
+    scanUpdateMutex.lock();
     scanModel->addScan(scanType);
+    scanUpdateMutex.unlock();
   }
 
   if (QString(scanValue.c_str()).trimmed() == "?") {
@@ -338,7 +343,9 @@ void MedUi::onFilterClicked() {
   med->filter(scanValue, scanType);
 
   if(med->getScans().size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
+    scanUpdateMutex.lock();
     scanModel->addScan(scanType);
+    scanUpdateMutex.unlock();
   }
 
   updateNumberOfAddresses();
@@ -415,16 +422,20 @@ void MedUi::onScanAddAllClicked() {
 void MedUi::onScanClearClicked() {
   scanUpdateMutex.lock();
   scanModel->empty();
-  statusBar->showMessage("Scan cleared");
   scanUpdateMutex.unlock();
+  statusBar->showMessage("Scan cleared");
 }
 
 void MedUi::onStoreHeaderClicked(int logicalIndex) {
   if (logicalIndex == STORE_COL_DESCRIPTION) {
+    storeUpdateMutex.lock();
     storeModel->sortByDescription();
+    storeUpdateMutex.unlock();
   }
   else if (logicalIndex == STORE_COL_ADDRESS) {
+    storeUpdateMutex.lock();
     storeModel->sortByAddress();
+    storeUpdateMutex.unlock();
   }
 }
 
