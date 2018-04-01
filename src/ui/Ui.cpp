@@ -340,13 +340,13 @@ void MedUi::onFilterClicked() {
     scanValue = encodingManager->encode(scanValue);
   }
 
+  scanUpdateMutex.lock();
   med->filter(scanValue, scanType);
 
   if(med->getScans().size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
-    scanUpdateMutex.lock();
     scanModel->addScan(scanType);
-    scanUpdateMutex.unlock();
   }
+  scanUpdateMutex.unlock();
 
   updateNumberOfAddresses();
 }
