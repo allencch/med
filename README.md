@@ -131,6 +131,10 @@ Other operators are ">" and "<".
 
 Notes: This feature is tested on Dosbox game.
 
+## Scope search
+
+To reduce the search space, we can specify the scope start and scope end by entering address in hexadecimal format. After entering both fields, make sure your cursor leave the field, so that the scope will take affect.
+
 
 # Build Instruction
 
