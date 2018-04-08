@@ -57,12 +57,26 @@ public:
   vector<MemPtr> filterUnknownInner(const vector<MemPtr>& list,
                                     const string& scanType,
                                     const ScanParser::OpType& op);
+
+  AddressPair* getScope();
+  void setScopeStart(Address addr);
+  void setScopeEnd(Address addr);
+
   std::mutex listMutex;
 
 private:
   void initialize();
   Maps getInterestedMaps(Maps& maps, const vector<MemPtr>& list);
   void compareBlocks(vector<MemPtr>& list, MemPtr& oldBlock, MemPtr& newBlock, const string& scanType, const ScanParser::OpType& op);
+
+  vector<MemPtr> scanByScope(Byte* value,
+                             int size,
+                             const string& scanType,
+                             const ScanParser::OpType& op);
+  vector<MemPtr> scanByMaps(Byte* value,
+                            int size,
+                            const string& scanType,
+                            const ScanParser::OpType& op);
 
   static void scanMap(MemIO* memio,
                       std::mutex& mutex,
@@ -102,10 +116,14 @@ private:
                                    int listIndex,
                                    const string& scanType,
                                    const ScanParser::OpType& op);
+
+  bool hasScope();
+
   pid_t pid;
   ThreadManager* threadManager;
   MemIO* memio;
   vector<MemPtr> snapshot;
+  AddressPair* scope;
 };
 
 #endif

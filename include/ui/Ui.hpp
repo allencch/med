@@ -111,6 +111,9 @@ private slots:
 
   void onMemEditorTriggered();
 
+  void onScopeStartEdited();
+  void onScopeEndEdited();
+
 private:
   void loadUiFiles();
   void loadProcessUi();

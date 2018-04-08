@@ -257,3 +257,11 @@ void MemEd::setValueByAddress(Address addr, const string& value, const string& s
   PemPtr pem = PemPtr(new Pem(addr, size, memio));
   pem->setValue(value, scanType);
 }
+
+void MemEd::setScopeStart(Address addr) {
+  scanner->setScopeStart(addr);
+}
+
+void MemEd::setScopeEnd(Address addr) {
+  scanner->setScopeEnd(addr);
+}

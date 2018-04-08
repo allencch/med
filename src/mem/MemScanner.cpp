@@ -28,12 +28,14 @@ MemScanner::~MemScanner() {
   pid = 0;
   delete memio;
   delete threadManager;
+  delete scope;
 }
 
 void MemScanner::initialize() {
   threadManager = new ThreadManager();
   threadManager->setMaxThreads(8);
   memio = new MemIO();
+  scope = new AddressPair(0, 0);
 }
 
 void MemScanner::setPid(pid_t pid) {
@@ -124,13 +126,24 @@ vector<MemPtr> MemScanner::filterUnknownInner(const vector<MemPtr>& list,
 }
 
 vector<MemPtr> MemScanner::scan(Byte* value,
-                                int size,
-                                const string& scanType,
-                                const ScanParser::OpType& op) {
+                                      int size,
+                                      const string& scanType,
+                                      const ScanParser::OpType& op) {
+  if (hasScope()) {
+    return scanByScope(value, size, scanType, op);
+  }
+  else {
+    return scanByMaps(value, size, scanType, op);
+  }
+}
+
+vector<MemPtr> MemScanner::scanByMaps(Byte* value,
+                                      int size,
+                                      const string& scanType,
+                                      const ScanParser::OpType& op) {
   vector<MemPtr> list;
 
   Maps maps = getMaps(pid);
-
   int memFd = getMem(pid);
   MemIO* memio = getMemIO();
 
@@ -147,6 +160,38 @@ vector<MemPtr> MemScanner::scan(Byte* value,
   threadManager->clear();
 
   close(memFd);
+
+  if (list.size() <= ADDRESS_SORTABLE_SIZE) {
+    return MemList::sortByAddress(list);
+  }
+  return list;
+}
+
+vector<MemPtr> MemScanner::scanByScope(Byte* value,
+                                       int size,
+                                       const string& scanType,
+                                       const ScanParser::OpType& op) {
+  vector<MemPtr> list;
+  auto start = scope->first;
+  auto end = scope->second;
+  int fd = getMem(pid);
+  auto& mutex = listMutex;
+
+  // TODO: Refactor this, since similar to scanMap()
+  for (Address j = start; j < end; j += getpagesize()) {
+    if (lseek(fd, j, SEEK_SET) == -1) {
+      continue;
+    }
+
+    Byte* page = new Byte[getpagesize()];
+
+    if (read(fd, page, getpagesize()) == -1) {
+      continue;
+    }
+    scanPage(memio, mutex, list, page, j, value, size, scanType, op);
+
+    delete[] page;
+  }
 
   if (list.size() <= ADDRESS_SORTABLE_SIZE) {
     return MemList::sortByAddress(list);
@@ -399,4 +444,20 @@ void MemScanner::compareBlocks(vector<MemPtr>& list, MemPtr& oldBlock, MemPtr& n
       list.push_back(pem);
     }
   }
+}
+
+AddressPair* MemScanner::getScope() {
+  return scope;
+}
+
+void MemScanner::setScopeStart(Address addr) {
+  scope->first = addr;
+}
+
+void MemScanner::setScopeEnd(Address addr) {
+  scope->second = addr;
+}
+
+bool MemScanner::hasScope() {
+  return scope->first && scope->second;
 }

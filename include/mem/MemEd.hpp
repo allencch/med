@@ -48,6 +48,9 @@ public:
   string& getNotes();
   void setNotes(const string& notes);
 
+  void setScopeStart(Address addr);
+  void setScopeEnd(Address addr);
+
 private:
   void initialize();
   pid_t pid;

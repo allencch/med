@@ -19,12 +19,6 @@
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="sizeConstraint">
-         <enum>QLayout::SetDefaultConstraint</enum>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
         <item>
          <widget class="QLineEdit" name="selectedProcess">
           <property name="toolTip">
@@ -144,6 +138,24 @@
               </sizepolicy>
              </property>
             </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QLineEdit" name="scopeStart">
+               <property name="placeholderText">
+                <string>Scope start</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="scopeEnd">
+               <property name="placeholderText">
+                <string>Scope end</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_4">

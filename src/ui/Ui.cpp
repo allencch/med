@@ -33,8 +33,6 @@ MedUi::MedUi(QApplication* app) {
   encodingManager = new EncodingManager(this);
   setScanState(UiState::Idle);
   setStoreState(UiState::Idle);
-
-  // TODO: other action here
 }
 
 MedUi::~MedUi() {
@@ -61,7 +59,6 @@ void MedUi::loadUiFiles() {
   storeTreeView->installEventFilter(new StoreTreeEventListener(storeTreeView, this));
 
   notesArea = mainWindow->findChild<QPlainTextEdit*>("notes");
-  // TODO: Notes
 }
 
 void MedUi::loadProcessUi() {
@@ -209,6 +206,14 @@ void MedUi::setupSignals() {
                    this,
                    SLOT(onMemEditorTriggered()));
 
+  QObject::connect(mainWindow->findChild<QLineEdit*>("scopeStart"),
+                   SIGNAL(editingFinished()),
+                   this,
+                   SLOT(onScopeStartEdited()));
+  QObject::connect(mainWindow->findChild<QLineEdit*>("scopeEnd"),
+                   SIGNAL(editingFinished()),
+                   this,
+                   SLOT(onScopeEndEdited()));
 }
 
 void MedUi::setupScanTreeView() {
@@ -733,4 +738,24 @@ void MedUi::setScanState(UiState state) {
 
 void MedUi::setStoreState(UiState state) {
   storeState = state;
+}
+
+void MedUi::onScopeStartEdited() {
+  string start = mainWindow->findChild<QLineEdit*>("scopeStart")->text().toStdString();
+  if (start.size() == 0) {
+    med->setScopeStart(0);
+  }
+  else {
+    med->setScopeStart(hexToInt(start));
+  }
+}
+
+void MedUi::onScopeEndEdited() {
+  string end = mainWindow->findChild<QLineEdit*>("scopeEnd")->text().toStdString();
+  if (end.size() == 0) {
+    med->setScopeEnd(0);
+  }
+  else {
+    med->setScopeEnd(hexToInt(end));
+  }
 }
