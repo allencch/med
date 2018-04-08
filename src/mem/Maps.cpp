@@ -20,11 +20,6 @@ void Maps::push(const AddressPair& pair) {
   maps.push_back(pair);
 }
 
-ProcMaps Maps::toProcMaps() {
-  ProcMaps newMaps;
-  for_each(maps.begin(), maps.end(), [&newMaps](AddressPair item) {
-      newMaps.starts.push_back(std::get<0>(item));
-      newMaps.ends.push_back(std::get<1>(item));
-    });
-  return newMaps;
+size_t Maps::size() {
+  return maps.size();
 }

@@ -129,8 +129,8 @@ void printHex(FILE* file,void* addr,int size) {
   }
 }
 
-ProcMaps getMaps(pid_t pid) {
-  ProcMaps procMaps;
+Maps getMaps(pid_t pid) {
+  Maps maps;
 
   //Get the region from /proc/pid/maps
   char filename[128];
@@ -163,14 +163,14 @@ ProcMaps getMaps(pid_t pid) {
     }
 
     if (rd == 'r' && wr == 'w' && ((end - start) > 0)) {
-      procMaps.starts.push_back(start);
-      procMaps.ends.push_back(end);
+      AddressPair pair(start, end);
+      maps.push(pair);
     }
   }
 
   fclose(file);
 
-  return procMaps;
+  return maps;
 }
 
 /**

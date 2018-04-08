@@ -4,10 +4,8 @@
 
 #include "mem/MemScanner.hpp"
 #include "med/MemOperator.hpp"
-#include "med/MedCommon.hpp"
 #include "mem/Pem.hpp"
 #include "mem/MemList.hpp"
-#include "mem/Maps.hpp"
 
 using namespace std;
 
@@ -131,14 +129,14 @@ vector<MemPtr> MemScanner::scan(Byte* value,
                                 const ScanParser::OpType& op) {
   vector<MemPtr> list;
 
-  ProcMaps maps = getMaps(pid);
+  Maps maps = getMaps(pid);
 
   int memFd = getMem(pid);
   MemIO* memio = getMemIO();
 
   auto& mutex = listMutex;
 
-  for (size_t i = 0; i < maps.starts.size(); i++) {
+  for (size_t i = 0; i < maps.size(); i++) {
     TMTask* fn = new TMTask();
     *fn = [memio, &mutex, &list, &maps, i, memFd, value, size, scanType, op]() {
       scanMap(memio, mutex, list, maps, i, memFd, value, size, scanType, op);
@@ -160,12 +158,12 @@ vector<MemPtr>& MemScanner::saveSnapshot(const vector<MemPtr>& baseList) {
   if (!baseList.size()) {
     throw MedException("Should not scan unknown with empty list");
   }
-  ProcMaps allMaps = getMaps(pid);
-  ProcMaps maps = getInterestedMaps(allMaps, baseList);
+  Maps allMaps = getMaps(pid);
+  Maps maps = getInterestedMaps(allMaps, baseList);
 
   MemIO* memio = getMemIO();
 
-  for (size_t i = 0; i < maps.starts.size(); i++) {
+  for (size_t i = 0; i < maps.size(); i++) {
     saveSnapshotMap(memio, snapshot, maps, i);
   }
   return snapshot;
@@ -174,14 +172,16 @@ vector<MemPtr>& MemScanner::saveSnapshot(const vector<MemPtr>& baseList) {
 void MemScanner::scanMap(MemIO* memio,
                          std::mutex& mutex,
                          vector<MemPtr>& list,
-                         ProcMaps& maps,
+                         Maps& maps,
                          int mapIndex,
                          int fd,
                          Byte* value,
                          int size,
                          const string& scanType,
                          const ScanParser::OpType& op) {
-  for (Address j = maps.starts[mapIndex]; j < maps.ends[mapIndex]; j += getpagesize()) {
+  auto& pairs = maps.getMaps();
+  auto& pair = pairs[mapIndex];
+  for (Address j = std::get<0>(pair); j < std::get<1>(pair); j += getpagesize()) {
     if (lseek(fd, j, SEEK_SET) == -1) {
       continue;
     }
@@ -199,10 +199,13 @@ void MemScanner::scanMap(MemIO* memio,
 
 void MemScanner::saveSnapshotMap(MemIO* memio,
                                  vector<MemPtr>& snapshot,
-                                 ProcMaps& maps,
+                                 Maps& maps,
                                  int mapIndex) {
   int size = getpagesize();
-  for (Address j = maps.starts[mapIndex]; j < maps.ends[mapIndex]; j += getpagesize()) {
+
+  auto& pairs = maps.getMaps();
+  auto& pair = pairs[mapIndex];
+  for (Address j = std::get<0>(pair); j < std::get<1>(pair); j += getpagesize()) {
     try {
       MemPtr mem = memio->read(j, size);
       snapshot.push_back(mem);
@@ -349,17 +352,18 @@ void MemScanner::filterUnknownByChunk(std::mutex& mutex,
   }
 }
 
-ProcMaps MemScanner::getInterestedMaps(const ProcMaps& maps, const vector<MemPtr>& list) {
+Maps MemScanner::getInterestedMaps(Maps& maps, const vector<MemPtr>& list) {
   Maps interested;
   for (size_t i = 0; i < list.size(); i++) {
-    const auto& mapStarts = maps.starts;
-    const auto& mapEnds = maps.ends;
-
-    for (size_t j = 0; j < mapStarts.size(); j++) {
-      bool inRegion = list[i]->getAddress() >=  mapStarts[j] && list[i]->getAddress() <= mapEnds[j];
+    for (size_t j = 0; j < maps.size(); j++) {
+      auto& pairs = maps.getMaps();
+      auto& pair = pairs[j];
+      auto start = std::get<0>(pair);
+      auto end = std::get<1>(pair);
+      bool inRegion = list[i]->getAddress() >= start && list[i]->getAddress() <= end;
 
       if (inRegion) {
-        AddressPair pair(mapStarts[j], mapEnds[j]);
+        AddressPair pair(start, end);
         if (!interested.hasPair(pair)) {
           interested.push(pair);
         }
@@ -367,7 +371,7 @@ ProcMaps MemScanner::getInterestedMaps(const ProcMaps& maps, const vector<MemPtr
       }
     }
   }
-  return interested.toProcMaps();
+  return interested;
 }
 
 vector<MemPtr> MemScanner::filterSnapshot(const string& scanType, const ScanParser::OpType& op) {

@@ -8,6 +8,7 @@
 #include "med/MedTypes.hpp"
 #include "med/ScanParser.hpp"
 #include "med/ThreadManager.hpp"
+#include "med/MedCommon.hpp"
 #include "mem/Mem.hpp"
 #include "mem/MemIO.hpp"
 
@@ -60,13 +61,13 @@ public:
 
 private:
   void initialize();
-  ProcMaps getInterestedMaps(const ProcMaps& maps, const vector<MemPtr>& list);
+  Maps getInterestedMaps(Maps& maps, const vector<MemPtr>& list);
   void compareBlocks(vector<MemPtr>& list, MemPtr& oldBlock, MemPtr& newBlock, const string& scanType, const ScanParser::OpType& op);
 
   static void scanMap(MemIO* memio,
                       std::mutex& mutex,
                       vector<MemPtr>& list,
-                      ProcMaps& maps,
+                      Maps& maps,
                       int mapIndex,
                       int fd,
                       Byte* data,
@@ -75,7 +76,7 @@ private:
                       const ScanParser::OpType& op);
   static void saveSnapshotMap(MemIO* memio,
                               vector<MemPtr>& snapshot,
-                              ProcMaps& maps,
+                              Maps& maps,
                               int mapIndex);
   static void scanPage(MemIO* memio,
                        std::mutex& mutex,

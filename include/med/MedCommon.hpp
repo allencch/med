@@ -6,6 +6,7 @@
 
 #include "med/MedTypes.hpp"
 #include "med/Process.hpp"
+#include "mem/Maps.hpp"
 
 using namespace std;
 
@@ -40,7 +41,7 @@ void printHex(FILE* file, void* addr, int size);
 /**
  * @param pid is pid_t, which is actually integer.
  */
-ProcMaps getMaps(pid_t pid);
+Maps getMaps(pid_t pid);
 
 /**
  * Convert the size to padded word size.

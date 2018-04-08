@@ -9,11 +9,6 @@ using namespace std;
 typedef uint8_t Byte;
 typedef unsigned long Address;
 
-struct ProcMaps {
-  vector<Address> starts;
-  vector<Address> ends;
-};
-
 enum ScanType {
   Int8,
   Int16,
@@ -38,5 +33,8 @@ enum EncodingType {
   Default,
   Big5
 };
+
+typedef pair<Address, Address> AddressPair;
+typedef vector<AddressPair> AddressPairs;
 
 #endif
