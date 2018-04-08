@@ -88,6 +88,10 @@ private:
                       int size,
                       const string& scanType,
                       const ScanParser::OpType& op);
+
+  vector<MemPtr>& saveSnapshotByScope();
+  vector<MemPtr>& saveSnapshotByList(const vector<MemPtr>& baseList);
+
   static void saveSnapshotMap(MemIO* memio,
                               vector<MemPtr>& snapshot,
                               Maps& maps,

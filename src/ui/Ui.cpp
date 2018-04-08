@@ -312,6 +312,10 @@ void MedUi::onScanClicked() {
 
   try {
     med->scan(scanValue, scanType);
+  } catch(EmptyListException &ex) {
+    statusBar->showMessage(ex.what());
+    cerr << ex.what() << endl;
+    return;
   } catch(MedException &ex) {
     cerr << "scan: "<< ex.what() << endl;
   }

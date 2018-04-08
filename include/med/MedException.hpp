@@ -21,4 +21,9 @@ private:
   string message;
 };
 
+class EmptyListException : public MedException {
+public:
+  explicit EmptyListException(const string& message) : MedException(message) {}
+};
+
 #endif

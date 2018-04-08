@@ -200,8 +200,18 @@ vector<MemPtr> MemScanner::scanByScope(Byte* value,
 }
 
 vector<MemPtr>& MemScanner::saveSnapshot(const vector<MemPtr>& baseList) {
+  snapshot.clear();
+  if (hasScope()) {
+    return saveSnapshotByScope();
+  }
+  else {
+    return saveSnapshotByList(baseList);
+  }
+}
+
+vector<MemPtr>& MemScanner::saveSnapshotByList(const vector<MemPtr>& baseList) {
   if (!baseList.size()) {
-    throw MedException("Should not scan unknown with empty list");
+    throw EmptyListException("Should not scan unknown with empty list");
   }
   Maps allMaps = getMaps(pid);
   Maps maps = getInterestedMaps(allMaps, baseList);
@@ -210,6 +220,22 @@ vector<MemPtr>& MemScanner::saveSnapshot(const vector<MemPtr>& baseList) {
 
   for (size_t i = 0; i < maps.size(); i++) {
     saveSnapshotMap(memio, snapshot, maps, i);
+  }
+  return snapshot;
+}
+
+vector<MemPtr>& MemScanner::saveSnapshotByScope() {
+  int size = getpagesize();
+
+  auto start = scope->first;
+  auto end = scope->second;
+  for (Address j = start; j < end; j += size) {
+    try {
+      MemPtr mem = memio->read(j, size);
+      snapshot.push_back(mem);
+    } catch(MedException& ex) {
+      cerr << ex.getMessage() << endl;
+    }
   }
   return snapshot;
 }
@@ -250,7 +276,7 @@ void MemScanner::saveSnapshotMap(MemIO* memio,
 
   auto& pairs = maps.getMaps();
   auto& pair = pairs[mapIndex];
-  for (Address j = std::get<0>(pair); j < std::get<1>(pair); j += getpagesize()) {
+  for (Address j = std::get<0>(pair); j < std::get<1>(pair); j += size) {
     try {
       MemPtr mem = memio->read(j, size);
       snapshot.push_back(mem);
