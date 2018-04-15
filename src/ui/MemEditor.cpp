@@ -168,6 +168,7 @@ void MemEditor::loadAddresses(Address address, size_t size) {
 void MemEditor::onMemAreaCursorPositionChanged() {
   updateCurrAddress();
   updateValueLine();
+  boldText();
 }
 
 Address MemEditor::getAddressByCursorPosition(int position) {
@@ -246,4 +247,42 @@ void MemEditor::setBaseAddress(Address addr) {
 
 Address MemEditor::getBaseAddress() {
   return baseAddress;
+}
+
+void MemEditor::clearFormat() {
+  QTextCursor cursor = memArea->textCursor();
+  auto cursorPosition = cursor.position();
+
+  cursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
+  cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+
+  QTextCharFormat format;
+  format.setFontWeight(QFont::Normal);
+  cursor.mergeCharFormat(format);
+
+  cursor.setPosition(cursorPosition);
+}
+
+void MemEditor::boldText() {
+  QString addr = currAddress->text();
+  if (addr.trimmed() == "") {
+    return;
+  }
+
+  clearFormat();
+
+  int distance = hexToInt(addr.toStdString()) - baseAddress;
+  int position = distance * 3;
+
+  QTextCursor cursor = memArea->textCursor();
+  auto cursorPosition = cursor.position();
+
+  cursor.setPosition(position, QTextCursor::MoveAnchor);
+  cursor.setPosition(position + 2, QTextCursor::KeepAnchor);
+
+  QTextCharFormat format;
+  format.setFontWeight(QFont::Bold);
+  cursor.mergeCharFormat(format);
+
+  cursor.setPosition(cursorPosition);
 }

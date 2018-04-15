@@ -31,6 +31,8 @@ public:
   void setBaseAddress(Address addr);
   Address getBaseAddress();
 
+  void boldText();
+
 private slots:
   void onCurrAddressEdited();
   void onMemAreaCursorPositionChanged();
@@ -66,6 +68,8 @@ private:
 
   static std::string memoryToHex(Byte* memory, size_t size);
   static std::string memoryToString(Byte* memory, size_t size, EncodingManager* encodingManager);
+
+  void clearFormat();
 };
 
 #endif
