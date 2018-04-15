@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>604</width>
     <height>500</height>
    </rect>
   </property>
@@ -18,13 +18,6 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLineEdit" name="baseAddress">
-         <property name="placeholderText">
-          <string>Base</string>
-         </property>
-        </widget>
-       </item>
        <item>
         <widget class="QLineEdit" name="currAddress">
          <property name="placeholderText">

@@ -20,6 +20,7 @@ MemEditor::MemEditor(MedUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   this->mainUi = mainUi;
   this->med = mainUi->med;
   rawMemory = NULL;
+  baseAddress = 0;
 
   QUiLoader loader;
   QFile file("./mem-editor.ui");
@@ -31,7 +32,6 @@ MemEditor::MemEditor(MedUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   this->setLayout(layout);
   this->resize(800, 500);
 
-  baseAddress = mainChild->findChild<QLineEdit*>("baseAddress");
   currAddress= mainChild->findChild<QLineEdit*>("currAddress");
   valueLine = mainChild->findChild<QLineEdit*>("value");
   memArea = mainChild->findChild<QPlainTextEdit*>("memArea");
@@ -59,10 +59,10 @@ MemEditor::~MemEditor() {
 }
 
 void MemEditor::setupSignals() {
-  QObject::connect(baseAddress,
+  QObject::connect(currAddress,
                    SIGNAL(editingFinished()),
                    this,
-                   SLOT(onBaseAddressEdited()));
+                   SLOT(onCurrAddressEdited()));
   QObject::connect(memArea,
                    SIGNAL(cursorPositionChanged()),
                    this,
@@ -74,8 +74,8 @@ void MemEditor::setupSignals() {
 }
 
 
-void MemEditor::onBaseAddressEdited() {
-  QString addr = baseAddress->text();
+void MemEditor::onCurrAddressEdited() {
+  QString addr = currAddress->text();
   if (addr.trimmed() == "") {
     return;
   }
@@ -86,32 +86,31 @@ void MemEditor::onBaseAddressEdited() {
   }
 
   try {
-    Address roundedAddr = addressRoundDown(hexToInt(addr.toStdString()));
-    baseAddress->setText(intToHex(roundedAddr).c_str());
-    loadMemory(roundedAddr);
-    loadAddresses(roundedAddr);
-
+    baseAddress = addressRoundDown(hexToInt(addr.toStdString()));
+    loadMemory(baseAddress);
+    loadAddresses(baseAddress);
+    currAddress->setText(addr);
+    setCursorPositionByAddress();
   } catch(MedException &ex) {
     cerr << ex.getMessage() << endl;
   }
 }
 
 void MemEditor::refresh() {
-  QString addr = baseAddress->text();
-  if (addr.trimmed() == "") {
+  if (!baseAddress) {
     return;
   }
-  Address roundedAddr = addressRoundDown(hexToInt(addr.toStdString()));
-  baseAddress->setText(intToHex(roundedAddr).c_str());
-  loadMemory(roundedAddr);
+  QString addr = currAddress->text();
+  loadMemory(baseAddress);
+  currAddress->setText(addr);
+  setCursorPositionByAddress();
 }
 
 void MemEditor::updateAddresses() {
-  QString addr = baseAddress->text();
-  if (addr.trimmed() == "") {
+  if (!baseAddress) {
     return;
   }
-  loadAddresses(hexToInt(addr.toStdString()));
+  loadAddresses(baseAddress);
 }
 
 void MemEditor::loadMemory(Address address, size_t size) {
@@ -172,13 +171,25 @@ void MemEditor::onMemAreaCursorPositionChanged() {
 }
 
 Address MemEditor::getAddressByCursorPosition(int position) {
-  QString addr = baseAddress->text();
-  if (addr.trimmed() == "") {
+  if (!baseAddress) {
     return 0;
   }
   int distance = position / 3;
-  Address base = hexToInt(addr.toStdString());
-  return base + distance;
+  return baseAddress + distance;
+}
+
+void MemEditor::setCursorPositionByAddress() {
+  QString addr = currAddress->text();
+  if (!baseAddress || addr.trimmed() == "") {
+    return;
+  }
+
+  int distance = hexToInt(addr.toStdString()) - baseAddress;
+  int position = distance * 3;
+
+  auto cursor = memArea->textCursor();
+  cursor.setPosition(position, QTextCursor::MoveAnchor);
+  memArea->setTextCursor(cursor);
 }
 
 void MemEditor::updateCurrAddress() {
@@ -227,4 +238,12 @@ string MemEditor::getHexString(int position) {
 
 void MemEditor::onRefreshButtonClicked() {
   refresh();
+}
+
+void MemEditor::setBaseAddress(Address addr) {
+  baseAddress = addr;
+}
+
+Address MemEditor::getBaseAddress() {
+  return baseAddress;
 }

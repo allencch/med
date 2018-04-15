@@ -111,9 +111,7 @@ void MemEditorEventListener::moveCursorUpward() {
     return;
   }
 
-  Address base = hexToInt(memEditor->baseAddress->text().toStdString());
-  base -= 16;
-  memEditor->baseAddress->setText(intToHex(base).c_str());
+  memEditor->setBaseAddress(memEditor->getBaseAddress() - 16);
   memEditor->refresh();
   memEditor->updateAddresses();
   cursor.setPosition(position, QTextCursor::MoveAnchor);
@@ -127,9 +125,7 @@ void MemEditorEventListener::moveCursorDownward() {
     return;
   }
 
-  Address base = hexToInt(memEditor->baseAddress->text().toStdString());
-  base += 16;
-  memEditor->baseAddress->setText(intToHex(base).c_str());
+  memEditor->setBaseAddress(memEditor->getBaseAddress() + 16);
   memEditor->refresh();
   memEditor->updateAddresses();
   cursor.setPosition(position, QTextCursor::MoveAnchor);

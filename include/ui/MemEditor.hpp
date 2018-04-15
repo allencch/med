@@ -23,14 +23,16 @@ public:
 
   QPlainTextEdit* memArea;
   std::string memHex;
-  QLineEdit* baseAddress;
 
   void writeToProcessMemory(int position, char ch);
   void refresh();
   void updateAddresses();
 
+  void setBaseAddress(Address addr);
+  Address getBaseAddress();
+
 private slots:
-  void onBaseAddressEdited();
+  void onCurrAddressEdited();
   void onMemAreaCursorPositionChanged();
   void onRefreshButtonClicked();
 
@@ -39,6 +41,7 @@ private:
   MedUi* mainUi;
   QWidget* parent;
   QWidget* mainChild;
+  Address baseAddress;
 
   QLineEdit* currAddress;
   QLineEdit* valueLine;
@@ -59,6 +62,7 @@ private:
 
   string getHexString(int position);
   Address getAddressByCursorPosition(int position);
+  void setCursorPositionByAddress();
 
   static std::string memoryToHex(Byte* memory, size_t size);
   static std::string memoryToString(Byte* memory, size_t size, EncodingManager* encodingManager);
