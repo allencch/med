@@ -20,6 +20,7 @@ using namespace std;
 MedUi::MedUi(QApplication* app) {
   this->app = app;
   med = new MemEd();
+  scanUpdateMutex = &med->getScanListMutex();
 
   loadUiFiles();
   loadProcessUi();
@@ -306,9 +307,9 @@ void MedUi::onScanClicked() {
     scanValue = encodingManager->encode(scanValue);
   }
 
-  scanUpdateMutex.lock();
+  scanUpdateMutex->lock();
   scanModel->clearAll();
-  scanUpdateMutex.unlock();
+  scanUpdateMutex->unlock();
 
   try {
     med->scan(scanValue, scanType);
@@ -321,9 +322,9 @@ void MedUi::onScanClicked() {
   }
 
   if(med->getScans().size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
-    scanUpdateMutex.lock();
+    scanUpdateMutex->lock();
     scanModel->addScan(scanType);
-    scanUpdateMutex.unlock();
+    scanUpdateMutex->unlock();
   }
 
   if (QString(scanValue.c_str()).trimmed() == "?") {
@@ -349,13 +350,13 @@ void MedUi::onFilterClicked() {
     scanValue = encodingManager->encode(scanValue);
   }
 
-  scanUpdateMutex.lock();
+  scanUpdateMutex->lock();
   med->filter(scanValue, scanType);
 
   if(med->getScans().size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
     scanModel->addScan(scanType);
   }
-  scanUpdateMutex.unlock();
+  scanUpdateMutex->unlock();
 
   updateNumberOfAddresses();
 }
@@ -368,7 +369,7 @@ void MedUi::onScanTreeViewClicked(const QModelIndex &index) {
 
 void MedUi::onScanTreeViewDoubleClicked(const QModelIndex &index) {
   if (index.column() == SCAN_COL_VALUE) {
-    scanUpdateMutex.lock();
+    scanUpdateMutex->lock();
     setScanState(UiState::Editing);
   }
 }
@@ -376,7 +377,7 @@ void MedUi::onScanTreeViewDoubleClicked(const QModelIndex &index) {
 void MedUi::onScanTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles) {
   // qDebug() << topLeft << bottomRight << roles;
   if (topLeft.column() == SCAN_COL_VALUE) {
-    tryUnlock(scanUpdateMutex);
+    tryUnlock(*scanUpdateMutex);
     setScanState(UiState::Idle);
   }
 }
@@ -410,28 +411,28 @@ void MedUi::onScanAddClicked() {
     ->selectionModel()
     ->selectedRows(SCAN_COL_ADDRESS);
 
-  scanUpdateMutex.lock();
+  scanUpdateMutex->lock();
   for (int i = 0; i < indexes.size(); i++) {
     med->addToStoreByIndex(indexes[i].row());
   }
 
   storeModel->refresh();
-  scanUpdateMutex.unlock();
+  scanUpdateMutex->unlock();
 }
 
 void MedUi::onScanAddAllClicked() {
-  scanUpdateMutex.lock();
+  scanUpdateMutex->lock();
   for (size_t i = 0; i < med->getScans().size(); i++) {
     med->addToStoreByIndex(i);
   }
   storeModel->refresh();
-  scanUpdateMutex.unlock();
+  scanUpdateMutex->unlock();
 }
 
 void MedUi::onScanClearClicked() {
-  scanUpdateMutex.lock();
+  scanUpdateMutex->lock();
   scanModel->empty();
-  scanUpdateMutex.unlock();
+  scanUpdateMutex->unlock();
   statusBar->showMessage("Scan cleared");
 }
 
@@ -717,9 +718,9 @@ void MedUi::refresh(MedUi* mainUi) {
 }
 
 void MedUi::refreshScanTreeView() {
-  scanUpdateMutex.lock();
+  scanUpdateMutex->lock();
   scanModel->refreshValues();
-  scanUpdateMutex.unlock();
+  scanUpdateMutex->unlock();
 }
 
 void MedUi::refreshStoreTreeView() {

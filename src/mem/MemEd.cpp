@@ -265,3 +265,7 @@ void MemEd::setScopeStart(Address addr) {
 void MemEd::setScopeEnd(Address addr) {
   scanner->setScopeEnd(addr);
 }
+
+std::mutex& MemEd::getScanListMutex() {
+  return scanner->getListMutex();
+}

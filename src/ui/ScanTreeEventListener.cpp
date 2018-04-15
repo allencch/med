@@ -12,7 +12,7 @@ bool ScanTreeEventListener::eventFilter(QObject*, QEvent* ev) {
 
     if (keyEvent->key() == Qt::Key_Escape) {
       if (mainUi->getScanState() == UiState::Editing) {
-        tryUnlock(mainUi->scanUpdateMutex);
+        tryUnlock(*mainUi->scanUpdateMutex);
         mainUi->setScanState(UiState::Idle);
       }
     }
@@ -22,7 +22,7 @@ bool ScanTreeEventListener::eventFilter(QObject*, QEvent* ev) {
       if (focused == treeView) {
         QModelIndex index = treeView->currentIndex();
         if (index.column() == SCAN_COL_VALUE && mainUi->getScanState() == UiState::Idle) {
-          mainUi->scanUpdateMutex.lock();
+          mainUi->scanUpdateMutex->lock();
           mainUi->setScanState(UiState::Editing);
         }
       }

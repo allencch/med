@@ -487,3 +487,7 @@ void MemScanner::setScopeEnd(Address addr) {
 bool MemScanner::hasScope() {
   return scope->first && scope->second;
 }
+
+std::mutex& MemScanner::getListMutex() {
+  return listMutex;
+}

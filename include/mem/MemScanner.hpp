@@ -62,7 +62,7 @@ public:
   void setScopeStart(Address addr);
   void setScopeEnd(Address addr);
 
-  std::mutex listMutex;
+  std::mutex& getListMutex();
 
 private:
   void initialize();
@@ -128,6 +128,7 @@ private:
   MemIO* memio;
   vector<MemPtr> snapshot;
   AddressPair* scope;
+  std::mutex listMutex;
 };
 
 #endif

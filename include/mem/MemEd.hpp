@@ -51,6 +51,8 @@ public:
   void setScopeStart(Address addr);
   void setScopeEnd(Address addr);
 
+  std::mutex& getScanListMutex();
+
 private:
   void initialize();
   pid_t pid;

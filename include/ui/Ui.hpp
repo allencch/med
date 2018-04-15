@@ -62,7 +62,7 @@ public:
   UiState getStoreState();
   void setStoreState(UiState);
 
-  std::mutex scanUpdateMutex;
+  std::mutex* scanUpdateMutex;
   std::mutex storeUpdateMutex;
 
   void setWindowTitle();
