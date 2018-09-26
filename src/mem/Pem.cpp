@@ -70,7 +70,8 @@ string Pem::getValue() {
   return Pem::bytesToString(buf, scanType);
 }
 
-Byte* Pem::getValuePtr() {
+Byte* Pem::getValuePtr(int n) {
+  int size = n > 0 ? n : this->size;
   Byte* buf = new Byte[size];
   MemPtr pem = memio->read(address, size);
   memcpy(buf, pem->getData(), size);

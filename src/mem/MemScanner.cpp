@@ -383,7 +383,7 @@ void MemScanner::filterByChunk(std::mutex& mutex,
                                const ScanParser::OpType& op) {
   for (int i = listIndex; i < listIndex + CHUNK_SIZE && i < (int)list.size(); i++) {
     PemPtr pem = static_pointer_cast<Pem>(list[i]);
-    Byte* data = pem->getValuePtr();
+    Byte* data = size > 1 ? pem->getValuePtr(size) : pem->getValuePtr();
 
     if (memCompare(data, size, value, size, op)) {
       pem->setScanType(scanType);
