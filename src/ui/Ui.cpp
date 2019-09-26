@@ -40,8 +40,9 @@ MedUi::~MedUi() {
   delete med;
   delete encodingManager;
 
-  refreshThread->join();
-  delete refreshThread;
+  // Do not enable this
+  // refreshThread->join();
+  // delete refreshThread;
 }
 
 void MedUi::loadUiFiles() {
@@ -95,7 +96,9 @@ void MedUi::setupUi() {
   mainWindow->show();
   qRegisterMetaType<QVector<int>>(); //For multithreading.
 
-  refreshThread = new std::thread(MedUi::refresh, this);
+  // Do not enable this
+  // refreshThread = new std::thread(MedUi::refresh, this);
+
   QAction* showNotesAction = mainWindow->findChild<QAction*>("actionShowNotes");
   if (showNotesAction->isChecked()) {
     notesArea->show();
@@ -169,6 +172,10 @@ void MedUi::setupSignals() {
                    SIGNAL(textChanged()),
                    this,
                    SLOT(onNotesAreaChanged()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionRefresh"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onRefreshTriggered()));
 
   QObject::connect(mainWindow->findChild<QPushButton*>("storeClear"),
                    SIGNAL(clicked()),
@@ -713,6 +720,11 @@ void MedUi::refresh(MedUi* mainUi) {
     mainUi->refreshStoreTreeView();
     std::this_thread::sleep_for(chrono::milliseconds(REFRESH_RATE));
   }
+}
+
+void MedUi::onRefreshTriggered() {
+  refreshScanTreeView();
+  refreshStoreTreeView();
 }
 
 void MedUi::refreshScanTreeView() {

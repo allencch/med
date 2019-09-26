@@ -315,7 +315,7 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>View</string>
+     <string>&amp;View</string>
     </property>
     <widget class="QMenu" name="menu_Encoding">
      <property name="title">
@@ -324,6 +324,7 @@
      <addaction name="actionDefaultEncoding"/>
      <addaction name="actionBig5Encoding"/>
     </widget>
+    <addaction name="actionRefresh"/>
     <addaction name="actionShowNotes"/>
     <addaction name="separator"/>
     <addaction name="menu_Encoding"/>
@@ -422,6 +423,14 @@
    </property>
    <property name="text">
     <string>&amp;Big5</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="text">
+    <string>&amp;Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
    </property>
   </action>
  </widget>

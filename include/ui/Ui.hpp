@@ -105,6 +105,7 @@ private slots:
   void onQuitTriggered();
   void onShowNotesTriggered(bool checked);
   void onNotesAreaChanged();
+  void onRefreshTriggered();
 
   void onNewAddressTriggered();
   void onDeleteAddressTriggered();
