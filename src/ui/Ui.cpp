@@ -19,6 +19,7 @@ using namespace std;
 
 MedUi::MedUi(QApplication* app) {
   this->app = app;
+  this->autoRefresh = false;
   med = new MemEd();
   scanUpdateMutex = &med->getScanListMutex();
 
@@ -40,9 +41,8 @@ MedUi::~MedUi() {
   delete med;
   delete encodingManager;
 
-  // Do not enable this
-  // refreshThread->join();
-  // delete refreshThread;
+  refreshThread->join();
+  delete refreshThread;
 }
 
 void MedUi::loadUiFiles() {
@@ -96,8 +96,7 @@ void MedUi::setupUi() {
   mainWindow->show();
   qRegisterMetaType<QVector<int>>(); //For multithreading.
 
-  // Do not enable this
-  // refreshThread = new std::thread(MedUi::refresh, this);
+  refreshThread = new std::thread(MedUi::refresh, this);
 
   QAction* showNotesAction = mainWindow->findChild<QAction*>("actionShowNotes");
   if (showNotesAction->isChecked()) {
@@ -172,6 +171,10 @@ void MedUi::setupSignals() {
                    SIGNAL(textChanged()),
                    this,
                    SLOT(onNotesAreaChanged()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionAutoRefresh"),
+                   SIGNAL(triggered(bool)),
+                   this,
+                   SLOT(onAutoRefreshTriggered(bool)));
   QObject::connect(mainWindow->findChild<QAction*>("actionRefresh"),
                    SIGNAL(triggered()),
                    this,
@@ -660,6 +663,14 @@ void MedUi::onShowNotesTriggered(bool checked) {
   }
 }
 
+void MedUi::onAutoRefreshTriggered(bool checked) {
+  if (checked) {
+    autoRefresh = true;
+  } else {
+    autoRefresh = false;
+  }
+}
+
 void MedUi::onNotesAreaChanged() {
   med->setNotes(notesArea->toPlainText().toStdString());
 }
@@ -716,8 +727,10 @@ void MedUi::updateNumberOfAddresses() {
 void MedUi::refresh(MedUi* mainUi) {
   // TODO: Store refresh if closing
   while (1) {
-    mainUi->refreshScanTreeView();
-    mainUi->refreshStoreTreeView();
+    if (mainUi->autoRefresh) {
+      mainUi->refreshScanTreeView();
+      mainUi->refreshStoreTreeView();
+    }
     std::this_thread::sleep_for(chrono::milliseconds(REFRESH_RATE));
   }
 }

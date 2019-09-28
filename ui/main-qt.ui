@@ -99,14 +99,14 @@
         <item>
          <widget class="QPushButton" name="scanButton">
           <property name="text">
-           <string>Scan</string>
+           <string>&amp;Scan</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="filterButton">
           <property name="text">
-           <string>Filter</string>
+           <string>F&amp;ilter</string>
           </property>
          </widget>
         </item>
@@ -325,6 +325,7 @@
      <addaction name="actionBig5Encoding"/>
     </widget>
     <addaction name="actionRefresh"/>
+    <addaction name="actionAutoRefresh"/>
     <addaction name="actionShowNotes"/>
     <addaction name="separator"/>
     <addaction name="menu_Encoding"/>
@@ -431,6 +432,14 @@
    </property>
    <property name="shortcut">
     <string>F5</string>
+   </property>
+  </action>
+  <action name="actionAutoRefresh">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto Refresh</string>
    </property>
   </action>
  </widget>
