@@ -341,6 +341,7 @@ void MedUi::onScanClicked() {
     statusBar->showMessage("Snapshot saved");
   }
   updateNumberOfAddresses();
+  med->resumeProcess();
 }
 
 
@@ -367,6 +368,7 @@ void MedUi::onFilterClicked() {
   }
 
   updateNumberOfAddresses();
+  med->resumeProcess();
 }
 
 void MedUi::onScanTreeViewClicked(const QModelIndex &index) {

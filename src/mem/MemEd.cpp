@@ -269,3 +269,9 @@ void MemEd::setScopeEnd(Address addr) {
 std::mutex& MemEd::getScanListMutex() {
   return scanner->getListMutex();
 }
+
+void MemEd::resumeProcess() {
+  if (isPidSuspended(pid)) {
+    pidResume(pid);
+  }
+}

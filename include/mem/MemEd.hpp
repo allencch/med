@@ -53,6 +53,8 @@ public:
 
   std::mutex& getScanListMutex();
 
+  void resumeProcess();
+
 private:
   void initialize();
   pid_t pid;

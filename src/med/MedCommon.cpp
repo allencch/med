@@ -7,6 +7,7 @@
 #include <sys/ptrace.h> //ptrace()
 #include <sys/wait.h> //waitpid()
 #include <dirent.h> //read directory
+#include <signal.h> // kill
 
 #include "med/MedCommon.hpp"
 #include "med/MedException.hpp"
@@ -206,12 +207,40 @@ pid_t pidAttach(pid_t pid) {
   return pid;
 }
 
-pid_t pidDetach(pid_t pid){
-  if(ptrace(PTRACE_DETACH, pid, NULL, NULL) == -1L) {
+pid_t pidDetach(pid_t pid) {
+  if (ptrace(PTRACE_DETACH, pid, NULL, NULL) == -1L) {
     fprintf(stderr, "Failed detach: %s\n", strerror(errno));
     throw MedException("Failed detach");
   }
   return -1;
+}
+
+bool isPidSuspended(pid_t pid) {
+  char filename[128];
+  sprintf(filename, "/proc/%d/stat", pid);
+  FILE* file;
+  file = fopen(filename, "r");
+  if (!file) {
+    printf("Failed open stat: %s\n", filename);
+    exit(1);
+  }
+  char line[256];
+  char state;
+  fgets(line, 255, file);
+  if (sscanf(line, "%*u %*s %c", &state) < 1) {
+    printf("Failed read stat\n");
+    exit(1);
+  }
+  fclose(file);
+
+  if (state == 'T' || state == 't') {
+    return true;
+  }
+  return false;
+}
+
+int pidResume(pid_t pid) {
+  return kill(pid, SIGCONT);
 }
 
 
