@@ -326,8 +326,8 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
   for (size_t i = 0; i < list.size(); i += CHUNK_SIZE) {
     TMTask* fn = new TMTask();
     *fn = [&mutex, &list, &newList, i, value, size, scanType, op]() {
-      filterByChunk(mutex, list, newList, i, value, size, scanType, op);
-    };
+            filterByChunk(mutex, list, newList, i, value, size, scanType, op);
+          };
     threadManager->queueTask(fn);
   }
   threadManager->start();
@@ -340,8 +340,8 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
 }
 
 vector<MemPtr> MemScanner::filterUnknown(const vector<MemPtr>& list,
-                                                 const string& scanType,
-                                                 const ScanParser::OpType& op) {
+                                         const string& scanType,
+                                         const ScanParser::OpType& op) {
   if (snapshot.size()) {
     return filterSnapshot(scanType, op);
   }
@@ -383,7 +383,12 @@ void MemScanner::filterByChunk(std::mutex& mutex,
                                const ScanParser::OpType& op) {
   for (int i = listIndex; i < listIndex + CHUNK_SIZE && i < (int)list.size(); i++) {
     PemPtr pem = static_pointer_cast<Pem>(list[i]);
-    Byte* data = size > 1 ? pem->getValuePtr(size) : pem->getValuePtr();
+    Byte* data;
+    try {
+      data = size > 1 ? pem->getValuePtr(size) : pem->getValuePtr();
+    } catch(MedException &ex) { // Memory not available
+      continue;
+    }
 
     if (memCompare(data, size, value, size, op)) {
       pem->setScanType(scanType);
@@ -408,8 +413,20 @@ void MemScanner::filterUnknownByChunk(std::mutex& mutex,
   for (int i = listIndex; i < listIndex + CHUNK_SIZE && i < (int)list.size(); i++) {
     int size = scanTypeToSize(scanType);
     PemPtr pem = static_pointer_cast<Pem>(list[i]);
-    Byte* data = pem->getValuePtr();
-    Byte* oldValue = pem->recallValuePtr();
+    Byte* data = NULL;
+    Byte* oldValue = NULL;
+    try {
+      data = pem->getValuePtr();
+      oldValue = pem->recallValuePtr();
+    } catch(MedException &ex) {
+      if (data) {
+        delete[] data;
+      }
+      if (oldValue) {
+        delete[] oldValue;
+      }
+      continue;
+    }
 
     if (memCompare(data, size, oldValue, size, op)) {
       pem->setScanType(scanType);
@@ -434,9 +451,9 @@ Maps MemScanner::getInterestedMaps(Maps& maps, const vector<MemPtr>& list) {
       bool inRegion = list[i]->getAddress() >= start && list[i]->getAddress() <= end;
 
       if (inRegion) {
-        AddressPair pair(start, end);
-        if (!interested.hasPair(pair)) {
-          interested.push(pair);
+        AddressPair addressPair(start, end);
+        if (!interested.hasPair(addressPair)) {
+          interested.push(addressPair);
         }
         break;
       }
