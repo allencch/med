@@ -56,6 +56,7 @@ public:
   EncodingManager* encodingManager;
   MemEd* med;
   bool autoRefresh;
+  bool resumeProcess;
   std::thread* refreshThread;
 
   UiState getScanState();
@@ -108,6 +109,7 @@ private slots:
   void onNotesAreaChanged();
   void onAutoRefreshTriggered(bool checked);
   void onRefreshTriggered();
+  void onResumeProcessTriggered(bool checked);
 
   void onNewAddressTriggered();
   void onDeleteAddressTriggered();

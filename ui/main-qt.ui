@@ -326,6 +326,7 @@
     </widget>
     <addaction name="actionRefresh"/>
     <addaction name="actionAutoRefresh"/>
+    <addaction name="actionResumeProcess"/>
     <addaction name="actionShowNotes"/>
     <addaction name="separator"/>
     <addaction name="menu_Encoding"/>
@@ -440,6 +441,17 @@
    </property>
    <property name="text">
     <string>Auto Refresh</string>
+   </property>
+  </action>
+  <action name="actionResumeProcess">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Resume Process</string>
    </property>
   </action>
  </widget>

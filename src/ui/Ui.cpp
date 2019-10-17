@@ -179,6 +179,10 @@ void MedUi::setupSignals() {
                    SIGNAL(triggered()),
                    this,
                    SLOT(onRefreshTriggered()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionResumeProcess"),
+                   SIGNAL(triggered(bool)),
+                   this,
+                   SLOT(onResumeProcessTriggered(bool)));
 
   QObject::connect(mainWindow->findChild<QPushButton*>("storeClear"),
                    SIGNAL(clicked()),
@@ -341,7 +345,9 @@ void MedUi::onScanClicked() {
     statusBar->showMessage("Snapshot saved");
   }
   updateNumberOfAddresses();
-  med->resumeProcess();
+  if (this->resumeProcess) {
+    med->resumeProcess();
+  }
 }
 
 
@@ -368,7 +374,9 @@ void MedUi::onFilterClicked() {
   }
 
   updateNumberOfAddresses();
-  med->resumeProcess();
+  if (this->resumeProcess) {
+    med->resumeProcess();
+  }
 }
 
 void MedUi::onScanTreeViewClicked(const QModelIndex &index) {
@@ -670,6 +678,14 @@ void MedUi::onAutoRefreshTriggered(bool checked) {
     autoRefresh = true;
   } else {
     autoRefresh = false;
+  }
+}
+
+void MedUi::onResumeProcessTriggered(bool checked) {
+  if (checked) {
+    resumeProcess = true;
+  } else {
+    resumeProcess = false;
   }
 }
 
