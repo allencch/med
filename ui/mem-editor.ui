@@ -51,12 +51,12 @@
          </item>
          <item>
           <property name="text">
-           <string>float16</string>
+           <string>float32</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>float32</string>
+           <string>float64</string>
           </property>
          </item>
         </widget>
