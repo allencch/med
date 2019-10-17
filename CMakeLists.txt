@@ -18,7 +18,7 @@ pkg_search_module(ICU REQUIRED icu-uc)
 
 add_definitions(${JSONCPP_CFLAGS} ${ICU_CFLAGS})
 
-add_executable(testfile src/test.c)
+add_executable(testfile src/test.cpp)
 
 file(GLOB med_SRC "src/med/*.cpp")
 file(GLOB mem_SRC "src/mem/*.cpp")
