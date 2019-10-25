@@ -56,7 +56,6 @@ public:
   EncodingManager* encodingManager;
   MemEd* med;
   bool autoRefresh;
-  bool resumeProcess;
   std::thread* refreshThread;
 
   UiState getScanState();

@@ -34,6 +34,7 @@ void MemEd::initialize() {
 
   vector<MemPtr> emptyMems;
   store = new MemList(emptyMems);
+  canResumeProcess = true;
 
   lockValueThread = new std::thread(MemEd::callLockValues, this);
 }
@@ -126,6 +127,9 @@ void MemEd::addToStoreByIndex(int index) {
 void MemEd::callLockValues(MemEd* med) {
   while (1) {
     med->lockValues();
+    if (med->getCanResumeProcess()) {
+      med->resumeProcess();
+    }
     std::this_thread::sleep_for(chrono::milliseconds(LOCK_REFRESH_RATE));
   }
 }
@@ -271,7 +275,15 @@ std::mutex& MemEd::getScanListMutex() {
 }
 
 void MemEd::resumeProcess() {
-  if (isPidSuspended(pid)) {
+  if (pid && isPidSuspended(pid)) {
     pidResume(pid);
   }
+}
+
+void MemEd::setCanResumeProcess(bool value) {
+  canResumeProcess = value;
+}
+
+bool MemEd::getCanResumeProcess() {
+  return canResumeProcess;
 }

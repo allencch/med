@@ -20,7 +20,6 @@ using namespace std;
 MedUi::MedUi(QApplication* app) {
   this->app = app;
   this->autoRefresh = false;
-  this->resumeProcess = true;
   med = new MemEd();
   scanUpdateMutex = &med->getScanListMutex();
 
@@ -346,7 +345,7 @@ void MedUi::onScanClicked() {
     statusBar->showMessage("Snapshot saved");
   }
   updateNumberOfAddresses();
-  if (this->resumeProcess) {
+  if (med->getCanResumeProcess()) {
     med->resumeProcess();
   }
 }
@@ -375,7 +374,7 @@ void MedUi::onFilterClicked() {
   }
 
   updateNumberOfAddresses();
-  if (this->resumeProcess) {
+  if (med->getCanResumeProcess()) {
     med->resumeProcess();
   }
 }
@@ -684,9 +683,9 @@ void MedUi::onAutoRefreshTriggered(bool checked) {
 
 void MedUi::onResumeProcessTriggered(bool checked) {
   if (checked) {
-    resumeProcess = true;
+    med->setCanResumeProcess(true);
   } else {
-    resumeProcess = false;
+    med->setCanResumeProcess(false);
   }
 }
 
