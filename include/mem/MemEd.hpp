@@ -37,6 +37,7 @@ public:
   Process selectedProcess;
 
   void lockValues();
+  bool hasLockValue();
 
   static void callLockValues(MemEd* med);
 

@@ -126,9 +126,11 @@ void MemEd::addToStoreByIndex(int index) {
 
 void MemEd::callLockValues(MemEd* med) {
   while (1) {
-    med->lockValues();
-    if (med->getCanResumeProcess()) {
-      med->resumeProcess();
+    if (med->hasLockValue()) {
+      med->lockValues();
+      if (med->getCanResumeProcess()) {
+        med->resumeProcess();
+      }
     }
     std::this_thread::sleep_for(chrono::milliseconds(LOCK_REFRESH_RATE));
   }
@@ -144,6 +146,17 @@ void MemEd::lockValues() {
     }
   }
   storeMutex.unlock();
+}
+
+bool MemEd::hasLockValue() {
+  auto list = getStore()->getList();
+  for (size_t i = 0; i < list.size(); i++) {
+    auto sem = static_pointer_cast<Sem>(list[i]);
+    if (sem->isLocked()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 
