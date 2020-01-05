@@ -243,6 +243,10 @@ int pidResume(pid_t pid) {
   return kill(pid, SIGCONT);
 }
 
+int pidStop(pid_t pid) {
+  return kill(pid, SIGSTOP);
+}
+
 
 /**
  * Convert the size to padded word size.

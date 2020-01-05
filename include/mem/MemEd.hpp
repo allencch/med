@@ -55,6 +55,8 @@ public:
   std::mutex& getScanListMutex();
 
   void resumeProcess();
+  void pauseProcess();
+  bool getIsProcessPaused();
   void setCanResumeProcess(bool value);
   bool getCanResumeProcess();
 
@@ -67,6 +69,7 @@ private:
   std::mutex storeMutex;
   std::thread* lockValueThread;
   bool canResumeProcess;
+  bool isProcessPaused;
 
   string notes;
 };

@@ -76,6 +76,7 @@ private slots:
   void onProcessClicked();
   void onScanClicked();
   void onFilterClicked();
+  void onPauseCheckboxClicked(bool checked);
 
   void onScanTreeViewClicked(const QModelIndex &index);
   void onScanTreeViewDoubleClicked(const QModelIndex &index);

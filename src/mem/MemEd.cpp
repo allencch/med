@@ -35,6 +35,7 @@ void MemEd::initialize() {
   vector<MemPtr> emptyMems;
   store = new MemList(emptyMems);
   canResumeProcess = true;
+  isProcessPaused = false;
 
   lockValueThread = new std::thread(MemEd::callLockValues, this);
 }
@@ -293,10 +294,20 @@ void MemEd::resumeProcess() {
   }
 }
 
+void MemEd::pauseProcess() {
+  if (!pid) return;
+
+  pidStop(pid);
+}
+
 void MemEd::setCanResumeProcess(bool value) {
   canResumeProcess = value;
 }
 
 bool MemEd::getCanResumeProcess() {
   return canResumeProcess;
+}
+
+bool MemEd::getIsProcessPaused() {
+  return isProcessPaused;
 }

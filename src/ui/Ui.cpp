@@ -129,6 +129,11 @@ void MedUi::setupSignals() {
                    this,
                    SLOT(onFilterClicked()));
 
+  QObject::connect(mainWindow->findChild<QWidget*>("pauseCheckbox"),
+                   SIGNAL(clicked(bool)),
+                   this,
+                   SLOT(onPauseCheckboxClicked(bool)));
+
   QObject::connect(mainWindow->findChild<QPushButton*>("scanAdd"),
                    SIGNAL(clicked()),
                    this,
@@ -345,7 +350,7 @@ void MedUi::onScanClicked() {
     statusBar->showMessage("Snapshot saved");
   }
   updateNumberOfAddresses();
-  if (med->getCanResumeProcess()) {
+  if (!med->getIsProcessPaused() && med->getCanResumeProcess()) {
     med->resumeProcess();
   }
 }
@@ -374,10 +379,20 @@ void MedUi::onFilterClicked() {
   }
 
   updateNumberOfAddresses();
-  if (med->getCanResumeProcess()) {
+  if (!med->getIsProcessPaused() && med->getCanResumeProcess()) {
     med->resumeProcess();
   }
 }
+
+void MedUi::onPauseCheckboxClicked(bool checked) {
+  if (checked) {
+    med->pauseProcess();
+  }
+  else {
+    med->resumeProcess();
+  }
+}
+
 
 void MedUi::onScanTreeViewClicked(const QModelIndex &index) {
   if(index.column() == SCAN_COL_TYPE) {
