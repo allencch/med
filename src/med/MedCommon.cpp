@@ -11,10 +11,32 @@
 
 #include "med/MedCommon.hpp"
 #include "med/MedException.hpp"
-#include "med/ScanParser.hpp"
 #include "med/Process.hpp"
+#include "med/ScanParser.hpp"
+#include "mem/StringUtil.hpp"
 
 using namespace std;
+
+int hexStrToInt(const string& str) {
+  auto trimmed = StringUtil::toLower(StringUtil::trim(str));
+  if (trimmed == "0") return 0;
+  else if (trimmed == "1") return 1;
+  else if (trimmed == "2") return 2;
+  else if (trimmed == "3") return 3;
+  else if (trimmed == "4") return 4;
+  else if (trimmed == "5") return 5;
+  else if (trimmed == "6") return 6;
+  else if (trimmed == "7") return 7;
+  else if (trimmed == "8") return 8;
+  else if (trimmed == "9") return 9;
+  else if (trimmed == "a") return 10;
+  else if (trimmed == "b") return 11;
+  else if (trimmed == "c") return 12;
+  else if (trimmed == "d") return 13;
+  else if (trimmed == "e") return 14;
+  else if (trimmed == "f") return 15;
+  return -1;
+}
 
 /**
  * @brief Convert hexadecimal string to integer value
@@ -349,3 +371,4 @@ void stringToMemory(const string& str, const string& type, Byte* buffer) {
   ScanType scanType = stringToScanType(type);
   stringToMemory(str, scanType, buffer);
 }
+

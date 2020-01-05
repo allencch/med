@@ -54,6 +54,28 @@
          <widget class="QLineEdit" name="scanEntry"/>
         </item>
         <item>
+         <widget class="QLineEdit" name="lastDigit">
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>10</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Last Digit</string>
+          </property>
+          <property name="placeholderText">
+           <string>Last Digit</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="found">
           <property name="minimumSize">
            <size>

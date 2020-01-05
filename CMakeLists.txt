@@ -69,6 +69,10 @@ if(CXXTEST_FOUND)
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/ScanParser.hpp)
   target_link_libraries(testScanParser med)
 
+  CXXTEST_ADD_TEST(testStringUtil testStringUtil.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/StringUtil.hpp)
+  target_link_libraries(testStringUtil med)
+
   CXXTEST_ADD_TEST(testCoder testCoder.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/Coder.hpp)
   target_link_libraries(testCoder med)

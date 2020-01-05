@@ -9,6 +9,7 @@ using namespace std;
 namespace StringUtil {
   string trim(const string& s);
   vector<string> split(const string& s, char delim);
+  string toLower(const string& s);
 }
 
 #endif

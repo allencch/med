@@ -25,12 +25,14 @@ public:
   vector<MemPtr> scan(Byte* value,
                       int size,
                       const string& scanType,
-                      const ScanParser::OpType& op);
+                      const ScanParser::OpType& op,
+                      int lastDigit = -1);
   vector<MemPtr> filter(const vector<MemPtr>& list,
                         Byte* value,
                         int size,
                         const string& scanType,
-                        const ScanParser::OpType& op);
+                        const ScanParser::OpType& op,
+                        int lastDigit = -1);
   vector<MemPtr> filterUnknown(const vector<MemPtr>& list,
                                const string& scanType,
                                const ScanParser::OpType& op);

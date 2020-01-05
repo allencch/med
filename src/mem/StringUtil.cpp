@@ -21,3 +21,11 @@ vector<string> StringUtil::split(const string& s, char delim) {
   }
   return tokens;
 }
+
+string StringUtil::toLower(const string& s) {
+  string newString = s;
+  for (char &ch : newString){
+    ch = std::tolower(ch);
+  }
+  return newString;
+}

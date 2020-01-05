@@ -23,6 +23,8 @@ int scanTypeToSize(const string& type);
 
 string scanTypeToString(const ScanType& scanType);
 
+int hexStrToInt(const string& str);
+
 /**
  * @brief Convert hexadecimal string to integer value
  */

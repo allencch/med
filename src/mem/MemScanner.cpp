@@ -126,9 +126,10 @@ vector<MemPtr> MemScanner::filterUnknownInner(const vector<MemPtr>& list,
 }
 
 vector<MemPtr> MemScanner::scan(Byte* value,
-                                      int size,
-                                      const string& scanType,
-                                      const ScanParser::OpType& op) {
+                                int size,
+                                const string& scanType,
+                                const ScanParser::OpType& op,
+                                int lastDigit) {
   if (hasScope()) {
     return scanByScope(value, size, scanType, op);
   }
@@ -318,7 +319,8 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
                                   Byte* value,
                                   int size,
                                   const string& scanType,
-                                  const ScanParser::OpType& op) {
+                                  const ScanParser::OpType& op,
+                                  int lastDigit) {
   vector<MemPtr> newList;
 
   auto& mutex = listMutex;
