@@ -56,6 +56,7 @@ public:
   EncodingManager* encodingManager;
   MemEd* med;
   bool autoRefresh;
+  bool fastScan;
   std::thread* refreshThread;
 
   UiState getScanState();
@@ -110,6 +111,7 @@ private slots:
   void onAutoRefreshTriggered(bool checked);
   void onRefreshTriggered();
   void onResumeProcessTriggered(bool checked);
+  void onFastScanTriggered(bool checked);
 
   void onNewAddressTriggered();
   void onDeleteAddressTriggered();

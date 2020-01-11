@@ -20,6 +20,7 @@ using namespace std;
 MedUi::MedUi(QApplication* app) {
   this->app = app;
   this->autoRefresh = false;
+  this->fastScan = true;
   med = new MemEd();
   scanUpdateMutex = &med->getScanListMutex();
 
@@ -188,6 +189,10 @@ void MedUi::setupSignals() {
                    SIGNAL(triggered(bool)),
                    this,
                    SLOT(onResumeProcessTriggered(bool)));
+  QObject::connect(mainWindow->findChild<QAction*>("actionFastScan"),
+                   SIGNAL(triggered(bool)),
+                   this,
+                   SLOT(onFastScanTriggered(bool)));
 
   QObject::connect(mainWindow->findChild<QPushButton*>("storeClear"),
                    SIGNAL(clicked()),
@@ -335,7 +340,7 @@ void MedUi::onScanClicked() {
   scanUpdateMutex->unlock();
 
   try {
-    med->scan(scanValue, scanType, getLastDigit());
+    med->scan(scanValue, scanType, fastScan, getLastDigit());
   } catch(EmptyListException &ex) {
     statusBar->showMessage(ex.what());
     cerr << ex.what() << endl;
@@ -697,6 +702,14 @@ void MedUi::onAutoRefreshTriggered(bool checked) {
     autoRefresh = true;
   } else {
     autoRefresh = false;
+  }
+}
+
+void MedUi::onFastScanTriggered(bool checked) {
+  if (checked) {
+    fastScan = true;
+  } else {
+    fastScan = false;
   }
 }
 

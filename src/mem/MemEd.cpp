@@ -49,7 +49,7 @@ pid_t MemEd::getPid() {
   return pid;
 }
 
-vector<MemPtr> MemEd::scan(const string& value, const string& scanType, const string& lastDigit) {
+vector<MemPtr> MemEd::scan(const string& value, const string& scanType, bool fastScan, const string& lastDigit) {
   if (!ScanParser::isValid(value)) {
     throw MedException("Invalid scan string");
   }
@@ -65,7 +65,7 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType, const st
     size_t size = std::get<1>(buffer);
 
     int lastDigitValue = hexStrToInt(lastDigit);
-    mems = scanner->scan(std::get<0>(buffer), size, scanType, ScanParser::OpType::Eq, lastDigitValue);
+    mems = scanner->scan(std::get<0>(buffer), size, scanType, ScanParser::OpType::Eq, fastScan, lastDigitValue);
     delete[] std::get<0>(buffer);
   }
   manager->setMems(mems);

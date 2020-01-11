@@ -129,12 +129,13 @@ vector<MemPtr> MemScanner::scan(Byte* value,
                                 int size,
                                 const string& scanType,
                                 const ScanParser::OpType& op,
+                                bool fastScan,
                                 int lastDigit) {
   if (hasScope()) {
-    return scanByScope(value, size, scanType, op, lastDigit);
+    return scanByScope(value, size, scanType, op, fastScan, lastDigit);
   }
   else {
-    return scanByMaps(value, size, scanType, op, lastDigit);
+    return scanByMaps(value, size, scanType, op, fastScan, lastDigit);
   }
 }
 
@@ -142,6 +143,7 @@ vector<MemPtr> MemScanner::scanByMaps(Byte* value,
                                       int size,
                                       const string& scanType,
                                       const ScanParser::OpType& op,
+                                      bool fastScan,
                                       int lastDigit) {
   vector<MemPtr> list;
 
@@ -153,9 +155,9 @@ vector<MemPtr> MemScanner::scanByMaps(Byte* value,
 
   for (size_t i = 0; i < maps.size(); i++) {
     TMTask* fn = new TMTask();
-    *fn = [memio, &mutex, &list, &maps, i, memFd, value, size, scanType, op, lastDigit]() {
-            scanMap(memio, mutex, list, maps, i, memFd, value, size, scanType, op, lastDigit);
-    };
+    *fn = [memio, &mutex, &list, &maps, i, memFd, value, size, scanType, op, fastScan, lastDigit]() {
+            scanMap(memio, mutex, list, maps, i, memFd, value, size, scanType, op, fastScan, lastDigit);
+          };
     threadManager->queueTask(fn);
   }
   threadManager->start();
@@ -173,6 +175,7 @@ vector<MemPtr> MemScanner::scanByScope(Byte* value,
                                        int size,
                                        const string& scanType,
                                        const ScanParser::OpType& op,
+                                       bool fastScan,
                                        int lastDigit) {
   vector<MemPtr> list;
   auto start = scope->first;
@@ -191,7 +194,7 @@ vector<MemPtr> MemScanner::scanByScope(Byte* value,
     if (read(fd, page, getpagesize()) == -1) {
       continue;
     }
-    scanPage(memio, mutex, list, page, j, value, size, scanType, op, lastDigit);
+    scanPage(memio, mutex, list, page, j, value, size, scanType, op, fastScan, lastDigit);
 
     delete[] page;
   }
@@ -253,6 +256,7 @@ void MemScanner::scanMap(MemIO* memio,
                          int size,
                          const string& scanType,
                          const ScanParser::OpType& op,
+                         bool fastScan,
                          int lastDigit) {
   auto& pairs = maps.getMaps();
   auto& pair = pairs[mapIndex];
@@ -266,7 +270,7 @@ void MemScanner::scanMap(MemIO* memio,
     if (read(fd, page, getpagesize()) == -1) {
       continue;
     }
-    scanPage(memio, mutex, list, page, j, value, size, scanType, op, lastDigit);
+    scanPage(memio, mutex, list, page, j, value, size, scanType, op, fastScan, lastDigit);
 
     delete[] page;
   }
@@ -290,7 +294,14 @@ void MemScanner::saveSnapshotMap(MemIO* memio,
   }
 }
 
-bool skipAddress(long address, int lastDigit) {
+bool skipAddressByFastScan(long address, int size, bool fastScan) {
+  if (!fastScan) return false;
+
+  if (address % size != 0) return true;
+  return false;
+}
+
+bool skipAddressByLastDigit(long address, int lastDigit) {
   if (lastDigit < 0) return false;
 
   if (address % 16 != lastDigit) return true;
@@ -306,9 +317,14 @@ void MemScanner::scanPage(MemIO* memio,
                           int size,
                           const string& scanType,
                           const ScanParser::OpType& op,
+                          bool fastScan,
                           int lastDigit) {
+  int scanTypeSize = scanTypeToSize(scanType);
   for (int k = 0; k <= getpagesize() - size; k += STEP) {
-    if (skipAddress((long)page + k, lastDigit)) {
+    if (skipAddressByFastScan((long)page + k, scanTypeSize, fastScan)) {
+      continue;
+    }
+    if (skipAddressByLastDigit((long)page + k, lastDigit)) {
       continue;
     }
     try {

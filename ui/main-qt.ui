@@ -360,8 +360,15 @@
     <addaction name="separator"/>
     <addaction name="menu_Encoding"/>
    </widget>
+   <widget class="QMenu" name="menuOption">
+    <property name="title">
+     <string>&amp;Option</string>
+    </property>
+    <addaction name="actionFastScan"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
+   <addaction name="menuOption"/>
    <addaction name="menuStore"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -481,6 +488,17 @@
    </property>
    <property name="text">
     <string>Resume Process</string>
+   </property>
+  </action>
+  <action name="actionFastScan">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Fast Scan</string>
    </property>
   </action>
  </widget>
