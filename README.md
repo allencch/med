@@ -25,6 +25,20 @@ The interface can briefly separated into two panes. Left pane is the result from
 2. After choosing the process, you can type in the value that you want to **scan**. (For the current stage, the only data types allowed are int8, int16, int32, float32, float64, and string.) For example, we can scan for the gold amount.
 3. After we make some changes of the gold in the game, you can **filter** it.
 
+## Last digit
+
+The small field besides the scan value input is the "Last Digit" of the target address.
+Some games may have consistent last digit like 0x12341230, where the "0" is the last digit.
+The allowed values are "0" to "f" (case insensitive).
+Other than that the value will be ignored.
+
+## Fast scan
+
+The Option "Fast Scan" is to allow faster scanning based on scan type.
+Let's say we are scanning for "int32", which is 4 bytes long.
+The scanning will target on the addresses with the last digit 0, 4, 8, c instead of 0 to f for every byte.
+Disable it if willing to do an exhaustive scanning.
+
 ## Manage address
 
 The scanned or stored memory addresses, you can
@@ -159,7 +173,7 @@ make
 2. ~~Memory editor dialog (view any memory as block).~~
 3. ~~Scan by string.~~
 4. ~~Scan by changes (scan unknown).~~
-5. Scan within memory block range.
+5. ~~Scan within memory block range.~~
 6. Arithmetic operation with prefix notation.
 7. Scan by struct, supports data type syntax
 8. Scan by pointer(?)
