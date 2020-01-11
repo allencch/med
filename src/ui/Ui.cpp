@@ -93,9 +93,9 @@ void MedUi::loadMemEditor() {
 }
 
 void MedUi::setupUi() {
-  scanTypeCombo->setCurrentIndex(1);
+  scanTypeCombo->setCurrentIndex(2); // int32
   mainWindow->show();
-  qRegisterMetaType<QVector<int>>(); //For multithreading.
+  qRegisterMetaType<QVector<int>>(); // For multithreading
 
   refreshThread = new std::thread(MedUi::refresh, this);
 

@@ -42,7 +42,7 @@
         <item>
          <widget class="QCheckBox" name="pauseCheckbox">
           <property name="text">
-           <string>Pause</string>
+           <string>Pa&amp;use</string>
           </property>
          </widget>
         </item>

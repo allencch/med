@@ -259,8 +259,8 @@ void MemEd::setNotes(const string& notes) {
 
 void MemEd::addNewAddress() {
   auto memio = scanner->getMemIO();
-  SemPtr sem = SemPtr(new Sem(scanTypeToSize(ScanType::Int16), memio));
-  sem->setScanType(SCAN_TYPE_INT_16);
+  SemPtr sem = SemPtr(new Sem(scanTypeToSize(ScanType::Int32), memio));
+  sem->setScanType(SCAN_TYPE_INT_32);
   sem->setDescription("No description");
   store->getList().push_back(sem);
 }
