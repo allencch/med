@@ -289,6 +289,7 @@ std::mutex& MemEd::getScanListMutex() {
 }
 
 void MemEd::resumeProcess() {
+  isProcessPaused = false;
   if (pid && isPidSuspended(pid)) {
     pidResume(pid);
   }
@@ -297,6 +298,7 @@ void MemEd::resumeProcess() {
 void MemEd::pauseProcess() {
   if (!pid) return;
 
+  isProcessPaused = true;
   pidStop(pid);
 }
 
