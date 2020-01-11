@@ -19,7 +19,7 @@ using namespace std;
 
 MedUi::MedUi(QApplication* app) {
   this->app = app;
-  this->autoRefresh = false;
+  this->autoRefresh = true;
   this->fastScan = true;
   med = new MemEd();
   scanUpdateMutex = &med->getScanListMutex();
