@@ -130,7 +130,7 @@ void MemEd::callLockValues(MemEd* med) {
   while (1) {
     if (med->hasLockValue()) {
       med->lockValues();
-      if (med->getCanResumeProcess()) {
+      if (!med->getIsProcessPaused() && med->getCanResumeProcess()) {
         med->resumeProcess();
       }
     }
