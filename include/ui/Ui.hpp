@@ -130,6 +130,8 @@ private:
   void setupUi();
   void updateNumberOfAddresses();
 
+  string getLastDigit();
+
   QApplication* app;
   TreeModel* scanModel;
   UiState scanState;

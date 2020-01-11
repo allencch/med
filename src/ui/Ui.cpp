@@ -310,6 +310,10 @@ void MedUi::onProcessItemDblClicked(QTreeWidgetItem* item, int) {
   processDialog->hide();
 }
 
+string MedUi::getLastDigit() {
+  return mainWindow->findChild<QLineEdit*>("lastDigit")->text().toStdString();
+}
+
 void MedUi::onScanClicked() {
   if(med->selectedProcess.pid == "") {
     statusBar->showMessage("No process selected");
@@ -331,7 +335,7 @@ void MedUi::onScanClicked() {
   scanUpdateMutex->unlock();
 
   try {
-    med->scan(scanValue, scanType);
+    med->scan(scanValue, scanType, getLastDigit());
   } catch(EmptyListException &ex) {
     statusBar->showMessage(ex.what());
     cerr << ex.what() << endl;

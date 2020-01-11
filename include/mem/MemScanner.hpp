@@ -31,8 +31,7 @@ public:
                         Byte* value,
                         int size,
                         const string& scanType,
-                        const ScanParser::OpType& op,
-                        int lastDigit = -1);
+                        const ScanParser::OpType& op);
   vector<MemPtr> filterUnknown(const vector<MemPtr>& list,
                                const string& scanType,
                                const ScanParser::OpType& op);
@@ -74,11 +73,13 @@ private:
   vector<MemPtr> scanByScope(Byte* value,
                              int size,
                              const string& scanType,
-                             const ScanParser::OpType& op);
+                             const ScanParser::OpType& op,
+                             int lastDigit = -1);
   vector<MemPtr> scanByMaps(Byte* value,
                             int size,
                             const string& scanType,
-                            const ScanParser::OpType& op);
+                            const ScanParser::OpType& op,
+                            int lastDigit = -1);
 
   static void scanMap(MemIO* memio,
                       std::mutex& mutex,
@@ -89,7 +90,8 @@ private:
                       Byte* data,
                       int size,
                       const string& scanType,
-                      const ScanParser::OpType& op);
+                      const ScanParser::OpType& op,
+                      int lastDigit = -1);
 
   vector<MemPtr>& saveSnapshotByScope();
   vector<MemPtr>& saveSnapshotByList(const vector<MemPtr>& baseList);
@@ -106,7 +108,8 @@ private:
                        Byte* value,
                        int size,
                        const string& scanType,
-                       const ScanParser::OpType& op);
+                       const ScanParser::OpType& op,
+                       int lastDigit = -1);
 
   static void filterByChunk(std::mutex& mutex,
                             const vector<MemPtr>& list,

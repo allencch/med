@@ -64,14 +64,15 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType, const st
     auto buffer = ScanParser::valueToBytes(value, scanType);
     size_t size = std::get<1>(buffer);
 
-    mems = scanner->scan(std::get<0>(buffer), size, scanType, ScanParser::OpType::Eq, -1);
+    int lastDigitValue = hexStrToInt(lastDigit);
+    mems = scanner->scan(std::get<0>(buffer), size, scanType, ScanParser::OpType::Eq, lastDigitValue);
     delete[] std::get<0>(buffer);
   }
   manager->setMems(mems);
   return mems;
 }
 
-vector<MemPtr> MemEd::filter(const string& value, const string& scanType, const string& lastDigit) {
+vector<MemPtr> MemEd::filter(const string& value, const string& scanType) {
   if (!ScanParser::isValid(value)) {
     throw MedException("Invalid scan string");
   }
@@ -85,7 +86,7 @@ vector<MemPtr> MemEd::filter(const string& value, const string& scanType, const 
     auto buffer = ScanParser::valueToBytes(value, scanType);
     size_t size = std::get<1>(buffer);
 
-    mems = scanner->filter(manager->getMems(), std::get<0>(buffer), size, scanType, ScanParser::OpType::Eq, -1);
+    mems = scanner->filter(manager->getMems(), std::get<0>(buffer), size, scanType, ScanParser::OpType::Eq);
 
     delete[] std::get<0>(buffer);
   }

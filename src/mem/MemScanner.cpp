@@ -131,17 +131,18 @@ vector<MemPtr> MemScanner::scan(Byte* value,
                                 const ScanParser::OpType& op,
                                 int lastDigit) {
   if (hasScope()) {
-    return scanByScope(value, size, scanType, op);
+    return scanByScope(value, size, scanType, op, lastDigit);
   }
   else {
-    return scanByMaps(value, size, scanType, op);
+    return scanByMaps(value, size, scanType, op, lastDigit);
   }
 }
 
 vector<MemPtr> MemScanner::scanByMaps(Byte* value,
                                       int size,
                                       const string& scanType,
-                                      const ScanParser::OpType& op) {
+                                      const ScanParser::OpType& op,
+                                      int lastDigit) {
   vector<MemPtr> list;
 
   Maps maps = getMaps(pid);
@@ -152,8 +153,8 @@ vector<MemPtr> MemScanner::scanByMaps(Byte* value,
 
   for (size_t i = 0; i < maps.size(); i++) {
     TMTask* fn = new TMTask();
-    *fn = [memio, &mutex, &list, &maps, i, memFd, value, size, scanType, op]() {
-      scanMap(memio, mutex, list, maps, i, memFd, value, size, scanType, op);
+    *fn = [memio, &mutex, &list, &maps, i, memFd, value, size, scanType, op, lastDigit]() {
+            scanMap(memio, mutex, list, maps, i, memFd, value, size, scanType, op, lastDigit);
     };
     threadManager->queueTask(fn);
   }
@@ -171,7 +172,8 @@ vector<MemPtr> MemScanner::scanByMaps(Byte* value,
 vector<MemPtr> MemScanner::scanByScope(Byte* value,
                                        int size,
                                        const string& scanType,
-                                       const ScanParser::OpType& op) {
+                                       const ScanParser::OpType& op,
+                                       int lastDigit) {
   vector<MemPtr> list;
   auto start = scope->first;
   auto end = scope->second;
@@ -189,7 +191,7 @@ vector<MemPtr> MemScanner::scanByScope(Byte* value,
     if (read(fd, page, getpagesize()) == -1) {
       continue;
     }
-    scanPage(memio, mutex, list, page, j, value, size, scanType, op);
+    scanPage(memio, mutex, list, page, j, value, size, scanType, op, lastDigit);
 
     delete[] page;
   }
@@ -250,7 +252,8 @@ void MemScanner::scanMap(MemIO* memio,
                          Byte* value,
                          int size,
                          const string& scanType,
-                         const ScanParser::OpType& op) {
+                         const ScanParser::OpType& op,
+                         int lastDigit) {
   auto& pairs = maps.getMaps();
   auto& pair = pairs[mapIndex];
   for (Address j = std::get<0>(pair); j < std::get<1>(pair); j += getpagesize()) {
@@ -263,7 +266,7 @@ void MemScanner::scanMap(MemIO* memio,
     if (read(fd, page, getpagesize()) == -1) {
       continue;
     }
-    scanPage(memio, mutex, list, page, j, value, size, scanType, op);
+    scanPage(memio, mutex, list, page, j, value, size, scanType, op, lastDigit);
 
     delete[] page;
   }
@@ -287,6 +290,13 @@ void MemScanner::saveSnapshotMap(MemIO* memio,
   }
 }
 
+bool skipAddress(long address, int lastDigit) {
+  if (lastDigit < 0) return false;
+
+  if (address % 16 != lastDigit) return true;
+  return false;
+}
+
 void MemScanner::scanPage(MemIO* memio,
                           std::mutex& mutex,
                           vector<MemPtr>& list,
@@ -295,8 +305,12 @@ void MemScanner::scanPage(MemIO* memio,
                           Byte* value,
                           int size,
                           const string& scanType,
-                          const ScanParser::OpType& op) {
+                          const ScanParser::OpType& op,
+                          int lastDigit) {
   for (int k = 0; k <= getpagesize() - size; k += STEP) {
+    if (skipAddress((long)page + k, lastDigit)) {
+      continue;
+    }
     try {
       if (memCompare(page + k, size, value, size, op)) {
         MemPtr mem = memio->read((Address)(start + k), size);
@@ -319,8 +333,7 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
                                   Byte* value,
                                   int size,
                                   const string& scanType,
-                                  const ScanParser::OpType& op,
-                                  int lastDigit) {
+                                  const ScanParser::OpType& op) {
   vector<MemPtr> newList;
 
   auto& mutex = listMutex;
