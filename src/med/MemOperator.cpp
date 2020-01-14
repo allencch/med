@@ -142,8 +142,9 @@ bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpT
 }
 
 bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, ScanParser::OpType op) {
-  if (op != ScanParser::Within)
+  if (op != ScanParser::Within) {
     return memCompare(ptr1, ptr2, size1, op);
+  }
 
   int chunk = size2 / size1; //TODO: will be used for array
   if (chunk < 2) {

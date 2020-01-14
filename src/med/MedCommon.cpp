@@ -291,14 +291,14 @@ vector<Process> pidList() {
   DIR *d;
   struct dirent *dir;
   d = opendir("/proc");
-  if(d) {
-    while((dir = readdir(d)) != NULL) {
-      if(isdigit(dir->d_name[0])) {
+  if (d) {
+    while ((dir = readdir(d)) != NULL) {
+      if (isdigit(dir->d_name[0])) {
         string cmd = pidName(dir->d_name);
-        if(cmd.length()) {
+        if (cmd.length()) {
           Process proc;
           proc.pid = dir->d_name;
-          proc.cmdline = pidName(proc.pid);
+          proc.cmdline = cmd;
           pids.push_back(proc);
         }
 
@@ -321,7 +321,7 @@ string pidName(const string& pid) {
   if(ifile.fail()) {
     return "";
   }
-  ifile >> ret;
+  getline(ifile, ret);
   ifile.close();
 
   return ret;
