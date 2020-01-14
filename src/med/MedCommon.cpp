@@ -2,6 +2,7 @@
 #include <sstream>
 #include <cstring> //strerror()
 #include <fstream>
+#include <regex>
 
 #include <fcntl.h> //open, read, lseek
 #include <sys/ptrace.h> //ptrace()
@@ -237,6 +238,17 @@ pid_t pidDetach(pid_t pid) {
   return -1;
 }
 
+char getPidStatus(const char* stat) {
+  string s = stat;
+  regex reg("\\d+ \\(.*?\\) (\\w) \\d+");
+  smatch m;
+  if (regex_search(s, m, reg)) {
+    return m.str(1).at(0);
+  }
+  return 'X';
+}
+
+
 bool isPidSuspended(pid_t pid) {
   char filename[128];
   sprintf(filename, "/proc/%d/stat", pid);
@@ -247,14 +259,10 @@ bool isPidSuspended(pid_t pid) {
     exit(1);
   }
   char line[256];
-  char state;
   fgets(line, 255, file);
-  if (sscanf(line, "%*u %*s %c", &state) < 1) {
-    printf("Failed read stat\n");
-    exit(1);
-  }
   fclose(file);
 
+  char state = getPidStatus(line);
   if (state == 'T' || state == 't') {
     return true;
   }

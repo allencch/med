@@ -58,6 +58,7 @@ int getMem(pid_t pid);
 
 pid_t pidAttach(pid_t pid);
 pid_t pidDetach(pid_t pid);
+char getPidStatus(const char* stat);
 bool isPidSuspended(pid_t pid);
 int pidResume(pid_t pid);
 int pidStop(pid_t pid);
