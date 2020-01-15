@@ -4,6 +4,7 @@ using namespace std;
 
 int main() {
   int a = 0;
+  int b[] = {1, 2, 0, 0, 3, 2, 1};
   while (1) {
     printf("%d\t", a);
     printf("a = 0x%x\n", a);
