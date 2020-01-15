@@ -185,3 +185,12 @@ For the process maps, read `man procfs`. To view maps,
 ```
 sudo cat /proc/[pid]/maps
 ```
+
+To build with `clang`,
+
+```
+export CC=/usr/bin/clang CXX=/usr/bin/clang++
+mkdir build && cd build
+cmake ..
+make
+```
