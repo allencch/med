@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <iostream>
 #include <algorithm>
 
 #include "mem/MemList.hpp"
@@ -42,9 +43,17 @@ string MemList::getScanType(int index) {
   return pem->getScanType();
 }
 
-void MemList::setValue(int index, const string& value, const string& scanType) {
-  PemPtr pem = static_pointer_cast<Pem>(list[index]);
-  pem->setValue(value, scanType);
+void MemList::setValue(int index, const string& value, const string& scanType, bool isStored) {
+  if (isStored) {
+    SemPtr sem = static_pointer_cast<Sem>(list[index]);
+    sem->setValue(value, scanType);
+    if (sem->isLocked()) {
+      sem->setLockedValue(value);
+    }
+  } else {
+    PemPtr pem = static_pointer_cast<Pem>(list[index]);
+    pem->setValue(value, scanType);
+  }
 }
 
 void MemList::setScanType(int index, const string& scanType) {

@@ -179,7 +179,7 @@ void StoreTreeModel::setValue(const QModelIndex &index, const QVariant &value) {
     string scanType = med->getStore()->getScanType(row);
     string newValue = encodeString(value.toString().toStdString(), scanType);
 
-    med->getStore()->setValue(row, newValue, scanType);
+    med->getStore()->setValue(row, newValue, scanType, true);
   } catch(MedException &e) {
     cerr << "editStoreValue: " << e.what() << endl;
   }

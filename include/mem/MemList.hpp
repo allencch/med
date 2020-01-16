@@ -17,7 +17,7 @@ public:
   string getScanType(int index);
   void dump(int index, bool newline = true);
 
-  void setValue(int index, const string& value, const string& scanType);
+  void setValue(int index, const string& value, const string& scanType, bool isStored = false);
   void setScanType(int index, const string& scanType);
   void setAddress(int index, const string& address);
   int getLastIndex();

@@ -441,7 +441,6 @@ void MedUi::onStoreTreeViewClicked(const QModelIndex &index) {
 }
 
 void MedUi::onStoreTreeViewDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles) {
-  // qDebug() << topLeft << bottomRight << roles;
   if (topLeft.column() == STORE_COL_VALUE) {
     tryUnlock(storeUpdateMutex);
     storeState = UiState::Idle;
