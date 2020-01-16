@@ -97,8 +97,8 @@ tuple<Byte*, size_t> ScanParser::numericToBytes(const string& v, const string& t
     throw MedException("Scan empty string");
   }
 
-  int valueLength = scanTypeToSize(t) * values.size();
-  Byte* data = new Byte[valueLength];
+  int valueLength = scanTypeToSize(t);
+  Byte* data = new Byte[valueLength * values.size()];
   Byte* pointer = data;
   for (size_t i = 0; i < values.size(); i++) {
     stringToMemory(values[i], t, pointer);

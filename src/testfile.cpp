@@ -4,8 +4,13 @@ using namespace std;
 
 int main() {
   int a = 0;
-  int b[] = {1, 2, 0, 0, 3, 2, 1};
+  int b[] = {100, 80, 50, 90, 66, 33, 11};
   while (1) {
+    for (int i =  0; i < 7; i++) {
+      printf("%d ", b[i]);
+    }
+    printf("\n");
+
     printf("%d\t", a);
     printf("a = 0x%x\n", a);
     int temp;
