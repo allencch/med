@@ -1,9 +1,9 @@
-#include <QApplication>
-
 // For segment fault tracing
+#include <iostream>
 #include <execinfo.h>
 #include <unistd.h>
 #include <signal.h>
+#include <QApplication>
 
 #include "ui/Ui.hpp"
 
@@ -21,9 +21,23 @@ void handler(int sig) {
   exit(1);
 }
 
+void print_exception(const std::exception& e, int level = 0) {
+  std::cerr << std::string(level, ' ') << "exception: " << e.what() << endl;
+  try {
+    std::rethrow_if_nested(e);
+  } catch (const std::exception& e) {
+    print_exception(e, level + 1);
+  } catch (...) {}
+}
+
 int main(int argc, char** argv) {
   signal(SIGSEGV, handler);
-  QApplication app(argc, argv);
-  new MedUi(&app);
-  return app.exec();
+  try {
+    QApplication app(argc, argv);
+    new MedUi(&app);
+    return app.exec();
+  } catch(const std::exception& e) {
+    print_exception(e);
+    return 1;
+  }
 }

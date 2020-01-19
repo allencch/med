@@ -258,14 +258,19 @@ void TreeModel::setType(const QModelIndex &index, const QVariant &value) {
 bool TreeModel::setItemData(const QModelIndex &index, const QVariant &value) {
   int row = index.row();
   TreeItem *item = getItem(index);
-  string scanType = med->getScans().getScanType(row);
+  try {
+    string scanType = med->getScans().getScanType(row);
 
-  QVariant newValue = value;
+    QVariant newValue = value;
 
-  if (index.column() == SCAN_COL_VALUE && scanType == SCAN_TYPE_STRING) {
-    newValue = getUtfString(row, scanType);
+    if (index.column() == SCAN_COL_VALUE && scanType == SCAN_TYPE_STRING) {
+      newValue = getUtfString(row, scanType);
+    }
+    return item->setData(index.column(), newValue);
+  } catch (const MedException& e) {
+    cout << "Exception tree model set data: " << e.what() << endl;
+    return false;
   }
-  return item->setData(index.column(), newValue);
 }
 
 QVariant TreeModel::getUtfString(int row, string scanType) {
