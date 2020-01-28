@@ -19,7 +19,10 @@ enum ScanType {
   Unknown
 };
 
-const int MAX_STRING_SIZE = 255;
+
+// To accommodate double
+// https://stackoverflow.com/questions/1701055/what-is-the-maximum-length-in-chars-needed-to-represent-any-double-value
+const int MAX_STRING_SIZE = 1079;
 
 const string SCAN_TYPE_INT_8 = "int8";
 const string SCAN_TYPE_INT_16 = "int16";
