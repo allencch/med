@@ -90,6 +90,7 @@ private:
                       Maps& maps,
                       int mapIndex,
                       int fd,
+                      std::mutex& fdMutex,
                       Byte* data,
                       int size,
                       const string& scanType,

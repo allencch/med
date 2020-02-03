@@ -152,11 +152,12 @@ vector<MemPtr> MemScanner::scanByMaps(Byte* value,
   MemIO* memio = getMemIO();
 
   auto& mutex = listMutex;
+  std::mutex fdMutex;
 
   for (size_t i = 0; i < maps.size(); i++) {
     TMTask* fn = new TMTask();
-    *fn = [memio, &mutex, &list, &maps, i, memFd, value, size, scanType, op, fastScan, lastDigit]() {
-            scanMap(memio, mutex, list, maps, i, memFd, value, size, scanType, op, fastScan, lastDigit);
+    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, value, size, scanType, op, fastScan, lastDigit]() {
+            scanMap(memio, mutex, list, maps, i, memFd, fdMutex, value, size, scanType, op, fastScan, lastDigit);
           };
     threadManager->queueTask(fn);
   }
@@ -252,6 +253,7 @@ void MemScanner::scanMap(MemIO* memio,
                          Maps& maps,
                          int mapIndex,
                          int fd,
+                         std::mutex& fdMutex,
                          Byte* value,
                          int size,
                          const string& scanType,
@@ -261,15 +263,21 @@ void MemScanner::scanMap(MemIO* memio,
   auto& pairs = maps.getMaps();
   auto& pair = pairs[mapIndex];
   for (Address j = std::get<0>(pair); j < std::get<1>(pair); j += getpagesize()) {
-    if (lseek(fd, j, SEEK_SET) == -1) {
-      continue;
-    }
-
     Byte* page = new Byte[getpagesize()]; //For block of memory
 
-    if (read(fd, page, getpagesize()) == -1) {
+    fdMutex.lock();
+    if (lseek(fd, j, SEEK_SET) == -1) {
+      delete[] page;
+      fdMutex.unlock();
       continue;
     }
+    if (read(fd, page, getpagesize()) == -1) {
+      delete[] page;
+      fdMutex.unlock();
+      continue;
+    }
+    fdMutex.unlock();
+
     scanPage(memio, mutex, list, page, j, value, size, scanType, op, fastScan, lastDigit);
 
     delete[] page;
@@ -327,6 +335,7 @@ void MemScanner::scanPage(MemIO* memio,
     if (skipAddressByLastDigit((Address)(start + k), lastDigit)) {
       continue;
     }
+
     try {
       if (memCompare(page + k, size, value, size, op)) {
         MemPtr mem = memio->read((Address)(start + k), size);
