@@ -321,10 +321,10 @@ void MemScanner::scanPage(MemIO* memio,
                           int lastDigit) {
   int scanTypeSize = scanTypeToSize(scanType);
   for (int k = 0; k <= getpagesize() - size; k += STEP) {
-    if (skipAddressByFastScan((long)page + k, scanTypeSize, fastScan)) {
+    if (skipAddressByFastScan((Address)(start + k), scanTypeSize, fastScan)) {
       continue;
     }
-    if (skipAddressByLastDigit((long)page + k, lastDigit)) {
+    if (skipAddressByLastDigit((Address)(start + k), lastDigit)) {
       continue;
     }
     try {
