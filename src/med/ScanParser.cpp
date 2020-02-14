@@ -82,7 +82,7 @@ bool ScanParser::isValid(const string &v) {
 }
 
 // TODO: Similar to Pem's method. Refactoring
-tuple<Byte*, size_t> ScanParser::valueToBytes(const string& v, const string& t) {
+tuple<BytePtr, size_t> ScanParser::valueToBytes(const string& v, const string& t) {
   if (t == SCAN_TYPE_STRING) {
     return ScanParser::stringToBytes(v);
   }
@@ -91,15 +91,15 @@ tuple<Byte*, size_t> ScanParser::valueToBytes(const string& v, const string& t) 
   }
 }
 
-tuple<Byte*, size_t> ScanParser::numericToBytes(const string& v, const string& t) {
+tuple<BytePtr, size_t> ScanParser::numericToBytes(const string& v, const string& t) {
   vector<string> values = getValues(v);
   if (values.size() == 0) {
     throw MedException("Scan empty string");
   }
 
   int valueLength = scanTypeToSize(t);
-  Byte* data = new Byte[valueLength * values.size()];
-  Byte* pointer = data;
+  BytePtr data(new Byte[valueLength * values.size()]);
+  Byte* pointer = data.get();
   for (size_t i = 0; i < values.size(); i++) {
     stringToMemory(values[i], t, pointer);
     pointer += valueLength;
@@ -107,16 +107,16 @@ tuple<Byte*, size_t> ScanParser::numericToBytes(const string& v, const string& t
   return make_tuple(data, valueLength * values.size()); // delete
 }
 
-tuple<Byte*, size_t> ScanParser::stringToBytes(const string& v) {
+tuple<BytePtr, size_t> ScanParser::stringToBytes(const string& v) {
   vector<string> values = getValues(v);
   if (values.size() == 0) {
     throw MedException("Scan empty string");
   }
   int valueLength = v.size();
 
-  Byte* data = new Byte[valueLength];
+  BytePtr data(new Byte[valueLength]);
 
-  char* pointer = (char*)data;
+  char* pointer = (char*)data.get();
   for (int i = 0; i < (int)v.size(); i++, pointer++) {
     sprintf(pointer, "%c", v[i]);
   }

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -39,5 +40,7 @@ enum EncodingType {
 
 typedef pair<Address, Address> AddressPair;
 typedef vector<AddressPair> AddressPairs;
+
+typedef std::shared_ptr<Byte> BytePtr;
 
 #endif
