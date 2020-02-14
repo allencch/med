@@ -153,8 +153,8 @@ bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, 
   return memWithin(ptr1, ptr2, (uint8_t*)ptr2 + size1, size1);
 }
 
-bool memWithin(const void* src, const void* low, const void* up, size_t size) {
-  return memGe(src, low, size) && memLe(src, up, size);
+bool memWithin(const void* src, const void* low, const void* high, size_t size) {
+  return memGe(src, low, size) && memLe(src, high, size);
 }
 
 string memToString(Byte* memory, string scanType) {
