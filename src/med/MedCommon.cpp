@@ -216,13 +216,13 @@ int getMem(pid_t pid) {
  * Attach PID
  */
 pid_t pidAttach(pid_t pid) {
-  if(ptrace(PTRACE_ATTACH, pid, NULL, NULL) == -1L) {
+  if (ptrace(PTRACE_ATTACH, pid, NULL, NULL) == -1L) {
     fprintf(stderr, "Failed attach: %s\n", strerror(errno));
     throw MedException("Failed attach");
   }
 
   int status;
-  if(waitpid(pid, &status, 0) == -1 || !WIFSTOPPED(status)) {
+  if (waitpid(pid, &status, 0) == -1 || !WIFSTOPPED(status)) {
     fprintf(stderr, "Error waiting: %s\n", strerror(errno));
     throw MedException("Error waiting");
   }
@@ -379,4 +379,3 @@ void stringToMemory(const string& str, const string& type, Byte* buffer) {
   ScanType scanType = stringToScanType(type);
   stringToMemory(str, scanType, buffer);
 }
-

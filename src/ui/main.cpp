@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <QApplication>
 
+#include "med/MedException.hpp"
 #include "ui/Ui.hpp"
 
 using namespace std;
@@ -36,6 +37,8 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     new MedUi(&app);
     return app.exec();
+  } catch(MedException &ex) {
+    cerr << ex.getMessage() << endl;
   } catch(const std::exception& e) {
     print_exception(e);
     return 1;
