@@ -41,6 +41,6 @@ enum EncodingType {
 typedef pair<Address, Address> AddressPair;
 typedef vector<AddressPair> AddressPairs;
 
-typedef std::shared_ptr<Byte> BytePtr;
+typedef std::shared_ptr<Byte[]> BytePtr;
 
 #endif
