@@ -38,7 +38,13 @@ MemPtr MemIO::readDirect(Address addr, size_t size) {
 
 MemPtr MemIO::readProcess(Address addr, size_t size) {
   mutex.lock();
-  pidAttach(pid);
+  try {
+    pidAttach(pid);
+  } catch (MedException &ex) {
+    mutex.unlock();
+    cerr << ex.getMessage() << endl;
+    return NULL;
+  }
 
   // When read process, use Pem so that the PemPtr can get data
   // from process through MemIO.
@@ -80,7 +86,13 @@ void MemIO::writeDirect(Address addr, MemPtr mem, size_t size) {
 
 void MemIO::writeProcess(Address addr, MemPtr mem, size_t size) {
   mutex.lock();
-  pidAttach(pid);
+  try {
+    pidAttach(pid);
+  } catch (MedException &ex) {
+    mutex.unlock();
+    cerr << ex.getMessage() << endl;
+    return;
+  }
 
   int writeSize = size ? size : mem->getSize();
 

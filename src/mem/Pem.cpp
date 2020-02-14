@@ -59,6 +59,9 @@ string Pem::bytesToString(Byte* buf, const string& scanType) {
 
 string Pem::getValue(const string& scanType) {
   MemPtr pem = memio->read(address, size);
+  if (!pem) {
+    return "(invalid)";
+  }
   Byte* buf = pem->getData();
   return Pem::bytesToString(buf, scanType);
 }
@@ -66,6 +69,9 @@ string Pem::getValue(const string& scanType) {
 string Pem::getValue() {
   string scanType = getScanType();
   MemPtr pem = memio->read(address, size);
+  if (!pem) {
+    return "(invalid)";
+  }
   Byte* buf = pem->getData();
   return Pem::bytesToString(buf, scanType);
 }
@@ -74,6 +80,9 @@ Byte* Pem::getValuePtr(int n) {
   int size = n > 0 ? n : this->size;
   Byte* buf = new Byte[size];
   MemPtr pem = memio->read(address, size);
+  if (pem) {
+    return NULL;
+  }
   memcpy(buf, pem->getData(), size);
   return buf;
 }
