@@ -6,7 +6,7 @@
 
 #include <string>
 #include <vector>
-#include <tuple>
+#include <utility>
 
 #include "med/MedTypes.hpp"
 
@@ -35,10 +35,10 @@ namespace ScanParser {
   bool isValid(const string &v);
   bool isSnapshotOperator(const OpType& opType);
 
-  tuple<BytePtr, size_t> valueToBytes(const string& v, const string& t);
+  pair<BytePtr, size_t> valueToBytes(const string& v, const string& t);
 
-  tuple<BytePtr, size_t> numericToBytes(const string& v, const string& t);
-  tuple<BytePtr, size_t> stringToBytes(const string& v);
+  pair<BytePtr, size_t> numericToBytes(const string& v, const string& t);
+  pair<BytePtr, size_t> stringToBytes(const string& v);
 };
 
 #endif

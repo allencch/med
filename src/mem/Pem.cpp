@@ -119,7 +119,7 @@ void Pem::setValue(const string& value, const string& scanType) {
   Byte* bytes = std::get<0>(buffer);
   int size = std::get<1>(buffer);
 
-  MemPtr mem = MemPtr(new Mem(size));
+  MemPtr mem(new Mem(size));
   mem->setAddress(address);
   memcpy(mem->getData(), bytes, size);
   delete[] bytes;

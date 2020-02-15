@@ -82,7 +82,7 @@ bool ScanParser::isValid(const string &v) {
 }
 
 // TODO: Similar to Pem's method. Refactoring
-tuple<BytePtr, size_t> ScanParser::valueToBytes(const string& v, const string& t) {
+pair<BytePtr, size_t> ScanParser::valueToBytes(const string& v, const string& t) {
   if (t == SCAN_TYPE_STRING) {
     return ScanParser::stringToBytes(v);
   }
@@ -91,7 +91,7 @@ tuple<BytePtr, size_t> ScanParser::valueToBytes(const string& v, const string& t
   }
 }
 
-tuple<BytePtr, size_t> ScanParser::numericToBytes(const string& v, const string& t) {
+pair<BytePtr, size_t> ScanParser::numericToBytes(const string& v, const string& t) {
   vector<string> values = getValues(v);
   if (values.size() == 0) {
     throw MedException("Scan empty string");
@@ -104,10 +104,10 @@ tuple<BytePtr, size_t> ScanParser::numericToBytes(const string& v, const string&
     stringToMemory(values[i], t, pointer);
     pointer += valueLength;
   }
-  return make_tuple(data, valueLength * values.size());
+  return make_pair(data, valueLength * values.size());
 }
 
-tuple<BytePtr, size_t> ScanParser::stringToBytes(const string& v) {
+pair<BytePtr, size_t> ScanParser::stringToBytes(const string& v) {
   vector<string> values = getValues(v);
   if (values.size() == 0) {
     throw MedException("Scan empty string");
@@ -121,7 +121,7 @@ tuple<BytePtr, size_t> ScanParser::stringToBytes(const string& v) {
     sprintf(pointer, "%c", v[i]);
   }
 
-  return make_tuple(data, valueLength);
+  return make_pair(data, valueLength);
 }
 
 bool ScanParser::isSnapshotOperator(const OpType& opType) {
