@@ -423,10 +423,11 @@ void MemScanner::filterByChunk(std::mutex& mutex,
                                const ScanParser::OpType& op) {
   for (int i = listIndex; i < listIndex + CHUNK_SIZE && i < (int)list.size(); i++) {
     PemPtr pem = static_pointer_cast<Pem>(list[i]);
-    Byte* data;
+    Byte* data = NULL;
     try {
-      data = size > 1 ? pem->getValuePtr(size).get() : pem->getValuePtr().get();
+      data = size > 1 ? pem->getValuePtr(size) : pem->getValuePtr();
     } catch(MedException &ex) { // Memory not available
+      if (data) delete[] data;
       continue;
     }
 
@@ -438,6 +439,7 @@ void MemScanner::filterByChunk(std::mutex& mutex,
       newList.push_back(pem);
       mutex.unlock();
     }
+    delete[] data;
   }
 }
 
@@ -455,9 +457,10 @@ void MemScanner::filterUnknownByChunk(std::mutex& mutex,
     Byte* data = NULL;
     Byte* oldValue = NULL;
     try {
-      data = pem->getValuePtr().get();
+      data = pem->getValuePtr();
       oldValue = pem->recallValuePtr();
     } catch(MedException &ex) {
+      if (data) delete[] data;
       continue;
     }
 
@@ -469,6 +472,7 @@ void MemScanner::filterUnknownByChunk(std::mutex& mutex,
       newList.push_back(pem);
       mutex.unlock();
     }
+    delete[] data;
   }
 }
 
