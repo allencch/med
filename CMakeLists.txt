@@ -102,6 +102,9 @@ if(CXXTEST_FOUND)
   set_property(SOURCE ${gui_HEADER} PROPERTY SKIP_AUTOMOC ON)
 endif()
 
+find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
+include(Dart)
+
 install(TARGETS med med-ui
   RUNTIME DESTINATION /opt/med
   LIBRARY DESTINATION lib)
