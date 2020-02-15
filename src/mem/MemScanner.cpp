@@ -423,23 +423,20 @@ void MemScanner::filterByChunk(std::mutex& mutex,
                                const ScanParser::OpType& op) {
   for (int i = listIndex; i < listIndex + CHUNK_SIZE && i < (int)list.size(); i++) {
     PemPtr pem = static_pointer_cast<Pem>(list[i]);
-    Byte* data = NULL;
+    BytePtr data;
     try {
       data = size > 1 ? pem->getValuePtr(size) : pem->getValuePtr();
     } catch(MedException &ex) { // Memory not available
-      if (data) delete[] data;
       continue;
     }
-
-    if (memCompare(data, size, value, size, op)) {
+    if (memCompare(data.get(), size, value, size, op)) {
       pem->setScanType(scanType);
-      pem->rememberValue(data, size);
+      pem->rememberValue(data.get(), size);
 
       mutex.lock();
       newList.push_back(pem);
       mutex.unlock();
     }
-    delete[] data;
   }
 }
 
@@ -454,25 +451,23 @@ void MemScanner::filterUnknownByChunk(std::mutex& mutex,
   for (int i = listIndex; i < listIndex + CHUNK_SIZE && i < (int)list.size(); i++) {
     int size = scanTypeToSize(scanType);
     PemPtr pem = static_pointer_cast<Pem>(list[i]);
-    Byte* data = NULL;
+    BytePtr data;
     Byte* oldValue = NULL;
     try {
       data = pem->getValuePtr();
       oldValue = pem->recallValuePtr();
     } catch(MedException &ex) {
-      if (data) delete[] data;
       continue;
     }
 
-    if (memCompare(data, size, oldValue, size, op)) {
+    if (memCompare(data.get(), size, oldValue, size, op)) {
       pem->setScanType(scanType);
-      pem->rememberValue(data, size);
+      pem->rememberValue(data.get(), size);
 
       mutex.lock();
       newList.push_back(pem);
       mutex.unlock();
     }
-    delete[] data;
   }
 }
 

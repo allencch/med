@@ -71,14 +71,14 @@ string Pem::getValue() {
   return getValue(scanType);
 }
 
-Byte* Pem::getValuePtr(int n) {
+BytePtr Pem::getValuePtr(int n) {
   int size = n > 0 ? n : this->size;
-  Byte* buf = new Byte[size];
+  BytePtr buf(new Byte[size]);
   MemPtr pem = memio->read(address, size);
   if (!pem) {
     return NULL;
   }
-  memcpy(buf, pem->getData(), size);
+  memcpy(buf.get(), pem->getData(), size);
   return buf;
 }
 
