@@ -2,6 +2,8 @@
 #include <iostream>
 #include <vector>
 #include <unicode/unistr.h>
+#include <unicode/ucnv.h>
+#include <unicode/ustring.h>
 
 #include "med/Coder.hpp"
 
@@ -18,6 +20,40 @@ string convertCode(const string& input, const char* from, const char* to) {
   vector<char> result(length + 1);
   src.extract(0, src.length(), &result[0], to);
   return string(result.begin(), result.end() - 1);
+}
+
+string _convertCodeUsingC(const string& input, const char* from, const char* to) {
+  const char* inputPtr = input.c_str();
+  const int bufLength = 255;
+
+  UErrorCode status = U_ZERO_ERROR;
+  UConverter* conv = ucnv_open(from, &status);
+  if (U_FAILURE(status)) {
+    fprintf(stderr, "Open ucnv error: %s\n", u_errorName(status));
+    return "";
+  }
+
+  UChar buffer[bufLength];
+  ucnv_toUChars(conv, buffer, bufLength, inputPtr, input.size(), &status);
+  if (U_FAILURE(status)) {
+    fprintf(stderr, "toUChars error: %s\n", u_errorName(status));
+    return "";
+  }
+
+  conv = ucnv_open(to, &status);
+  if (U_FAILURE(status)) {
+    fprintf(stderr, "Open ucnv error: %s\n", u_errorName(status));
+    return "";
+  }
+
+  char output[bufLength];
+  ucnv_fromUChars(conv, output, bufLength, buffer, u_strlen(buffer), &status);
+  if (U_FAILURE(status)) {
+    fprintf(stderr, "fromUChars error: %s\n", u_errorName(status));
+    return "";
+  }
+
+  return string(output);
 }
 
 string convertToUtf8(const string& input, const char* from) {
