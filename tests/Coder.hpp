@@ -1,5 +1,6 @@
 #include <string>
 #include <cxxtest/TestSuite.h>
+#include <unicode/uclean.h>
 
 #include "med/Coder.hpp"
 
@@ -28,5 +29,7 @@ public:
 
     string output = convertBig5ToUtf8(buffer);
     TS_ASSERT_EQUALS(strcmp(output.c_str(), expected), 0);
+
+    u_cleanup(); // To avoid valgrind memory leak report
   }
 };
