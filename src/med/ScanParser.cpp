@@ -82,7 +82,7 @@ bool ScanParser::isValid(const string &v) {
 }
 
 // TODO: Similar to Pem's method. Refactoring
-pair<BytePtr, size_t> ScanParser::valueToBytes(const string& v, const string& t) {
+SizedBytes ScanParser::valueToBytes(const string& v, const string& t) {
   if (t == SCAN_TYPE_STRING) {
     return ScanParser::stringToBytes(v);
   }
@@ -91,7 +91,7 @@ pair<BytePtr, size_t> ScanParser::valueToBytes(const string& v, const string& t)
   }
 }
 
-pair<BytePtr, size_t> ScanParser::numericToBytes(const string& v, const string& t) {
+SizedBytes ScanParser::numericToBytes(const string& v, const string& t) {
   vector<string> values = getValues(v);
   if (values.size() == 0) {
     throw MedException("Scan empty string");
@@ -107,7 +107,7 @@ pair<BytePtr, size_t> ScanParser::numericToBytes(const string& v, const string& 
   return make_pair(data, valueLength * values.size());
 }
 
-pair<BytePtr, size_t> ScanParser::stringToBytes(const string& v) {
+SizedBytes ScanParser::stringToBytes(const string& v) {
   vector<string> values = getValues(v);
   if (values.size() == 0) {
     throw MedException("Scan empty string");

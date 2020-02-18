@@ -63,7 +63,7 @@ public:
     op = ScanParser::getOp(s);
     TS_ASSERT_EQUALS(op, "");
 
-    TS_ASSERT_EQUALS(ScanParser::getOp(" <> 1234, 5432 "), "<>");
+    TS_ASSERT_EQUALS(ScanParser::getOp(" <> 1234 5432 "), "<>");
 
     TS_ASSERT_EQUALS(ScanParser::getOp(" < "), "<");
   }
