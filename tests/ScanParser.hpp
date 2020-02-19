@@ -128,5 +128,16 @@ public:
     TS_ASSERT_EQUALS(bytes[1], 0);
     TS_ASSERT_EQUALS(bytes[2], 0);
     TS_ASSERT_EQUALS(bytes[3], 0);
+
+    s = "> 10";
+    result = ScanParser::valueToOperands(s, SCAN_TYPE_INT_32);
+    TS_ASSERT_EQUALS(result.count(), 1);
+    operand = result.getFirstOperand();
+
+    TS_ASSERT_EQUALS(operand.getSize(), 4);
+    bytes = operand.getBytes();
+    TS_ASSERT_EQUALS(bytes[0], 10);
+    TS_ASSERT_EQUALS(bytes[1], 0);
+    TS_ASSERT_EQUALS(bytes[2], 0);
   }
 };
