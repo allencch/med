@@ -14,9 +14,9 @@ public:
     int memory[] = {100, 200, 100};
 
     auto buffer = ScanParser::valueToBytes("100", "int32");
-    size_t size = std::get<1>(buffer);
+    size_t size = buffer.getSize();
 
-    auto list = scanner.scanInner(std::get<0>(buffer).get(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
+    auto list = scanner.scanInner(buffer.getByte(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
 
     TS_ASSERT_EQUALS(list.size(), 2);
   }
@@ -26,15 +26,15 @@ public:
     int memory[] = {100, 200, 100};
 
     auto buffer = ScanParser::valueToBytes("100", "int32");
-    size_t size = std::get<1>(buffer);
+    size_t size = buffer.getSize();
 
-    auto list = scanner.scanInner(std::get<0>(buffer).get(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
+    auto list = scanner.scanInner(buffer.getByte(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
 
     memory[0] = 120;
     buffer = ScanParser::valueToBytes("120", "int32");
     list = scanner.filterInner(list,
-                               std::get<0>(buffer).get(),
-                               std::get<1>(buffer),
+                               buffer.getByte(),
+                               buffer.getSize(),
                                "int32",
                                ScanParser::OpType::Eq);
     TS_ASSERT_EQUALS(list.size(), 1);
@@ -45,9 +45,9 @@ public:
     int memory[] = {100, 200, 100};
 
     auto buffer = ScanParser::valueToBytes("100", "int32");
-    size_t size = std::get<1>(buffer);
+    size_t size = buffer.getSize();
 
-    auto list = scanner.scanInner(std::get<0>(buffer).get(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
+    auto list = scanner.scanInner(buffer.getByte(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
 
     memory[0] = 120;
     list = scanner.filterUnknownInner(list,
@@ -63,9 +63,9 @@ public:
     int memory[] = {100, 200, 100};
 
     auto buffer = ScanParser::valueToBytes("100", "int32");
-    size_t size = std::get<1>(buffer);
+    size_t size = buffer.getSize();
 
-    auto list = scanner.scanInner(std::get<0>(buffer).get(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
+    auto list = scanner.scanInner(buffer.getByte(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
 
     memory[0] = 80;
     memory[2] = 90;

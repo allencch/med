@@ -2,6 +2,7 @@
 #define OPERANDS_HPP
 
 #include "med/MedTypes.hpp"
+#include "med/SizedBytes.hpp"
 
 class Operands {
 public:

@@ -104,7 +104,7 @@ SizedBytes ScanParser::numericToBytes(const string& v, const string& t) {
     stringToMemory(values[i], t, pointer);
     pointer += valueLength;
   }
-  return make_pair(data, valueLength * values.size());
+  return SizedBytes(data, valueLength * values.size());
 }
 
 SizedBytes ScanParser::stringToBytes(const string& v) {
@@ -121,7 +121,7 @@ SizedBytes ScanParser::stringToBytes(const string& v) {
     sprintf(pointer, "%c", v[i]);
   }
 
-  return make_pair(data, valueLength);
+  return SizedBytes(data, valueLength);
 }
 
 bool ScanParser::isSnapshotOperator(const OpType& opType) {

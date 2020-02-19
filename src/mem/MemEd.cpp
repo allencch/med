@@ -62,10 +62,10 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType, bool fas
   }
   else {
     auto buffer = ScanParser::valueToBytes(value, scanType);
-    size_t size = std::get<1>(buffer);
+    size_t size = buffer.getSize();
 
     int lastDigitValue = hexStrToInt(lastDigit);
-    mems = scanner->scan(std::get<0>(buffer).get(), size, scanType, op, fastScan, lastDigitValue);
+    mems = scanner->scan(buffer.getByte(), size, scanType, op, fastScan, lastDigitValue);
   }
   manager->setMems(mems);
   return mems;
@@ -83,9 +83,9 @@ vector<MemPtr> MemEd::filter(const string& value, const string& scanType) {
   }
   else {
     auto buffer = ScanParser::valueToBytes(value, scanType);
-    size_t size = std::get<1>(buffer);
+    size_t size = buffer.getSize();
 
-    mems = scanner->filter(manager->getMems(), std::get<0>(buffer).get(), size, scanType, op);
+    mems = scanner->filter(manager->getMems(), buffer.getByte(), size, scanType, op);
   }
 
   manager->setMems(mems);

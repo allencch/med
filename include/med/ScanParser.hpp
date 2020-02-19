@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "med/MedTypes.hpp"
+#include "med/SizedBytes.hpp"
 #include "med/Operands.hpp"
 
 using namespace std;
