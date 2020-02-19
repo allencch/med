@@ -134,3 +134,16 @@ bool ScanParser::isSnapshotOperator(const OpType& opType) {
   }
   return false;
 }
+
+Operands ScanParser::valueToOperands(const string& v, const string& t) {
+  SizedBytes bytes;
+  if (t == SCAN_TYPE_STRING) {
+    bytes = ScanParser::stringToBytes(v);
+  } else {
+    bytes = ScanParser::numericToBytes(v, t);
+  }
+  vector<SizedBytes> vector = { bytes };
+  Operands operands(vector);
+  return operands;
+
+}

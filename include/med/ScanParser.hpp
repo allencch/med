@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "med/MedTypes.hpp"
+#include "med/Operands.hpp"
 
 using namespace std;
 
@@ -39,6 +40,8 @@ namespace ScanParser {
 
   SizedBytes numericToBytes(const string& v, const string& t);
   SizedBytes stringToBytes(const string& v);
+
+  Operands valueToOperands(const string& v, const string& t);
 };
 
 #endif

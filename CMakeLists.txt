@@ -21,6 +21,7 @@ add_definitions(${JSONCPP_CFLAGS} ${ICU_CFLAGS})
 
 add_executable(testfile src/testfile.cpp)
 
+# NOTE: If adding new source file, this file needs to be "touch"-ed
 file(GLOB med_SRC "src/med/*.cpp")
 file(GLOB mem_SRC "src/mem/*.cpp")
 add_library(med SHARED ${med_SRC} ${mem_SRC})
