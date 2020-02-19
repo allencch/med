@@ -117,8 +117,10 @@ SizedBytes ScanParser::stringToBytes(const string& v) {
   BytePtr data(new Byte[valueLength]);
 
   char* pointer = (char*)data.get();
+  char buf[2];
   for (int i = 0; i < (int)v.size(); i++, pointer++) {
-    sprintf(pointer, "%c", v[i]);
+    sprintf(buf, "%c", v[i]);
+    memcpy(pointer, buf, 1);
   }
 
   return SizedBytes(data, valueLength);

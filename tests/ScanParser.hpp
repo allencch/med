@@ -94,7 +94,7 @@ public:
     TS_ASSERT_EQUALS(values[0], "10");
   }
 
-  void testValueToOperands() {
+  void test_ValueToOperands_to_string() {
     string s = "1";
     Operands result = ScanParser::valueToOperands(s, SCAN_TYPE_STRING);
     TS_ASSERT_EQUALS(result.count(), 1);
@@ -103,5 +103,30 @@ public:
     TS_ASSERT_EQUALS(operand.getSize(), 1);
     Byte* bytes = operand.getBytes();
     TS_ASSERT_EQUALS(bytes[0], 49);
+
+    s = "100";
+    result = ScanParser::valueToOperands(s, SCAN_TYPE_STRING);
+    TS_ASSERT_EQUALS(result.count(), 1);
+    operand = result.getFirstOperand();
+
+    TS_ASSERT_EQUALS(operand.getSize(), 3);
+    bytes = operand.getBytes();
+    TS_ASSERT_EQUALS(bytes[0], 49);
+    TS_ASSERT_EQUALS(bytes[1], 48);
+    TS_ASSERT_EQUALS(bytes[2], 48);
+  }
+
+  void test_valueToOperands_to_numeric() {
+    string s = "1";
+    Operands result = ScanParser::valueToOperands(s, SCAN_TYPE_INT_32);
+    TS_ASSERT_EQUALS(result.count(), 1);
+    auto operand = result.getFirstOperand();
+
+    TS_ASSERT_EQUALS(operand.getSize(), 4);
+    Byte* bytes = operand.getBytes();
+    TS_ASSERT_EQUALS(bytes[0], 1);
+    TS_ASSERT_EQUALS(bytes[1], 0);
+    TS_ASSERT_EQUALS(bytes[2], 0);
+    TS_ASSERT_EQUALS(bytes[3], 0);
   }
 };
