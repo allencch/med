@@ -9,7 +9,7 @@ public:
   SizedBytes(BytePtr data, int length);
   size_t getSize();
   BytePtr getBytePtr();
-  Byte* getByte();
+  Byte* getBytes();
 
 private:
   pair<BytePtr, size_t> data;

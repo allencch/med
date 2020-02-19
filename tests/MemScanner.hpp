@@ -16,7 +16,7 @@ public:
     auto buffer = ScanParser::valueToBytes("100", "int32");
     size_t size = buffer.getSize();
 
-    auto list = scanner.scanInner(buffer.getByte(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
+    auto list = scanner.scanInner(buffer.getBytes(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
 
     TS_ASSERT_EQUALS(list.size(), 2);
   }
@@ -28,12 +28,12 @@ public:
     auto buffer = ScanParser::valueToBytes("100", "int32");
     size_t size = buffer.getSize();
 
-    auto list = scanner.scanInner(buffer.getByte(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
+    auto list = scanner.scanInner(buffer.getBytes(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
 
     memory[0] = 120;
     buffer = ScanParser::valueToBytes("120", "int32");
     list = scanner.filterInner(list,
-                               buffer.getByte(),
+                               buffer.getBytes(),
                                buffer.getSize(),
                                "int32",
                                ScanParser::OpType::Eq);
@@ -47,7 +47,7 @@ public:
     auto buffer = ScanParser::valueToBytes("100", "int32");
     size_t size = buffer.getSize();
 
-    auto list = scanner.scanInner(buffer.getByte(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
+    auto list = scanner.scanInner(buffer.getBytes(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
 
     memory[0] = 120;
     list = scanner.filterUnknownInner(list,
@@ -65,7 +65,7 @@ public:
     auto buffer = ScanParser::valueToBytes("100", "int32");
     size_t size = buffer.getSize();
 
-    auto list = scanner.scanInner(buffer.getByte(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
+    auto list = scanner.scanInner(buffer.getBytes(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
 
     memory[0] = 80;
     memory[2] = 90;

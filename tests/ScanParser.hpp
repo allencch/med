@@ -93,4 +93,15 @@ public:
     TS_ASSERT_EQUALS(values.size(), 1);
     TS_ASSERT_EQUALS(values[0], "10");
   }
+
+  void testValueToOperands() {
+    string s = "1";
+    Operands result = ScanParser::valueToOperands(s, SCAN_TYPE_STRING);
+    TS_ASSERT_EQUALS(result.count(), 1);
+    auto operand = result.getFirstOperand();
+
+    TS_ASSERT_EQUALS(operand.getSize(), 1);
+    Byte* bytes = operand.getBytes();
+    TS_ASSERT_EQUALS(bytes[0], 49);
+  }
 };

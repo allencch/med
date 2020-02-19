@@ -13,7 +13,7 @@ BytePtr SizedBytes::getBytePtr() {
   return std::get<0>(data);
 }
 
-Byte* SizedBytes::getByte() {
+Byte* SizedBytes::getBytes() {
   auto bytePtr = getBytePtr();
   return bytePtr.get();
 }
