@@ -63,9 +63,9 @@ ScanParser::OpType ScanParser::getOpType(const string &v) {
   return stringToOpType(getOp(v));
 }
 
-vector<string> ScanParser::getValues(const string &v) {
+vector<string> ScanParser::getValues(const string &v, char delimiter) {
   string value = ScanParser::getValue(v);
-  vector<string> values = StringUtil::split(value, ',');
+  vector<string> values = StringUtil::split(value, delimiter);
   return values;
 }
 
@@ -137,15 +137,35 @@ bool ScanParser::isSnapshotOperator(const OpType& opType) {
   return false;
 }
 
-Operands ScanParser::valueToOperands(const string& v, const string& t) {
+Operands ScanParser::valueToOperands(const string& v, const string& t, OpType op) {
   SizedBytes bytes;
   if (t == SCAN_TYPE_STRING) {
-    bytes = ScanParser::stringToBytes(v);
+    bytes = stringToBytes(v);
+  } else if (op == OpType::Within) {
+    return getTwoOperands(v, t);
   } else {
-    bytes = ScanParser::numericToBytes(v, t);
+    bytes = numericToBytes(v, t);
   }
   vector<SizedBytes> vector = { bytes };
   Operands operands(vector);
   return operands;
 
+}
+
+Operands ScanParser::getTwoOperands(const string& v, const string& t) {
+  vector<string> values = getValues(v, ' ');
+  if (values.size() < 2) {
+    throw MedException("Operands should not be less than 2");
+  }
+  int length = scanTypeToSize(t);
+
+  vector<SizedBytes> list;
+  for (int i = 0; i < 2; i++) {
+    BytePtr data(new Byte[length]);
+    Byte* ptr = data.get();
+    stringToMemory(values[i], t, ptr);
+
+    list.push_back(SizedBytes(data, length));
+  }
+  return Operands(list);
 }

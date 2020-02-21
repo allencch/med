@@ -30,7 +30,7 @@ namespace ScanParser {
   OpType stringToOpType(const string &s);
   OpType getOpType(const string &v);
   string getValue(const string &v);
-  vector<string> getValues(const string &v);
+  vector<string> getValues(const string &v, char delimiter = ',');
   bool hasValues(const string& v);
   bool isArray(const string &v);
 
@@ -42,7 +42,8 @@ namespace ScanParser {
   SizedBytes numericToBytes(const string& v, const string& t);
   SizedBytes stringToBytes(const string& v);
 
-  Operands valueToOperands(const string& v, const string& t);
+  Operands valueToOperands(const string& v, const string& t, OpType op = OpType::Eq);
+  Operands getTwoOperands(const string& v, const string& t);
 };
 
 #endif
