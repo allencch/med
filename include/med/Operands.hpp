@@ -12,6 +12,8 @@ public:
 
   SizedBytes getFirstOperand();
   SizedBytes getSecondOperand();
+
+  size_t getFirstSize();
 private:
   std::vector<SizedBytes> data;
 };

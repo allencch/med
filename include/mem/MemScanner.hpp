@@ -8,6 +8,7 @@
 #include "med/MedTypes.hpp"
 #include "med/ScanParser.hpp"
 #include "med/ThreadManager.hpp"
+#include "med/Operands.hpp"
 #include "med/MedCommon.hpp"
 #include "mem/Mem.hpp"
 #include "mem/MemIO.hpp"
@@ -22,14 +23,14 @@ public:
   void setPid(pid_t pid);
   pid_t getPid();
   MemIO* getMemIO();
-  vector<MemPtr> scan(Byte* value,
+  vector<MemPtr> scan(Operands& operands,
                       int size,
                       const string& scanType,
                       const ScanParser::OpType& op,
                       bool fastScan = false,
                       int lastDigit = -1);
   vector<MemPtr> filter(const vector<MemPtr>& list,
-                        Byte* value,
+                        Operands& operands,
                         int size,
                         const string& scanType,
                         const ScanParser::OpType& op);
@@ -42,7 +43,7 @@ public:
   vector<MemPtr>& saveSnapshot(const vector<MemPtr>& baseList);
   vector<MemPtr> filterSnapshot(const string& scanType, const ScanParser::OpType& op);
 
-  vector<MemPtr> scanInner(Byte* value,
+  vector<MemPtr> scanInner(Operands& operands,
                            int size,
                            Address base,
                            int blockSize,
@@ -52,7 +53,7 @@ public:
                                   int blockSize,
                                   const string& scanType);
   vector<MemPtr> filterInner(const vector<MemPtr>& list,
-                             Byte* value,
+                             Operands& operands,
                              int size,
                              const string& scanType,
                              const ScanParser::OpType& op);
@@ -71,13 +72,13 @@ private:
   Maps getInterestedMaps(Maps& maps, const vector<MemPtr>& list);
   void compareBlocks(vector<MemPtr>& list, MemPtr& oldBlock, MemPtr& newBlock, const string& scanType, const ScanParser::OpType& op);
 
-  vector<MemPtr> scanByScope(Byte* value,
+  vector<MemPtr> scanByScope(Operands& operands,
                              int size,
                              const string& scanType,
                              const ScanParser::OpType& op,
                              bool fastScan = false,
                              int lastDigit = -1);
-  vector<MemPtr> scanByMaps(Byte* value,
+  vector<MemPtr> scanByMaps(Operands& operands,
                             int size,
                             const string& scanType,
                             const ScanParser::OpType& op,
@@ -91,7 +92,7 @@ private:
                       int mapIndex,
                       int fd,
                       std::mutex& fdMutex,
-                      Byte* data,
+                      Operands& operands,
                       int size,
                       const string& scanType,
                       const ScanParser::OpType& op,
@@ -110,7 +111,7 @@ private:
                        vector<MemPtr>& list,
                        Byte* page,
                        Address start,
-                       Byte* value,
+                       Operands& operands,
                        int size,
                        const string& scanType,
                        const ScanParser::OpType& op,
@@ -121,7 +122,7 @@ private:
                             const vector<MemPtr>& list,
                             vector<MemPtr>& newList,
                             int listIndex,
-                            Byte* value,
+                            Operands& operands,
                             int size,
                             const string& scanType,
                             const ScanParser::OpType& op);

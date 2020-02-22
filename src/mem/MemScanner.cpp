@@ -51,7 +51,7 @@ MemIO* MemScanner::getMemIO() {
   return memio;
 }
 
-vector<MemPtr> MemScanner::scanInner(Byte* value,
+vector<MemPtr> MemScanner::scanInner(Operands& operands,
                                      int size,
                                      Address base,
                                      int blockSize,
@@ -59,7 +59,7 @@ vector<MemPtr> MemScanner::scanInner(Byte* value,
                                      const ScanParser::OpType& op) {
   vector<MemPtr> list;
   for (Address addr = base; addr + size <= base + blockSize; addr += STEP) {
-    if (memCompare((void*)addr, size, value, size, op)) {
+    if (memCompare((void*)addr, size, operands, op)) {
       MemPtr mem = memio->read(addr, size);
       PemPtr pem = Pem::convertToPemPtr(mem, memio);
       pem->setScanType(scanType);
@@ -88,7 +88,7 @@ vector<MemPtr> MemScanner::scanUnknownInner(Address base,
 }
 
 vector<MemPtr> MemScanner::filterInner(const vector<MemPtr>& list,
-                                       Byte* value,
+                                       Operands& operands,
                                        int size,
                                        const string& scanType,
                                        const ScanParser::OpType& op) {
@@ -96,7 +96,7 @@ vector<MemPtr> MemScanner::filterInner(const vector<MemPtr>& list,
   for (size_t i = 0; i < list.size(); i++) {
     MemPtr mem = memio->read(list[i]->getAddress(), list[i]->getSize());
 
-    if (memCompare(mem->getData(), size, value, size, op)) {
+    if (memCompare(mem->getData(), size, operands, op)) {
       PemPtr pem = Pem::convertToPemPtr(mem, memio);
       pem->setScanType(scanType);
       newList.push_back(pem);
@@ -125,21 +125,21 @@ vector<MemPtr> MemScanner::filterUnknownInner(const vector<MemPtr>& list,
   return newList;
 }
 
-vector<MemPtr> MemScanner::scan(Byte* value,
+vector<MemPtr> MemScanner::scan(Operands& operands,
                                 int size,
                                 const string& scanType,
                                 const ScanParser::OpType& op,
                                 bool fastScan,
                                 int lastDigit) {
   if (hasScope()) {
-    return scanByScope(value, size, scanType, op, fastScan, lastDigit);
+    return scanByScope(operands, size, scanType, op, fastScan, lastDigit);
   }
   else {
-    return scanByMaps(value, size, scanType, op, fastScan, lastDigit);
+    return scanByMaps(operands, size, scanType, op, fastScan, lastDigit);
   }
 }
 
-vector<MemPtr> MemScanner::scanByMaps(Byte* value,
+vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
                                       int size,
                                       const string& scanType,
                                       const ScanParser::OpType& op,
@@ -156,8 +156,8 @@ vector<MemPtr> MemScanner::scanByMaps(Byte* value,
 
   for (size_t i = 0; i < maps.size(); i++) {
     TMTask* fn = new TMTask();
-    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, value, size, scanType, op, fastScan, lastDigit]() {
-            scanMap(memio, mutex, list, maps, i, memFd, fdMutex, value, size, scanType, op, fastScan, lastDigit);
+    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &operands, size, scanType, op, fastScan, lastDigit]() {
+            scanMap(memio, mutex, list, maps, i, memFd, fdMutex, operands, size, scanType, op, fastScan, lastDigit);
           };
     threadManager->queueTask(fn);
   }
@@ -172,7 +172,7 @@ vector<MemPtr> MemScanner::scanByMaps(Byte* value,
   return list;
 }
 
-vector<MemPtr> MemScanner::scanByScope(Byte* value,
+vector<MemPtr> MemScanner::scanByScope(Operands& operands,
                                        int size,
                                        const string& scanType,
                                        const ScanParser::OpType& op,
@@ -195,7 +195,7 @@ vector<MemPtr> MemScanner::scanByScope(Byte* value,
     if (read(fd, page, getpagesize()) == -1) {
       continue;
     }
-    scanPage(memio, mutex, list, page, j, value, size, scanType, op, fastScan, lastDigit);
+    scanPage(memio, mutex, list, page, j, operands, size, scanType, op, fastScan, lastDigit);
 
     delete[] page;
   }
@@ -254,7 +254,7 @@ void MemScanner::scanMap(MemIO* memio,
                          int mapIndex,
                          int fd,
                          std::mutex& fdMutex,
-                         Byte* value,
+                         Operands& operands,
                          int size,
                          const string& scanType,
                          const ScanParser::OpType& op,
@@ -278,7 +278,7 @@ void MemScanner::scanMap(MemIO* memio,
     }
     fdMutex.unlock();
 
-    scanPage(memio, mutex, list, page, j, value, size, scanType, op, fastScan, lastDigit);
+    scanPage(memio, mutex, list, page, j, operands, size, scanType, op, fastScan, lastDigit);
 
     delete[] page;
   }
@@ -321,7 +321,7 @@ void MemScanner::scanPage(MemIO* memio,
                           vector<MemPtr>& list,
                           Byte* page,
                           Address start,
-                          Byte* value,
+                          Operands& operands,
                           int size,
                           const string& scanType,
                           const ScanParser::OpType& op,
@@ -337,7 +337,7 @@ void MemScanner::scanPage(MemIO* memio,
     }
 
     try {
-      if (memCompare(page + k, size, value, size, op)) {
+      if (memCompare(page + k, size, operands, op)) {
         MemPtr mem = memio->read((Address)(start + k), size);
 
         PemPtr pem = Pem::convertToPemPtr(mem, memio);
@@ -355,7 +355,7 @@ void MemScanner::scanPage(MemIO* memio,
 }
 
 vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
-                                  Byte* value,
+                                  Operands& operands,
                                   int size,
                                   const string& scanType,
                                   const ScanParser::OpType& op) {
@@ -365,8 +365,8 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
 
   for (size_t i = 0; i < list.size(); i += CHUNK_SIZE) {
     TMTask* fn = new TMTask();
-    *fn = [&mutex, &list, &newList, i, value, size, scanType, op]() {
-            filterByChunk(mutex, list, newList, i, value, size, scanType, op);
+    *fn = [&mutex, &list, &newList, i, &operands, size, scanType, op]() {
+            filterByChunk(mutex, list, newList, i, operands, size, scanType, op);
           };
     threadManager->queueTask(fn);
   }
@@ -417,7 +417,7 @@ void MemScanner::filterByChunk(std::mutex& mutex,
                                const vector<MemPtr>& list,
                                vector<MemPtr>& newList,
                                int listIndex,
-                               Byte* value,
+                               Operands& operands,
                                int size,
                                const string& scanType,
                                const ScanParser::OpType& op) {
@@ -429,7 +429,7 @@ void MemScanner::filterByChunk(std::mutex& mutex,
     } catch(MedException &ex) { // Memory not available
       continue;
     }
-    if (memCompare(data.get(), size, value, size, op)) {
+    if (memCompare(data.get(), size, operands, op)) {
       pem->setScanType(scanType);
       pem->rememberValue(data.get(), size);
 

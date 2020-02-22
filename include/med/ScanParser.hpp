@@ -42,6 +42,10 @@ namespace ScanParser {
   SizedBytes numericToBytes(const string& v, const string& t);
   SizedBytes stringToBytes(const string& v);
 
+  // Convert input string (value) to Operands.
+  // If it is scan Within, then it will have two operands.
+  // Others will consider as one operand.
+  // If the input is an array (with commas), it is one operand.
   Operands valueToOperands(const string& v, const string& t, OpType op = OpType::Eq);
   Operands getTwoOperands(const string& v, const string& t);
 };

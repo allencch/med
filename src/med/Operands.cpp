@@ -24,3 +24,7 @@ SizedBytes Operands::getSecondOperand() {
   }
   return data[1];
 }
+
+size_t Operands::getFirstSize() {
+  return data[0].getSize();
+}

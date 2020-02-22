@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "mem/MemScanner.hpp"
+#include "med/Operands.hpp"
 
 using namespace std;
 
@@ -15,8 +16,9 @@ public:
 
     auto buffer = ScanParser::valueToBytes("100", "int32");
     size_t size = buffer.getSize();
+    Operands operands(std::vector<SizedBytes>{ buffer });
 
-    auto list = scanner.scanInner(buffer.getBytes(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
+    auto list = scanner.scanInner(operands, size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
 
     TS_ASSERT_EQUALS(list.size(), 2);
   }
@@ -27,13 +29,15 @@ public:
 
     auto buffer = ScanParser::valueToBytes("100", "int32");
     size_t size = buffer.getSize();
+    Operands operands(std::vector<SizedBytes>{ buffer });
 
-    auto list = scanner.scanInner(buffer.getBytes(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
+    auto list = scanner.scanInner(operands, size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
 
     memory[0] = 120;
     buffer = ScanParser::valueToBytes("120", "int32");
+    operands = Operands(std::vector<SizedBytes>{ buffer });
     list = scanner.filterInner(list,
-                               buffer.getBytes(),
+                               operands,
                                buffer.getSize(),
                                "int32",
                                ScanParser::OpType::Eq);
@@ -46,8 +50,9 @@ public:
 
     auto buffer = ScanParser::valueToBytes("100", "int32");
     size_t size = buffer.getSize();
+    Operands operands(std::vector<SizedBytes>{ buffer });
 
-    auto list = scanner.scanInner(buffer.getBytes(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
+    auto list = scanner.scanInner(operands, size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
 
     memory[0] = 120;
     list = scanner.filterUnknownInner(list,
@@ -64,8 +69,9 @@ public:
 
     auto buffer = ScanParser::valueToBytes("100", "int32");
     size_t size = buffer.getSize();
+    Operands operands(std::vector<SizedBytes>{ buffer });
 
-    auto list = scanner.scanInner(buffer.getBytes(), size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
+    auto list = scanner.scanInner(operands, size, (Address)memory, 4 * 3, "int32", ScanParser::OpType::Eq);
 
     memory[0] = 80;
     memory[2] = 90;
