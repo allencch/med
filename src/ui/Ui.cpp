@@ -381,7 +381,15 @@ void MedUi::onFilterClicked() {
     scanValue = encodingManager->encode(scanValue);
   }
 
-  med->filter(scanValue, scanType);
+  try {
+    med->filter(scanValue, scanType);
+  } catch (EmptyListException &ex) {
+    statusBar->showMessage(ex.what());
+    cerr << ex.what() << endl;
+    return;
+  } catch (MedException &ex) {
+    cerr << "filter: "<< ex.what() << endl;
+  }
 
   if(med->getScans().size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
     scanModel->addScan(scanType);

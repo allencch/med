@@ -52,9 +52,9 @@ string ScanParser::getValue(const string &v) {
   return result;
 }
 
-bool ScanParser::isArray(const string &v) {
+bool ScanParser::isArray(const string &v, char delimiter) {
   string value = StringUtil::trim(v);
-  if (value.find(",") != string::npos)
+  if (value.find(delimiter) != string::npos)
     return true;
   return false;
 }
@@ -76,7 +76,7 @@ bool ScanParser::hasValues(const string& v) {
 
 bool ScanParser::isValid(const string &v) {
   if (ScanParser::getOpType(v) == ScanParser::Within &&
-      !ScanParser::isArray(v))
+      !ScanParser::isArray(v, ' '))
     return false;
   return true;
 }

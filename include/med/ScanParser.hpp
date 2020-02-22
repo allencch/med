@@ -32,7 +32,7 @@ namespace ScanParser {
   string getValue(const string &v);
   vector<string> getValues(const string &v, char delimiter = ',');
   bool hasValues(const string& v);
-  bool isArray(const string &v);
+  bool isArray(const string &v, char delimiter = ',');
 
   bool isValid(const string &v);
   bool isSnapshotOperator(const OpType& opType);
