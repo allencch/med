@@ -799,13 +799,23 @@ void MedUi::onRefreshTriggered() {
 
 void MedUi::refreshScanTreeView() {
   scanUpdateMutex->lock();
-  scanModel->refreshValues();
+  try {
+    scanModel->refreshValues();
+  } catch (MedException& ex) {
+    scanUpdateMutex->unlock();
+    cerr << ex.getMessage() << endl;
+  }
   scanUpdateMutex->unlock();
 }
 
 void MedUi::refreshStoreTreeView() {
   storeUpdateMutex.lock();
-  storeModel->refreshValues();
+  try {
+    storeModel->refreshValues();
+  } catch (MedException& ex) {
+    storeUpdateMutex.unlock();
+    cerr << ex.getMessage() << endl;
+  }
   storeUpdateMutex.unlock();
 }
 
