@@ -2,6 +2,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "med/MemOperator.hpp"
+#include "med/Operands.hpp"
 
 using namespace std;
 
@@ -75,5 +76,28 @@ public:
     addr = 0x4321432f;
     rounded = addressRoundDown(addr);
     TS_ASSERT_EQUALS(rounded, 0x43214320);
+  }
+
+  void test_compare_operands() {
+    int length = 4;
+    SizedBytes sizedBytes = SizedBytes::create(length);
+    Operands operands(std::vector<SizedBytes>{ sizedBytes });
+    Byte* ptr = sizedBytes.getBytes();
+    ptr[0] = 1;
+    ptr[1] = 0;
+    ptr[2] = 0;
+    ptr[3] = 0;
+
+    Byte* bytes = new Byte[length];
+    ptr = bytes;
+    ptr[0] = 1;
+    ptr[1] = 0;
+    ptr[2] = 0;
+    ptr[3] = 0;
+
+    bool result = memCompare(bytes, length, operands, ScanParser::Eq);
+    TS_ASSERT_EQUALS(result, true);
+
+    delete[] bytes;
   }
 };

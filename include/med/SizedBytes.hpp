@@ -7,6 +7,9 @@ class SizedBytes {
 public:
   SizedBytes();
   SizedBytes(BytePtr data, int length);
+
+  static SizedBytes create(int length);
+
   size_t getSize();
   BytePtr getBytePtr();
   Byte* getBytes();

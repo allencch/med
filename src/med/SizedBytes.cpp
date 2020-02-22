@@ -5,6 +5,11 @@ SizedBytes::SizedBytes(BytePtr data, int length) {
   this->data = std::make_pair(data, length);
 }
 
+SizedBytes SizedBytes::create(int length) {
+  BytePtr bytePtr(new Byte[length]);
+  return SizedBytes(bytePtr, length);
+}
+
 size_t SizedBytes::getSize() {
   return std::get<1>(data);
 }

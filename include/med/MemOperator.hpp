@@ -7,6 +7,7 @@
 #include "med/MedTypes.hpp"
 #include "med/MedException.hpp"
 #include "med/ScanParser.hpp"
+#include "med/Operands.hpp"
 
 using namespace std;
 
@@ -37,6 +38,7 @@ bool memLe(const void* ptr1, const void* ptr2, size_t size);
  */
 bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpType op);
 bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, ScanParser::OpType op);
+bool memCompare(const void* ptr, size_t size, Operands& operands, const ScanParser::OpType& op);
 
 
 /**
