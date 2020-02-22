@@ -98,6 +98,57 @@ public:
     bool result = memCompare(bytes, length, operands, ScanParser::Eq);
     TS_ASSERT_EQUALS(result, true);
 
+    ptr[0] = 2;
+    result = memCompare(bytes, length, operands, ScanParser::Neq);
+    TS_ASSERT_EQUALS(result, true);
+
+    // Target bytes is greater than input value
+    result = memCompare(bytes, length, operands, ScanParser::Gt);
+    TS_ASSERT_EQUALS(result, true);
+
+    delete[] bytes;
+  }
+
+  void test_compare_two_operands() {
+    int length = 4;
+    SizedBytes first = SizedBytes::create(length);
+    Byte* ptr = first.getBytes();
+    ptr[0] = 10;
+    ptr[1] = 0;
+    ptr[2] = 0;
+    ptr[3] = 0;
+
+    SizedBytes second = SizedBytes::create(length);
+    ptr = second.getBytes();
+    ptr[0] = 20;
+    ptr[1] = 0;
+    ptr[2] = 0;
+    ptr[3] = 0;
+
+    Operands operands(std::vector<SizedBytes>{ first, second });
+
+    Byte* bytes = new Byte[length];
+    ptr = bytes;
+    ptr[0] = 10;
+    ptr[1] = 0;
+    ptr[2] = 0;
+    ptr[3] = 0;
+
+    bool result = memCompare(bytes, length, operands, ScanParser::Within);
+    TS_ASSERT_EQUALS(result, true);
+
+    ptr[0] = 9;
+    result = memCompare(bytes, length, operands, ScanParser::Within);
+    TS_ASSERT_EQUALS(result, false);
+
+    ptr[0] = 20;
+    result = memCompare(bytes, length, operands, ScanParser::Within);
+    TS_ASSERT_EQUALS(result, true);
+
+    ptr[0] = 21;
+    result = memCompare(bytes, length, operands, ScanParser::Within);
+    TS_ASSERT_EQUALS(result, false);
+
     delete[] bytes;
   }
 };
