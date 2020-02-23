@@ -91,6 +91,21 @@ Let's say we know a hero has the attributes like Max HP, HP, Max MP, and MP, wit
 
 where the Max HP is 3000, current HP is 2580, Max MP is 1500, and current MP is 1500.
 
+## Scan by operators
+
+There are several operators can be used for scanning,
+
+* `=` - equal, default
+* `>` - greater than
+* `>=` - greater than or equal to
+* `<` - less than
+* `<=` - less than or equal to
+* `!` - not
+* `<>` - between (inclusive)
+
+For `<>`, it requires two operands, example `<> 10 20`, which means scan for the value in the range of [10, 20].
+This feature is useful to search for the value such as floating point (float or double) that contains decimal places which is not shown in the game, such as Forager.
+
 
 ## Save/open file
 
