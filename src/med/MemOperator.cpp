@@ -179,6 +179,12 @@ string memToString(Byte* memory, string scanType) {
   case Int32:
     sprintf(str, "%" PRIu32, *(uint32_t*)memory);
     break;
+  case Ptr32:
+    sprintf(str, "0x%" PRIx32, *(uint32_t*)memory);
+    break;
+  case Ptr64:
+    sprintf(str, "0x%" PRIx64, *(uint64_t*)memory);
+    break;
   case Float32:
     sprintf(str, "%f", *(float*)memory);
     break;

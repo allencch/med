@@ -73,8 +73,11 @@ ScanType stringToScanType(const string& scanType) {
   else if (scanType == SCAN_TYPE_INT_32) {
     return Int32;
   }
-  else if (scanType == SCAN_TYPE_INT_64) {
-    return Int64;
+  else if (scanType == SCAN_TYPE_PTR_32) {
+    return Ptr32;
+  }
+  else if (scanType == SCAN_TYPE_PTR_64) {
+    return Ptr64;
   }
   else if (scanType == SCAN_TYPE_FLOAT_32) {
     return Float32;
@@ -100,8 +103,11 @@ string scanTypeToString(const ScanType& scanType) {
   case Int32:
     ret = SCAN_TYPE_INT_32;
     break;
-  case Int64:
-    ret = SCAN_TYPE_INT_64;
+  case Ptr32:
+    ret = SCAN_TYPE_PTR_32;
+    break;
+  case Ptr64:
+    ret = SCAN_TYPE_PTR_64;
     break;
   case Float32:
     ret = SCAN_TYPE_FLOAT_32;
@@ -128,9 +134,10 @@ int scanTypeToSize(const ScanType& type) {
     ret = sizeof(uint16_t);
     break;
   case Int32:
+  case Ptr32:
     ret = sizeof(uint32_t);
     break;
-  case Int64:
+  case Ptr64:
     ret = sizeof(uint64_t);
     break;
   case Float32:
@@ -194,7 +201,7 @@ Maps getMaps(pid_t pid) {
       continue;
     }
 
-    if (rd == 'r' && wr == 'w' && ((end - start) > 0)) {
+    if (rd == 'r' && ((end - start) > 0)) {
       AddressPair pair(start, end);
       maps.push(pair);
     }
@@ -368,9 +375,10 @@ void stringToMemory(const string& str, const ScanType& type, Byte* buffer) {
     ss >> dec >> *(uint16_t*)buffer;
     break;
   case Int32:
+  case Ptr32:
     ss >> dec >> *(uint32_t*)buffer;
     break;
-  case Int64:
+  case Ptr64:
     ss >> dec >> *(uint64_t*)buffer;
     break;
   case Float32:
@@ -401,8 +409,14 @@ bool isHexString(const string& str) {
 }
 
 void hexStringToMemory(const string& str, const ScanType& type, Byte* buffer) {
-  stringstream ss(str);
+  regex reg("^0x");
+  string sanitized = regex_replace(str, reg, "");
+  int length = scanTypeToSize(type) * 2;
 
+  int indexStart = std::max((int)(sanitized.length() - length), 0);
+  sanitized = sanitized.substr(indexStart, length);
+
+  stringstream ss(sanitized);
   int temp;
   switch (type) {
   case Int8:
@@ -413,9 +427,10 @@ void hexStringToMemory(const string& str, const ScanType& type, Byte* buffer) {
     ss >> hex >> *(uint16_t*)buffer;
     break;
   case Int32:
+  case Ptr32:
     ss >> hex >> *(uint32_t*)buffer;
     break;
-  case Int64:
+  case Ptr64:
     ss >> hex >> *(uint64_t*)buffer;
     break;
   case Float32:

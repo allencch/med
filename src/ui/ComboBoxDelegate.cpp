@@ -22,6 +22,8 @@ QWidget* ComboBoxDelegate::createEditor(QWidget* parent,
                    "int8" <<
                    "int16" <<
                    "int32" <<
+                   "ptr32" <<
+                   "ptr64" <<
                    "float32" <<
                    "float64" <<
                    "string");

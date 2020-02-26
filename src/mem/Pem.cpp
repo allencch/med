@@ -8,6 +8,7 @@
 #include "med/MedException.hpp"
 #include "med/ScanParser.hpp"
 #include "med/MedTypes.hpp"
+#include "med/MemOperator.hpp"
 
 Pem::Pem(size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
@@ -31,30 +32,7 @@ Pem::~Pem() {
 }
 
 string Pem::bytesToString(Byte* buf, const string& scanType) {
-  char str[MAX_STRING_SIZE];
-  switch (stringToScanType(scanType)) {
-  case Int8:
-    sprintf(str, "%" PRIu8, *(uint8_t*)buf);
-    break;
-  case Int16:
-    sprintf(str, "%" PRIu16, *(uint16_t*)buf);
-    break;
-  case Int32:
-    sprintf(str, "%" PRIu32, *(uint32_t*)buf);
-    break;
-  case Float32:
-    sprintf(str, "%f", *(float*)buf);
-    break;
-  case Float64:
-    sprintf(str, "%lf", *(double*)buf);
-    break;
-  case String:
-    sprintf(str, "%s", buf);
-    break;
-  case Unknown:
-    throw_with_nested(MedException(string("bytesToString: Error Type: ") + scanType));
-  }
-  return string(str);
+  return memToString(buf, scanType);
 }
 
 string Pem::getValue(const string& scanType) {

@@ -110,7 +110,12 @@
           </item>
           <item>
            <property name="text">
-            <string>int64</string>
+            <string>ptr32</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ptr64</string>
            </property>
           </item>
           <item>
