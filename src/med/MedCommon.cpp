@@ -73,6 +73,9 @@ ScanType stringToScanType(const string& scanType) {
   else if (scanType == SCAN_TYPE_INT_32) {
     return Int32;
   }
+  else if (scanType == SCAN_TYPE_INT_64) {
+    return Int64;
+  }
   else if (scanType == SCAN_TYPE_FLOAT_32) {
     return Float32;
   }
@@ -96,6 +99,9 @@ string scanTypeToString(const ScanType& scanType) {
     break;
   case Int32:
     ret = SCAN_TYPE_INT_32;
+    break;
+  case Int64:
+    ret = SCAN_TYPE_INT_64;
     break;
   case Float32:
     ret = SCAN_TYPE_FLOAT_32;
@@ -123,6 +129,9 @@ int scanTypeToSize(const ScanType& type) {
     break;
   case Int32:
     ret = sizeof(uint32_t);
+    break;
+  case Int64:
+    ret = sizeof(uint64_t);
     break;
   case Float32:
     ret = sizeof(float);
@@ -361,6 +370,9 @@ void stringToMemory(const string& str, const ScanType& type, Byte* buffer) {
   case Int32:
     ss >> dec >> *(uint32_t*)buffer;
     break;
+  case Int64:
+    ss >> dec >> *(uint64_t*)buffer;
+    break;
   case Float32:
     ss >> dec >> *(float*)buffer;
     break;
@@ -374,7 +386,7 @@ void stringToMemory(const string& str, const ScanType& type, Byte* buffer) {
     break;
   }
   if(ss.fail()) {
-    printf("Error input: %s\n", str.c_str());
+    printf("stringToMemory Error input: %s\n", str.c_str());
   }
 }
 
@@ -403,6 +415,9 @@ void hexStringToMemory(const string& str, const ScanType& type, Byte* buffer) {
   case Int32:
     ss >> hex >> *(uint32_t*)buffer;
     break;
+  case Int64:
+    ss >> hex >> *(uint64_t*)buffer;
+    break;
   case Float32:
     ss >> hex >> *(float*)buffer;
     break;
@@ -416,6 +431,6 @@ void hexStringToMemory(const string& str, const ScanType& type, Byte* buffer) {
     break;
   }
   if(ss.fail()) {
-    printf("Error input: %s\n", str.c_str());
+    printf("hexStringToMemory Error input: %s\n", str.c_str());
   }
 }

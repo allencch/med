@@ -110,6 +110,11 @@
           </item>
           <item>
            <property name="text">
+            <string>int64</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>float32</string>
            </property>
           </item>
@@ -314,7 +319,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>29</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
