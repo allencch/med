@@ -16,4 +16,20 @@ public:
     char res = getPidStatus(pid);
     TS_ASSERT_EQUALS(res, 'T');
   }
+
+  void test_stringToMemory() {
+    string t = "int16";
+    int valueLength = scanTypeToSize(t);
+    Byte* buffer = new Byte[valueLength];
+
+    stringToMemory("100", t, buffer);
+    TS_ASSERT_EQUALS(buffer[0], 100);
+    TS_ASSERT_EQUALS(buffer[1], 0);
+
+    stringToMemory("0x63", t, buffer);
+    TS_ASSERT_EQUALS(buffer[0], 99);
+    TS_ASSERT_EQUALS(buffer[1], 0);
+
+    delete[] buffer;
+  }
 };

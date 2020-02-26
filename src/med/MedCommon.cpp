@@ -47,7 +47,6 @@ long hexToInt(string str) {
   long ret = -1;
   ss >> hex >> ret;
   if(ss.fail()) {
-    // fprintf(stderr,"Error input: %s\n",str.c_str());
     throw MedException(string("Error input: ") + str);
   }
 
@@ -344,13 +343,17 @@ void tryUnlock(std::mutex &mutex) {
 }
 
 void stringToMemory(const string& str, const ScanType& type, Byte* buffer) {
+  if (isHexString(str)) {
+    return hexStringToMemory(str, type, buffer);
+  }
+
   stringstream ss(str);
 
   int temp;
   switch (type) {
   case Int8:
     ss >> dec >> temp; //Because it does not handle the uint8_t correctly as integer, but a character.
-    *(uint8_t*)buffer = (uint8_t) temp;
+    *(uint8_t*)buffer = (uint8_t)temp;
     break;
   case Int16:
     ss >> dec >> *(uint16_t*)buffer;
@@ -378,4 +381,41 @@ void stringToMemory(const string& str, const ScanType& type, Byte* buffer) {
 void stringToMemory(const string& str, const string& type, Byte* buffer) {
   ScanType scanType = stringToScanType(type);
   stringToMemory(str, scanType, buffer);
+}
+
+bool isHexString(const string& str) {
+  regex reg("^0x[0-9a-fA-F]+");
+  return regex_match(str, reg);
+}
+
+void hexStringToMemory(const string& str, const ScanType& type, Byte* buffer) {
+  stringstream ss(str);
+
+  int temp;
+  switch (type) {
+  case Int8:
+    ss >> hex >> temp;
+    *(uint8_t*)buffer = (uint8_t)temp;
+    break;
+  case Int16:
+    ss >> hex >> *(uint16_t*)buffer;
+    break;
+  case Int32:
+    ss >> hex >> *(uint32_t*)buffer;
+    break;
+  case Float32:
+    ss >> hex >> *(float*)buffer;
+    break;
+  case Float64:
+    ss >> hex >> *(double*)buffer;
+    break;
+  case String:
+    printf("Warning: stringToMemory with String type\n");
+    break;
+  case Unknown:
+    break;
+  }
+  if(ss.fail()) {
+    printf("Error input: %s\n", str.c_str());
+  }
 }

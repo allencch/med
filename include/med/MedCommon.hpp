@@ -78,4 +78,7 @@ void tryUnlock(std::mutex& mutex);
 void stringToMemory(const string& str, const string& type, Byte* buffer); // Similar to stringToRaw, but this doesn't create new memory
 void stringToMemory(const string& str, const ScanType& type, Byte* buffer);
 
+bool isHexString(const string& str);
+void hexStringToMemory(const string& str, const ScanType& type, Byte* buffer);
+
 #endif
