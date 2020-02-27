@@ -201,7 +201,7 @@ Maps getMaps(pid_t pid) {
       continue;
     }
 
-    if (rd == 'r' && ((end - start) > 0)) {
+    if (rd == 'r' && wr == 'w' && ((end - start) > 0)) {
       AddressPair pair(start, end);
       maps.push(pair);
     }
