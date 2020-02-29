@@ -91,6 +91,8 @@ Let's say we know a hero has the attributes like Max HP, HP, Max MP, and MP, wit
 
 where the Max HP is 3000, current HP is 2580, Max MP is 1500, and current MP is 1500.
 
+NOTE: There is a known issue. If the array to be scan involves two `pages` (4096 bytes), then the array will not be found.
+
 ## Scan by operators
 
 There are several operators can be used for scanning,
