@@ -14,11 +14,11 @@ enum ScanType {
   Int8,
   Int16,
   Int32,
-  Ptr32,
-  Ptr64,
   Float32,
   Float64,
   String,
+  Ptr32,
+  Ptr64,
   Unknown
 };
 
@@ -30,11 +30,11 @@ const int MAX_STRING_SIZE = 1079;
 const string SCAN_TYPE_INT_8 = "int8";
 const string SCAN_TYPE_INT_16 = "int16";
 const string SCAN_TYPE_INT_32 = "int32";
-const string SCAN_TYPE_PTR_32 = "ptr32";
-const string SCAN_TYPE_PTR_64 = "ptr64";
 const string SCAN_TYPE_FLOAT_32 = "float32";
 const string SCAN_TYPE_FLOAT_64 = "float64";
 const string SCAN_TYPE_STRING = "string";
+const string SCAN_TYPE_PTR_32 = "ptr32";
+const string SCAN_TYPE_PTR_64 = "ptr64";
 const string SCAN_TYPE_UNKNOWN = "unknown";
 
 enum EncodingType {

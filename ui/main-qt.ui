@@ -110,16 +110,6 @@
           </item>
           <item>
            <property name="text">
-            <string>ptr32</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>ptr64</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>float32</string>
            </property>
           </item>
@@ -131,6 +121,16 @@
           <item>
            <property name="text">
             <string>string</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ptr32</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ptr64</string>
            </property>
           </item>
          </widget>
