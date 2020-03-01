@@ -1,5 +1,6 @@
 #include "mem/Mem.hpp"
 #include "mem/MemIO.hpp"
+#include "med/SizedBytes.hpp"
 
 // This is Pem (Process mEMory). Derived from Mem
 // Basically, Pem doesn't store the value.
@@ -25,15 +26,14 @@ public:
 
   MemIO* getMemIO();
   static string bytesToString(Byte* value, const string& scanType);
-  static tuple<Byte*, size_t> stringToBytes(const string& value, const string& scanType);
+  static SizedBytes stringToBytes(const string& value, const string& scanType);
 
   static std::shared_ptr<Pem> convertToPemPtr(MemPtr mem, MemIO* memio);
 
 private:
   ScanType scanType;
   MemIO* memio;
-  Byte* rememberedValue;
-  size_t rememberedSize;
+  SizedBytes rememberedValue;
 };
 
 typedef std::shared_ptr<Pem> PemPtr;

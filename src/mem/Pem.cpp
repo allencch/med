@@ -12,24 +12,16 @@
 
 Pem::Pem(size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
-  rememberedValue = NULL;
-  rememberedSize = 0;
   scanType = ScanType::Unknown;
 }
 
 Pem::Pem(Address addr, size_t size, MemIO* memio) : Mem(size) {
   this->memio = memio;
-  rememberedValue = NULL;
-  rememberedSize = 0;
   setAddress(addr);
   scanType = ScanType::Unknown;
 }
 
-Pem::~Pem() {
-  if (rememberedValue) {
-    delete[] rememberedValue;
-  }
-}
+Pem::~Pem() {}
 
 string Pem::bytesToString(Byte* buf, const string& scanType) {
   return memToString(buf, scanType);
@@ -64,43 +56,43 @@ string Pem::getScanType() {
   return scanTypeToString(scanType);
 }
 
-tuple<Byte*, size_t> Pem::stringToBytes(const string& value, const string& scanType) {
-  Byte* buf;
-  int size;
-
-  // If scanType is string, it will just compy  all
+SizedBytes Pem::stringToBytes(const string& value, const string& scanType) {
+  // If scanType is string, it will just copy all
   if (scanType == SCAN_TYPE_STRING) {
-    size = MAX_STRING_SIZE;
-    buf = new Byte[size];
+    int size = MAX_STRING_SIZE;
+    Byte* buf = new Byte[size];
     sprintf((char*)buf, "%s", value.c_str());
     int length = strlen((char*)buf);
 
-    return make_tuple(buf, length);
+    BytePtr data(new Byte[length]);
+    memcpy(data.get(), buf, length);
+    delete[] buf;
+
+    return SizedBytes(data, length);
   }
   else { // Allows parse comma
-    size = scanTypeToSize(stringToScanType(scanType));
     vector<string> tokens = ScanParser::getValues(value);
-    buf = new Byte[size * tokens.size()];
+    int size = scanTypeToSize(stringToScanType(scanType));
+    BytePtr data(new Byte[size * tokens.size()]);
+    Byte* pointer = data.get();
 
-    Byte* ptr = buf;
     for (size_t i = 0; i < tokens.size(); i++) {
-      stringToMemory(tokens[i], stringToScanType(scanType), ptr);
-      ptr += size;
+      stringToMemory(tokens[i], stringToScanType(scanType), pointer);
+      pointer += size;
     }
 
-    return make_tuple(buf, size * tokens.size()); // delete
+    return SizedBytes(data, size * tokens.size());
   }
 }
 
 void Pem::setValue(const string& value, const string& scanType) {
-  auto buffer = Pem::stringToBytes(value, scanType);
-  Byte* bytes = std::get<0>(buffer);
-  int size = std::get<1>(buffer);
+  SizedBytes buffer = Pem::stringToBytes(value, scanType);
+  Byte* bytes = buffer.getBytes();
+  int size = buffer.getSize();
 
   MemPtr mem(new Mem(size));
   mem->setAddress(address);
   memcpy(mem->getData(), bytes, size);
-  delete[] bytes;
 
   memio->write(address, mem, size);
 }
@@ -131,32 +123,22 @@ MemIO* Pem::getMemIO() {
 }
 
 void Pem::rememberValue(const string& value, const string& scanType) {
-  auto bytes = Pem::stringToBytes(value, scanType);
-  if (rememberedValue) {
-    delete[] rememberedValue;
-  }
-  rememberedValue = std::get<0>(bytes);
-  rememberedSize = std::get<1>(bytes);
+  rememberedValue = Pem::stringToBytes(value, scanType);
 }
 
 void Pem::rememberValue(Byte* value, size_t size) {
-  if (rememberedValue) {
-    delete[] rememberedValue;
-  }
-  rememberedValue = new Byte[size];
-  rememberedSize = size;
-  memcpy(rememberedValue, value, size);
+  rememberedValue = SizedBytes(value, size);
 }
 
 string Pem::recallValue(const string& scanType) {
-  if (rememberedValue == NULL) {
+  if (rememberedValue.isEmpty()) {
     return "";
   }
-  return Pem::bytesToString(rememberedValue, scanType);
+  return Pem::bytesToString(rememberedValue.getBytes(), scanType);
 }
 
 Byte* Pem::recallValuePtr() {
-  return rememberedValue;
+  return rememberedValue.getBytes();
 }
 
 PemPtr Pem::convertToPemPtr(MemPtr mem, MemIO* memio) {
