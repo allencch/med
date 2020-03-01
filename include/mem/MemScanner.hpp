@@ -36,12 +36,13 @@ public:
                         const ScanParser::OpType& op);
   vector<MemPtr> filterUnknown(const vector<MemPtr>& list,
                                const string& scanType,
-                               const ScanParser::OpType& op);
+                               const ScanParser::OpType& op,
+                               bool fastScan = false);
   vector<MemPtr> filterUnknownWithList(const vector<MemPtr>& list,
                                        const string& scanType,
                                        const ScanParser::OpType& op);
   vector<MemPtr>& saveSnapshot(const vector<MemPtr>& baseList);
-  vector<MemPtr> filterSnapshot(const string& scanType, const ScanParser::OpType& op);
+  vector<MemPtr> filterSnapshot(const string& scanType, const ScanParser::OpType& op, bool fastScan = false);
 
   vector<MemPtr> scanInner(Operands& operands,
                            int size,
@@ -70,7 +71,12 @@ public:
 private:
   void initialize();
   Maps getInterestedMaps(Maps& maps, const vector<MemPtr>& list);
-  void compareBlocks(vector<MemPtr>& list, MemPtr& oldBlock, MemPtr& newBlock, const string& scanType, const ScanParser::OpType& op);
+  void compareBlocks(vector<MemPtr>& list,
+                     MemPtr& oldBlock,
+                     MemPtr& newBlock,
+                     const string& scanType,
+                     const ScanParser::OpType& op,
+                     bool fastScan = false);
 
   vector<MemPtr> scanByScope(Operands& operands,
                              int size,

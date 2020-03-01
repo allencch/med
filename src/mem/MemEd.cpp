@@ -71,7 +71,7 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType, bool fas
   return mems;
 }
 
-vector<MemPtr> MemEd::filter(const string& value, const string& scanType) {
+vector<MemPtr> MemEd::filter(const string& value, const string& scanType, bool fastScan) {
   if (!ScanParser::isValid(value)) {
     throw MedException("Invalid scan string");
   }
@@ -79,7 +79,7 @@ vector<MemPtr> MemEd::filter(const string& value, const string& scanType) {
   vector<MemPtr> mems;
   ScanParser::OpType op = ScanParser::getOpType(value);
   if (ScanParser::isSnapshotOperator(op) && !ScanParser::hasValues(value)) {
-    mems = scanner->filterUnknown(manager->getMems(), scanType, op);
+    mems = scanner->filterUnknown(manager->getMems(), scanType, op, fastScan);
   }
   else {
     Operands operands = ScanParser::valueToOperands(value, scanType, op);

@@ -382,7 +382,7 @@ void MedUi::onFilterClicked() {
   }
 
   try {
-    med->filter(scanValue, scanType);
+    med->filter(scanValue, scanType, fastScan);
   } catch (EmptyListException &ex) {
     statusBar->showMessage(ex.what());
     cerr << ex.what() << endl;

@@ -381,9 +381,10 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
 
 vector<MemPtr> MemScanner::filterUnknown(const vector<MemPtr>& list,
                                          const string& scanType,
-                                         const ScanParser::OpType& op) {
+                                         const ScanParser::OpType& op,
+                                         bool fastScan) {
   if (snapshot.size()) {
-    return filterSnapshot(scanType, op);
+    return filterSnapshot(scanType, op, fastScan);
   }
   else {
     return filterUnknownWithList(list, scanType, op);
@@ -493,24 +494,34 @@ Maps MemScanner::getInterestedMaps(Maps& maps, const vector<MemPtr>& list) {
   return interested;
 }
 
-vector<MemPtr> MemScanner::filterSnapshot(const string& scanType, const ScanParser::OpType& op) {
+vector<MemPtr> MemScanner::filterSnapshot(const string& scanType, const ScanParser::OpType& op, bool fastScan) {
   vector<MemPtr> list;
   for (size_t i = 0; i < snapshot.size(); i++) {
     auto block = memio->read(snapshot[i]->getAddress(), snapshot[i]->getSize());
-    compareBlocks(list, snapshot[i], block, scanType, op);
+    compareBlocks(list, snapshot[i], block, scanType, op, fastScan);
   }
   snapshot.clear();
   return list;
 }
 
-void MemScanner::compareBlocks(vector<MemPtr>& list, MemPtr& oldBlock, MemPtr& newBlock, const string& scanType, const ScanParser::OpType& op) {
+void MemScanner::compareBlocks(vector<MemPtr>& list,
+                               MemPtr& oldBlock,
+                               MemPtr& newBlock,
+                               const string& scanType,
+                               const ScanParser::OpType& op,
+                               bool fastScan) {
   size_t blockSize = oldBlock->getSize();
   int size = scanTypeToSize(scanType);
   Byte* oldBlockPtr = oldBlock->getData();
   Byte* newBlockPtr = newBlock->getData();
   for (size_t i = 0; i <= blockSize - size; i += STEP) {
+    Address oldAddress = oldBlock->getAddress() + i;
+    if (skipAddressByFastScan(oldAddress, size, fastScan)) {
+      continue;
+    }
+
     if (memCompare(newBlockPtr + i, size, oldBlockPtr + i, size, op)) {
-      MemPtr mem = memio->read(oldBlock->getAddress() + i, size);
+      MemPtr mem = memio->read(oldAddress, size);
       PemPtr pem = Pem::convertToPemPtr(mem, memio);
       pem->setScanType(scanType);
       pem->rememberValue(mem->getData(), size);
