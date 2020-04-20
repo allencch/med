@@ -244,6 +244,7 @@ void MedUi::setupSignals() {
 void MedUi::setupScanTreeView() {
   scanModel = new TreeModel(this, mainWindow);
   scanTreeView->setModel(scanModel);
+  scanTreeView->setColumnWidth(SCAN_COL_TYPE, 90);
   ComboBoxDelegate* delegate = new ComboBoxDelegate();
   scanTreeView->setItemDelegateForColumn(SCAN_COL_TYPE, delegate);
   QObject::connect(scanTreeView,
@@ -265,6 +266,7 @@ void MedUi::setupScanTreeView() {
 void MedUi::setupStoreTreeView() {
   storeModel = new StoreTreeModel(this, mainWindow);
   storeTreeView->setModel(storeModel);
+  storeTreeView->setColumnWidth(STORE_COL_TYPE, 90);
   ComboBoxDelegate* storeDelegate = new ComboBoxDelegate();
   storeTreeView->setItemDelegateForColumn(STORE_COL_TYPE, storeDelegate);
   CheckBoxDelegate* storeLockDelegate = new CheckBoxDelegate();
