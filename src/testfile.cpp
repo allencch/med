@@ -30,7 +30,7 @@ int main() {
     printf("\n");
 
     printf("%d\t", a);
-    printf("a = 0x%x\n", a);
+    printf("a = 0x%x\n", (int)a);
     int temp;
     scanf("%d", &temp);
     if (temp == 0) {
@@ -39,7 +39,7 @@ int main() {
       a = temp;
     }
     printf("%d\t", a);
-    printf("a changed 0x%x\n", a);
+    printf("a changed 0x%x\n", (int)a);
   }
 
   delete[] c;

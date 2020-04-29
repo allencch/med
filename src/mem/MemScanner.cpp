@@ -329,7 +329,8 @@ void MemScanner::scanPage(MemIO* memio,
                           int lastDigit) {
   int scanTypeSize = scanTypeToSize(scanType);
   for (int k = 0; k <= getpagesize() - size; k += STEP) {
-    if (skipAddressByFastScan((Address)(start + k), scanTypeSize, fastScan)) {
+    if (scanType != SCAN_TYPE_STRING &&
+        skipAddressByFastScan((Address)(start + k), scanTypeSize, fastScan)) {
       continue;
     }
     if (skipAddressByLastDigit((Address)(start + k), lastDigit)) {
@@ -516,7 +517,8 @@ void MemScanner::compareBlocks(vector<MemPtr>& list,
   Byte* newBlockPtr = newBlock->getData();
   for (size_t i = 0; i <= blockSize - size; i += STEP) {
     Address oldAddress = oldBlock->getAddress() + i;
-    if (skipAddressByFastScan(oldAddress, size, fastScan)) {
+    if (scanType != SCAN_TYPE_STRING &&
+        skipAddressByFastScan(oldAddress, size, fastScan)) {
       continue;
     }
 
