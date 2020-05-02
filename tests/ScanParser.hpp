@@ -162,4 +162,11 @@ public:
     TS_ASSERT_EQUALS(bytes[2], 0);
     TS_ASSERT_EQUALS(bytes[3], 0);
   }
+
+  void test_getOperator() {
+    string s = "1";
+    Operands result = ScanParser::valueToOperands(s, SCAN_TYPE_INT_32);
+    auto op = result.getOperator();
+    TS_ASSERT_EQUALS(op, ScanParser::OpType::Eq);
+  }
 };

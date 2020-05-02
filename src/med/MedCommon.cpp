@@ -149,6 +149,7 @@ int scanTypeToSize(const ScanType& type) {
   case String:
     ret = MAX_STRING_SIZE;
     break;
+  case Custom: // TODO: Confirm this one
   case Unknown:
     ret = 0;
   }
@@ -390,6 +391,7 @@ void stringToMemory(const string& str, const ScanType& type, Byte* buffer) {
   case String:
     printf("Warning: stringToMemory with String type\n");
     break;
+  case Custom: // TODO: Confirm this one
   case Unknown:
     break;
   }
@@ -442,6 +444,7 @@ void hexStringToMemory(const string& str, const ScanType& type, Byte* buffer) {
   case String:
     printf("Warning: stringToMemory with String type\n");
     break;
+  case Custom: // TODO: confirm this one
   case Unknown:
     break;
   }

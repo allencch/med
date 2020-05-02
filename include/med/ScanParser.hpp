@@ -16,16 +16,6 @@ using namespace std;
 
 namespace ScanParser {
   constexpr const char* OP_REGEX = "^(=|>(?=[^=])|<(?=[^=>])|>=|<=|!|<>|\\?|<|>)";
-  enum OpType {
-    Eq,
-    Gt,
-    Lt,
-    Neq,
-    Ge,
-    Le,
-    Within,
-    SnapshotSave
-  };
   string getOp(const string &v);
   OpType stringToOpType(const string &s);
   OpType getOpType(const string &v);

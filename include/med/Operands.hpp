@@ -12,10 +12,12 @@ public:
 
   SizedBytes getFirstOperand();
   SizedBytes getSecondOperand();
+  ScanParser::OpType getOperator();
 
   size_t getFirstSize();
 private:
   std::vector<SizedBytes> data;
+  ScanParser::OpType op;
 };
 
 #endif

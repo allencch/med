@@ -2,8 +2,12 @@
 #include "med/Operands.hpp"
 #include "med/MedException.hpp"
 
-Operands::Operands() {}
-Operands::Operands(std::vector<SizedBytes> l) : data(l) {}
+Operands::Operands() {
+  op = ScanParser::OpType::Eq;
+}
+Operands::Operands(std::vector<SizedBytes> l) : data(l) {
+  op = ScanParser::OpType::Eq;
+}
 
 size_t Operands::count() {
   return data.size();
@@ -27,4 +31,8 @@ SizedBytes Operands::getSecondOperand() {
 
 size_t Operands::getFirstSize() {
   return data[0].getSize();
+}
+
+ScanParser::OpType Operands::getOperator() {
+  return op;
 }

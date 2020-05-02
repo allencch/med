@@ -194,6 +194,9 @@ string memToString(Byte* memory, string scanType) {
   case String:
     sprintf(str, "%s", memory);
     break;
+  case Custom:
+    printf("Custom not able directly write to string");
+    break;
   case Unknown:
     throw MedException("memToString: Error Type");
   }

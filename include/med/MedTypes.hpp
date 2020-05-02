@@ -17,6 +17,7 @@ enum ScanType {
   Float32,
   Float64,
   String,
+  Custom,
   Ptr32,
   Ptr64,
   Unknown
@@ -33,6 +34,7 @@ const string SCAN_TYPE_INT_32 = "int32";
 const string SCAN_TYPE_FLOAT_32 = "float32";
 const string SCAN_TYPE_FLOAT_64 = "float64";
 const string SCAN_TYPE_STRING = "string";
+const string SCAN_TYPE_CUSTOM = "custom";
 const string SCAN_TYPE_PTR_32 = "ptr32";
 const string SCAN_TYPE_PTR_64 = "ptr64";
 const string SCAN_TYPE_UNKNOWN = "unknown";
@@ -46,5 +48,18 @@ typedef pair<Address, Address> AddressPair;
 typedef vector<AddressPair> AddressPairs;
 
 typedef std::shared_ptr<Byte[]> BytePtr;
+
+namespace ScanParser {
+  enum OpType {
+    Eq,
+    Gt,
+    Lt,
+    Neq,
+    Ge,
+    Le,
+    Within,
+    SnapshotSave
+  };
+};
 
 #endif
