@@ -3,10 +3,10 @@
 #include "med/MedException.hpp"
 
 Operands::Operands() {
-  op = ScanParser::OpType::Eq;
+  cmd = "";
 }
 Operands::Operands(std::vector<SizedBytes> l) : data(l) {
-  op = ScanParser::OpType::Eq;
+  cmd = "";
 }
 
 size_t Operands::count() {
@@ -33,6 +33,6 @@ size_t Operands::getFirstSize() {
   return data[0].getSize();
 }
 
-ScanParser::OpType Operands::getOperator() {
-  return op;
+string Operands::getCmd() {
+  return cmd;
 }

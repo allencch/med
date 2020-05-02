@@ -1,6 +1,7 @@
 #ifndef OPERANDS_HPP
 #define OPERANDS_HPP
 
+#include <string>
 #include "med/MedTypes.hpp"
 #include "med/SizedBytes.hpp"
 
@@ -12,12 +13,12 @@ public:
 
   SizedBytes getFirstOperand();
   SizedBytes getSecondOperand();
-  ScanParser::OpType getOperator();
+  string getCmd();
 
   size_t getFirstSize();
 private:
   std::vector<SizedBytes> data;
-  ScanParser::OpType op;
+  string cmd;
 };
 
 #endif
