@@ -6,6 +6,7 @@
 SubCommand::SubCommand() {}
 
 SubCommand::SubCommand(const string &s) {
+  cmd = parseCmd(s);
 }
 
 Operands SubCommand::getOperands() {
@@ -26,7 +27,7 @@ string getCmdString(const string& s) {
   return matched;
 }
 
-SubCommand::Command SubCommand::getCmd(const string& s) {
+SubCommand::Command SubCommand::parseCmd(const string& s) {
   auto cmd = getCmdString(s);
   if (cmd == "s:") {
     return Command::Str;
@@ -34,4 +35,8 @@ SubCommand::Command SubCommand::getCmd(const string& s) {
     return Command::Wildcard;
   }
   return Command::Noop;
+}
+
+SubCommand::Command SubCommand::getCmd() {
+  return cmd;
 }

@@ -12,14 +12,16 @@ public:
     Str,
     Wildcard
   };
-  static constexpr const char* CMD_REGEX = "(s|w):";
+  static constexpr const char* CMD_REGEX = "^(s|w):";
   SubCommand();
   explicit SubCommand(const string &s);
   Operands getOperands();
+  Command getCmd();
 
-  static Command getCmd(const string &s);
+  static Command parseCmd(const string &s);
 private:
   Operands operands;
+  Command cmd;
 };
 
 #endif
