@@ -11,6 +11,7 @@
 #include "med/MedTypes.hpp"
 #include "med/SizedBytes.hpp"
 #include "med/Operands.hpp"
+#include "med/ScanCommand.hpp"
 
 using namespace std;
 
@@ -38,6 +39,8 @@ namespace ScanParser {
   // If the input is an array (with commas), it is one operand.
   Operands valueToOperands(const string& v, const string& t, OpType op = OpType::Eq);
   Operands getTwoOperands(const string& v, const string& t);
+
+  ScanCommand getScanCommand(const string& v);
 };
 
 #endif

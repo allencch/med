@@ -7,6 +7,7 @@
 #include "med/ScanParser.hpp"
 #include "med/MedException.hpp"
 #include "med/MedCommon.hpp"
+#include "med/SubCommand.hpp"
 #include "mem/StringUtil.hpp"
 
 using namespace std;
@@ -168,4 +169,15 @@ Operands ScanParser::getTwoOperands(const string& v, const string& t) {
     list.push_back(SizedBytes(data, length));
   }
   return Operands(list);
+}
+
+ScanCommand ScanParser::getScanCommand(const string& v) {
+  auto values = getValues(v);
+  
+  for (size_t i = 0; i < values.size(); i++) {
+    auto value = values[i];
+    SubCommand subCmd(value);
+  }
+  ScanCommand cmd;
+  return cmd;
 }

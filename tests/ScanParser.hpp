@@ -2,6 +2,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "med/ScanParser.hpp"
+#include "med/ScanCommand.hpp"
 #include "mem/StringUtil.hpp"
 
 using namespace std;
@@ -163,10 +164,18 @@ public:
     TS_ASSERT_EQUALS(bytes[3], 0);
   }
 
+  // TODO: Possibly not used, can be removed
   void test_getCmd() {
     string s = "1";
     Operands result = ScanParser::valueToOperands(s, SCAN_TYPE_INT_32);
     auto cmd = result.getCmd();
-    TS_ASSERT_EQUALS(cmd, "");
+    TS_ASSERT_EQUALS(cmd == "", true);
+  }
+
+  void test_getScanCommand() {
+    string s = "1";
+    ScanCommand cmd = ScanParser::getScanCommand(s);
+    auto subCmds = cmd.getSubCommands();
+    TS_ASSERT_EQUALS(subCmds.size(), 1);
   }
 };
