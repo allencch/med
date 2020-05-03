@@ -13,12 +13,10 @@ public:
 
   SizedBytes getFirstOperand();
   SizedBytes getSecondOperand();
-  string getCmd();
 
   size_t getFirstSize();
 private:
   std::vector<SizedBytes> data;
-  string cmd;
 };
 
 #endif

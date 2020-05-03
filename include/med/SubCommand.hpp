@@ -13,6 +13,7 @@ public:
     Wildcard
   };
   static constexpr const char* CMD_REGEX = "^(s|w):";
+  static constexpr const char* CMD_STRING = "'(.+?)'";
   SubCommand();
   explicit SubCommand(const string &s);
   Operands getOperands();

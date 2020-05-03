@@ -164,14 +164,6 @@ public:
     TS_ASSERT_EQUALS(bytes[3], 0);
   }
 
-  // TODO: Possibly not used, can be removed
-  void test_getCmd() {
-    string s = "1";
-    Operands result = ScanParser::valueToOperands(s, SCAN_TYPE_INT_32);
-    auto cmd = result.getCmd();
-    TS_ASSERT_EQUALS(cmd == "", true);
-  }
-
   void test_getScanCommand() {
     string s = "1";
     ScanCommand cmd = ScanParser::getScanCommand(s);

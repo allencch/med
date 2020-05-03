@@ -2,12 +2,8 @@
 #include "med/Operands.hpp"
 #include "med/MedException.hpp"
 
-Operands::Operands() {
-  cmd = "";
-}
-Operands::Operands(std::vector<SizedBytes> l) : data(l) {
-  cmd = "";
-}
+Operands::Operands() {}
+Operands::Operands(std::vector<SizedBytes> l) : data(l) {}
 
 size_t Operands::count() {
   return data.size();
@@ -31,8 +27,4 @@ SizedBytes Operands::getSecondOperand() {
 
 size_t Operands::getFirstSize() {
   return data[0].getSize();
-}
-
-string Operands::getCmd() {
-  return cmd;
 }
