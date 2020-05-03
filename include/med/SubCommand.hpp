@@ -14,15 +14,17 @@ public:
   };
   static constexpr const char* CMD_REGEX = "^(s|w):";
   static constexpr const char* CMD_STRING = "'(.+?)'";
-  SubCommand();
+
   explicit SubCommand(const string &s);
   Operands getOperands();
+  int getWildcardSteps();
   Command getCmd();
 
   static Command parseCmd(const string &s);
 private:
   Operands operands;
   Command cmd;
+  int wildcardSteps;
 };
 
 #endif

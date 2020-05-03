@@ -4,8 +4,6 @@
 #include "med/ScanParser.hpp"
 #include "mem/StringUtil.hpp"
 
-SubCommand::SubCommand() {}
-
 string extractString(const string& s) {
   string value = StringUtil::trim(s);
   regex r(SubCommand::CMD_STRING);
@@ -16,14 +14,31 @@ string extractString(const string& s) {
   return "";
 }
 
+int extractNumber(const string &s) {
+  string value = StringUtil::trim(s);
+  regex r(":(\\d+)");
+  smatch match;
+  string matched;
+  if (std::regex_search(value, match, r)) {
+    matched = match[1];
+  }
+  if (matched.size()) {
+    return stoi(matched);
+  }
+  return 0;
+}
+
 SubCommand::SubCommand(const string &s) {
   cmd = parseCmd(s);
+  wildcardSteps = 0;
   if (cmd == Command::Noop) {
     // NOTE: Default to int32 first
     operands = ScanParser::valueToOperands(s, SCAN_TYPE_INT_32);
   } else if (cmd == Command::Str) {
     string valueStr = extractString(s);
     operands = ScanParser::valueToOperands(valueStr, SCAN_TYPE_STRING);
+  } else if (cmd == Command::Wildcard) {
+    wildcardSteps = extractNumber(s);
   }
 }
 
@@ -57,4 +72,8 @@ SubCommand::Command SubCommand::parseCmd(const string& s) {
 
 SubCommand::Command SubCommand::getCmd() {
   return cmd;
+}
+
+int SubCommand::getWildcardSteps() {
+  return wildcardSteps;
 }

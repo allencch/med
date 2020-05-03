@@ -45,4 +45,11 @@ public:
     TS_ASSERT_EQUALS(bytes[0], 0x32);
     TS_ASSERT_EQUALS(bytes[1], 0x30);
   }
+
+  void test_getWildcardSteps() {
+    string s = "w:20";
+    SubCommand subCmd(s);
+    auto steps = subCmd.getWildcardSteps();
+    TS_ASSERT_EQUALS(steps, 20);
+  }
 };
