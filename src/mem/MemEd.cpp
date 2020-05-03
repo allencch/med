@@ -4,6 +4,7 @@
 #include "mem/MemEd.hpp"
 #include "med/MedCommon.hpp"
 #include "med/MedException.hpp"
+#include "med/ScanCommand.hpp"
 #include "mem/Sem.hpp"
 
 using namespace std;
@@ -59,6 +60,9 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType, bool fas
   vector<MemPtr> mems;
   if (op == ScanParser::OpType::SnapshotSave) {
     scanner->saveSnapshot(store->getList());
+  } else if (scanType == SCAN_TYPE_CUSTOM) {
+    ScanCommand scanCommand = ScanParser::getScanCommand(value);
+    mems = scanner->scan(scanCommand);
   }
   else {
     Operands operands = ScanParser::valueToOperands(value, scanType, op);

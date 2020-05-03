@@ -139,6 +139,13 @@ vector<MemPtr> MemScanner::scan(Operands& operands,
   }
 }
 
+vector<MemPtr> MemScanner::scan(ScanCommand &scanCommand) {
+  if (hasScope()) {
+    return scanByScope(scanCommand);
+  }
+  return scanByMaps(scanCommand);
+}
+
 vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
                                       int size,
                                       const string& scanType,
@@ -158,6 +165,34 @@ vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
     TMTask* fn = new TMTask();
     *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &operands, size, scanType, op, fastScan, lastDigit]() {
             scanMap(memio, mutex, list, maps, i, memFd, fdMutex, operands, size, scanType, op, fastScan, lastDigit);
+          };
+    threadManager->queueTask(fn);
+  }
+  threadManager->start();
+  threadManager->clear();
+
+  close(memFd);
+
+  if (list.size() <= ADDRESS_SORTABLE_SIZE) {
+    return MemList::sortByAddress(list);
+  }
+  return list;
+}
+
+vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand) {
+  vector<MemPtr> list;
+
+  Maps maps = getMaps(pid);
+  int memFd = getMem(pid);
+  MemIO* memio = getMemIO();
+
+  auto& mutex = listMutex;
+  std::mutex fdMutex;
+
+  for (size_t i = 0; i < maps.size(); i++) {
+    TMTask* fn = new TMTask();
+    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &scanCommand]() {
+            scanMap(memio, mutex, list, maps, i, memFd, fdMutex, scanCommand);
           };
     threadManager->queueTask(fn);
   }
@@ -205,6 +240,36 @@ vector<MemPtr> MemScanner::scanByScope(Operands& operands,
   }
   return list;
 }
+
+vector<MemPtr> MemScanner::scanByScope(ScanCommand &scanCommand) {
+  vector<MemPtr> list;
+  auto start = scope->first;
+  auto end = scope->second;
+  int fd = getMem(pid);
+  auto& mutex = listMutex;
+
+  // TODO: Refactor this, since similar to scanMap()
+  for (Address j = start; j < end; j += getpagesize()) {
+    if (lseek(fd, j, SEEK_SET) == -1) {
+      continue;
+    }
+
+    Byte* page = new Byte[getpagesize()];
+
+    if (read(fd, page, getpagesize()) == -1) {
+      continue;
+    }
+    scanPage(memio, mutex, list, page, j, scanCommand);
+
+    delete[] page;
+  }
+
+  if (list.size() <= ADDRESS_SORTABLE_SIZE) {
+    return MemList::sortByAddress(list);
+  }
+  return list;
+}
+
 
 vector<MemPtr>& MemScanner::saveSnapshot(const vector<MemPtr>& baseList) {
   snapshot.clear();
@@ -284,6 +349,38 @@ void MemScanner::scanMap(MemIO* memio,
   }
 }
 
+void MemScanner::scanMap(MemIO* memio,
+                         std::mutex& mutex,
+                         vector<MemPtr>& list,
+                         Maps& maps,
+                         int mapIndex,
+                         int fd,
+                         std::mutex& fdMutex,
+                         ScanCommand &scanCommand) {
+  auto& pairs = maps.getMaps();
+  auto& pair = pairs[mapIndex];
+  for (Address j = std::get<0>(pair); j < std::get<1>(pair); j += getpagesize()) {
+    Byte* page = new Byte[getpagesize()]; //For block of memory
+
+    fdMutex.lock();
+    if (lseek(fd, j, SEEK_SET) == -1) {
+      delete[] page;
+      fdMutex.unlock();
+      continue;
+    }
+    if (read(fd, page, getpagesize()) == -1) {
+      delete[] page;
+      fdMutex.unlock();
+      continue;
+    }
+    fdMutex.unlock();
+
+    scanPage(memio, mutex, list, page, j, scanCommand);
+
+    delete[] page;
+  }
+}
+
 void MemScanner::saveSnapshotMap(MemIO* memio,
                                  vector<MemPtr>& snapshot,
                                  Maps& maps,
@@ -343,6 +440,32 @@ void MemScanner::scanPage(MemIO* memio,
 
         PemPtr pem = Pem::convertToPemPtr(mem, memio);
         pem->setScanType(scanType);
+        pem->rememberValue(page + k, size);
+
+        mutex.lock();
+        list.push_back(pem);
+        mutex.unlock();
+      }
+    } catch(MedException& ex) {
+      cerr << ex.getMessage() << endl;
+    }
+  }
+}
+
+void MemScanner::scanPage(MemIO* memio,
+                          std::mutex& mutex,
+                          vector<MemPtr>& list,
+                          Byte* page,
+                          Address start,
+                          ScanCommand &scanCommand) {
+  size_t size = 0; // TODO: fix this
+  for (size_t k = 0; k <= getpagesize() - size; k += STEP) {
+    try {
+      if (false) { // TODO: fix this
+        MemPtr mem = memio->read((Address)(start + k), size);
+
+        PemPtr pem = Pem::convertToPemPtr(mem, memio);
+        pem->setScanType(SCAN_TYPE_INT_32); // NOTE: Set to int32
         pem->rememberValue(page + k, size);
 
         mutex.lock();

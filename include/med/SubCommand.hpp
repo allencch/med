@@ -19,6 +19,7 @@ public:
   Operands getOperands();
   int getWildcardSteps();
   Command getCmd();
+  size_t getSize();
 
   static Command parseCmd(const string &s);
 private:

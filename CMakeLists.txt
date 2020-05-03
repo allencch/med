@@ -103,6 +103,10 @@ if(CXXTEST_FOUND)
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/SubCommand.hpp)
   target_link_libraries(testSubCommand med)
 
+  CXXTEST_ADD_TEST(testScanCommand testScanCommand.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/ScanCommand.hpp)
+  target_link_libraries(testScanCommand med)
+
   file(GLOB test_HEADER "tests/*.hpp")
   set_property(SOURCE ${gui_HEADER} PROPERTY SKIP_AUTOMOC ON)
 endif()

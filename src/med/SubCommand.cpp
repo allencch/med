@@ -77,3 +77,14 @@ SubCommand::Command SubCommand::getCmd() {
 int SubCommand::getWildcardSteps() {
   return wildcardSteps;
 }
+
+size_t SubCommand::getSize() {
+  switch (cmd) {
+  case Command::Noop:
+  case Command::Str:
+    return operands.getFirstSize();
+  case Command::Wildcard:
+    return wildcardSteps;
+  }
+  return 0;
+}

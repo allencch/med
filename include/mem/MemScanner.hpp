@@ -10,6 +10,7 @@
 #include "med/ThreadManager.hpp"
 #include "med/Operands.hpp"
 #include "med/MedCommon.hpp"
+#include "med/ScanCommand.hpp"
 #include "mem/Mem.hpp"
 #include "mem/MemIO.hpp"
 
@@ -29,6 +30,7 @@ public:
                       const ScanParser::OpType& op,
                       bool fastScan = false,
                       int lastDigit = -1);
+  vector <MemPtr> scan(ScanCommand &scanCommand);
   vector<MemPtr> filter(const vector<MemPtr>& list,
                         Operands& operands,
                         int size,
@@ -84,12 +86,15 @@ private:
                              const ScanParser::OpType& op,
                              bool fastScan = false,
                              int lastDigit = -1);
+  vector<MemPtr> scanByScope(ScanCommand &scanCommand);
+
   vector<MemPtr> scanByMaps(Operands& operands,
                             int size,
                             const string& scanType,
                             const ScanParser::OpType& op,
                             bool fastScan = false,
                             int lastDigit = -1);
+  vector<MemPtr> scanByMaps(ScanCommand &scanCommand);
 
   static void scanMap(MemIO* memio,
                       std::mutex& mutex,
@@ -104,6 +109,14 @@ private:
                       const ScanParser::OpType& op,
                       bool fastScan = false,
                       int lastDigit = -1);
+  static void scanMap(MemIO* memio,
+                      std::mutex& mutex,
+                      vector<MemPtr>& list,
+                      Maps& maps,
+                      int mapIndex,
+                      int fd,
+                      std::mutex& fdMutex,
+                      ScanCommand &scanCommand);
 
   vector<MemPtr>& saveSnapshotByScope();
   vector<MemPtr>& saveSnapshotByList(const vector<MemPtr>& baseList);
@@ -123,6 +136,12 @@ private:
                        const ScanParser::OpType& op,
                        bool fastScan = false,
                        int lastDigit = -1);
+  static void scanPage(MemIO* memio,
+                       std::mutex& mutex,
+                       vector<MemPtr>& list,
+                       Byte* page,
+                       Address start,
+                       ScanCommand &scanCommand);
 
   static void filterByChunk(std::mutex& mutex,
                             const vector<MemPtr>& list,
