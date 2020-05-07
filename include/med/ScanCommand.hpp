@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include "med/MedTypes.hpp"
 #include "med/SubCommand.hpp"
 
 using namespace std;
@@ -12,6 +13,8 @@ public:
   explicit ScanCommand(const string& s);
   vector<SubCommand> getSubCommands();
   size_t getSize();
+
+  bool match(Byte* address);
 private:
   vector<SubCommand> subCommands;
 

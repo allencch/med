@@ -2,6 +2,7 @@
 
 #include "med/SubCommand.hpp"
 #include "med/ScanParser.hpp"
+#include "med/MemOperator.hpp"
 #include "mem/StringUtil.hpp"
 
 string extractString(const string& s) {
@@ -87,4 +88,18 @@ size_t SubCommand::getSize() {
     return wildcardSteps;
   }
   return 0;
+}
+
+tuple<bool, int> SubCommand::match(Byte* address) {
+  bool matchResult;
+  size_t size = getSize();
+  switch (cmd) {
+  case Command::Noop:
+  case Command::Str:
+    matchResult = memCompare(address, size, operands, ScanParser::OpType::Eq);
+    break;
+  case Command::Wildcard:
+    matchResult = true;
+  }
+  return make_tuple(matchResult, size);
 }

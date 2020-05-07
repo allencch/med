@@ -1,3 +1,4 @@
+#include <tuple>
 #include "med/ScanCommand.hpp"
 #include "med/ScanParser.hpp"
 
@@ -28,4 +29,20 @@ size_t ScanCommand::_getSize() {
 
 size_t ScanCommand::getSize() {
   return size;
+}
+
+bool ScanCommand::match(Byte* address) {
+  bool result = true;
+  Byte *ptr = address;
+  for (size_t i = 0; i < subCommands.size(); i++) {
+    SubCommand subCmd = subCommands[i];
+    tuple<bool, int> subResult = subCmd.match(ptr);
+    bool match = std::get<0>(subResult);
+    int step = std::get<1>(subResult);
+
+    if (!match) return false;
+
+    ptr += step;
+  }
+  return result;
 }

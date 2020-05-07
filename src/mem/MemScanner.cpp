@@ -458,10 +458,10 @@ void MemScanner::scanPage(MemIO* memio,
                           Byte* page,
                           Address start,
                           ScanCommand &scanCommand) {
-  size_t size = 0; // TODO: fix this
+  size_t size = scanCommand.getSize();
   for (size_t k = 0; k <= getpagesize() - size; k += STEP) {
     try {
-      if (false) { // TODO: fix this
+      if (scanCommand.match(page + k)) {
         MemPtr mem = memio->read((Address)(start + k), size);
 
         PemPtr pem = Pem::convertToPemPtr(mem, memio);

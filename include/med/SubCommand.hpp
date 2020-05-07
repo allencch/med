@@ -2,7 +2,10 @@
 #define SUB_COMMAND_HPP
 
 #include <string>
+#include <tuple>
+#include "med/MedTypes.hpp"
 #include "med/Operands.hpp"
+
 using namespace std;
 
 class SubCommand {
@@ -20,6 +23,11 @@ public:
   int getWildcardSteps();
   Command getCmd();
   size_t getSize();
+
+  /**
+   * @return tuple of boolean match result, and int of steps involved
+   */
+  tuple<bool, int> match(Byte* address);
 
   static Command parseCmd(const string &s);
 private:
