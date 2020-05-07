@@ -24,6 +24,9 @@ Pem::Pem(Address addr, size_t size, MemIO* memio) : Mem(size) {
 Pem::~Pem() {}
 
 string Pem::bytesToString(Byte* buf, const string& scanType) {
+  if (scanType == SCAN_TYPE_CUSTOM) {
+    return memToString(buf, SCAN_TYPE_INT_8);
+  }
   return memToString(buf, scanType);
 }
 
