@@ -125,6 +125,11 @@
           </item>
           <item>
            <property name="text">
+            <string>custom</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>ptr32</string>
            </property>
           </item>

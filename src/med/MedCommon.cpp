@@ -88,6 +88,9 @@ ScanType stringToScanType(const string& scanType) {
   else if (scanType == SCAN_TYPE_STRING) {
     return String;
   }
+  else if (scanType == SCAN_TYPE_CUSTOM) {
+    return Custom;
+  }
   return Unknown;
 }
 
@@ -117,6 +120,9 @@ string scanTypeToString(const ScanType& scanType) {
     break;
   case String:
     ret = SCAN_TYPE_STRING;
+    break;
+  case Custom:
+    ret = SCAN_TYPE_CUSTOM;
     break;
   default:
     ret = SCAN_TYPE_UNKNOWN;

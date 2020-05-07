@@ -460,12 +460,14 @@ void MemScanner::scanPage(MemIO* memio,
                           ScanCommand &scanCommand) {
   size_t size = scanCommand.getSize();
   for (size_t k = 0; k <= getpagesize() - size; k += STEP) {
+    if ((Address)(start + k) % 8 != 0) continue; // NOTE: BlockAlign to 8
+
     try {
       if (scanCommand.match(page + k)) {
         MemPtr mem = memio->read((Address)(start + k), size);
 
         PemPtr pem = Pem::convertToPemPtr(mem, memio);
-        pem->setScanType(SCAN_TYPE_INT_32); // NOTE: Set to int32
+        pem->setScanType(SCAN_TYPE_INT_8); // NOTE: Set to 8
         pem->rememberValue(page + k, size);
 
         mutex.lock();
