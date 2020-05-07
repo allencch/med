@@ -30,12 +30,13 @@ public:
                       const ScanParser::OpType& op,
                       bool fastScan = false,
                       int lastDigit = -1);
-  vector <MemPtr> scan(ScanCommand &scanCommand);
+  vector<MemPtr> scan(ScanCommand &scanCommand);
   vector<MemPtr> filter(const vector<MemPtr>& list,
                         Operands& operands,
                         int size,
                         const string& scanType,
                         const ScanParser::OpType& op);
+  vector<MemPtr> filter(const vector<MemPtr> &list, ScanCommand &scanCommand);
   vector<MemPtr> filterUnknown(const vector<MemPtr>& list,
                                const string& scanType,
                                const ScanParser::OpType& op,
@@ -151,6 +152,11 @@ private:
                             int size,
                             const string& scanType,
                             const ScanParser::OpType& op);
+  static void filterByChunk(std::mutex& mutex,
+                            const vector<MemPtr>& list,
+                            vector<MemPtr>& newList,
+                            int listIndex,
+                            ScanCommand &scanCommand);
   static void filterUnknownByChunk(std::mutex& mutex,
                                    const vector<MemPtr>& list,
                                    vector<MemPtr>& newList,

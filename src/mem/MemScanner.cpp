@@ -505,6 +505,28 @@ vector<MemPtr> MemScanner::filter(const vector<MemPtr>& list,
   return newList;
 }
 
+vector<MemPtr> MemScanner::filter(const vector<MemPtr> &list,
+                                  ScanCommand &scanCommand) {
+  vector<MemPtr> newList;
+
+  auto& mutex = listMutex;
+
+  for (size_t i = 0; i < list.size(); i += CHUNK_SIZE) {
+    TMTask* fn = new TMTask();
+    *fn = [&mutex, &list, &newList, i, &scanCommand]() {
+            filterByChunk(mutex, list, newList, i, scanCommand);
+          };
+    threadManager->queueTask(fn);
+  }
+  threadManager->start();
+  threadManager->clear();
+
+  if (newList.size() <= ADDRESS_SORTABLE_SIZE) {
+    return MemList::sortByAddress(newList);
+  }
+  return newList;
+}
+
 vector<MemPtr> MemScanner::filterUnknown(const vector<MemPtr>& list,
                                          const string& scanType,
                                          const ScanParser::OpType& op,
@@ -567,7 +589,30 @@ void MemScanner::filterByChunk(std::mutex& mutex,
   }
 }
 
+void MemScanner::filterByChunk(std::mutex& mutex,
+                               const vector<MemPtr>& list,
+                               vector<MemPtr>& newList,
+                               int listIndex,
+                               ScanCommand &scanCommand) {
+  size_t size = scanCommand.getSize();
+  for (int i = listIndex; i < listIndex + CHUNK_SIZE && i < (int)list.size(); i++) {
+    PemPtr pem = static_pointer_cast<Pem>(list[i]);
+    BytePtr data;
+    try {
+      data = size > 1 ? pem->getValuePtr(size) : pem->getValuePtr();
+    } catch(MedException &ex) { // Memory not available
+      continue;
+    }
+    if (scanCommand.match(data.get())) {
+      pem->setScanType(SCAN_TYPE_INT_8);
+      pem->rememberValue(data.get(), size);
 
+      mutex.lock();
+      newList.push_back(pem);
+      mutex.unlock();
+    }
+  }
+}
 
 void MemScanner::filterUnknownByChunk(std::mutex& mutex,
                                       const vector<MemPtr>& list,

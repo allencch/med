@@ -84,6 +84,9 @@ vector<MemPtr> MemEd::filter(const string& value, const string& scanType, bool f
   ScanParser::OpType op = ScanParser::getOpType(value);
   if (ScanParser::isSnapshotOperator(op) && !ScanParser::hasValues(value)) {
     mems = scanner->filterUnknown(manager->getMems(), scanType, op, fastScan);
+  } else if (scanType == SCAN_TYPE_CUSTOM) {
+    ScanCommand scanCommand = ScanParser::getScanCommand(value);
+    mems = scanner->filter(manager->getMems(), scanCommand);
   }
   else {
     Operands operands = ScanParser::valueToOperands(value, scanType, op);
