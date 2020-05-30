@@ -20,6 +20,7 @@
 
 #include "ui/TreeModel.hpp"
 #include "ui/StoreTreeModel.hpp"
+#include "ui/NamedScansController.hpp"
 #include "mem/MemEd.hpp"
 
 const int REFRESH_RATE = 800;
@@ -141,6 +142,8 @@ private:
   QWidget* memEditor;
 
   QString filename;
+
+  NamedScansController *namedScansController;
 };
 
 

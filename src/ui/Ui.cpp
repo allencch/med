@@ -36,11 +36,14 @@ MedUi::MedUi(QApplication* app) {
   encodingManager = new EncodingManager(this);
   setScanState(UiState::Idle);
   setStoreState(UiState::Idle);
+
+  namedScansController = new NamedScansController(this);
 }
 
 MedUi::~MedUi() {
   delete med;
   delete encodingManager;
+  delete namedScansController;
 
   refreshThread->join();
   delete refreshThread;
