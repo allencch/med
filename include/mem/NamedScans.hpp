@@ -26,9 +26,10 @@ public:
   string getScanType();
 
 private:
+  void removeScanTypes(string name);
   map<string, MemList> data;
   string activeName;
-  string scanType;
+  map<string, string> scanTypes;
 };
 
 #endif

@@ -7,7 +7,7 @@ using namespace std;
 NamedScans::NamedScans() {
   data[DEFAULT] = MemList();
   activeName = DEFAULT;
-  scanType = SCAN_TYPE_INT_8;
+  scanTypes[DEFAULT] = SCAN_TYPE_INT_8;
 }
 
 MemList* NamedScans::addNewScan(string name) {
@@ -47,10 +47,18 @@ bool NamedScans::remove(string name) {
   auto search = data.find(name);
   if (search != data.end()) {
     data.erase(search);
+    removeScanTypes(name);
     activeName = DEFAULT;
     return true;
   }
   return false;
+}
+
+void NamedScans::removeScanTypes(string name) {
+  auto search = scanTypes.find(name);
+  if (search != scanTypes.end()) {
+    scanTypes.erase(search);
+  }
 }
 
 string NamedScans::getActiveName() {
@@ -63,9 +71,12 @@ void NamedScans::setActiveName(string name) {
 }
 
 void NamedScans::setScanType(string type) {
-  scanType = type;
+  scanTypes[activeName] = type;
 }
 
 string NamedScans::getScanType() {
-  return scanType;
+  auto result = scanTypes[activeName];
+  if (!result.length()) return SCAN_TYPE_INT_8;
+
+  return result;
 }

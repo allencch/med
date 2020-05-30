@@ -49,6 +49,7 @@ public:
   QTreeView* storeTreeView;
   QPlainTextEdit* notesArea;
   StoreTreeModel* storeModel;
+  TreeModel* scanModel;
 
   static void refresh(MedUi* mainUi);
   void refreshScanTreeView();
@@ -136,7 +137,6 @@ private:
   string getLastDigit();
 
   QApplication* app;
-  TreeModel* scanModel;
   UiState scanState;
   UiState storeState;
   QWidget* memEditor;

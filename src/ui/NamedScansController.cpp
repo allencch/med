@@ -66,6 +66,9 @@ void NamedScansController::onComboBoxChanged(int) {
 
 void NamedScansController::updateScanTree() {
   auto count = namedScans->getMemList()->size();
-  cout << namedScans->getActiveName() << endl;
-  cout << count << endl;
+  if (count > SCAN_ADDRESS_VISIBLE_SIZE) return;
+
+  mainUi->scanUpdateMutex->lock();
+  mainUi->scanModel->addScan(namedScans->getScanType());
+  mainUi->scanUpdateMutex->unlock();
 }
