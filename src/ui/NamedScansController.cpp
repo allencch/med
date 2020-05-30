@@ -71,4 +71,5 @@ void NamedScansController::updateScanTree() {
   mainUi->scanUpdateMutex->lock();
   mainUi->scanModel->addScan(namedScans->getScanType());
   mainUi->scanUpdateMutex->unlock();
+  mainUi->updateNumberOfAddresses();
 }

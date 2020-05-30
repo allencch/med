@@ -71,6 +71,7 @@ public:
 
   void setWindowTitle();
   void openFile(QString filename);
+  void updateNumberOfAddresses();
 
 public slots:
   void onProcessItemDblClicked(QTreeWidgetItem* item, int column);
@@ -132,7 +133,6 @@ private:
   void setupStoreTreeView();
   void setupSignals();
   void setupUi();
-  void updateNumberOfAddresses();
 
   string getLastDigit();
 
