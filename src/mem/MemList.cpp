@@ -8,6 +8,10 @@
 
 using namespace std;
 
+MemList::MemList() {
+  list = vector<MemPtr>();
+}
+
 MemList::MemList(vector<MemPtr> list) {
   this->list = list;
 }
