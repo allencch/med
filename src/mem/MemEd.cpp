@@ -20,7 +20,6 @@ MemEd::MemEd(pid_t pid) {
 
 MemEd::~MemEd() {
   delete scanner;
-  delete manager;
 
   delete store;
 
@@ -31,7 +30,6 @@ MemEd::~MemEd() {
 void MemEd::initialize() {
   pid = 0;
   scanner = new MemScanner();
-  manager = new MemManager();
 
   vector<MemPtr> emptyMems;
   store = new MemList(emptyMems);
@@ -71,7 +69,7 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType, bool fas
     int lastDigitValue = hexStrToInt(lastDigit);
     mems = scanner->scan(operands, size, scanType, op, fastScan, lastDigitValue);
   }
-  manager->setMems(mems);
+  namedScans.getMemList()->setList(mems);
   return mems;
 }
 
@@ -83,24 +81,24 @@ vector<MemPtr> MemEd::filter(const string& value, const string& scanType, bool f
   vector<MemPtr> mems;
   ScanParser::OpType op = ScanParser::getOpType(value);
   if (ScanParser::isSnapshotOperator(op) && !ScanParser::hasValues(value)) {
-    mems = scanner->filterUnknown(manager->getMems(), scanType, op, fastScan);
+    mems = scanner->filterUnknown(namedScans.getMemList()->getList(), scanType, op, fastScan);
   } else if (scanType == SCAN_TYPE_CUSTOM) {
     ScanCommand scanCommand = ScanParser::getScanCommand(value);
-    mems = scanner->filter(manager->getMems(), scanCommand);
+    mems = scanner->filter(namedScans.getMemList()->getList(), scanCommand);
   }
   else {
     Operands operands = ScanParser::valueToOperands(value, scanType, op);
     size_t size = operands.getFirstSize();
 
-    mems = scanner->filter(manager->getMems(), operands, size, scanType, op);
+    mems = scanner->filter(namedScans.getMemList()->getList(), operands, size, scanType, op);
   }
 
-  manager->setMems(mems);
+  namedScans.getMemList()->setList(mems);
   return mems;
 }
 
 MemList MemEd::getScans() {
-  MemList list(manager->getMems());
+  MemList list(namedScans.getMemList()->getList());
   return list;
 }
 
@@ -116,7 +114,7 @@ Process MemEd::selectProcessByIndex(int index) {
 }
 
 void MemEd::clearScans() {
-  manager->clear();
+  namedScans.getMemList()->clear();
 }
 
 MemList* MemEd::getStore() {

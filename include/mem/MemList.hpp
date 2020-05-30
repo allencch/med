@@ -1,3 +1,6 @@
+#ifndef MEM_LIST_HPP
+#define MEM_LIST_HPP
+
 #include <vector>
 #include "mem/Mem.hpp"
 
@@ -39,3 +42,5 @@ public:
 private:
   vector<MemPtr> list;
 };
+
+#endif

@@ -12,7 +12,6 @@
 
 #include "mem/StringUtil.hpp"
 #include "mem/MemScanner.hpp"
-#include "mem/MemManager.hpp"
 #include "mem/MemEd.hpp"
 
 #define COMMAND_SCAN 1

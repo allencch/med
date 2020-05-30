@@ -7,8 +7,8 @@
 #include <json/json.h>
 
 #include "mem/MemScanner.hpp"
-#include "mem/MemManager.hpp"
 #include "mem/MemList.hpp"
+#include "mem/NamedScans.hpp"
 #include "med/Process.hpp"
 
 const int LOCK_REFRESH_RATE = 800;
@@ -64,7 +64,7 @@ private:
   void initialize();
   pid_t pid;
   MemScanner* scanner;
-  MemManager* manager;
+  NamedScans namedScans;
   MemList* store;
   std::mutex storeMutex;
   std::thread* lockValueThread;

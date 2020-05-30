@@ -9,13 +9,19 @@ using namespace std;
 
 class NamedScans {
 public:
+  static const string DEFAULT;
+
   NamedScans();
   MemList* addNewScan(string name);
-  MemList* get(string name);
+  MemList* getMemList(string name = DEFAULT);
   bool remove(string name);
+
+  void setActiveName(string name);
+  string getActiveName();
 
 private:
   map<string, MemList> data;
+  string activeName;
 };
 
 #endif

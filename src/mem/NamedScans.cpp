@@ -1,9 +1,10 @@
 #include "mem/NamedScans.hpp"
 
-const string DEFAULT = "Default";
+const string NamedScans::DEFAULT = "Default";
 
 NamedScans::NamedScans() {
   data[DEFAULT] = MemList();
+  activeName = DEFAULT;
 }
 
 MemList* NamedScans::addNewScan(string name) {
@@ -11,7 +12,7 @@ MemList* NamedScans::addNewScan(string name) {
   return &data[name];
 }
 
-MemList* NamedScans::get(string name) {
+MemList* NamedScans::getMemList(string name) {
   auto search = data.find(name);
   if (search != data.end()) {
     return &search->second;
@@ -25,7 +26,16 @@ bool NamedScans::remove(string name) {
   auto search = data.find(name);
   if (search != data.end()) {
     data.erase(search);
+    activeName = DEFAULT;
     return true;
   }
   return false;
+}
+
+string NamedScans::getActiveName() {
+  return activeName;
+}
+
+void NamedScans::setActiveName(string name) {
+  activeName = name;
 }
