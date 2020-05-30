@@ -69,7 +69,7 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType, bool fas
     int lastDigitValue = hexStrToInt(lastDigit);
     mems = scanner->scan(operands, size, scanType, op, fastScan, lastDigitValue);
   }
-  namedScans.getMemList()->setList(mems);
+  namedScans.setMemPtrs(mems, scanType);
   return mems;
 }
 
@@ -93,8 +93,12 @@ vector<MemPtr> MemEd::filter(const string& value, const string& scanType, bool f
     mems = scanner->filter(namedScans.getMemList()->getList(), operands, size, scanType, op);
   }
 
-  namedScans.getMemList()->setList(mems);
+  namedScans.setMemPtrs(mems, scanType);
   return mems;
+}
+
+NamedScans& MemEd::getNamedScans() {
+  return namedScans;
 }
 
 MemList MemEd::getScans() {

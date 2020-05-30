@@ -3,25 +3,32 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include "mem/MemList.hpp"
 
 using namespace std;
 
 class NamedScans {
 public:
-  static const string DEFAULT;
+  inline static const string DEFAULT = "Default";
 
   NamedScans();
   MemList* addNewScan(string name);
-  MemList* getMemList(string name = DEFAULT);
+  MemList* getMemList();
+  MemList* getMemList(string name);
+  void setMemPtrs(vector<MemPtr> list, string scanType);
   bool remove(string name);
 
   void setActiveName(string name);
   string getActiveName();
 
+  void setScanType(string type);
+  string getScanType();
+
 private:
   map<string, MemList> data;
   string activeName;
+  string scanType;
 };
 
 #endif

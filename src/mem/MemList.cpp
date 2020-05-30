@@ -29,11 +29,15 @@ Address MemList::getAddress(int index) {
 }
 
 string MemList::getValue(int index, const string& scanType) {
+  if (index >= (int)list.size()) return "";
+
   PemPtr pem = static_pointer_cast<Pem>(list[index]);
   return pem->getValue(scanType);
 }
 
 string MemList::getValue(int index) {
+  if (index >= (int)list.size()) return "";
+
   PemPtr pem = static_pointer_cast<Pem>(list[index]);
   return pem->getValue(pem->getScanType());
 }
@@ -43,6 +47,8 @@ void MemList::dump(int index, bool newline) {
 }
 
 string MemList::getScanType(int index) {
+  if (index >= (int)list.size()) return "";
+
   PemPtr pem = static_pointer_cast<Pem>(list[index]);
   return pem->getScanType();
 }
