@@ -30,7 +30,7 @@ MemEditor::MemEditor(MedUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   QVBoxLayout* layout = new QVBoxLayout;
   layout->addWidget(mainChild);
   this->setLayout(layout);
-  this->resize(800, 500);
+  this->resize(750, 550);
 
   currAddress= mainChild->findChild<QLineEdit*>("currAddress");
   valueLine = mainChild->findChild<QLineEdit*>("value");
@@ -39,6 +39,9 @@ MemEditor::MemEditor(MedUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   textArea = mainChild->findChild<QPlainTextEdit*>("textArea");
   refreshButton = mainChild->findChild<QPushButton*>("refresh");
   scanTypeCombo = mainChild->findChild<QComboBox*>("scanType");
+  viewInt32 = mainChild->findChild<QLineEdit*>("view_int32");
+  viewFloat32 = mainChild->findChild<QLineEdit*>("view_float32");
+  viewFloat64 = mainChild->findChild<QLineEdit*>("view_float64");
 
   QFont font("FreeMono");
   font.setStyleHint(QFont::Monospace);
@@ -173,6 +176,7 @@ void MemEditor::loadAddresses(Address address, size_t size) {
 void MemEditor::onMemAreaCursorPositionChanged() {
   updateCurrAddress();
   updateValueLine();
+  updateValueViews();
   boldText();
 }
 
@@ -215,6 +219,19 @@ void MemEditor::updateValueLine() {
 
   string value = Pem::bytesToString(rawMemory + distance, scanType);
   valueLine->setText(value.c_str());
+}
+
+void MemEditor::updateValueViews() {
+  int position = memArea->textCursor().position();
+  int distance = position / 3;
+  string valueInt32 = Pem::bytesToString(rawMemory + distance, SCAN_TYPE_INT_32);
+  viewInt32->setText(valueInt32.c_str());
+
+  string valueFloat32 = Pem::bytesToString(rawMemory + distance, SCAN_TYPE_FLOAT_32);
+  viewFloat32->setText(valueFloat32.c_str());
+
+  string valueFloat64 = Pem::bytesToString(rawMemory + distance, SCAN_TYPE_FLOAT_64);
+  viewFloat64->setText(valueFloat64.c_str());
 }
 
 void MemEditor::storeRawMemory(Byte* memory, size_t size) {

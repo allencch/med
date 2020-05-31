@@ -52,6 +52,9 @@ private:
   QPlainTextEdit* textArea;
   QPushButton* refreshButton;
   QComboBox *scanTypeCombo;
+  QLineEdit *viewInt32;
+  QLineEdit *viewFloat32;
+  QLineEdit *viewFloat64;
 
   Byte* rawMemory; // For re-use without keep read from PID
 
@@ -62,6 +65,7 @@ private:
 
   void updateCurrAddress();
   void updateValueLine();
+  void updateValueViews();
   void storeRawMemory(Byte* memory, size_t size);
 
   string getHexString(int position);
