@@ -1,3 +1,7 @@
+/**
+ * Note: The cursor is in shown block character, because
+ * the plain text editor is the overwriteMode.
+ */
 #include <string>
 #include <iostream>
 #include <cctype>
@@ -205,6 +209,7 @@ void MemEditor::setCursorPositionByAddress() {
   auto cursor = memArea->textCursor();
   cursor.setPosition(position, QTextCursor::MoveAnchor);
   memArea->setTextCursor(cursor);
+  memArea->setFocus();
 }
 
 void MemEditor::updateCurrAddress() {
