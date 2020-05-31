@@ -38,6 +38,7 @@ MemEditor::MemEditor(MedUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   addrArea = mainChild->findChild<QPlainTextEdit*>("addrArea");
   textArea = mainChild->findChild<QPlainTextEdit*>("textArea");
   refreshButton = mainChild->findChild<QPushButton*>("refresh");
+  scanTypeCombo = mainChild->findChild<QComboBox*>("scanType");
 
   QFont font("FreeMono");
   font.setStyleHint(QFont::Monospace);
@@ -71,6 +72,10 @@ void MemEditor::setupSignals() {
                    SIGNAL(clicked()),
                    this,
                    SLOT(onRefreshButtonClicked()));
+  QObject::connect(scanTypeCombo,
+                   SIGNAL(currentIndexChanged(int)),
+                   this,
+                   SLOT(onScanTypeComboChanged(int)));
 }
 
 
@@ -206,7 +211,7 @@ void MemEditor::updateValueLine() {
   int position = memArea->textCursor().position();
   int distance = position / 3;
 
-  string scanType = mainChild->findChild<QComboBox*>("scanType")->currentText().toStdString();
+  string scanType = scanTypeCombo->currentText().toStdString();
 
   string value = Pem::bytesToString(rawMemory + distance, scanType);
   valueLine->setText(value.c_str());
@@ -285,4 +290,8 @@ void MemEditor::boldText() {
   cursor.mergeCharFormat(format);
 
   cursor.setPosition(cursorPosition);
+}
+
+void MemEditor::onScanTypeComboChanged(int) {
+  refresh();
 }

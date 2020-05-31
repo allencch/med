@@ -37,6 +37,7 @@ private slots:
   void onCurrAddressEdited();
   void onMemAreaCursorPositionChanged();
   void onRefreshButtonClicked();
+  void onScanTypeComboChanged(int index);
 
 private:
   MemEd* med;
@@ -50,6 +51,7 @@ private:
   QPlainTextEdit* addrArea;
   QPlainTextEdit* textArea;
   QPushButton* refreshButton;
+  QComboBox *scanTypeCombo;
 
   Byte* rawMemory; // For re-use without keep read from PID
 
