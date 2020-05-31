@@ -16,7 +16,7 @@ Before scanning or opening a JSON file, one must select a target process.
 
 ## Interface
 
-![UI](https://i.imgur.com/XfGXFWr.png)
+![UI](https://i.imgur.com/CGvLdwp.png)
 
 The interface can briefly separated into two panes and a bottom "Named Scans".
 
