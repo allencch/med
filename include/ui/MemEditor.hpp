@@ -38,6 +38,7 @@ private slots:
   void onMemAreaCursorPositionChanged();
   void onRefreshButtonClicked();
   void onScanTypeComboChanged(int index);
+  void onEnterClicked();
 
 private:
   MemEd* med;
@@ -55,6 +56,7 @@ private:
   QLineEdit *viewInt32;
   QLineEdit *viewFloat32;
   QLineEdit *viewFloat64;
+  QPushButton *enterButton;
 
   Byte* rawMemory; // For re-use without keep read from PID
 

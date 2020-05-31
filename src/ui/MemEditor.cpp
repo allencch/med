@@ -32,7 +32,7 @@ MemEditor::MemEditor(MedUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   this->setLayout(layout);
   this->resize(750, 550);
 
-  currAddress= mainChild->findChild<QLineEdit*>("currAddress");
+  currAddress = mainChild->findChild<QLineEdit*>("currAddress");
   valueLine = mainChild->findChild<QLineEdit*>("value");
   memArea = mainChild->findChild<QPlainTextEdit*>("memArea");
   addrArea = mainChild->findChild<QPlainTextEdit*>("addrArea");
@@ -42,6 +42,7 @@ MemEditor::MemEditor(MedUi* mainUi) : QWidget(NULL, Qt::SubWindow) {
   viewInt32 = mainChild->findChild<QLineEdit*>("view_int32");
   viewFloat32 = mainChild->findChild<QLineEdit*>("view_float32");
   viewFloat64 = mainChild->findChild<QLineEdit*>("view_float64");
+  enterButton = mainChild->findChild<QPushButton*>("enterButton");
 
   QFont font("FreeMono");
   font.setStyleHint(QFont::Monospace);
@@ -79,6 +80,10 @@ void MemEditor::setupSignals() {
                    SIGNAL(currentIndexChanged(int)),
                    this,
                    SLOT(onScanTypeComboChanged(int)));
+  QObject::connect(enterButton,
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onEnterClicked()));
 }
 
 
@@ -310,5 +315,16 @@ void MemEditor::boldText() {
 }
 
 void MemEditor::onScanTypeComboChanged(int) {
+  refresh();
+}
+
+void MemEditor::onEnterClicked() {
+  string value = valueLine->text().toStdString();
+  Address address = hexToInt(currAddress->text().toStdString());
+  string scanType = scanTypeCombo->currentText().toStdString();
+
+  if (!address) return;
+
+  mainUi->med->setValueByAddress(address, value, scanType);
   refresh();
 }

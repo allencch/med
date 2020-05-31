@@ -33,6 +33,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="enterButton">
+         <property name="text">
+          <string>Enter</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QComboBox" name="scanType">
          <item>
           <property name="text">
@@ -69,13 +76,6 @@
            <string>ptr64</string>
           </property>
          </item>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton">
-         <property name="text">
-          <string>Enter</string>
-         </property>
         </widget>
        </item>
        <item>
