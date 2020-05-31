@@ -19,6 +19,7 @@ private slots:
 private:
   void selectByName(string name);
   void updateScanTree();
+  void updateScanType();
   MedUi *mainUi;
   QWidget *mainWindow;
   MemEd *med;

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "mem/NamedScans.hpp"
+#include "mem/StringUtil.hpp"
 #include "med/MedTypes.hpp"
 
 using namespace std;
@@ -7,19 +8,20 @@ using namespace std;
 NamedScans::NamedScans() {
   data[DEFAULT] = MemList();
   activeName = DEFAULT;
-  scanTypes[DEFAULT] = SCAN_TYPE_INT_8;
+  scanTypes[DEFAULT] = SCAN_TYPE_INT_32;
 }
 
 MemList* NamedScans::addNewScan(string name) {
-  if (!name.size()) return NULL;
+  auto trimmed = StringUtil::trim(name);
+  if (!trimmed.size()) return NULL;
 
-  auto search = data.find(name);
+  auto search = data.find(trimmed);
   if (search != data.end()) {
     return NULL;
   }
 
-  data[name] = MemList();
-  return &data[name];
+  data[trimmed] = MemList();
+  return &data[trimmed];
 }
 
 MemList* NamedScans::getMemList() {
@@ -27,9 +29,10 @@ MemList* NamedScans::getMemList() {
 }
 
 MemList* NamedScans::getMemList(string name) {
-  if (!name.size()) return NULL;
+  auto trimmed = StringUtil::trim(name);
+  if (!trimmed.size()) return NULL;
 
-  auto search = data.find(name);
+  auto search = data.find(trimmed);
   if (search != data.end()) {
     return &search->second;
   }
@@ -42,12 +45,13 @@ void NamedScans::setMemPtrs(vector<MemPtr> list, string scanType) {
 }
 
 bool NamedScans::remove(string name) {
-  if (name == DEFAULT || !name.size()) return false;
+  auto trimmed = StringUtil::trim(name);
+  if (trimmed == DEFAULT || !trimmed.size()) return false;
 
-  auto search = data.find(name);
+  auto search = data.find(trimmed);
   if (search != data.end()) {
     data.erase(search);
-    removeScanTypes(name);
+    removeScanTypes(trimmed);
     activeName = DEFAULT;
     return true;
   }
@@ -55,7 +59,8 @@ bool NamedScans::remove(string name) {
 }
 
 void NamedScans::removeScanTypes(string name) {
-  auto search = scanTypes.find(name);
+  auto trimmed = StringUtil::trim(name);
+  auto search = scanTypes.find(trimmed);
   if (search != scanTypes.end()) {
     scanTypes.erase(search);
   }
@@ -66,8 +71,9 @@ string NamedScans::getActiveName() {
 }
 
 void NamedScans::setActiveName(string name) {
-  if (!name.size()) return;
-  activeName = name;
+  auto trimmed = StringUtil::trim(name);
+  if (!trimmed.size()) return;
+  activeName = trimmed;
 }
 
 void NamedScans::setScanType(string type) {
@@ -76,7 +82,7 @@ void NamedScans::setScanType(string type) {
 
 string NamedScans::getScanType() {
   auto result = scanTypes[activeName];
-  if (!result.length()) return SCAN_TYPE_INT_8;
+  if (!result.length()) return SCAN_TYPE_INT_32;
 
   return result;
 }

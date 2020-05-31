@@ -2,6 +2,7 @@
 #include <QtUiTools>
 #include "ui/Ui.hpp"
 #include "ui/NamedScansController.hpp"
+#include "mem/StringUtil.hpp"
 
 using namespace std;
 
@@ -31,27 +32,30 @@ NamedScansController::NamedScansController(MedUi *mainUi) {
 void NamedScansController::onAddClicked() {
   auto nameInput = mainWindow->findChild<QLineEdit*>("namedScan_name");
   string name = nameInput->text().toStdString();
-  auto result = namedScans->addNewScan(name);
+  auto trimmed = StringUtil::trim(name);
+  auto result = namedScans->addNewScan(trimmed);
   if (!result) return;
 
-  comboBox->addItem(QString(name.c_str()));
+  comboBox->addItem(QString(trimmed.c_str()));
   nameInput->setText("");
 
-  selectByName(name);
+  selectByName(trimmed);
 }
 
 void NamedScansController::selectByName(string name) {
-  int index = comboBox->findText(QString(name.c_str()));
+  auto trimmed = StringUtil::trim(name);
+  int index = comboBox->findText(QString(trimmed.c_str()));
   if (index < 0) return;
 
   comboBox->setCurrentIndex(index);
-  namedScans->setActiveName(name);
+  namedScans->setActiveName(trimmed);
 }
 
 void NamedScansController::onDeleteClicked() {
   string name = comboBox->currentText().toStdString();
+  auto trimmed = StringUtil::trim(name);
   int index = comboBox->currentIndex();
-  auto result = namedScans->remove(name);
+  auto result = namedScans->remove(trimmed);
   if (!result) return;
 
   comboBox->setCurrentIndex(0); // Default
@@ -60,8 +64,10 @@ void NamedScansController::onDeleteClicked() {
 
 void NamedScansController::onComboBoxChanged(int) {
   string name = comboBox->currentText().toStdString();
-  namedScans->setActiveName(name);
+  auto trimmed = StringUtil::trim(name);
+  namedScans->setActiveName(trimmed);
   updateScanTree();
+  updateScanType();
 }
 
 void NamedScansController::updateScanTree() {
@@ -72,4 +78,13 @@ void NamedScansController::updateScanTree() {
   mainUi->scanModel->addScan(namedScans->getScanType());
   mainUi->scanUpdateMutex->unlock();
   mainUi->updateNumberOfAddresses();
+}
+
+void NamedScansController::updateScanType() {
+  auto scanTypeCombo = mainWindow->findChild<QComboBox*>("scanType");
+  auto scanType = QString(namedScans->getScanType().c_str());
+  int index = scanTypeCombo->findText(scanType);
+  if (index < 0) return;
+
+  scanTypeCombo->setCurrentIndex(index);
 }
