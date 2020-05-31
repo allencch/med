@@ -41,6 +41,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="pauseCheckbox">
+          <property name="toolTip">
+           <string>Pause process</string>
+          </property>
           <property name="text">
            <string>Pa&amp;use</string>
           </property>
@@ -205,6 +208,9 @@
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
               <widget class="QPushButton" name="scanAdd">
+               <property name="toolTip">
+                <string>Add the selected address to Store</string>
+               </property>
                <property name="text">
                 <string>Add</string>
                </property>
@@ -212,6 +218,9 @@
              </item>
              <item>
               <widget class="QPushButton" name="scanAddAll">
+               <property name="toolTip">
+                <string>Add all to Store</string>
+               </property>
                <property name="text">
                 <string>Add All</string>
                </property>
@@ -219,6 +228,9 @@
              </item>
              <item>
               <widget class="QPushButton" name="scanClear">
+               <property name="toolTip">
+                <string>Clear addresses</string>
+               </property>
                <property name="text">
                 <string>Clear</string>
                </property>
@@ -263,6 +275,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="storeClear">
+              <property name="toolTip">
+               <string>Clear all addresses in Store</string>
+              </property>
               <property name="text">
                <string>Clear</string>
               </property>
@@ -291,6 +306,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="storeShift">
+              <property name="toolTip">
+               <string>Shift selected addresses</string>
+              </property>
               <property name="text">
                <string>Shift</string>
               </property>
@@ -298,6 +316,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="storeUnshift">
+              <property name="toolTip">
+               <string>Unshift selected addresses</string>
+              </property>
               <property name="text">
                <string>Unshift</string>
               </property>
@@ -343,6 +364,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="namedScan_delete">
+        <property name="toolTip">
+         <string>Delete current named scan</string>
+        </property>
         <property name="text">
          <string>Delete</string>
         </property>
@@ -356,10 +380,16 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>The name scan to be added</string>
+        </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="namedScan_add">
+        <property name="toolTip">
+         <string>Add new named scan</string>
+        </property>
         <property name="text">
          <string>Add</string>
         </property>
