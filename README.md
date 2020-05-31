@@ -16,7 +16,13 @@ Before scanning or opening a JSON file, one must select a target process.
 
 ## Interface
 
-The interface can briefly separated into two panes. Left pane is the result from the scan; right pane is the memory addresses that we intended to store and save, or open from the file.
+![UI](https://i.imgur.com/XfGXFWr.png)
+
+The interface can briefly separated into two panes and a bottom "Named Scans".
+
+* Left pane is the result from the scan.
+* Right pane is the memory addresses that we intended to store and save, or open from the file.
+* Bottom area is allows manage the named scans. We can temporary save the scan results according to the target named scan.
 
 
 ## Scanning & filtering
