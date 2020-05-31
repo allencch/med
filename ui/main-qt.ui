@@ -273,16 +273,6 @@
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QPushButton" name="storeClear">
-              <property name="toolTip">
-               <string>Clear all addresses in Store</string>
-              </property>
-              <property name="text">
-               <string>Clear</string>
-              </property>
-             </widget>
-            </item>
            </layout>
           </item>
           <item>
@@ -430,6 +420,7 @@
     </property>
     <addaction name="actionNewAddress"/>
     <addaction name="actionDeleteAddress"/>
+    <addaction name="actionStoreClear"/>
     <addaction name="separator"/>
     <addaction name="actionMemEditor"/>
    </widget>
@@ -593,6 +584,11 @@
    </property>
    <property name="text">
     <string>&amp;Fast Scan</string>
+   </property>
+  </action>
+  <action name="actionStoreClear">
+   <property name="text">
+    <string>Clear</string>
    </property>
   </action>
  </widget>

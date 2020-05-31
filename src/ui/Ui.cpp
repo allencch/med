@@ -197,10 +197,6 @@ void MedUi::setupSignals() {
                    this,
                    SLOT(onFastScanTriggered(bool)));
 
-  QObject::connect(mainWindow->findChild<QPushButton*>("storeClear"),
-                   SIGNAL(clicked()),
-                   this,
-                   SLOT(onStoreClearClicked()));
   QObject::connect(mainWindow->findChild<QPushButton*>("nextAddress"),
                    SIGNAL(clicked()),
                    this,
@@ -229,6 +225,10 @@ void MedUi::setupSignals() {
                    SIGNAL(triggered()),
                    this,
                    SLOT(onDeleteAddressTriggered()));
+  QObject::connect(mainWindow->findChild<QAction*>("actionStoreClear"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onStoreClearTriggered()));
   QObject::connect(mainWindow->findChild<QAction*>("actionMemEditor"),
                    SIGNAL(triggered()),
                    this,
@@ -509,7 +509,7 @@ void MedUi::onStoreHeaderClicked(int logicalIndex) {
 // Store buttons //
 ///////////////////
 
-void MedUi::onStoreClearClicked() {
+void MedUi::onStoreClearTriggered() {
   storeUpdateMutex.lock();
   storeModel->empty();
   storeUpdateMutex.unlock();

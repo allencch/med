@@ -96,7 +96,6 @@ private slots:
   void onScanClearClicked();
 
   void onStoreHeaderClicked(int logicalIndex);
-  void onStoreClearClicked();
 
   void onStoreNextClicked();
   void onStorePrevClicked();
@@ -118,6 +117,7 @@ private slots:
 
   void onNewAddressTriggered();
   void onDeleteAddressTriggered();
+  void onStoreClearTriggered();
 
   void onMemEditorTriggered();
 
