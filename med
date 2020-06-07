@@ -1,2 +1,2 @@
 #!/bin/sh
-cd /opt/med && ./med-qt
+cd /opt/med && ./med-ui
