@@ -189,7 +189,7 @@ Read [here](https://allencch.wordpress.com/2020/05/07/med-experimental-feature/)
 
 # Build Instruction
 
-This program requires **GCC** (C++ compiler) (or **clang**), **Qt5**, and **JSONPP**.
+This program requires **GCC** (C++ compiler) (or **clang**), **Qt5**, **JSONPP**, and **ICU**.
 
 1. In the directory that contains the source code including `CMakeLists.txt`,
 
