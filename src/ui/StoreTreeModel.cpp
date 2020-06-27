@@ -77,8 +77,10 @@ bool StoreTreeModel::setData(const QModelIndex &index, const QVariant &value, in
 }
 
 Qt::ItemFlags StoreTreeModel::flags(const QModelIndex &index) const {
-  if (!index.isValid())
-    return 0;
+  if (!index.isValid()) {
+    return Qt::NoItemFlags;
+  }
+
   Qt::ItemFlags flags = Qt::ItemIsEditable | QAbstractItemModel::flags(index);
   if (index.column() == STORE_COL_LOCK) {
     flags |= Qt::ItemIsUserCheckable;
