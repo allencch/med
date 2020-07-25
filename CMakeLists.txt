@@ -7,12 +7,14 @@ cmake_policy(SET CMP0071 NEW) # 3.10.1 introduced policy, "cmake --help-policy C
 set(CMAKE_CXX_FLAGS "-std=c++17 -g -Og") # for strong debugging purpose
 # set(CMAKE_CXX_FLAGS "-std=c++17 -g") # for debugging
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,-export-dynamic")
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON) #required for qt moc
 set(CMAKE_AUTOMOC ON) #automatic moc
 
 include_directories(./include)
 
 find_package(PkgConfig REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 find_package(Qt5UiTools)
 pkg_search_module(JSONCPP REQUIRED jsoncpp)
 pkg_search_module(ICU REQUIRED icu-uc)
@@ -36,14 +38,10 @@ target_link_libraries(med ${JSONCPP_LIBRARIES} ${ICU_LIBRARIES} -lpthread)
 
 # med-ui
 file(GLOB ui_HEADER "include/ui/*.hpp")
-qt5_wrap_cpp(moc_med-ui ${ui_HEADER})
-add_library(moc-med-ui ${moc_med-ui})
-qt5_use_modules(moc-med-ui Widgets)
-set_property(SOURCE ${ui_HEADER} PROPERTY SKIP_AUTOMOC ON)
-
 file(GLOB ui_SRC "src/ui/*.cpp")
-add_executable(med-ui ${ui_SRC})
-target_link_libraries(med-ui moc-med-ui med Qt5::UiTools)
+# header is necessary, https://github.com/bincrafters/community/issues/466#issuecomment-426265654
+add_executable(med-ui ${ui_SRC} ${ui_HEADER})
+target_link_libraries(med-ui med Qt5::Widgets Qt5::UiTools)
 
 
 # CLI
