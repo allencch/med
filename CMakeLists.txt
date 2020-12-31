@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.12.4)
 project (Med)
 
 cmake_policy(SET CMP0071 NEW) # 3.10.1 introduced policy, "cmake --help-policy CMP0071" for detail.
