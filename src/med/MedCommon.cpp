@@ -76,6 +76,9 @@ ScanType stringToScanType(const string& scanType) {
   else if (scanType == SCAN_TYPE_PTR_32) {
     return Ptr32;
   }
+  else if (scanType == SCAN_TYPE_INT_64) {
+    return Int64;
+  }
   else if (scanType == SCAN_TYPE_PTR_64) {
     return Ptr64;
   }
@@ -108,6 +111,9 @@ string scanTypeToString(const ScanType& scanType) {
     break;
   case Ptr32:
     ret = SCAN_TYPE_PTR_32;
+    break;
+  case Int64:
+    ret = SCAN_TYPE_INT_64;
     break;
   case Ptr64:
     ret = SCAN_TYPE_PTR_64;
@@ -143,6 +149,7 @@ int scanTypeToSize(const ScanType& type) {
   case Ptr32:
     ret = sizeof(uint32_t);
     break;
+  case Int64:
   case Ptr64:
     ret = sizeof(uint64_t);
     break;
@@ -385,6 +392,7 @@ void stringToMemory(const string& str, const ScanType& type, Byte* buffer) {
   case Ptr32:
     ss >> dec >> *(uint32_t*)buffer;
     break;
+  case Int64:
   case Ptr64:
     ss >> dec >> *(uint64_t*)buffer;
     break;
@@ -438,6 +446,7 @@ void hexStringToMemory(const string& str, const ScanType& type, Byte* buffer) {
   case Ptr32:
     ss >> hex >> *(uint32_t*)buffer;
     break;
+  case Int64:
   case Ptr64:
     ss >> hex >> *(uint64_t*)buffer;
     break;

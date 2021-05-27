@@ -113,6 +113,11 @@
           </item>
           <item>
            <property name="text">
+            <string>int64</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>float32</string>
            </property>
           </item>

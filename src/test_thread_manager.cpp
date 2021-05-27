@@ -1,6 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include <future>
+#include <thread>
 
 #include "med/ThreadManager.hpp"
 

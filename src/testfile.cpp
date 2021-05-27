@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+#include <cinttypes>
 using namespace std;
 
 int main() {
@@ -31,8 +32,8 @@ int main() {
 
     printf("%d\t", a);
     printf("a = 0x%x\n", (int)a);
-    int temp;
-    scanf("%d", &temp);
+    uint64_t temp;
+    scanf("%" SCNd64, &temp);
     if (temp == 0) {
       continue;
     } else {
