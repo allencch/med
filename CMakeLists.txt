@@ -105,6 +105,10 @@ if(CXXTEST_FOUND)
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/ScanCommand.hpp)
   target_link_libraries(testScanCommand med)
 
+  CXXTEST_ADD_TEST(testMaps testMaps.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/Maps.hpp)
+  target_link_libraries(testMaps med)
+
   file(GLOB test_HEADER "tests/*.hpp")
   set_property(SOURCE ${gui_HEADER} PROPERTY SKIP_AUTOMOC ON)
 endif()

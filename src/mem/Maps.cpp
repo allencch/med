@@ -1,9 +1,18 @@
 #include <algorithm>
+#include <iostream>
+#include "med/MedException.hpp"
 #include "mem/Maps.hpp"
 
 using namespace std;
 
 Maps::Maps() {}
+
+AddressPair& Maps::operator[](size_t index) {
+  if (index >= size()) {
+    throw MedException("Maps out of index");
+  }
+  return maps[index];
+}
 
 AddressPairs& Maps::getMaps() {
   return maps;
@@ -22,4 +31,43 @@ void Maps::push(const AddressPair& pair) {
 
 size_t Maps::size() {
   return maps.size();
+}
+
+void Maps::clear() {
+  maps.clear();
+}
+
+void Maps::trimByScope(const AddressPair& scope) {
+  auto start = scope.first;
+  auto end = scope.second;
+
+  AddressPairs newMaps;
+  for (size_t i = 0; i < size(); i++) {
+    auto first = maps[i].first;
+    auto second = maps[i].second;
+
+    if (end < first || start > second) {
+      continue;
+    }
+
+    if (start < first) {
+      if (end < second) {
+        newMaps.push_back(AddressPair(first, end));
+      }
+      else {
+        newMaps.push_back(AddressPair(first, second));
+      }
+    }
+    else { // start >= first
+      if (end < second) {
+        newMaps.push_back(AddressPair(start, end));
+        break;
+      }
+      else {
+        newMaps.push_back(AddressPair(start, second));
+      }
+    }
+  }
+
+  maps = newMaps;
 }
