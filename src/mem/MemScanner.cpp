@@ -162,8 +162,22 @@ vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
   for (size_t i = 0; i < maps.size(); i++) {
     TMTask* fn = new TMTask();
     *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &operands, size, scanType, op, fastScan, lastDigit]() {
-            scanMap(memio, mutex, list, maps, i, memFd, fdMutex, operands, size, scanType, op, fastScan, lastDigit);
-          };
+      scanMap(ScanParams {
+          .memio = memio,
+          .mutex = mutex,
+          .list = list,
+          .maps = maps,
+          .mapIndex = i,
+          .fd = memFd,
+          .fdMutex = fdMutex,
+          .operands = operands,
+          .size = size,
+          .scanType = scanType,
+          .op = op,
+          .fastScan = fastScan,
+          .lastDigit = lastDigit
+        });
+    };
     threadManager->queueTask(fn);
   }
   threadManager->start();
@@ -277,19 +291,21 @@ vector<MemPtr>& MemScanner::saveSnapshotByScope() {
   return snapshot;
 }
 
-void MemScanner::scanMap(MemIO* memio,
-                         std::mutex& mutex,
-                         vector<MemPtr>& list,
-                         Maps& maps,
-                         int mapIndex,
-                         int fd,
-                         std::mutex& fdMutex,
-                         Operands& operands,
-                         int size,
-                         const string& scanType,
-                         const ScanParser::OpType& op,
-                         bool fastScan,
-                         int lastDigit) {
+void MemScanner::scanMap(ScanParams params) {
+  MemIO* memio = params.memio;
+  std::mutex& mutex = params.mutex;
+  vector<MemPtr>& list = params.list;
+  Maps& maps = params.maps;
+  int mapIndex = params.mapIndex;
+  int fd = params.fd;
+  std::mutex& fdMutex = params.fdMutex;
+  Operands& operands = params.operands;
+  int size = params.size;
+  const string& scanType = params.scanType;
+  const ScanParser::OpType& op = params.op;
+  bool fastScan = params.fastScan;
+  int lastDigit = params.lastDigit;
+
   auto& pairs = maps.getMaps();
   auto& pair = pairs[mapIndex];
   for (Address j = std::get<0>(pair); j < std::get<1>(pair); j += getpagesize()) {

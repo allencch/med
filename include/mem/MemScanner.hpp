@@ -13,6 +13,7 @@
 #include "med/ScanCommand.hpp"
 #include "mem/Mem.hpp"
 #include "mem/MemIO.hpp"
+#include "mem/ScanParams.hpp"
 
 using namespace std;
 
@@ -91,19 +92,7 @@ private:
                             int lastDigit = -1);
   vector<MemPtr> scanByMaps(ScanCommand &scanCommand);
 
-  static void scanMap(MemIO* memio,
-                      std::mutex& mutex,
-                      vector<MemPtr>& list,
-                      Maps& maps,
-                      int mapIndex,
-                      int fd,
-                      std::mutex& fdMutex,
-                      Operands& operands,
-                      int size,
-                      const string& scanType,
-                      const ScanParser::OpType& op,
-                      bool fastScan = false,
-                      int lastDigit = -1);
+  static void scanMap(ScanParams params);
   static void scanMap(MemIO* memio,
                       std::mutex& mutex,
                       vector<MemPtr>& list,
