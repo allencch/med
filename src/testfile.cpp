@@ -5,7 +5,7 @@
 using namespace std;
 
 int main() {
-  int a = 0;
+  float a = 0;
   int b[] = {100, 80, 50, 90, 66, 33, 11};
   int* c = new int[4];
   memset(c, 0, 4 * sizeof(int));
@@ -30,17 +30,17 @@ int main() {
     }
     printf("\n");
 
-    printf("%d\t", a);
+    printf("%f\t", a);
     printf("a = 0x%x\n", (int)a);
-    uint64_t temp;
-    scanf("%" SCNd64, &temp);
+    float temp;
+    scanf("%f", &temp);
     if (temp == 0) {
       continue;
     } else {
       a = temp;
     }
-    printf("%d\t", a);
-    printf("a changed 0x%x\n", (int)a);
+    printf("%f\t", (float)a);
+    printf("a changed 0x%p\n", &a);
   }
 
   delete[] c;
