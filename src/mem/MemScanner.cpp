@@ -448,7 +448,7 @@ void MemScanner::scanPage(MemIO* memio,
         MemPtr mem = memio->read((Address)(start + k), size);
 
         PemPtr pem = Pem::convertToPemPtr(mem, memio);
-        pem->setScanType(SCAN_TYPE_INT_8); // NOTE: Set to 8
+        pem->setScanType(scanCommand.getFirstScanType());
         pem->rememberValue(page + k, size);
 
         mutex.lock();
@@ -585,7 +585,7 @@ void MemScanner::filterByChunk(std::mutex& mutex,
       continue;
     }
     if (scanCommand.match(data.get())) {
-      pem->setScanType(SCAN_TYPE_INT_8);
+      pem->setScanType(scanCommand.getFirstScanType());
       pem->rememberValue(data.get(), size);
 
       mutex.lock();

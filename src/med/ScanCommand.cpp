@@ -3,6 +3,7 @@
 #include "med/ScanParser.hpp"
 
 ScanCommand::ScanCommand(const string& s) {
+  commandString = s;
   auto values = ScanParser::getValues(s);
 
   for (size_t i = 0; i < values.size(); i++) {
@@ -45,4 +46,8 @@ bool ScanCommand::match(Byte* address) {
     ptr += step;
   }
   return result;
+}
+
+string ScanCommand::getFirstScanType() {
+  return SubCommand::getScanType(commandString);
 }

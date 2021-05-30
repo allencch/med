@@ -67,6 +67,29 @@ SubCommand::SubCommand(const string &s) {
   }
 }
 
+string SubCommand::getScanType(const string &s) {
+  auto cmd = parseCmd(s);
+  switch (cmd) {
+  case Command::Wildcard:
+  case Command::Int8:
+    return SCAN_TYPE_INT_8;
+  case Command::Int16:
+    return SCAN_TYPE_INT_16;
+  case Command::Noop:
+  case Command::Int32:
+    return SCAN_TYPE_INT_32;
+  case Command::Int64:
+    return SCAN_TYPE_INT_64;
+  case Command::Float32:
+    return SCAN_TYPE_FLOAT_32;
+  case Command::Float64:
+    return SCAN_TYPE_FLOAT_64;
+  case Command::Str:
+    return SCAN_TYPE_STRING;
+  }
+  return SCAN_TYPE_INT_8;
+}
+
 Operands SubCommand::getOperands() {
   return operands;
 }

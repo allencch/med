@@ -15,10 +15,12 @@ public:
   size_t getSize();
 
   bool match(Byte* address);
+  string getFirstScanType();
 private:
   vector<SubCommand> subCommands;
 
   size_t _getSize(); // Memoization
   size_t size;
+  string commandString;
 };
 #endif

@@ -29,15 +29,17 @@ public:
   int getWildcardSteps();
   Command getCmd();
   size_t getSize();
-  ScanParser::OpType op;
 
   /**
    * @return tuple of boolean match result, and int of steps involved
    */
   tuple<bool, int> match(Byte* address);
 
+  ScanParser::OpType op;
+
   static Command parseCmd(const string &s);
   static string getCmdString(const string &s);
+  static string getScanType(const string &s);
 private:
   string stripCommand(const string &s);
 

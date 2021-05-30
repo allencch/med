@@ -358,7 +358,8 @@ void MedUi::onScanClicked() {
 
   if(med->getScans().size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
     scanUpdateMutex->lock();
-    scanModel->addScan(scanType);
+    string scanTypeToAdd = scanType == SCAN_TYPE_CUSTOM ? SubCommand::getScanType(scanValue) : scanType;
+    scanModel->addScan(scanTypeToAdd);
     scanUpdateMutex->unlock();
   }
 
@@ -399,6 +400,7 @@ void MedUi::onFilterClicked() {
   }
 
   if(med->getScans().size() <= SCAN_ADDRESS_VISIBLE_SIZE) {
+    string scanTypeToAdd = scanType == SCAN_TYPE_CUSTOM ? SubCommand::getScanType(scanValue) : scanType;
     scanModel->addScan(scanType);
   }
 
