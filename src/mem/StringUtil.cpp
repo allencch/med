@@ -29,3 +29,14 @@ string StringUtil::toLower(const string& s) {
   }
   return newString;
 }
+
+string StringUtil::replace(string& s, const string& find, const string& r) {
+  if (!find.length()) {
+    return s;
+  }
+  string::size_type n = s.find(find);
+  if (n == string::npos) {
+    return s;
+  }
+  return s.replace(n, find.length(), r);
+}

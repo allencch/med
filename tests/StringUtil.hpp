@@ -16,4 +16,10 @@ public:
     string res = StringUtil::trim(s);
     TS_ASSERT_EQUALS(res, "A");
   }
+
+  void test_replace() {
+    string s = "s:'testing'";
+    string res = StringUtil::replace(s, "s:", "");
+    TS_ASSERT_EQUALS(res, "'testing'");
+  }
 };

@@ -10,6 +10,7 @@ namespace StringUtil {
   string trim(const string& s);
   vector<string> split(const string& s, char delim);
   string toLower(const string& s);
+  string replace(string& s, const string& find, const string& r);
 }
 
 #endif
