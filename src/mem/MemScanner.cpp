@@ -131,12 +131,7 @@ vector<MemPtr> MemScanner::scan(Operands& operands,
                                 const ScanParser::OpType& op,
                                 bool fastScan,
                                 int lastDigit) {
-  if (hasScope()) {
-    return scanByScope(operands, size, scanType, op, fastScan, lastDigit);
-  }
-  else {
-    return scanByMaps(operands, size, scanType, op, fastScan, lastDigit);
-  }
+  return scanByMaps(operands, size, scanType, op, fastScan, lastDigit);
 }
 
 vector<MemPtr> MemScanner::scan(ScanCommand &scanCommand) {
@@ -155,6 +150,9 @@ vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
   vector<MemPtr> list;
 
   Maps maps = getMaps(pid);
+  if (hasScope()) {
+    maps.trimByScope(*scope);
+  }
   int memFd = getMem(pid);
   MemIO* memio = getMemIO();
 
@@ -207,39 +205,6 @@ vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand) {
   return list;
 }
 
-vector<MemPtr> MemScanner::scanByScope(Operands& operands,
-                                       int size,
-                                       const string& scanType,
-                                       const ScanParser::OpType& op,
-                                       bool fastScan,
-                                       int lastDigit) {
-  vector<MemPtr> list;
-  auto start = scope->first;
-  auto end = scope->second;
-  int fd = getMem(pid);
-  auto& mutex = listMutex;
-
-  // TODO: Refactor this, since similar to scanMap()
-  for (Address j = start; j < end; j += getpagesize()) {
-    if (lseek(fd, j, SEEK_SET) == -1) {
-      continue;
-    }
-
-    Byte* page = new Byte[getpagesize()];
-
-    if (read(fd, page, getpagesize()) == -1) {
-      continue;
-    }
-    scanPage(memio, mutex, list, page, j, operands, size, scanType, op, fastScan, lastDigit);
-
-    delete[] page;
-  }
-
-  if (list.size() <= ADDRESS_SORTABLE_SIZE) {
-    return MemList::sortByAddress(list);
-  }
-  return list;
-}
 
 vector<MemPtr> MemScanner::scanByScope(ScanCommand &scanCommand) {
   vector<MemPtr> list;

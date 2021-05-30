@@ -81,12 +81,6 @@ private:
                      const ScanParser::OpType& op,
                      bool fastScan = false);
 
-  vector<MemPtr> scanByScope(Operands& operands,
-                             int size,
-                             const string& scanType,
-                             const ScanParser::OpType& op,
-                             bool fastScan = false,
-                             int lastDigit = -1);
   vector<MemPtr> scanByScope(ScanCommand &scanCommand);
 
   vector<MemPtr> scanByMaps(Operands& operands,
