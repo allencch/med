@@ -2,7 +2,7 @@
 
 There was a memory editor in Windows, that was Game Master. But it was not a freeware. And there is a freeware memory editor, it is ArtMoney. But it is also for Windows only. In Linux, there is only one memory editor, **scanmem** with GameConqueror as the GUI. However, it does not fulfil my needs. Thus, I decided to create one which can fit my needs.
 
-Med is still in the development, it is not stable. Anyone can help to improve the program.
+Everyone is welcome to contribute to the code.
 
 ![Memory editing](http://i.imgur.com/6gSR0WI.png)
 
