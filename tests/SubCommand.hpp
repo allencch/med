@@ -59,7 +59,11 @@ public:
 
   void test_initialize() {
     string s = "i8:1";
-    SubCommand subCmd(s);
-    TS_ASSERT_EQUALS(subCmd.op, ScanParser::OpType::Eq);
+    SubCommand subCmd1(s);
+    TS_ASSERT_EQUALS(subCmd1.op, ScanParser::OpType::Eq);
+
+    s = "i8:~ 2";
+    SubCommand subCmd2(s);
+    TS_ASSERT_EQUALS(subCmd2.op, ScanParser::OpType::Around);
   }
 };

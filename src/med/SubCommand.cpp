@@ -1,3 +1,4 @@
+#include <iostream>
 #include <regex>
 
 #include "med/SubCommand.hpp"
@@ -34,8 +35,8 @@ SubCommand::SubCommand(const string &s) {
   wildcardSteps = 0;
   string valueStr;
 
-  op = ScanParser::getOpType(s);
   string stripped = stripCommand(s);
+  op = ScanParser::getOpType(stripped);
 
   switch (cmd) {
   case Command::Int8:
