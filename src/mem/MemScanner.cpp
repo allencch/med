@@ -134,11 +134,8 @@ vector<MemPtr> MemScanner::scan(Operands& operands,
   return scanByMaps(operands, size, scanType, op, fastScan, lastDigit);
 }
 
-vector<MemPtr> MemScanner::scan(ScanCommand &scanCommand) {
-  if (hasScope()) {
-    return scanByScope(scanCommand);
-  }
-  return scanByMaps(scanCommand);
+vector<MemPtr> MemScanner::scan(ScanCommand &scanCommand, int lastDigit) {
+  return scanByMaps(scanCommand, lastDigit);
 }
 
 vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
@@ -191,10 +188,13 @@ vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
   return list;
 }
 
-vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand) {
+vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand, int lastDigit) {
   vector<MemPtr> list;
 
   Maps maps = getMaps(pid);
+  if (hasScope()) {
+    maps.trimByScope(*scope);
+  }
   int memFd = getMem(pid);
   MemIO* memio = getMemIO();
 
@@ -203,9 +203,9 @@ vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand) {
 
   for (size_t i = 0; i < maps.size(); i++) {
     TMTask* fn = new TMTask();
-    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &scanCommand]() {
-            scanMap(memio, mutex, list, maps, i, memFd, fdMutex, scanCommand);
-          };
+    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &scanCommand, lastDigit]() {
+      scanMap(memio, mutex, list, maps, i, memFd, fdMutex, scanCommand, lastDigit);
+    };
     threadManager->queueTask(fn);
   }
   threadManager->start();
@@ -218,37 +218,6 @@ vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand) {
   }
   return list;
 }
-
-
-vector<MemPtr> MemScanner::scanByScope(ScanCommand &scanCommand) {
-  vector<MemPtr> list;
-  auto start = scope->first;
-  auto end = scope->second;
-  int fd = getMem(pid);
-  auto& mutex = listMutex;
-
-  // TODO: Refactor this, since similar to scanMap()
-  for (Address j = start; j < end; j += getpagesize()) {
-    if (lseek(fd, j, SEEK_SET) == -1) {
-      continue;
-    }
-
-    Byte* page = new Byte[getpagesize()];
-
-    if (read(fd, page, getpagesize()) == -1) {
-      continue;
-    }
-    scanPage(memio, mutex, list, page, j, scanCommand);
-
-    delete[] page;
-  }
-
-  if (list.size() <= ADDRESS_SORTABLE_SIZE) {
-    return MemList::sortByAddress(list);
-  }
-  return list;
-}
-
 
 vector<MemPtr>& MemScanner::saveSnapshot(const vector<MemPtr>& baseList) {
   snapshot.clear();
@@ -337,7 +306,8 @@ void MemScanner::scanMap(MemIO* memio,
                          int mapIndex,
                          int fd,
                          std::mutex& fdMutex,
-                         ScanCommand &scanCommand) {
+                         ScanCommand &scanCommand,
+                         int lastDigit) {
   auto& pairs = maps.getMaps();
   auto& pair = pairs[mapIndex];
   for (Address j = std::get<0>(pair); j < std::get<1>(pair); j += getpagesize()) {
@@ -356,7 +326,7 @@ void MemScanner::scanMap(MemIO* memio,
     }
     fdMutex.unlock();
 
-    scanPage(memio, mutex, list, page, j, scanCommand);
+    scanPage(memio, mutex, list, page, j, scanCommand, lastDigit);
 
     delete[] page;
   }
@@ -438,10 +408,14 @@ void MemScanner::scanPage(MemIO* memio,
                           vector<MemPtr>& list,
                           Byte* page,
                           Address start,
-                          ScanCommand &scanCommand) {
+                          ScanCommand &scanCommand,
+                          int lastDigit) {
   size_t size = scanCommand.getSize();
   for (size_t k = 0; k <= getpagesize() - size; k += STEP) {
-    if ((Address)(start + k) % 8 != 0) continue; // NOTE: BlockAlign to 8
+    // if ((Address)(start + k) % 8 != 0) continue; // NOTE: BlockAlign to 8
+    if (skipAddressByLastDigit((Address)(start + k), lastDigit)) {
+      continue;
+    }
 
     try {
       if (scanCommand.match(page + k)) {

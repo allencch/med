@@ -54,19 +54,19 @@ vector<MemPtr> MemEd::scan(const string& value, const string& scanType, bool fas
   }
 
   ScanParser::OpType op = ScanParser::getOpType(value);
+  int lastDigitValue = hexStrToInt(lastDigit);
 
   vector<MemPtr> mems;
   if (op == ScanParser::OpType::SnapshotSave) {
     scanner->saveSnapshot(store->getList());
   } else if (scanType == SCAN_TYPE_CUSTOM) {
     ScanCommand scanCommand = ScanParser::getScanCommand(value);
-    mems = scanner->scan(scanCommand);
+    mems = scanner->scan(scanCommand, lastDigitValue);
   }
   else {
     Operands operands = ScanParser::valueToOperands(value, scanType, op);
     size_t size = operands.getFirstSize();
 
-    int lastDigitValue = hexStrToInt(lastDigit);
     mems = scanner->scan(operands, size, scanType, op, fastScan, lastDigitValue);
   }
   namedScans.setMemPtrs(mems, scanType);
