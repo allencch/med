@@ -175,7 +175,7 @@ Notes: This feature is tested on Dosbox game.
 
 To reduce the search space, we can specify the scope start and scope end by entering address in hexadecimal format. After entering both fields, make sure your cursor leave the field, so that the scope will take affect.
 
-## Custom search (experimental)
+## Custom search (experimental, Good!)
 
 Custom search allows to search string and wildcard. To do custom search, one can choose the `custom` type for searching. Then using the following input
 
@@ -185,7 +185,8 @@ s:'1', w:3, s:'2'
 
 which will look for hexadecimal pattern `31 xx xx xx 32`. Where `s:` is the string to search, and `w:` is the number of wildcard.
 
-Note: This search always targets on the address aligned to 8 bytes, meaning the memory address will end with 0 or 8 (`address % 8 == 0`).
+Other scan types are supported: `i8`, `i16`, `i32`, `i64`, `f32`, and `f64`.
+Besides that, operator such as `~`, `<>`, `>`, `<`, `>=`, `<=` are supported as well. Eg `i8:~ 4, f32: 10.5`
 
 Read [here](https://allencch.wordpress.com/2020/05/07/med-experimental-feature/) for the example usage.
 

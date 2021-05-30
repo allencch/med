@@ -62,7 +62,7 @@ public:
     SubCommand subCmd1(s);
     TS_ASSERT_EQUALS(subCmd1.op, ScanParser::OpType::Eq);
 
-    s = "i8:~ 2";
+    s = "i8: ~ 2";
     SubCommand subCmd2(s);
     TS_ASSERT_EQUALS(subCmd2.op, ScanParser::OpType::Around);
   }
