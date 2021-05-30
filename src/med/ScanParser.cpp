@@ -43,6 +43,8 @@ ScanParser::OpType ScanParser::stringToOpType(const string &s) {
     return ScanParser::Ge;
   else if (s == "<>")
     return ScanParser::Within;
+  else if (s == "~")
+    return ScanParser::Around;
   return ScanParser::Eq;
 }
 
@@ -142,8 +144,9 @@ Operands ScanParser::valueToOperands(const string& v, const string& t, OpType op
   SizedBytes bytes;
   if (t == SCAN_TYPE_STRING) {
     bytes = stringToBytes(v);
-  } else if (op == OpType::Within) {
-    return getTwoOperands(v, t);
+  } else if (op == OpType::Within ||
+             op == OpType::Around) {
+    return getTwoOperands(v, t, op);
   } else {
     bytes = numericToBytes(v, t);
   }
@@ -153,10 +156,17 @@ Operands ScanParser::valueToOperands(const string& v, const string& t, OpType op
 
 }
 
-Operands ScanParser::getTwoOperands(const string& v, const string& t) {
-  vector<string> values = getValues(v, ' ');
+Operands ScanParser::getTwoOperands(const string& v, const string& t, OpType op) {
+  vector<string> values;
+  if (op == OpType::Around) {
+    values = convertAroundToWithinValues(v);
+  }
+  else {
+    values = getValues(v, ' ');
+  }
+
   if (values.size() < 2) {
-    throw MedException("Operands should not be less than 2");
+      throw MedException("Operands should not be less than 2");
   }
   int length = scanTypeToSize(t);
 
@@ -173,4 +183,17 @@ Operands ScanParser::getTwoOperands(const string& v, const string& t) {
 
 ScanCommand ScanParser::getScanCommand(const string& v) {
   return ScanCommand(v);
+}
+
+vector<string> ScanParser::convertAroundToWithinValues(const string& v) {
+  vector<string> values = getValues(v, ' ');
+  double first = stod(values[0]);
+  double second;
+  if (values.size() < 2) {
+    second = 1.0;
+  }
+  else {
+    second = stod(values[1]);
+  }
+  return vector<string>{to_string(first - second), to_string(first + second)};
 }

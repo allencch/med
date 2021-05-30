@@ -60,6 +60,7 @@ namespace ScanParser {
     Ge,
     Le,
     Within,
+    Around,
     SnapshotSave
   };
 };

@@ -170,4 +170,46 @@ public:
     auto subCmds = cmd.getSubCommands();
     TS_ASSERT_EQUALS(subCmds.size(), 1);
   }
+
+  void test_around() {
+    string s = "~ 10";
+    Operands result = ScanParser::getTwoOperands(s, SCAN_TYPE_INT_32, ScanParser::OpType::Around);
+    TS_ASSERT_EQUALS(result.count(), 2);
+
+    auto operand = result.getFirstOperand();
+    TS_ASSERT_EQUALS(operand.getSize(), 4);
+    Byte* bytes = operand.getBytes();
+    TS_ASSERT_EQUALS(bytes[0], 9);
+    TS_ASSERT_EQUALS(bytes[1], 0);
+    TS_ASSERT_EQUALS(bytes[2], 0);
+    TS_ASSERT_EQUALS(bytes[3], 0);
+
+    operand = result.getSecondOperand();
+    TS_ASSERT_EQUALS(operand.getSize(), 4);
+    bytes = operand.getBytes();
+    TS_ASSERT_EQUALS(bytes[0], 11);
+    TS_ASSERT_EQUALS(bytes[1], 0);
+    TS_ASSERT_EQUALS(bytes[2], 0);
+    TS_ASSERT_EQUALS(bytes[3], 0);
+
+    s = "~ 10 2";
+    result = ScanParser::getTwoOperands(s, SCAN_TYPE_INT_32, ScanParser::OpType::Around);
+    TS_ASSERT_EQUALS(result.count(), 2);
+
+    operand = result.getFirstOperand();
+    TS_ASSERT_EQUALS(operand.getSize(), 4);
+    bytes = operand.getBytes();
+    TS_ASSERT_EQUALS(bytes[0], 8);
+    TS_ASSERT_EQUALS(bytes[1], 0);
+    TS_ASSERT_EQUALS(bytes[2], 0);
+    TS_ASSERT_EQUALS(bytes[3], 0);
+
+    operand = result.getSecondOperand();
+    TS_ASSERT_EQUALS(operand.getSize(), 4);
+    bytes = operand.getBytes();
+    TS_ASSERT_EQUALS(bytes[0], 12);
+    TS_ASSERT_EQUALS(bytes[1], 0);
+    TS_ASSERT_EQUALS(bytes[2], 0);
+    TS_ASSERT_EQUALS(bytes[3], 0);
+  }
 };

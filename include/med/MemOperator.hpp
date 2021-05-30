@@ -37,7 +37,7 @@ bool memLe(const void* ptr1, const void* ptr2, size_t size);
  * Compare the memory based on the operation
  */
 bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpType op);
-bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, ScanParser::OpType op);
+bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, ScanParser::OpType op); // @deprecated
 bool memCompare(const void* ptr, size_t size, Operands& operands, const ScanParser::OpType& op);
 
 

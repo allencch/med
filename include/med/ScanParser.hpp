@@ -16,7 +16,7 @@
 using namespace std;
 
 namespace ScanParser {
-  constexpr const char* OP_REGEX = "^(=|>(?=[^=])|<(?=[^=>])|>=|<=|!|<>|\\?|<|>)";
+  constexpr const char* OP_REGEX = "^(=|>(?=[^=])|<(?=[^=>])|>=|<=|!|<>|\\?|<|>|~)";
   string getOp(const string &v);
   OpType stringToOpType(const string &s);
   OpType getOpType(const string &v);
@@ -38,9 +38,11 @@ namespace ScanParser {
   // Others will consider as one operand.
   // If the input is an array (with commas), it is one operand.
   Operands valueToOperands(const string& v, const string& t, OpType op = OpType::Eq);
-  Operands getTwoOperands(const string& v, const string& t);
+  Operands getTwoOperands(const string& v, const string& t, OpType op = OpType::Within);
 
   ScanCommand getScanCommand(const string& v);
+
+  vector<string> convertAroundToWithinValues(const string& v);
 };
 
 #endif

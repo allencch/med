@@ -143,7 +143,7 @@ bool memCompare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpT
 
 // @deprecated
 bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, ScanParser::OpType op) {
-  if (op != ScanParser::Within) {
+  if (op != ScanParser::Within && op != ScanParser::Around) {
     return memCompare(ptr1, ptr2, size1, op);
   }
 
@@ -156,9 +156,10 @@ bool memCompare(const void* ptr1, size_t size1, const void* ptr2, size_t size2, 
 
 bool memCompare(const void* ptr, size_t size, Operands& operands, const ScanParser::OpType& op) {
   SizedBytes firstOperand = operands.getFirstOperand();
-  if (op != ScanParser::Within) {
+  if (op != ScanParser::Within && op != ScanParser::Around) {
     return memCompare(ptr, firstOperand.getBytes(), size, op);
   }
+
   SizedBytes secondOperand = operands.getSecondOperand();
   return memWithin(ptr, firstOperand.getBytes(), secondOperand.getBytes(), size);
 }
