@@ -19,6 +19,10 @@ public:
     s = "w:10";
     cmd = SubCommand::parseCmd(s);
     TS_ASSERT_EQUALS(cmd, SubCommand::Wildcard);
+
+    s = "i8:5";
+    cmd = SubCommand::parseCmd(s);
+    TS_ASSERT_EQUALS(cmd, SubCommand::Int8);
   }
 
   void test_getOperands() {
@@ -51,5 +55,11 @@ public:
     SubCommand subCmd(s);
     auto steps = subCmd.getWildcardSteps();
     TS_ASSERT_EQUALS(steps, 20);
+  }
+
+  void test_initialize() {
+    string s = "i8:1";
+    SubCommand subCmd(s);
+    TS_ASSERT_EQUALS(subCmd.op, ScanParser::OpType::Eq);
   }
 };

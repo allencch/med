@@ -18,8 +18,8 @@ using namespace std;
 namespace ScanParser {
   constexpr const char* OP_REGEX = "^(=|>(?=[^=])|<(?=[^=>])|>=|<=|!|<>|\\?|<|>|~)";
   string getOp(const string &v);
-  OpType stringToOpType(const string &s);
-  OpType getOpType(const string &v);
+  OpType stringToOpType(const string &s); /** Convert a string (or character) to OpType */
+  OpType getOpType(const string &v); /** Get OpType from a string */
   string getValue(const string &v);
   vector<string> getValues(const string &v, char delimiter = ',');
   bool hasValues(const string& v);

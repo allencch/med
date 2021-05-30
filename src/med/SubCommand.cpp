@@ -32,14 +32,38 @@ int extractNumber(const string &s) {
 SubCommand::SubCommand(const string &s) {
   cmd = parseCmd(s);
   wildcardSteps = 0;
-  if (cmd == Command::Noop) {
-    // NOTE: Default to int32 first
-    operands = ScanParser::valueToOperands(s, SCAN_TYPE_INT_32);
-  } else if (cmd == Command::Str) {
-    string valueStr = extractString(s);
-    operands = ScanParser::valueToOperands(valueStr, SCAN_TYPE_STRING);
-  } else if (cmd == Command::Wildcard) {
+  string valueStr;
+
+  op = ScanParser::getOpType(s);
+  string stripped = stripCommand(s);
+
+  switch (cmd) {
+  case Command::Int8:
+    operands = ScanParser::valueToOperands(stripped, SCAN_TYPE_INT_8, op);
+    break;
+  case Command::Int16:
+    operands = ScanParser::valueToOperands(stripped, SCAN_TYPE_INT_16, op);
+    break;
+  case Command::Noop:
+  case Command::Int32:
+    operands = ScanParser::valueToOperands(stripped, SCAN_TYPE_INT_32, op);
+    break;
+  case Command::Int64:
+    operands = ScanParser::valueToOperands(stripped, SCAN_TYPE_INT_64, op);
+    break;
+  case Command::Float32:
+    operands = ScanParser::valueToOperands(stripped, SCAN_TYPE_FLOAT_32, op);
+    break;
+  case Command::Float64:
+    operands = ScanParser::valueToOperands(stripped, SCAN_TYPE_FLOAT_64, op);
+    break;
+  case Command::Str:
+    valueStr = extractString(s);
+    operands = ScanParser::valueToOperands(valueStr, SCAN_TYPE_STRING, op);
+    break;
+  case Command::Wildcard:
     wildcardSteps = extractNumber(s);
+    break;
   }
 }
 
@@ -47,7 +71,7 @@ Operands SubCommand::getOperands() {
   return operands;
 }
 
-string getCmdString(const string& s) {
+string SubCommand::getCmdString(const string& s) {
   string value = StringUtil::trim(s);
   regex r(SubCommand::CMD_REGEX);
   auto begin = sregex_iterator(value.begin(), value.end(), r);
@@ -61,11 +85,35 @@ string getCmdString(const string& s) {
   return matched;
 }
 
+string SubCommand::stripCommand(const string &s) {
+  string copy = s;
+  return StringUtil::replace(copy, getCmdString(s), "");
+}
+
 SubCommand::Command SubCommand::parseCmd(const string& s) {
   auto cmd = getCmdString(s);
   if (cmd == "s:") {
     return Command::Str;
-  } else if (cmd == "w:") {
+  }
+  else if (cmd == "i8:") {
+    return Command::Int8;
+  }
+  else if (cmd == "i16:") {
+    return Command::Int16;
+  }
+  else if (cmd == "i32:") {
+    return Command::Int32;
+  }
+  else if (cmd == "i64:") {
+    return Command::Int64;
+  }
+  else if (cmd == "f32:") {
+    return Command::Float32;
+  }
+  else if (cmd == "f64:") {
+    return Command::Float64;
+  }
+  else if (cmd == "w:") {
     return Command::Wildcard;
   }
   return Command::Noop;
@@ -81,11 +129,10 @@ int SubCommand::getWildcardSteps() {
 
 size_t SubCommand::getSize() {
   switch (cmd) {
-  case Command::Noop:
-  case Command::Str:
-    return operands.getFirstSize();
   case Command::Wildcard:
     return wildcardSteps;
+  default:
+    return operands.getFirstSize();
   }
   return 0;
 }
@@ -94,12 +141,11 @@ tuple<bool, int> SubCommand::match(Byte* address) {
   bool matchResult;
   size_t size = getSize();
   switch (cmd) {
-  case Command::Noop:
-  case Command::Str:
-    matchResult = memCompare(address, size, operands, ScanParser::OpType::Eq);
-    break;
   case Command::Wildcard:
     matchResult = true;
+    break;
+  default:
+    matchResult = memCompare(address, size, operands, op);
   }
   return make_tuple(matchResult, size);
 }
