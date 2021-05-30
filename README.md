@@ -110,9 +110,12 @@ There are several operators can be used for scanning,
 * `<=` - less than or equal to
 * `!` - not
 * `<>` - between (inclusive)
+* `~` - around
 
 For `<>`, it requires two operands, example `<> 10 20`, which means scan for the value in the range of [10, 20].
 This feature is useful to search for the value such as floating point (float or double) that contains decimal places which is not shown in the game, such as Forager.
+
+For `~`, it requires one operand with second optional operand, example `~ 10`, which will scan for the value [9, 11]. It is translated as 10 ± 1. If the input is `~ 10 2`, it will be 10 ± 2, then will search for the value [8, 12]. This is useful to search the floating point.
 
 
 ## Save/open file
