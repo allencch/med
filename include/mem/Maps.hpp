@@ -1,3 +1,6 @@
+#ifndef MAPS_HPP
+#define MAPS_HPP
+
 #include <vector>
 #include <utility>
 
@@ -20,3 +23,5 @@ public:
 private:
   AddressPairs maps;
 };
+
+#endif
