@@ -216,7 +216,7 @@ make
 4. ~~Scan by changes (scan unknown).~~
 5. ~~Scan within memory block range.~~
 6. Arithmetic operation with prefix notation.
-7. Scan by struct, supports data type syntax
+7. ~~Scan by struct, supports data type syntax~~
 8. Scan by pointer(?)
 
 # Developer notes
