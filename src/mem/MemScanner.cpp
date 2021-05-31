@@ -411,8 +411,14 @@ void MemScanner::scanPage(MemIO* memio,
                           ScanCommand &scanCommand,
                           int lastDigit) {
   size_t size = scanCommand.getSize();
+  string scanType = scanCommand.getFirstScanType();
+  int scanTypeSize = scanTypeToSize(scanType);
+
   for (size_t k = 0; k <= getpagesize() - size; k += STEP) {
-    // if ((Address)(start + k) % 8 != 0) continue; // NOTE: BlockAlign to 8
+    if (scanType != SCAN_TYPE_STRING &&
+        skipAddressByFastScan((Address)(start + k), scanTypeSize, true)) {
+      continue;
+    }
     if (skipAddressByLastDigit((Address)(start + k), lastDigit)) {
       continue;
     }
