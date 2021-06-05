@@ -1,0 +1,24 @@
+name: Build and Test
+on: [push]
+jobs:
+  Build-And-Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Installing build requirements
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install clang cmake libjsoncpp-dev libicu-dev qttools5-dev
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Build project
+        run: |
+          cd ${{ github.workspace }}
+          export CC=/usr/bin/clang CXX=/usr/bin/clang++
+          mkdir build && cd build
+          cmake ..
+          make
+      - name: Test
+        run: |
+          cd ${{ github.workspace }}
+          cd build
+          make test

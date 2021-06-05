@@ -1,5 +1,7 @@
 # Med (Memory Editor)
 
+![Build status](https://github.com/allencch/med/actions/workflows/actions.yml/badge.svg)
+
 There was a memory editor in Windows, that was Game Master. But it was not a freeware. And there is a freeware memory editor, it is ArtMoney. But it is also for Windows only. In Linux, there is only one memory editor, **scanmem** with GameConqueror as the GUI. However, it does not fulfil my needs. Thus, I decided to create one which can fit my needs.
 
 Everyone is welcome to contribute to the code.
