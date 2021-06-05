@@ -10,15 +10,11 @@ jobs:
           sudo apt-get -y install clang cmake libjsoncpp-dev libicu-dev qttools5-dev
       - name: Check out repository code
         uses: actions/checkout@v2
-      - name: Build project
+      - name: Build and test
         run: |
           cd ${{ github.workspace }}
           export CC=/usr/bin/clang CXX=/usr/bin/clang++
           mkdir build && cd build
           cmake ..
           make
-      - name: Test
-        run: |
-          cd ${{ github.workspace }}
-          cd build
           make test
