@@ -7,7 +7,7 @@ jobs:
       - name: Installing build requirements
         run: |
           sudo apt-get update
-          sudo apt-get -y install clang cmake libjsoncpp-dev libicu-dev qttools5-dev
+          sudo apt-get -y install clang cmake libjsoncpp-dev libicu-dev qttools5-dev cxxtest
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Build and test
@@ -17,4 +17,8 @@ jobs:
           mkdir build && cd build
           cmake ..
           make
+      - name: Test
+        run: |
+          cd ${{ github.workspace }}
+          cd build
           make test
