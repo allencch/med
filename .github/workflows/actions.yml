@@ -7,10 +7,10 @@ jobs:
       - name: Installing build requirements
         run: |
           sudo apt-get update
-          sudo apt-get -y install clang cmake libjsoncpp-dev libicu-dev qttools5-dev cxxtest
+          sudo apt-get -y install clang cmake libjsoncpp-dev libicu-dev qttools5-dev cxxtest valgrind
       - name: Check out repository code
         uses: actions/checkout@v2
-      - name: Build and test
+      - name: Build
         run: |
           cd ${{ github.workspace }}
           export CC=/usr/bin/clang CXX=/usr/bin/clang++
@@ -22,3 +22,8 @@ jobs:
           cd ${{ github.workspace }}
           cd build
           make test
+      - name: Memory check
+        run: |
+          cd ${{ github.workspace }}
+          cd build
+          ctest -T memcheck
