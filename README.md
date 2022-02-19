@@ -193,9 +193,25 @@ Besides that, operator such as `~`, `<>`, `>`, `<`, `>=`, `<=` are supported as 
 Read [here](https://allencch.wordpress.com/2020/05/07/med-experimental-feature/) for the example usage.
 
 
+## Partially known issue
+
+Sometimes the process that is being scanned for memory will freeze/pause due to the lock of Med.
+To resume it, one can toggle the upper-right Pause on and off.
+
+Alternatively, if the process is run through console, one can do `Ctrl+Z` to suspend the process, then run `fg` to bring back to foreground.
+
+
 # Build Instruction
 
-This program requires **GCC** (C++ compiler) (or **clang**), **Qt5**, **JSONPP**, and **ICU**.
+To build this program, it requires
+
+* cmake
+* clang (which I am using) (or GCC)
+* Qt5 (qttools5-dev)
+* JSONPP (libjsoncpp-dev)
+* ICU (libicu-dev)
+* cxxtest (optional)
+* libreadline-dev ([Issue #6](https://github.com/allencch/med/issues/6), required on Debian Bullseye)
 
 1. In the directory that contains the source code including `CMakeLists.txt`,
 
