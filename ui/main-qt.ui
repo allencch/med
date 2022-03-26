@@ -452,6 +452,7 @@
      <string>&amp;Option</string>
     </property>
     <addaction name="actionFastScan"/>
+    <addaction name="actionForceResume"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -594,6 +595,14 @@
   <action name="actionStoreClear">
    <property name="text">
     <string>Clear</string>
+   </property>
+  </action>
+  <action name="actionForceResume">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>F&amp;orce Resume</string>
    </property>
   </action>
  </widget>

@@ -59,6 +59,7 @@ public:
   MemEd* med;
   bool autoRefresh;
   bool fastScan;
+  bool forceResume;
   std::thread* refreshThread;
 
   UiState getScanState();
@@ -114,6 +115,7 @@ private slots:
   void onRefreshTriggered();
   void onResumeProcessTriggered(bool checked);
   void onFastScanTriggered(bool checked);
+  void onForceResumeTriggered(bool checked);
 
   void onNewAddressTriggered();
   void onDeleteAddressTriggered();

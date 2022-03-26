@@ -21,6 +21,7 @@ MedUi::MedUi(QApplication* app) {
   this->app = app;
   this->autoRefresh = true;
   this->fastScan = true;
+  this->forceResume = false;
   med = new MemEd();
   scanUpdateMutex = &med->getScanListMutex();
 
@@ -196,6 +197,10 @@ void MedUi::setupSignals() {
                    SIGNAL(triggered(bool)),
                    this,
                    SLOT(onFastScanTriggered(bool)));
+  QObject::connect(mainWindow->findChild<QAction*>("actionForceResume"),
+                   SIGNAL(triggered(bool)),
+                   this,
+                   SLOT(onForceResumeTriggered(bool)));
 
   QObject::connect(mainWindow->findChild<QPushButton*>("nextAddress"),
                    SIGNAL(clicked()),
@@ -722,11 +727,11 @@ void MedUi::onAutoRefreshTriggered(bool checked) {
 }
 
 void MedUi::onFastScanTriggered(bool checked) {
-  if (checked) {
-    fastScan = true;
-  } else {
-    fastScan = false;
-  }
+  fastScan = checked;
+}
+
+void MedUi::onForceResumeTriggered(bool checked) {
+  forceResume = checked;
 }
 
 void MedUi::onResumeProcessTriggered(bool checked) {
@@ -796,6 +801,10 @@ void MedUi::refresh(MedUi* mainUi) {
     if (mainUi->autoRefresh) {
       mainUi->refreshScanTreeView();
       mainUi->refreshStoreTreeView();
+    }
+    auto med = mainUi->med;
+    if (mainUi->forceResume && !med->getIsProcessPaused()) {
+      med->resumeProcess();
     }
     std::this_thread::sleep_for(chrono::milliseconds(REFRESH_RATE));
   }
