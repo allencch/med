@@ -18,7 +18,7 @@ string extractString(const string& s) {
 
 int extractNumber(const string &s) {
   string value = StringUtil::trim(s);
-  regex r(":(\\d+)");
+  regex r(":\\s*?(\\d+)");
   smatch match;
   string matched;
   if (std::regex_search(value, match, r)) {

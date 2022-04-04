@@ -22,7 +22,7 @@ public:
     Wildcard
   };
   static constexpr const char* CMD_REGEX = "^(s|w|i8|i16|i32|i64|f32|f64):";
-  static constexpr const char* CMD_STRING = "'(.+?)'";
+  static constexpr const char* CMD_STRING = "\\s*?'(.+?)'";
 
   explicit SubCommand(const string &s);
   Operands getOperands();
