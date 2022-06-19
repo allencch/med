@@ -3,6 +3,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <cstring>
 
 #include "med/ScanParser.hpp"
 #include "med/MedException.hpp"
