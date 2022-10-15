@@ -31,7 +31,7 @@ public:
                       const ScanParser::OpType& op,
                       bool fastScan = false,
                       int lastDigit = -1);
-  vector<MemPtr> scan(ScanCommand &scanCommand, int lastDigit = -1);
+  vector<MemPtr> scan(ScanCommand &scanCommand, int lastDigit = -1, bool fastScan = true);
   vector<MemPtr> filter(const vector<MemPtr>& list,
                         Operands& operands,
                         int size,
@@ -88,7 +88,7 @@ private:
                             const ScanParser::OpType& op,
                             bool fastScan = false,
                             int lastDigit = -1);
-  vector<MemPtr> scanByMaps(ScanCommand &scanCommand, int lastDigit = -1);
+  vector<MemPtr> scanByMaps(ScanCommand &scanCommand, int lastDigit = -1, bool fastScan = false);
 
   static void scanMap(ScanParams params);
   static void scanMap(MemIO* memio,
@@ -99,7 +99,8 @@ private:
                       int fd,
                       std::mutex& fdMutex,
                       ScanCommand &scanCommand,
-                      int lastDigit = -1);
+                      int lastDigit = -1,
+                      bool fastScan = false);
 
   vector<MemPtr>& saveSnapshotByScope();
   vector<MemPtr>& saveSnapshotByList(const vector<MemPtr>& baseList);
@@ -125,7 +126,8 @@ private:
                        Byte* page,
                        Address start,
                        ScanCommand &scanCommand,
-                       int lastDigit = -1);
+                       int lastDigit = -1,
+                       bool fastScan = false);
 
   static void filterByChunk(std::mutex& mutex,
                             const vector<MemPtr>& list,

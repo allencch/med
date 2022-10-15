@@ -134,8 +134,8 @@ vector<MemPtr> MemScanner::scan(Operands& operands,
   return scanByMaps(operands, size, scanType, op, fastScan, lastDigit);
 }
 
-vector<MemPtr> MemScanner::scan(ScanCommand &scanCommand, int lastDigit) {
-  return scanByMaps(scanCommand, lastDigit);
+vector<MemPtr> MemScanner::scan(ScanCommand &scanCommand, int lastDigit, bool fastScan) {
+  return scanByMaps(scanCommand, lastDigit, fastScan);
 }
 
 vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
@@ -188,7 +188,7 @@ vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
   return list;
 }
 
-vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand, int lastDigit) {
+vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand, int lastDigit, bool fastScan) {
   vector<MemPtr> list;
 
   Maps maps = getMaps(pid);
@@ -203,8 +203,8 @@ vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand, int lastDigit) {
 
   for (size_t i = 0; i < maps.size(); i++) {
     TMTask* fn = new TMTask();
-    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &scanCommand, lastDigit]() {
-      scanMap(memio, mutex, list, maps, i, memFd, fdMutex, scanCommand, lastDigit);
+    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &scanCommand, lastDigit, fastScan]() {
+      scanMap(memio, mutex, list, maps, i, memFd, fdMutex, scanCommand, lastDigit, fastScan);
     };
     threadManager->queueTask(fn);
   }
@@ -307,7 +307,8 @@ void MemScanner::scanMap(MemIO* memio,
                          int fd,
                          std::mutex& fdMutex,
                          ScanCommand &scanCommand,
-                         int lastDigit) {
+                         int lastDigit,
+                         bool fastScan) {
   auto& pairs = maps.getMaps();
   auto& pair = pairs[mapIndex];
   for (Address j = std::get<0>(pair); j < std::get<1>(pair); j += getpagesize()) {
@@ -326,7 +327,7 @@ void MemScanner::scanMap(MemIO* memio,
     }
     fdMutex.unlock();
 
-    scanPage(memio, mutex, list, page, j, scanCommand, lastDigit);
+    scanPage(memio, mutex, list, page, j, scanCommand, lastDigit, fastScan);
 
     delete[] page;
   }
@@ -409,14 +410,15 @@ void MemScanner::scanPage(MemIO* memio,
                           Byte* page,
                           Address start,
                           ScanCommand &scanCommand,
-                          int lastDigit) {
+                          int lastDigit,
+                          bool fastScan) {
   size_t size = scanCommand.getSize();
   string scanType = scanCommand.getFirstScanType();
   int scanTypeSize = scanTypeToSize(scanType);
 
   for (size_t k = 0; k <= getpagesize() - size; k += STEP) {
     if (scanType != SCAN_TYPE_STRING &&
-        skipAddressByFastScan((Address)(start + k), scanTypeSize, true)) {
+        skipAddressByFastScan((Address)(start + k), scanTypeSize, fastScan)) {
       continue;
     }
     if (skipAddressByLastDigit((Address)(start + k), lastDigit)) {
