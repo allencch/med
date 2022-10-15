@@ -536,7 +536,7 @@ void MemScanner::filterByChunk(std::mutex& mutex,
     BytePtr data;
     try {
       data = size > 1 ? pem->getValuePtr(size) : pem->getValuePtr();
-    } catch(MedException &ex) { // Memory not available
+    } catch (const MedException &ex) { // Memory not available
       continue;
     }
     if (memCompare(data.get(), size, operands, op)) {
@@ -561,7 +561,7 @@ void MemScanner::filterByChunk(std::mutex& mutex,
     BytePtr data;
     try {
       data = size > 1 ? pem->getValuePtr(size) : pem->getValuePtr();
-    } catch(MedException &ex) { // Memory not available
+    } catch(const MedException &ex) { // Memory not available
       continue;
     }
     if (scanCommand.match(data.get())) {
@@ -589,7 +589,7 @@ void MemScanner::filterUnknownByChunk(std::mutex& mutex,
     try {
       data = pem->getValuePtr();
       oldValue = pem->recallValuePtr();
-    } catch(MedException &ex) {
+    } catch(const MedException &ex) {
       continue;
     }
 

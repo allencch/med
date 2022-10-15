@@ -82,15 +82,9 @@ vector<MemPtr> MemEd::filter(const string& value, const string& scanType, bool f
   ScanParser::OpType op = ScanParser::getOpType(value);
   if (ScanParser::isSnapshotOperator(op) && !ScanParser::hasValues(value)) {
     mems = scanner->filterUnknown(namedScans.getMemList()->getList(), scanType, op, fastScan);
-  } else if (scanType == SCAN_TYPE_CUSTOM) {
-    ScanCommand scanCommand = ScanParser::getScanCommand(value);
+  } else {
+    ScanCommand scanCommand = ScanParser::getScanCommand(value, scanType);
     mems = scanner->filter(namedScans.getMemList()->getList(), scanCommand);
-  }
-  else {
-    Operands operands = ScanParser::valueToOperands(value, scanType, op);
-    size_t size = operands.getFirstSize();
-
-    mems = scanner->filter(namedScans.getMemList()->getList(), operands, size, scanType, op);
   }
 
   namedScans.setMemPtrs(mems, scanType);

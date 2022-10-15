@@ -40,7 +40,7 @@ namespace ScanParser {
   Operands valueToOperands(const string& v, const string& t, OpType op = OpType::Eq);
   Operands getTwoOperands(const string& v, const string& t, OpType op = OpType::Within);
 
-  ScanCommand getScanCommand(const string& v);
+  ScanCommand getScanCommand(const string& v, const string& scanType = SCAN_TYPE_CUSTOM);
 
   vector<string> convertAroundToWithinValues(const string& v);
 };

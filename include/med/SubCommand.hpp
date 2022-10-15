@@ -24,7 +24,7 @@ public:
   static constexpr const char* CMD_REGEX = "^(s|w|i8|i16|i32|i64|f32|f64):";
   static constexpr const char* CMD_STRING = "\\s*?'(.+?)'";
 
-  explicit SubCommand(const string &s);
+  explicit SubCommand(const string &s, const string &scanType = SCAN_TYPE_CUSTOM);
   Operands getOperands();
   int getWildcardSteps();
   Command getCmd();
@@ -39,7 +39,7 @@ public:
 
   static Command parseCmd(const string &s);
   static string getCmdString(const string &s);
-  static string getScanType(const string &s);
+  static string getScanType(const string &s, const string &scanType = SCAN_TYPE_CUSTOM); /** @param scanType as fallback if command is Noop */
 private:
   string stripCommand(const string &s);
 

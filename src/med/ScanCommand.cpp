@@ -2,13 +2,14 @@
 #include "med/ScanCommand.hpp"
 #include "med/ScanParser.hpp"
 
-ScanCommand::ScanCommand(const string& s) {
+ScanCommand::ScanCommand(const string& s, const string& scanType) {
   commandString = s;
+  this->scanType = scanType;
   auto values = ScanParser::getValues(s);
 
   for (size_t i = 0; i < values.size(); i++) {
     auto value = values[i];
-    SubCommand subCmd(value);
+    SubCommand subCmd(value, scanType);
     subCommands.push_back(subCmd);
   }
 
@@ -49,5 +50,5 @@ bool ScanCommand::match(Byte* address) {
 }
 
 string ScanCommand::getFirstScanType() {
-  return SubCommand::getScanType(commandString);
+  return SubCommand::getScanType(commandString, scanType);
 }

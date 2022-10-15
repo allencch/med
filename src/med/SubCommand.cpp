@@ -30,7 +30,7 @@ int extractNumber(const string &s) {
   return 0;
 }
 
-SubCommand::SubCommand(const string &s) {
+SubCommand::SubCommand(const string &s, const string &scanType) {
   cmd = parseCmd(s);
   wildcardSteps = 0;
   string valueStr;
@@ -45,7 +45,6 @@ SubCommand::SubCommand(const string &s) {
   case Command::Int16:
     operands = ScanParser::valueToOperands(stripped, SCAN_TYPE_INT_16, op);
     break;
-  case Command::Noop:
   case Command::Int32:
     operands = ScanParser::valueToOperands(stripped, SCAN_TYPE_INT_32, op);
     break;
@@ -65,10 +64,14 @@ SubCommand::SubCommand(const string &s) {
   case Command::Wildcard:
     wildcardSteps = extractNumber(s);
     break;
+  case Command::Noop:
+    string fallbackType = scanType == SCAN_TYPE_CUSTOM ? SCAN_TYPE_INT_32 : scanType;
+    operands = ScanParser::valueToOperands(stripped, fallbackType, op);
+    break;
   }
 }
 
-string SubCommand::getScanType(const string &s) {
+string SubCommand::getScanType(const string &s, const string &scanType) {
   auto cmd = parseCmd(s);
   switch (cmd) {
   case Command::Wildcard:
@@ -76,7 +79,6 @@ string SubCommand::getScanType(const string &s) {
     return SCAN_TYPE_INT_8;
   case Command::Int16:
     return SCAN_TYPE_INT_16;
-  case Command::Noop:
   case Command::Int32:
     return SCAN_TYPE_INT_32;
   case Command::Int64:
@@ -87,6 +89,11 @@ string SubCommand::getScanType(const string &s) {
     return SCAN_TYPE_FLOAT_64;
   case Command::Str:
     return SCAN_TYPE_STRING;
+  case Command::Noop:
+    if (scanType == SCAN_TYPE_CUSTOM) {
+      return SCAN_TYPE_INT_32;
+    }
+    return scanType;
   }
   return SCAN_TYPE_INT_8;
 }

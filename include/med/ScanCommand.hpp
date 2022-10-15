@@ -10,7 +10,7 @@ using namespace std;
 
 class ScanCommand {
 public:
-  explicit ScanCommand(const string& s);
+  explicit ScanCommand(const string& s, const string& scanType = SCAN_TYPE_CUSTOM);
   vector<SubCommand> getSubCommands();
   size_t getSize();
 
@@ -22,5 +22,6 @@ private:
   size_t _getSize(); // Memoization
   size_t size;
   string commandString;
+  string scanType;
 };
 #endif

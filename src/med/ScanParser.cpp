@@ -182,8 +182,8 @@ Operands ScanParser::getTwoOperands(const string& v, const string& t, OpType op)
   return Operands(list);
 }
 
-ScanCommand ScanParser::getScanCommand(const string& v) {
-  return ScanCommand(v);
+ScanCommand ScanParser::getScanCommand(const string& v, const string& scanType) {
+  return ScanCommand(v, scanType);
 }
 
 vector<string> ScanParser::convertAroundToWithinValues(const string& v) {
