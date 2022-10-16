@@ -1,14 +1,14 @@
 #include <tuple>
 #include "med/ScanCommand.hpp"
-#include "med/ScanParser.hpp"
+#include "mem/StringUtil.hpp"
 
 ScanCommand::ScanCommand(const string& s, const string& scanType) {
   commandString = s;
   this->scanType = scanType;
-  auto values = ScanParser::getValues(s);
+  auto values = StringUtil::split(s, ',');
 
   for (size_t i = 0; i < values.size(); i++) {
-    auto value = values[i];
+    auto value = StringUtil::trim(values[i]);
     SubCommand subCmd(value, scanType);
     subCommands.push_back(subCmd);
   }
