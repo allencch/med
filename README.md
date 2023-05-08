@@ -33,12 +33,14 @@ The interface can briefly separated into two panes and a bottom "Named Scans".
 2. After choosing the process, you can type in the value that you want to **scan**. (For the current stage, the only data types allowed are int8, int16, int32, float32, float64, and string.) For example, we can scan for the gold amount.
 3. After we make some changes of the gold in the game, you can **filter** it.
 
-## Last digit
+## Last digits
 
-The small field besides the scan value input is the "Last Digit" of the target address.
+The small field besides the scan value input is the "Last Digits" of the target address.
 Some games may have consistent last digit like 0x12341230, where the "0" is the last digit.
 The allowed values are "0" to "f" (case insensitive).
 Other than that the value will be ignored.
+
+Last digits allows comma separated value, eg: "4, c", which will search for the addresses where the last digit match any of the value (i.e. 4 or 0xc).
 
 ## Fast scan
 
