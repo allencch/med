@@ -30,8 +30,8 @@ public:
                       const string& scanType,
                       const ScanParser::OpType& op,
                       bool fastScan = false,
-                      int lastDigit = -1);
-  vector<MemPtr> scan(ScanCommand &scanCommand, int lastDigit = -1, bool fastScan = true);
+                      Integers lastDigits = Integers());
+  vector<MemPtr> scan(ScanCommand &scanCommand, Integers lastDigits = Integers(), bool fastScan = true);
   vector<MemPtr> filter(const vector<MemPtr>& list,
                         Operands& operands,
                         int size,
@@ -87,8 +87,8 @@ private:
                             const string& scanType,
                             const ScanParser::OpType& op,
                             bool fastScan = false,
-                            int lastDigit = -1);
-  vector<MemPtr> scanByMaps(ScanCommand &scanCommand, int lastDigit = -1, bool fastScan = false);
+                            Integers lastDigits = Integers());
+  vector<MemPtr> scanByMaps(ScanCommand &scanCommand, Integers lastDigits = Integers(), bool fastScan = false);
 
   static void scanMap(ScanParams params);
   static void scanMap(MemIO* memio,
@@ -99,7 +99,7 @@ private:
                       int fd,
                       std::mutex& fdMutex,
                       ScanCommand &scanCommand,
-                      int lastDigit = -1,
+                      Integers lastDigits = Integers(),
                       bool fastScan = false);
 
   vector<MemPtr>& saveSnapshotByScope();
@@ -119,14 +119,14 @@ private:
                        const string& scanType,
                        const ScanParser::OpType& op,
                        bool fastScan = false,
-                       int lastDigit = -1);
+                       Integers lastDigits = Integers());
   static void scanPage(MemIO* memio,
                        std::mutex& mutex,
                        vector<MemPtr>& list,
                        Byte* page,
                        Address start,
                        ScanCommand &scanCommand,
-                       int lastDigit = -1,
+                       Integers lastDigits = Integers(),
                        bool fastScan = false);
 
   static void filterByChunk(std::mutex& mutex,

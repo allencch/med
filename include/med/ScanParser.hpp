@@ -43,6 +43,8 @@ namespace ScanParser {
   ScanCommand getScanCommand(const string& v, const string& scanType = SCAN_TYPE_CUSTOM);
 
   vector<string> convertAroundToWithinValues(const string& v);
+
+  Integers getIntegers(const string &v, char delimiter = ',');
 };
 
 #endif

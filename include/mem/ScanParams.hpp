@@ -24,7 +24,7 @@ struct ScanParams {
   const string& scanType;
   const ScanParser::OpType& op;
   bool fastScan = false;
-  int lastDigit = -1;
+  Integers lastDigits = Integers();
 };
 
 #endif

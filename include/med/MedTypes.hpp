@@ -65,4 +65,6 @@ namespace ScanParser {
   };
 };
 
+typedef vector<int> Integers;
+
 #endif

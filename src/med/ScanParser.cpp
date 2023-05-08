@@ -198,3 +198,12 @@ vector<string> ScanParser::convertAroundToWithinValues(const string& v) {
   }
   return vector<string>{to_string(first - second), to_string(first + second)};
 }
+
+Integers ScanParser::getIntegers(const string &v, char delimiter) {
+  auto stringValues = getValues(v, delimiter);
+  Integers integers = Integers();
+  std::for_each(stringValues.begin(), stringValues.end(), [&integers](string s) {
+    integers.push_back(hexStrToInt(s));
+  });
+  return integers;
+}

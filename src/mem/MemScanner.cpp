@@ -130,12 +130,12 @@ vector<MemPtr> MemScanner::scan(Operands& operands,
                                 const string& scanType,
                                 const ScanParser::OpType& op,
                                 bool fastScan,
-                                int lastDigit) {
-  return scanByMaps(operands, size, scanType, op, fastScan, lastDigit);
+                                Integers lastDigits) {
+  return scanByMaps(operands, size, scanType, op, fastScan, lastDigits);
 }
 
-vector<MemPtr> MemScanner::scan(ScanCommand &scanCommand, int lastDigit, bool fastScan) {
-  return scanByMaps(scanCommand, lastDigit, fastScan);
+vector<MemPtr> MemScanner::scan(ScanCommand &scanCommand, Integers lastDigits, bool fastScan) {
+  return scanByMaps(scanCommand, lastDigits, fastScan);
 }
 
 vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
@@ -143,7 +143,7 @@ vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
                                       const string& scanType,
                                       const ScanParser::OpType& op,
                                       bool fastScan,
-                                      int lastDigit) {
+                                      Integers lastDigits) {
   vector<MemPtr> list;
 
   Maps maps = getMaps(pid);
@@ -158,7 +158,7 @@ vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
 
   for (size_t i = 0; i < maps.size(); i++) {
     TMTask* fn = new TMTask();
-    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &operands, size, scanType, op, fastScan, lastDigit]() {
+    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &operands, size, scanType, op, fastScan, lastDigits]() {
       scanMap(ScanParams {
           .memio = memio,
           .mutex = mutex,
@@ -172,7 +172,7 @@ vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
           .scanType = scanType,
           .op = op,
           .fastScan = fastScan,
-          .lastDigit = lastDigit
+          .lastDigits = lastDigits
         });
     };
     threadManager->queueTask(fn);
@@ -188,7 +188,7 @@ vector<MemPtr> MemScanner::scanByMaps(Operands& operands,
   return list;
 }
 
-vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand, int lastDigit, bool fastScan) {
+vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand, Integers lastDigits, bool fastScan) {
   vector<MemPtr> list;
 
   Maps maps = getMaps(pid);
@@ -203,8 +203,8 @@ vector<MemPtr> MemScanner::scanByMaps(ScanCommand &scanCommand, int lastDigit, b
 
   for (size_t i = 0; i < maps.size(); i++) {
     TMTask* fn = new TMTask();
-    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &scanCommand, lastDigit, fastScan]() {
-      scanMap(memio, mutex, list, maps, i, memFd, fdMutex, scanCommand, lastDigit, fastScan);
+    *fn = [memio, &mutex, &list, &maps, i, memFd, &fdMutex, &scanCommand, lastDigits, fastScan]() {
+      scanMap(memio, mutex, list, maps, i, memFd, fdMutex, scanCommand, lastDigits, fastScan);
     };
     threadManager->queueTask(fn);
   }
@@ -273,7 +273,7 @@ void MemScanner::scanMap(ScanParams params) {
   const string& scanType = params.scanType;
   const ScanParser::OpType& op = params.op;
   bool fastScan = params.fastScan;
-  int lastDigit = params.lastDigit;
+  Integers lastDigits = params.lastDigits;
 
   auto& pairs = maps.getMaps();
   auto& pair = pairs[mapIndex];
@@ -293,7 +293,7 @@ void MemScanner::scanMap(ScanParams params) {
     }
     fdMutex.unlock();
 
-    scanPage(memio, mutex, list, page, j, operands, size, scanType, op, fastScan, lastDigit);
+    scanPage(memio, mutex, list, page, j, operands, size, scanType, op, fastScan, lastDigits);
 
     delete[] page;
   }
@@ -307,7 +307,7 @@ void MemScanner::scanMap(MemIO* memio,
                          int fd,
                          std::mutex& fdMutex,
                          ScanCommand &scanCommand,
-                         int lastDigit,
+                         Integers lastDigits,
                          bool fastScan) {
   auto& pairs = maps.getMaps();
   auto& pair = pairs[mapIndex];
@@ -327,7 +327,7 @@ void MemScanner::scanMap(MemIO* memio,
     }
     fdMutex.unlock();
 
-    scanPage(memio, mutex, list, page, j, scanCommand, lastDigit, fastScan);
+    scanPage(memio, mutex, list, page, j, scanCommand, lastDigits, fastScan);
 
     delete[] page;
   }
@@ -358,13 +358,21 @@ bool skipAddressByFastScan(long address, int size, bool fastScan) {
   return false;
 }
 
-bool skipAddressByLastDigit(long address, int lastDigit) {
-  if (lastDigit < 0) return false;
+bool skipAddressByLastDigits(long address, Integers lastDigits) {
+  if (!lastDigits.size()) return false;
 
-  if (address % 16 != lastDigit) return true;
-  return false;
+  bool matched = false;
+  for (unsigned int i = 0; i < lastDigits.size(); i += 1) {
+    auto lastDigit = lastDigits[i];
+    if (address % 16 == lastDigit) {
+      matched |= true;
+      break;
+    }
+  }
+  return !matched;
 }
 
+// @deprecated
 void MemScanner::scanPage(MemIO* memio,
                           std::mutex& mutex,
                           vector<MemPtr>& list,
@@ -375,14 +383,16 @@ void MemScanner::scanPage(MemIO* memio,
                           const string& scanType,
                           const ScanParser::OpType& op,
                           bool fastScan,
-                          int lastDigit) {
+                          Integers lastDigits) {
   int scanTypeSize = scanTypeToSize(scanType);
   for (int k = 0; k <= getpagesize() - size; k += STEP) {
+    long address = (Address)(start + k);
+
     if (scanType != SCAN_TYPE_STRING &&
-        skipAddressByFastScan((Address)(start + k), scanTypeSize, fastScan)) {
+        skipAddressByFastScan(address, scanTypeSize, fastScan)) {
       continue;
     }
-    if (skipAddressByLastDigit((Address)(start + k), lastDigit)) {
+    if (skipAddressByLastDigits(address, lastDigits)) {
       continue;
     }
 
@@ -410,24 +420,26 @@ void MemScanner::scanPage(MemIO* memio,
                           Byte* page,
                           Address start,
                           ScanCommand &scanCommand,
-                          int lastDigit,
+                          Integers lastDigits,
                           bool fastScan) {
   size_t size = scanCommand.getSize();
   string scanType = scanCommand.getFirstScanType();
   int scanTypeSize = scanTypeToSize(scanType);
 
   for (size_t k = 0; k <= getpagesize() - size; k += STEP) {
+    long address = (Address)(start + k);
+
     if (scanType != SCAN_TYPE_STRING &&
-        skipAddressByFastScan((Address)(start + k), scanTypeSize, fastScan)) {
+        skipAddressByFastScan(address, scanTypeSize, fastScan)) {
       continue;
     }
-    if (skipAddressByLastDigit((Address)(start + k), lastDigit)) {
+    if (skipAddressByLastDigits(address, lastDigits)) {
       continue;
     }
 
     try {
       if (scanCommand.match(page + k)) {
-        MemPtr mem = memio->read((Address)(start + k), size);
+        MemPtr mem = memio->read(address, size);
 
         PemPtr pem = Pem::convertToPemPtr(mem, memio);
         pem->setScanType(scanCommand.getFirstScanType());

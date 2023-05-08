@@ -368,7 +368,10 @@ string pidName(const string& pid) {
  * This will just perform the unlock by force
  */
 void tryUnlock(std::mutex &mutex) {
-  mutex.try_lock();
+  if (mutex.try_lock()) { // check condition because of "nodiscard" attribute
+    mutex.unlock();
+    return;
+  }
   mutex.unlock();
 }
 

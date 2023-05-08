@@ -212,4 +212,12 @@ public:
     TS_ASSERT_EQUALS(bytes[2], 0);
     TS_ASSERT_EQUALS(bytes[3], 0);
   }
+
+  void test_getIntegers() {
+    string s = "9, a";
+    auto result = ScanParser::getIntegers(s);
+    TS_ASSERT_EQUALS(result.size(), 2);
+    TS_ASSERT_EQUALS(result[0], 9);
+    TS_ASSERT_EQUALS(result[1], 10);
+  }
 };
