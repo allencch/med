@@ -60,7 +60,7 @@
          <widget class="QLineEdit" name="lastDigit">
           <property name="maximumSize">
            <size>
-            <width>40</width>
+            <width>80</width>
             <height>16777215</height>
            </size>
           </property>
@@ -71,10 +71,10 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>Last Digit</string>
+           <string>Last Digits (comma separated)</string>
           </property>
           <property name="placeholderText">
-           <string>Last Digit</string>
+           <string>Last Digits</string>
           </property>
          </widget>
         </item>
