@@ -170,7 +170,7 @@ void MemEd::saveFile(const char* filename) {
     pairs["type"] = sem->getScanType();
     try {
       pairs["value"] = sem->getValue();
-    } catch(MedException &ex) {
+    } catch (const MedException &ex) {
       pairs["value"] = "";
     }
     pairs["lock"] = sem->isLocked();

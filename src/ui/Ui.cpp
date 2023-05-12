@@ -201,6 +201,10 @@ void MedUi::setupSignals() {
                    SIGNAL(triggered(bool)),
                    this,
                    SLOT(onForceResumeTriggered(bool)));
+  QObject::connect(mainWindow->findChild<QAction*>("actionUnlockAll"),
+                   SIGNAL(triggered()),
+                   this,
+                   SLOT(onUnlockAllTriggered()));
 
   QObject::connect(mainWindow->findChild<QPushButton*>("nextAddress"),
                    SIGNAL(clicked()),
@@ -871,4 +875,9 @@ void MedUi::onScopeEndEdited() {
   else {
     med->setScopeEnd(hexToInt(end));
   }
+}
+
+void MedUi::onUnlockAllTriggered() {
+  StoreTreeModel* model = dynamic_cast<StoreTreeModel*>(storeTreeView->model());
+  model->unlockAll();
 }

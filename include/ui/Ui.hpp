@@ -116,6 +116,7 @@ private slots:
   void onResumeProcessTriggered(bool checked);
   void onFastScanTriggered(bool checked);
   void onForceResumeTriggered(bool checked);
+  void onUnlockAllTriggered();
 
   void onNewAddressTriggered();
   void onDeleteAddressTriggered();

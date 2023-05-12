@@ -26,6 +26,7 @@ public:
   void sortByDescription();
   void sortByAddress();
   void empty();
+  void unlockAll();
 
 protected:
   void setValue(const QModelIndex &index, const QVariant &value);

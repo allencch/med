@@ -49,7 +49,7 @@ bool StoreTreeModel::setData(const QModelIndex &index, const QVariant &value, in
   if (role != Qt::EditRole)
     return false;
 
-  if(index.column() == STORE_COL_VALUE) {
+  if (index.column() == STORE_COL_VALUE) {
     setValue(index, value);
   }
   else if (index.column() == STORE_COL_TYPE) {
@@ -100,7 +100,7 @@ void StoreTreeModel::refreshValues() {
     string value;
     try {
       value = store->getValue(i);
-    } catch(MedException &ex) {}
+    } catch (const MedException &ex) {}
     QModelIndex modelIndex = index(i, STORE_COL_VALUE);
     setItemData(modelIndex, QString::fromStdString(value));
   }
@@ -115,7 +115,7 @@ void StoreTreeModel::refresh() {
     string value;
     try {
       value = store->getValue(i);
-    } catch(MedException &ex) {
+    } catch (const MedException &ex) {
       cerr << "Exception throw in refresh" << endl;
     }
 
@@ -142,7 +142,7 @@ void StoreTreeModel::addRow() {
   string value;
   try {
     value = store->getValue(lastIndex);
-  } catch(MedException &ex) {
+  } catch (const MedException &ex) {
     cerr << "Add row no value" << endl;
   }
 
@@ -231,4 +231,20 @@ QVariant StoreTreeModel::getUtfString(int row, string scanType) {
   string valueByAddress = med->getStore()->getValue(row, scanType);
   string utfString = mainUi->encodingManager->convertToUtf8(valueByAddress);
   return QString::fromStdString(utfString);
+}
+
+void StoreTreeModel::unlockAll() {
+  if (rowCount() == 0) return;
+  QModelIndex first = index(0, STORE_COL_VALUE);
+  QModelIndex last = index(rowCount() - 1, STORE_COL_VALUE);
+
+  for (int i = 0; i < rowCount(); i += 1) {
+    QModelIndex modelIndex = index(i, STORE_COL_LOCK);
+
+    auto sem = static_pointer_cast<Sem>(med->getStore()->getList()[modelIndex.row()]);
+    sem->lock(false);
+    setItemData(modelIndex, false);
+
+  }
+  emit dataChanged(first, last);
 }
