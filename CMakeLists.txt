@@ -21,6 +21,9 @@ pkg_search_module(ICU REQUIRED icu-uc)
 
 add_definitions(${JSONCPP_CFLAGS} ${ICU_CFLAGS})
 
+# Disable C++ API deprecated in Qt 5.15
+add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x050F00)
+
 add_executable(testfile src/testfile.cpp)
 
 # NOTE: If adding new source file, this file needs to be "touch"-ed
