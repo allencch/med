@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 
+#include <QtWidgets>
 #include <QAction>
 #include <QMenu>
 

@@ -14,8 +14,8 @@ set(CMAKE_AUTOMOC ON) #automatic moc
 include_directories(./include)
 
 find_package(PkgConfig REQUIRED)
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
-find_package(Qt5UiTools)
+find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt6UiTools)
 pkg_search_module(JSONCPP REQUIRED jsoncpp)
 pkg_search_module(ICU REQUIRED icu-uc)
 
@@ -41,7 +41,7 @@ file(GLOB ui_HEADER "include/ui/*.hpp")
 file(GLOB ui_SRC "src/ui/*.cpp")
 # header is necessary, https://github.com/bincrafters/community/issues/466#issuecomment-426265654
 add_executable(med-ui ${ui_SRC} ${ui_HEADER})
-target_link_libraries(med-ui mem_ed Qt5::Widgets Qt5::UiTools)
+target_link_libraries(med-ui mem_ed Qt6::Widgets Qt6::UiTools)
 
 
 # CLI
