@@ -65,7 +65,7 @@ jobs:
 
     - run: |
        sudo apt-get update
-       sudo apt-get -y install clang cmake libjsoncpp-dev libicu-dev qttools5-dev cxxtest
+       sudo apt-get -y install clang cmake libjsoncpp-dev libicu-dev qt6-tools-dev libglvnd-dev cxxtest
        export CC=/usr/bin/clang CXX=/usr/bin/clang++
        mkdir build && cd build
        cmake ..

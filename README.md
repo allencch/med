@@ -154,7 +154,7 @@ Currently only support Big5 where the Default is actually UTF8.
 
 For example, if a game uses Big5 encoding, we can change the encoding to Big5 and search the text like "臺灣" (Traditional Chinese).
 
-Note: Qt5 application run as root doesn't support IME like Fcitx. Please use copy-paste instead.
+Note: Qt6 application run as root doesn't support IME like Fcitx. Please use copy-paste instead.
 
 
 ## Search for unknown value (experimental v2)
@@ -209,11 +209,14 @@ To build this program, it requires
 
 * cmake
 * clang (which I am using) (or GCC)
-* Qt5 (qttools5-dev)
+* Qt6 (qt6-tools-dev)
+* libglvnd-dev (required by Qt6)
 * JSONPP (libjsoncpp-dev)
 * ICU (libicu-dev)
 * cxxtest (optional)
 * libreadline-dev ([Issue #6](https://github.com/allencch/med/issues/6), required on Debian Bullseye)
+
+Refer to `.github/workflows/actions.yml` for compilation.
 
 1. In the directory that contains the source code including `CMakeLists.txt`,
 
