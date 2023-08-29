@@ -117,7 +117,6 @@ if(CXXTEST_FOUND)
 endif()
 
 find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
-include(Dart)
 
 install(TARGETS mem_ed med-ui
   RUNTIME DESTINATION /opt/med
