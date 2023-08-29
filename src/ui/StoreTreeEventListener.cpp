@@ -8,7 +8,7 @@ StoreTreeEventListener::StoreTreeEventListener(QTreeView* treeView, MedUi* mainU
 
 
 bool StoreTreeEventListener::eventFilter(QObject*, QEvent* ev) {
-  if (ev->type() == QEvent::KeyRelease) {
+  if (ev->type() == QEvent::KeyPress) {
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(ev);
 
     if (keyEvent->key() == Qt::Key_Escape) {
@@ -19,7 +19,7 @@ bool StoreTreeEventListener::eventFilter(QObject*, QEvent* ev) {
     }
 
     if (keyEvent->key() == Qt::Key_F2) {
-      QWidget* focused = mainUi->mainWindow->focusWidget()->parentWidget()->parentWidget();
+      QWidget* focused = mainUi->mainWindow->focusWidget();
       if (focused == treeView) {
         QModelIndex index = treeView->currentIndex();
         if (index.column() == STORE_COL_VALUE && mainUi->getStoreState() == UiState::Idle) {
