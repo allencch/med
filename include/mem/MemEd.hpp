@@ -68,6 +68,7 @@ private:
   NamedScans namedScans;
   MemList* store;
   std::mutex storeMutex;
+  std::mutex processAccessMutex;
   std::thread* lockValueThread;
   bool canResumeProcess;
   bool isProcessPaused;

@@ -133,18 +133,28 @@ void MemEd::callLockValues(MemEd* med) {
 }
 
 void MemEd::lockValues() {
-  storeMutex.lock();
-  auto list = getStore()->getList();
-  for (size_t i = 0; i < list.size(); i++) {
-    auto sem = static_pointer_cast<Sem>(list[i]);
-    if (sem->isLocked()) {
+  vector<SemPtr> locked_items;
+  {
+    std::lock_guard<std::mutex> store_lock(storeMutex);
+    auto list = getStore()->getList();
+    for (size_t i = 0; i < list.size(); i++) {
+      auto sem = static_pointer_cast<Sem>(list[i]);
+      if (sem->isLocked()) {
+        locked_items.push_back(sem);
+      }
+    }
+  }
+
+  if (!locked_items.empty()) {
+    std::lock_guard<std::mutex> process_lock(processAccessMutex);
+    for (auto& sem : locked_items) {
       sem->lockValue();
     }
   }
-  storeMutex.unlock();
 }
 
 bool MemEd::hasLockValue() {
+  std::lock_guard<std::mutex> lock(storeMutex);
   auto list = getStore()->getList();
   for (size_t i = 0; i < list.size(); i++) {
     auto sem = static_pointer_cast<Sem>(list[i]);
@@ -260,11 +270,13 @@ void MemEd::addNewAddress() {
 }
 
 MemPtr MemEd::readMemory(Address addr, size_t size) {
+  std::lock_guard<std::mutex> lock(processAccessMutex);
   auto memio = scanner->getMemIO();
   return memio->read(addr, size);
 }
 
 void MemEd::setValueByAddress(Address addr, const string& value, const string& scanType) {
+  std::lock_guard<std::mutex> lock(processAccessMutex);
   auto memio = scanner->getMemIO();
   size_t size = scanTypeToSize(scanType);
   PemPtr pem = PemPtr(new Pem(addr, size, memio));
