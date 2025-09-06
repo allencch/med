@@ -2,12 +2,12 @@ name: Build and Test
 on: [push]
 jobs:
   Build-And-Test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Installing build requirements
         run: |
           sudo apt-get update
-          sudo apt-get -y install clang cmake libjsoncpp-dev libicu-dev qt6-tools-dev libglvnd-dev cxxtest
+          sudo apt-get -y install clang cmake libjsoncpp-dev libicu-dev qt6-tools-dev libglvnd-dev cxxtest libreadline-dev
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Build
