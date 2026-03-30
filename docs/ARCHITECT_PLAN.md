@@ -21,9 +21,9 @@ The current codebase suffers from a difficult-to-reproduce deadlock. The decisio
 ## 5. Rewrite Roadmap
 
 ### Phase 1: Core Foundation & Memory IO
-- [ ] Define core data structures (`MedTypes`, `SizedBytes`).
-- [ ] Implement robust `Process` and `MemIO` layers.
-- [ ] Unit tests for core memory operations.
+- [x] Define core data structures (`MedTypes`, `SizedBytes`).
+- [x] Implement robust `Process` and `MemIO` layers.
+- [x] Unit tests for core memory operations.
 
 ### Phase 2: Scanning Engine
 - [ ] Rewrite `MemScanner` and `ScanParser`.
