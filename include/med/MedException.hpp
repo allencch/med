@@ -1,29 +1,28 @@
-#ifndef MED_EXCEPTION_H
-#define MED_EXCEPTION_H
+#ifndef MED_EXCEPTION_HPP
+#define MED_EXCEPTION_HPP
 
 #include <string>
 #include <exception>
 
-using namespace std;
-
-class MedException: public std::nested_exception {
+class MedException : public std::exception {
 public:
-  explicit MedException(const string& message) : message(message) { }
-  virtual const char* what() const throw() {
-    return message.c_str();
-  }
+    explicit MedException(std::string message) : message_(std::move(message)) {}
 
-  string getMessage() {
-    return message;
-  }
+    const char* what() const noexcept override {
+        return message_.c_str();
+    }
+
+    const std::string& getMessage() const {
+        return message_;
+    }
 
 private:
-  string message;
+    std::string message_;
 };
 
 class EmptyListException : public MedException {
 public:
-  explicit EmptyListException(const string& message) : MedException(message) {}
+    explicit EmptyListException(const std::string& message) : MedException(message) {}
 };
 
 #endif
