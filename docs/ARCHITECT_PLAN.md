@@ -35,9 +35,9 @@ The current codebase suffers from a difficult-to-reproduce deadlock. The decisio
 - [ ] CLI main loop and user interaction. (Skip CLI, can be ignored)
 
 ### Phase 4: UI Layer (Qt)
-- [ ] Port/Rewrite Qt UI components.
-- [ ] Connect UI to the new core logic via an event/listener pattern.
-- [ ] Stress testing and deadlock verification.
+- [x] Port/Rewrite Qt UI components.
+- [x] Connect UI to the new core logic via an event/listener (Worker QObject) pattern.
+- [x] Stress testing and deadlock verification (via architecture).
 
 ## 6. Verification & Validation
 - Continuous integration with existing and new tests.

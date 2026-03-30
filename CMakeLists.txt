@@ -1,28 +1,42 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 project(MedRewrite)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Og -Wl,-export-dynamic")
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
 include_directories(include)
 
 # Find dependencies
 find_package(PkgConfig REQUIRED)
-# pkg_search_module(JSONCPP REQUIRED jsoncpp) # Not used yet in new core
-# pkg_search_module(ICU REQUIRED icu-uc) # Not used yet in new core
+find_package(Qt6 COMPONENTS Core Widgets Gui UiTools REQUIRED)
 
 # Core Library
 file(GLOB med_SRC "src/med/*.cpp")
 add_library(med_core SHARED ${med_SRC})
 target_link_libraries(med_core pthread)
 
+# UI
+set(ui_SRC
+    src/ui/main.cpp
+    src/ui/MainWindow.cpp
+    src/ui/MedWorker.cpp
+    include/ui/MainWindow.hpp
+    include/ui/MedWorker.hpp
+)
+add_executable(med-ui ${ui_SRC})
+target_link_libraries(med-ui med_core Qt6::Widgets Qt6::UiTools Qt6::Gui Qt6::Core)
+
 # Testing
 find_package(CxxTest)
 if(CXXTEST_FOUND)
     enable_testing()
     include_directories(${CXXTEST_INCLUDE_DIR})
-    
+
     CXXTEST_ADD_TEST(TestPhase1 TestPhase1.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestPhase1.hpp)
     target_link_libraries(TestPhase1 med_core)
