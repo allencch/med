@@ -5,7 +5,7 @@ SizedBytes::SizedBytes() {
     data_ = std::make_pair(nullptr, 0);
 }
 
-SizedBytes::SizedBytes(Byte* bytes, size_t length) {
+SizedBytes::SizedBytes(const Byte* bytes, size_t length) {
     if (length == 0) {
         data_ = std::make_pair(nullptr, 0);
     } else {

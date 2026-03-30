@@ -26,13 +26,13 @@ The current codebase suffers from a difficult-to-reproduce deadlock. The decisio
 - [x] Unit tests for core memory operations.
 
 ### Phase 2: Scanning Engine
-- [ ] Rewrite `MemScanner` and `ScanParser`.
-- [ ] Implement thread-safe `ThreadManager` for parallel scanning.
-- [ ] Integration tests for scanning logic.
+- [x] Rewrite `MemScanner` and `ScanParser`.
+- [x] Implement thread-safe `ThreadPool` for parallel scanning.
+- [x] Integration tests for scanning logic.
 
 ### Phase 3: CLI & Command Layer
 - [ ] Rebuild `ScanCommand` and `SubCommand` infrastructure.
-- [ ] CLI main loop and user interaction.
+- [ ] CLI main loop and user interaction. (Skip CLI, can be ignored)
 
 ### Phase 4: UI Layer (Qt)
 - [ ] Port/Rewrite Qt UI components.

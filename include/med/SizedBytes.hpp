@@ -6,7 +6,7 @@
 class SizedBytes {
 public:
     SizedBytes();
-    SizedBytes(Byte* bytes, size_t length);
+    SizedBytes(const Byte* bytes, size_t length);
     SizedBytes(BytePtr data, size_t length);
 
     static SizedBytes create(size_t length);
