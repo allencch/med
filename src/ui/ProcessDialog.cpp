@@ -25,7 +25,8 @@ ProcessDialog::ProcessDialog(QWidget* parent) : QDialog(parent) {
 void ProcessDialog::setProcessList(const std::vector<Process>& processes) {
     if (!treeWidget_) return;
     treeWidget_->clear();
-    for (const auto& p : processes) {
+    for (auto it = processes.rbegin(); it != processes.rend(); ++it) {
+        const auto& p = *it;
         auto* item = new QTreeWidgetItem(treeWidget_);
         item->setText(0, QString::number(p.getPid()));
         item->setText(1, QString::fromStdString(p.getCmdline()));

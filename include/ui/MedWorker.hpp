@@ -51,6 +51,7 @@ public slots:
     
     void requestProcessList();
     void refreshWatchedValues();
+    void refreshScanResults(const std::vector<ScanResult>& current);
     void setProcessPaused(bool paused);
     void setCanResume(bool canResume);
     void setScopeStart(Address start);

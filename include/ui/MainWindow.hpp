@@ -33,6 +33,7 @@ private slots:
     void onScanClearClicked();
     
     void onScanTreeViewDoubleClicked(const QModelIndex& index);
+    void onScanDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
     void onStoreTreeViewDoubleClicked(const QModelIndex& index);
     void onStoreDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
@@ -89,6 +90,7 @@ private:
     
     pid_t currentPid_ = 0;
     bool fastScan_ = true;
+    bool autoRefresh_ = true;
 };
 
 #endif

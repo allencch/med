@@ -93,6 +93,20 @@ void MedWorker::requestProcessList() {
     }
 }
 
+void MedWorker::refreshScanResults(const std::vector<ScanResult>& current) {
+    if (pid_ == 0 || current.empty()) return;
+
+    std::vector<ScanResult> updated = current;
+    MemIO memio(pid_);
+    for (auto& res : updated) {
+        try {
+            size_t size = MedUtil::scanTypeToSize(res.type);
+            res.data = memio.read(res.address, size);
+        } catch (...) {}
+    }
+    emit scanCompleted(updated);
+}
+
 void MedWorker::setProcessPaused(bool paused) {
     if (pid_ == 0) return;
     isProcessPaused_ = paused;

@@ -95,6 +95,7 @@ void MainWindow::setupUi() {
     if (scanTreeView_) {
         scanTreeView_->setModel(scanModel_);
         connect(scanTreeView_, &QTreeView::doubleClicked, this, &MainWindow::onScanTreeViewDoubleClicked);
+        connect(scanModel_, &QStandardItemModel::dataChanged, this, &MainWindow::onScanDataChanged);
     }
 
     storeModel_ = new QStandardItemModel(this);
@@ -146,6 +147,10 @@ void MainWindow::setupUi() {
     if (actionShowNotes) connect(actionShowNotes, &QAction::triggered, this, &MainWindow::onShowNotesTriggered);
     if (actionFastScan) connect(actionFastScan, &QAction::triggered, this, &MainWindow::onFastScanTriggered);
     if (actionCanResume) connect(actionCanResume, &QAction::triggered, this, &MainWindow::onCanResumeTriggered);
+
+    // Initial State
+    if (notesEdit_) notesEdit_->hide();
+    if (scanTypeCombo_) scanTypeCombo_->setCurrentText("int32");
 }
 
 void MainWindow::connectSignals() {
@@ -216,8 +221,13 @@ void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
         QList<QStandardItem*> items;
         items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(res.address)));
         items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(res.type)));
-        items << new QStandardItem(QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type)));
-        for (auto* item : items) item->setEditable(false);
+        QStandardItem* valItem = new QStandardItem(QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type)));
+        items << valItem;
+        
+        items[0]->setEditable(false);
+        items[1]->setEditable(false);
+        valItem->setEditable(true);
+        
         scanModel_->appendRow(items);
     }
     if (foundLabel_) foundLabel_->setText(QString::number(results.size()));
@@ -235,6 +245,11 @@ void MainWindow::onWatchedValuesRefreshed(const std::vector<WatchedAddress>& wat
         if (storeModel_->data(index, Qt::EditRole).toString() != QString::fromStdString(watched[i].value)) {
             storeModel_->setData(index, QString::fromStdString(watched[i].value), Qt::DisplayRole);
         }
+    }
+
+    if (autoRefresh_ && !lastScanResults_.empty() && lastScanResults_.size() <= 800) {
+        QMetaObject::invokeMethod(worker_, "refreshScanResults", Qt::QueuedConnection,
+                                  Q_ARG(std::vector<ScanResult>, lastScanResults_));
     }
 }
 
@@ -312,7 +327,24 @@ void MainWindow::onAddAllToStoreClicked() {
 }
 
 void MainWindow::onScanTreeViewDoubleClicked(const QModelIndex& index) {
-    onAddToStoreClicked();
+    if (index.column() != 2) {
+        onAddToStoreClicked();
+    }
+}
+
+void MainWindow::onScanDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) {
+    for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
+        if (row >= (int)lastScanResults_.size()) continue;
+        if (topLeft.column() == 2) {
+            QString newVal = scanModel_->data(scanModel_->index(row, 2)).toString();
+            Address addr = lastScanResults_[row].address;
+            ScanType type = lastScanResults_[row].type;
+            QMetaObject::invokeMethod(worker_, "writeMemory", Qt::QueuedConnection,
+                                      Q_ARG(Address, addr),
+                                      Q_ARG(QString, newVal),
+                                      Q_ARG(ScanType, type));
+        }
+    }
 }
 
 void MainWindow::onStoreTreeViewDoubleClicked(const QModelIndex& index) {

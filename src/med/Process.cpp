@@ -45,12 +45,23 @@ std::vector<Process> Process::listAll() {
 std::string Process::getName(pid_t pid) {
     std::string ret;
     std::string path = "/proc/" + std::to_string(pid) + "/cmdline";
-    std::ifstream ifile(path);
+    std::ifstream ifile(path, std::ios::binary);
     if (ifile.fail()) {
         return "";
     }
-    std::getline(ifile, ret);
+    std::stringstream ss;
+    char ch;
+    while (ifile.get(ch)) {
+        if (ch == '\0') ss << ' ';
+        else ss << ch;
+    }
+    ret = ss.str();
     ifile.close();
+    
+    // Trim trailing space
+    if (!ret.empty() && ret.back() == ' ') {
+        ret.pop_back();
+    }
     return ret;
 }
 

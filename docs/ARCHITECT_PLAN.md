@@ -48,14 +48,15 @@ The current codebase suffers from a difficult-to-reproduce deadlock. The decisio
 
 ## 7. Extra
 
-- [ ] Should follow the old code for the initialize state after window is show
-  + [ ] Note is hidden
-  + [ ] Default type is int32
-- [ ] Scan area should refresh like Store area
+- [x] Should follow the old code for the initialize state after window is show
+  + [x] Note is hidden
+  + [x] Default type is int32
+- [x] Scan area should refresh like Store area
 - [ ] Hotkey like Ctrl-Q doesn't work. Other hotkeys should follow the old code.
-- [ ] Scan aread should be editable
-- [ ] Scan and Store area, the Type should be editable using dropdown, follow old code
+- [x] Scan area value should be editable
+- [x] Scan and Store area, the Type should be editable using dropdown, follow old code
 - [ ] Address > Editor not showing
+- [x] Process list should by reverse order. The process string contains box-like whitespace, including the end of line.
 
 
 # Proposal for rewrite for resolving deadlock
