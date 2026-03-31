@@ -3,7 +3,7 @@ project(MedRewrite)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Og -Wl,-export-dynamic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Og")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
