@@ -46,6 +46,17 @@ The current codebase suffers from a difficult-to-reproduce deadlock. The decisio
 - Targeted stress tests for concurrency.
 - Manual verification of memory editing workflows.
 
+## 7. Extra
+
+- [ ] Should follow the old code for the initialize state after window is show
+  + [ ] Note is hidden
+  + [ ] Default type is int32
+- [ ] Scan area should refresh like Store area
+- [ ] Hotkey like Ctrl-Q doesn't work. Other hotkeys should follow the old code.
+- [ ] Scan aread should be editable
+- [ ] Scan and Store area, the Type should be editable using dropdown, follow old code
+- [ ] Address > Editor not showing
+
 
 # Proposal for rewrite for resolving deadlock
 
