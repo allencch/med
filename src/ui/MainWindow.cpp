@@ -39,33 +39,42 @@ void MainWindow::setupUi() {
         QMessageBox::critical(this, "Error", "Could not open UI file");
         return;
     }
-    QWidget* centralWidget = loader.load(&file, this);
+    QWidget* uiWidget = loader.load(&file);
     file.close();
     
-    if (!centralWidget) {
+    if (!uiWidget) {
         QMessageBox::critical(this, "Error", "Could not load UI");
         return;
     }
 
-    setCentralWidget(centralWidget);
+    QMainWindow* uiWindow = qobject_cast<QMainWindow*>(uiWidget);
+    if (uiWindow) {
+        QWidget* central = uiWindow->takeCentralWidget();
+        setCentralWidget(central);
+        setMenuBar(uiWindow->menuBar());
+        setStatusBar(uiWindow->statusBar());
+    } else {
+        setCentralWidget(uiWidget);
+    }
+
     setWindowTitle("Med Rewrite");
 
     // Finding components
-    scanTreeView_ = centralWidget->findChild<QTreeView*>("scanTreeView");
-    storeTreeView_ = centralWidget->findChild<QTreeView*>("storeTreeView");
-    scanValueEdit_ = centralWidget->findChild<QLineEdit*>("scanEntry");
-    scanTypeCombo_ = centralWidget->findChild<QComboBox*>("scanType");
-    foundLabel_ = centralWidget->findChild<QLabel*>("found");
-    notesEdit_ = centralWidget->findChild<QPlainTextEdit*>("notes");
-    selectedProcessEdit_ = centralWidget->findChild<QLineEdit*>("selectedProcess");
+    scanTreeView_ = findChild<QTreeView*>("scanTreeView");
+    storeTreeView_ = findChild<QTreeView*>("storeTreeView");
+    scanValueEdit_ = findChild<QLineEdit*>("scanEntry");
+    scanTypeCombo_ = findChild<QComboBox*>("scanType");
+    foundLabel_ = findChild<QLabel*>("found");
+    notesEdit_ = findChild<QPlainTextEdit*>("notes");
+    selectedProcessEdit_ = findChild<QLineEdit*>("selectedProcess");
     
-    QPushButton* scanButton = centralWidget->findChild<QPushButton*>("scanButton");
-    QPushButton* filterButton = centralWidget->findChild<QPushButton*>("filterButton");
-    QPushButton* processButton = centralWidget->findChild<QPushButton*>("process");
-    QPushButton* scanAddButton = centralWidget->findChild<QPushButton*>("scanAdd");
-    QPushButton* scanAddAllButton = centralWidget->findChild<QPushButton*>("scanAddAll");
-    QPushButton* scanClearButton = centralWidget->findChild<QPushButton*>("scanClear");
-    QCheckBox* pauseCheckbox = centralWidget->findChild<QCheckBox*>("pauseCheckbox");
+    QPushButton* scanButton = findChild<QPushButton*>("scanButton");
+    QPushButton* filterButton = findChild<QPushButton*>("filterButton");
+    QPushButton* processButton = findChild<QPushButton*>("process");
+    QPushButton* scanAddButton = findChild<QPushButton*>("scanAdd");
+    QPushButton* scanAddAllButton = findChild<QPushButton*>("scanAddAll");
+    QPushButton* scanClearButton = findChild<QPushButton*>("scanClear");
+    QCheckBox* pauseCheckbox = findChild<QCheckBox*>("pauseCheckbox");
 
     if (scanButton) connect(scanButton, &QPushButton::clicked, this, &MainWindow::onScanClicked);
     if (filterButton) connect(filterButton, &QPushButton::clicked, this, &MainWindow::onFilterClicked);
@@ -75,8 +84,8 @@ void MainWindow::setupUi() {
     if (scanClearButton) connect(scanClearButton, &QPushButton::clicked, this, &MainWindow::onScanClearClicked);
     if (pauseCheckbox) connect(pauseCheckbox, &QCheckBox::clicked, this, &MainWindow::onPauseClicked);
 
-    QPushButton* prevButton = centralWidget->findChild<QPushButton*>("prevAddress");
-    QPushButton* nextButton = centralWidget->findChild<QPushButton*>("nextAddress");
+    QPushButton* prevButton = findChild<QPushButton*>("prevAddress");
+    QPushButton* nextButton = findChild<QPushButton*>("nextAddress");
     if (prevButton) connect(prevButton, &QPushButton::clicked, this, &MainWindow::onPrevAddressClicked);
     if (nextButton) connect(nextButton, &QPushButton::clicked, this, &MainWindow::onNextAddressClicked);
 
@@ -100,8 +109,8 @@ void MainWindow::setupUi() {
     processDialog_ = new ProcessDialog(this);
     connect(processDialog_, &ProcessDialog::processSelected, this, &MainWindow::onProcessSelected);
 
-    QLineEdit* scopeStartEdit = centralWidget->findChild<QLineEdit*>("scopeStart");
-    QLineEdit* scopeEndEdit = centralWidget->findChild<QLineEdit*>("scopeEnd");
+    QLineEdit* scopeStartEdit = findChild<QLineEdit*>("scopeStart");
+    QLineEdit* scopeEndEdit = findChild<QLineEdit*>("scopeEnd");
     if (scopeStartEdit) connect(scopeStartEdit, &QLineEdit::editingFinished, this, [this, scopeStartEdit]() {
         try {
             Address start = MedUtil::hexToInt(scopeStartEdit->text().toStdString());
@@ -116,16 +125,16 @@ void MainWindow::setupUi() {
     });
 
     // Menu Actions
-    QAction* actionOpen = centralWidget->findChild<QAction*>("actionOpen");
-    QAction* actionSave = centralWidget->findChild<QAction*>("actionSave");
-    QAction* actionSaveAs = centralWidget->findChild<QAction*>("actionSaveAs");
-    QAction* actionReload = centralWidget->findChild<QAction*>("actionReload");
-    QAction* actionNew = centralWidget->findChild<QAction*>("actionNewAddress");
-    QAction* actionDelete = centralWidget->findChild<QAction*>("actionDeleteAddress");
-    QAction* actionUnlockAll = centralWidget->findChild<QAction*>("actionUnlockAll");
-    QAction* actionShowNotes = centralWidget->findChild<QAction*>("actionShowNotes");
-    QAction* actionFastScan = centralWidget->findChild<QAction*>("actionFastScan");
-    QAction* actionCanResume = centralWidget->findChild<QAction*>("actionResumeProcess");
+    QAction* actionOpen = findChild<QAction*>("actionOpen");
+    QAction* actionSave = findChild<QAction*>("actionSave");
+    QAction* actionSaveAs = findChild<QAction*>("actionSaveAs");
+    QAction* actionReload = findChild<QAction*>("actionReload");
+    QAction* actionNew = findChild<QAction*>("actionNewAddress");
+    QAction* actionDelete = findChild<QAction*>("actionDeleteAddress");
+    QAction* actionUnlockAll = findChild<QAction*>("actionUnlockAll");
+    QAction* actionShowNotes = findChild<QAction*>("actionShowNotes");
+    QAction* actionFastScan = findChild<QAction*>("actionFastScan");
+    QAction* actionCanResume = findChild<QAction*>("actionResumeProcess");
 
     if (actionOpen) connect(actionOpen, &QAction::triggered, this, &MainWindow::onOpenTriggered);
     if (actionSave) connect(actionSave, &QAction::triggered, this, &MainWindow::onSaveTriggered);
