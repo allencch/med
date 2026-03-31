@@ -5,8 +5,13 @@
 #include <QStatusBar>
 #include <QtUiTools/QUiLoader>
 #include <QFile>
+#include <QAction>
+#include <QCheckBox>
+#include <QFileDialog>
 
 #include "ui/MainWindow.hpp"
+#include "ui/ComboBoxDelegate.hpp"
+#include "ui/CheckBoxDelegate.hpp"
 #include "med/MedCommon.hpp"
 #include "med/MemOperator.hpp"
 
@@ -45,49 +50,114 @@ void MainWindow::setupUi() {
     setCentralWidget(centralWidget);
     setWindowTitle("Med Rewrite");
 
-    // Finding components (names are based on old ui files)
+    // Finding components
     scanTreeView_ = centralWidget->findChild<QTreeView*>("scanTreeView");
     storeTreeView_ = centralWidget->findChild<QTreeView*>("storeTreeView");
-    scanValueEdit_ = centralWidget->findChild<QLineEdit*>("scanValueEdit");
-    scanTypeCombo_ = centralWidget->findChild<QComboBox*>("scanTypeCombo");
-    scanOpCombo_ = centralWidget->findChild<QComboBox*>("scanOpCombo");
+    scanValueEdit_ = centralWidget->findChild<QLineEdit*>("scanEntry");
+    scanTypeCombo_ = centralWidget->findChild<QComboBox*>("scanType");
+    foundLabel_ = centralWidget->findChild<QLabel*>("found");
+    notesEdit_ = centralWidget->findChild<QPlainTextEdit*>("notes");
+    selectedProcessEdit_ = centralWidget->findChild<QLineEdit*>("selectedProcess");
     
     QPushButton* scanButton = centralWidget->findChild<QPushButton*>("scanButton");
     QPushButton* filterButton = centralWidget->findChild<QPushButton*>("filterButton");
-    QPushButton* processButton = centralWidget->findChild<QPushButton*>("processButton");
-    QPushButton* addButton = centralWidget->findChild<QPushButton*>("addButton");
+    QPushButton* processButton = centralWidget->findChild<QPushButton*>("process");
+    QPushButton* scanAddButton = centralWidget->findChild<QPushButton*>("scanAdd");
+    QPushButton* scanAddAllButton = centralWidget->findChild<QPushButton*>("scanAddAll");
+    QPushButton* scanClearButton = centralWidget->findChild<QPushButton*>("scanClear");
+    QCheckBox* pauseCheckbox = centralWidget->findChild<QCheckBox*>("pauseCheckbox");
 
     if (scanButton) connect(scanButton, &QPushButton::clicked, this, &MainWindow::onScanClicked);
     if (filterButton) connect(filterButton, &QPushButton::clicked, this, &MainWindow::onFilterClicked);
     if (processButton) connect(processButton, &QPushButton::clicked, this, &MainWindow::onSelectProcessClicked);
-    if (addButton) connect(addButton, &QPushButton::clicked, this, &MainWindow::onAddToStoreClicked);
+    if (scanAddButton) connect(scanAddButton, &QPushButton::clicked, this, &MainWindow::onAddToStoreClicked);
+    if (scanAddAllButton) connect(scanAddAllButton, &QPushButton::clicked, this, &MainWindow::onAddAllToStoreClicked);
+    if (scanClearButton) connect(scanClearButton, &QPushButton::clicked, this, &MainWindow::onScanClearClicked);
+    if (pauseCheckbox) connect(pauseCheckbox, &QCheckBox::clicked, this, &MainWindow::onPauseClicked);
+
+    QPushButton* prevButton = centralWidget->findChild<QPushButton*>("prevAddress");
+    QPushButton* nextButton = centralWidget->findChild<QPushButton*>("nextAddress");
+    if (prevButton) connect(prevButton, &QPushButton::clicked, this, &MainWindow::onPrevAddressClicked);
+    if (nextButton) connect(nextButton, &QPushButton::clicked, this, &MainWindow::onNextAddressClicked);
 
     // Setup Models
     scanModel_ = new QStandardItemModel(this);
     scanModel_->setHorizontalHeaderLabels({"Address", "Type", "Value"});
-    if (scanTreeView_) scanTreeView_->setModel(scanModel_);
+    if (scanTreeView_) {
+        scanTreeView_->setModel(scanModel_);
+        connect(scanTreeView_, &QTreeView::doubleClicked, this, &MainWindow::onScanTreeViewDoubleClicked);
+    }
 
     storeModel_ = new QStandardItemModel(this);
     storeModel_->setHorizontalHeaderLabels({"Description", "Address", "Type", "Value", "Lock"});
-    if (storeTreeView_) storeTreeView_->setModel(storeModel_);
+    if (storeTreeView_) {
+        storeTreeView_->setModel(storeModel_);
+        storeTreeView_->setItemDelegateForColumn(2, new ComboBoxDelegate(this));
+        storeTreeView_->setItemDelegateForColumn(4, new CheckBoxDelegate(this));
+        connect(storeModel_, &QStandardItemModel::dataChanged, this, &MainWindow::onStoreDataChanged);
+    }
+
+    processDialog_ = new ProcessDialog(this);
+    connect(processDialog_, &ProcessDialog::processSelected, this, &MainWindow::onProcessSelected);
+
+    QLineEdit* scopeStartEdit = centralWidget->findChild<QLineEdit*>("scopeStart");
+    QLineEdit* scopeEndEdit = centralWidget->findChild<QLineEdit*>("scopeEnd");
+    if (scopeStartEdit) connect(scopeStartEdit, &QLineEdit::editingFinished, this, [this, scopeStartEdit]() {
+        try {
+            Address start = MedUtil::hexToInt(scopeStartEdit->text().toStdString());
+            QMetaObject::invokeMethod(worker_, "setScopeStart", Qt::QueuedConnection, Q_ARG(Address, start));
+        } catch (...) {}
+    });
+    if (scopeEndEdit) connect(scopeEndEdit, &QLineEdit::editingFinished, this, [this, scopeEndEdit]() {
+        try {
+            Address end = MedUtil::hexToInt(scopeEndEdit->text().toStdString());
+            QMetaObject::invokeMethod(worker_, "setScopeEnd", Qt::QueuedConnection, Q_ARG(Address, end));
+        } catch (...) {}
+    });
+
+    // Menu Actions
+    QAction* actionOpen = centralWidget->findChild<QAction*>("actionOpen");
+    QAction* actionSave = centralWidget->findChild<QAction*>("actionSave");
+    QAction* actionSaveAs = centralWidget->findChild<QAction*>("actionSaveAs");
+    QAction* actionReload = centralWidget->findChild<QAction*>("actionReload");
+    QAction* actionNew = centralWidget->findChild<QAction*>("actionNewAddress");
+    QAction* actionDelete = centralWidget->findChild<QAction*>("actionDeleteAddress");
+    QAction* actionUnlockAll = centralWidget->findChild<QAction*>("actionUnlockAll");
+    QAction* actionShowNotes = centralWidget->findChild<QAction*>("actionShowNotes");
+    QAction* actionFastScan = centralWidget->findChild<QAction*>("actionFastScan");
+    QAction* actionCanResume = centralWidget->findChild<QAction*>("actionResumeProcess");
+
+    if (actionOpen) connect(actionOpen, &QAction::triggered, this, &MainWindow::onOpenTriggered);
+    if (actionSave) connect(actionSave, &QAction::triggered, this, &MainWindow::onSaveTriggered);
+    if (actionSaveAs) connect(actionSaveAs, &QAction::triggered, this, &MainWindow::onSaveAsTriggered);
+    if (actionReload) connect(actionReload, &QAction::triggered, this, &MainWindow::onReloadTriggered);
+    if (actionNew) connect(actionNew, &QAction::triggered, this, &MainWindow::onNewAddressTriggered);
+    if (actionDelete) connect(actionDelete, &QAction::triggered, this, &MainWindow::onDeleteAddressTriggered);
+    if (actionUnlockAll) connect(actionUnlockAll, &QAction::triggered, this, &MainWindow::onUnlockAllTriggered);
+    if (actionShowNotes) connect(actionShowNotes, &QAction::triggered, this, &MainWindow::onShowNotesTriggered);
+    if (actionFastScan) connect(actionFastScan, &QAction::triggered, this, &MainWindow::onFastScanTriggered);
+    if (actionCanResume) connect(actionCanResume, &QAction::triggered, this, &MainWindow::onCanResumeTriggered);
 }
 
 void MainWindow::connectSignals() {
-    // UI to Worker (Cross-thread via QueuedConnection automatically by Qt)
-    connect(this, SIGNAL(scanRequested(QString, ScanType, ScanParser::OpType, bool, std::vector<int>)), 
-            worker_, SLOT(startScan(QString, ScanType, ScanParser::OpType, bool, std::vector<int>)));
-    
-    // Worker to UI
     connect(worker_, &MedWorker::scanCompleted, this, &MainWindow::onScanCompleted);
     connect(worker_, &MedWorker::filterCompleted, this, &MainWindow::onFilterCompleted);
     connect(worker_, &MedWorker::watchedValuesRefreshed, this, &MainWindow::onWatchedValuesRefreshed);
     connect(worker_, &MedWorker::processListReady, this, &MainWindow::onProcessListReady);
+    connect(worker_, &MedWorker::fileLoaded, this, &MainWindow::onFileLoaded);
     connect(worker_, &MedWorker::errorOccurred, this, &MainWindow::onError);
 }
 
-// These should be signals in the class definition for cleaner code,
-// but for now I'll use direct meta-calls or just fix the header later.
-// Let's fix the header to include the necessary signals.
+void MainWindow::onSelectProcessClicked() {
+    worker_->requestProcessList();
+}
+
+void MainWindow::onProcessSelected(pid_t pid, const QString& name) {
+    currentPid_ = pid;
+    if (selectedProcessEdit_) selectedProcessEdit_->setText(QString("%1 %2").arg(pid).arg(name));
+    QMetaObject::invokeMethod(worker_, "setPid", Qt::QueuedConnection, Q_ARG(pid_t, pid));
+    statusBar()->showMessage(QString("Attached to %1 (%2)").arg(name).arg(pid));
+}
 
 void MainWindow::onScanClicked() {
     if (currentPid_ == 0) {
@@ -96,15 +166,16 @@ void MainWindow::onScanClicked() {
     }
     
     QString val = scanValueEdit_->text();
+    if (val.isEmpty()) return;
+
     ScanType type = MedUtil::stringToScanType(scanTypeCombo_->currentText().toStdString());
-    ScanParser::OpType op = ScanParser::getOpType(scanOpCombo_->currentText().toStdString());
+    ScanParser::OpType op = ScanParser::getOpType(val.toStdString());
     
-    // Using QMetaObject::invokeMethod for a simple way without redeclaring signals now
     QMetaObject::invokeMethod(worker_, "startScan", Qt::QueuedConnection,
                               Q_ARG(QString, val),
                               Q_ARG(ScanType, type),
                               Q_ARG(ScanParser::OpType, op),
-                              Q_ARG(bool, false),
+                              Q_ARG(bool, fastScan_),
                               Q_ARG(std::vector<int>, std::vector<int>()));
     
     statusBar()->showMessage("Scanning...");
@@ -112,8 +183,10 @@ void MainWindow::onScanClicked() {
 
 void MainWindow::onFilterClicked() {
     QString val = scanValueEdit_->text();
+    if (val.isEmpty()) return;
+
     ScanType type = MedUtil::stringToScanType(scanTypeCombo_->currentText().toStdString());
-    ScanParser::OpType op = ScanParser::getOpType(scanOpCombo_->currentText().toStdString());
+    ScanParser::OpType op = ScanParser::getOpType(val.toStdString());
 
     QMetaObject::invokeMethod(worker_, "startFilter", Qt::QueuedConnection,
                               Q_ARG(std::vector<ScanResult>, lastScanResults_),
@@ -124,21 +197,21 @@ void MainWindow::onFilterClicked() {
     statusBar()->showMessage("Filtering...");
 }
 
-void MainWindow::onSelectProcessClicked() {
-    worker_->requestProcessList();
-}
-
 void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
     lastScanResults_ = results;
     scanModel_->removeRows(0, scanModel_->rowCount());
     
-    for (const auto& res : results) {
+    size_t count = std::min(results.size(), (size_t)800);
+    for (size_t i = 0; i < count; ++i) {
+        const auto& res = results[i];
         QList<QStandardItem*> items;
         items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(res.address)));
         items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(res.type)));
         items << new QStandardItem(QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type)));
+        for (auto* item : items) item->setEditable(false);
         scanModel_->appendRow(items);
     }
+    if (foundLabel_) foundLabel_->setText(QString::number(results.size()));
     statusBar()->showMessage(QString("Found %1 addresses").arg(results.size()));
 }
 
@@ -149,32 +222,33 @@ void MainWindow::onFilterCompleted(const std::vector<ScanResult>& results) {
 void MainWindow::onWatchedValuesRefreshed(const std::vector<WatchedAddress>& watched) {
     watchedAddresses_ = watched;
     for (int i = 0; i < (int)watched.size(); ++i) {
-        storeModel_->setData(storeModel_->index(i, 3), QString::fromStdString(watched[i].value));
+        auto index = storeModel_->index(i, 3);
+        if (storeModel_->data(index, Qt::EditRole).toString() != QString::fromStdString(watched[i].value)) {
+            storeModel_->setData(index, QString::fromStdString(watched[i].value), Qt::DisplayRole);
+        }
     }
 }
 
 void MainWindow::onProcessListReady(const std::vector<Process>& processes) {
-    QStringList items;
-    for (const auto& p : processes) {
-        items << QString("%1: %2").arg(p.getPid()).arg(QString::fromStdString(p.getCmdline()));
-    }
-    
-    bool ok;
-    QString item = QInputDialog::getItem(this, "Select Process", "Process:", items, 0, false, &ok);
-    if (ok && !item.isEmpty()) {
-        pid_t pid = item.split(":").at(0).toInt();
-        currentPid_ = pid;
-        QMetaObject::invokeMethod(worker_, "setPid", Qt::QueuedConnection, Q_ARG(pid_t, pid));
-        statusBar()->showMessage(QString("Attached to PID %1").arg(pid));
-    }
+    processDialog_->setProcessList(processes);
+    processDialog_->show();
+}
+
+void MainWindow::onScanClearClicked() {
+    lastScanResults_.clear();
+    scanModel_->clear();
+    scanModel_->setHorizontalHeaderLabels({"Address", "Type", "Value"});
+    if (foundLabel_) foundLabel_->setText("0");
+    statusBar()->showMessage("Scan cleared");
 }
 
 void MainWindow::onAddToStoreClicked() {
-    // Add selected from scanTreeView to store
     auto index = scanTreeView_->currentIndex();
     if (!index.isValid()) return;
     
     int row = index.row();
+    if (row >= (int)lastScanResults_.size()) return;
+    
     const auto& res = lastScanResults_[row];
     
     WatchedAddress wa;
@@ -182,6 +256,8 @@ void MainWindow::onAddToStoreClicked() {
     wa.address = res.address;
     wa.type = res.type;
     wa.value = MemOperator::toString(res.data.getBytes(), res.type);
+    wa.locked = false;
+    wa.lockValue = wa.value;
     
     watchedAddresses_.push_back(wa);
     
@@ -190,11 +266,203 @@ void MainWindow::onAddToStoreClicked() {
     items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(wa.address)));
     items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(wa.type)));
     items << new QStandardItem(QString::fromStdString(wa.value));
-    items << new QStandardItem("No");
+    
+    QStandardItem* lockItem = new QStandardItem();
+    lockItem->setData(false, Qt::EditRole);
+    items << lockItem;
+    
     storeModel_->appendRow(items);
     
     QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection, 
                               Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+}
+
+void MainWindow::onAddAllToStoreClicked() {
+    for (const auto& res : lastScanResults_) {
+        WatchedAddress wa;
+        wa.description = "New Address";
+        wa.address = res.address;
+        wa.type = res.type;
+        wa.value = MemOperator::toString(res.data.getBytes(), res.type);
+        wa.locked = false;
+        wa.lockValue = wa.value;
+        watchedAddresses_.push_back(wa);
+
+        QList<QStandardItem*> items;
+        items << new QStandardItem(QString::fromStdString(wa.description));
+        items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(wa.address)));
+        items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(wa.type)));
+        items << new QStandardItem(QString::fromStdString(wa.value));
+        QStandardItem* lockItem = new QStandardItem();
+        lockItem->setData(false, Qt::EditRole);
+        items << lockItem;
+        storeModel_->appendRow(items);
+    }
+    QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection, 
+                              Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+}
+
+void MainWindow::onScanTreeViewDoubleClicked(const QModelIndex& index) {
+    onAddToStoreClicked();
+}
+
+void MainWindow::onStoreTreeViewDoubleClicked(const QModelIndex& index) {
+}
+
+void MainWindow::onStoreDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) {
+    for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
+        if (row >= (int)watchedAddresses_.size()) continue;
+        
+        auto& wa = watchedAddresses_[row];
+        wa.description = storeModel_->data(storeModel_->index(row, 0)).toString().toStdString();
+        wa.type = MedUtil::stringToScanType(storeModel_->data(storeModel_->index(row, 2)).toString().toStdString());
+        
+        if (topLeft.column() == 3) { // Value changed
+            QString newVal = storeModel_->data(storeModel_->index(row, 3)).toString();
+            wa.value = newVal.toStdString();
+            if (wa.locked) wa.lockValue = wa.value;
+            QMetaObject::invokeMethod(worker_, "writeMemory", Qt::QueuedConnection,
+                                      Q_ARG(Address, wa.address),
+                                      Q_ARG(QString, newVal),
+                                      Q_ARG(ScanType, wa.type));
+        } else if (topLeft.column() == 4) { // Lock toggled
+            wa.locked = storeModel_->data(storeModel_->index(row, 4), Qt::EditRole).toBool();
+            if (wa.locked) {
+                wa.lockValue = storeModel_->data(storeModel_->index(row, 3)).toString().toStdString();
+            }
+        }
+    }
+    QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection, 
+                              Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+}
+
+void MainWindow::onPauseClicked(bool checked) {
+    QMetaObject::invokeMethod(worker_, "setProcessPaused", Qt::QueuedConnection, Q_ARG(bool, checked));
+}
+
+void MainWindow::onCanResumeTriggered(bool checked) {
+    QMetaObject::invokeMethod(worker_, "setCanResume", Qt::QueuedConnection, Q_ARG(bool, checked));
+}
+
+void MainWindow::onFastScanTriggered(bool checked) {
+    fastScan_ = checked;
+}
+
+void MainWindow::onOpenTriggered() {
+    QString fileName = QFileDialog::getOpenFileName(this, "Open JSON", "", "JSON Files (*.json)");
+    if (!fileName.isEmpty()) {
+        currentFilename_ = fileName;
+        QMetaObject::invokeMethod(worker_, "loadFile", Qt::QueuedConnection, Q_ARG(QString, fileName));
+    }
+}
+
+void MainWindow::onSaveTriggered() {
+    if (currentFilename_.isEmpty()) {
+        onSaveAsTriggered();
+    } else {
+        QString notes = notesEdit_ ? notesEdit_->toPlainText() : "";
+        QMetaObject::invokeMethod(worker_, "saveFile", Qt::QueuedConnection, Q_ARG(QString, currentFilename_), Q_ARG(QString, notes));
+    }
+}
+
+void MainWindow::onSaveAsTriggered() {
+    QString fileName = QFileDialog::getSaveFileName(this, "Save JSON", "", "JSON Files (*.json)");
+    if (!fileName.isEmpty()) {
+        currentFilename_ = fileName;
+        onSaveTriggered();
+    }
+}
+
+void MainWindow::onReloadTriggered() {
+    if (!currentFilename_.isEmpty()) {
+        QMetaObject::invokeMethod(worker_, "loadFile", Qt::QueuedConnection, Q_ARG(QString, currentFilename_));
+    }
+}
+
+void MainWindow::onShowNotesTriggered(bool checked) {
+    if (notesEdit_) notesEdit_->setVisible(checked);
+}
+
+void MainWindow::onNewAddressTriggered() {
+    WatchedAddress wa;
+    wa.description = "New Address";
+    wa.address = 0;
+    wa.type = ScanType::Int32;
+    wa.value = "0";
+    wa.locked = false;
+    
+    watchedAddresses_.push_back(wa);
+    QList<QStandardItem*> items;
+    items << new QStandardItem(QString::fromStdString(wa.description));
+    items << new QStandardItem("0x0");
+    items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(wa.type)));
+    items << new QStandardItem(QString::fromStdString(wa.value));
+    QStandardItem* lockItem = new QStandardItem();
+    lockItem->setData(false, Qt::EditRole);
+    items << lockItem;
+    storeModel_->appendRow(items);
+}
+
+void MainWindow::onDeleteAddressTriggered() {
+    auto index = storeTreeView_->currentIndex();
+    if (!index.isValid()) return;
+    int row = index.row();
+    storeModel_->removeRow(row);
+    watchedAddresses_.erase(watchedAddresses_.begin() + row);
+    QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection, 
+                              Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+}
+
+void MainWindow::onUnlockAllTriggered() {
+    for (int i = 0; i < (int)watchedAddresses_.size(); ++i) {
+        watchedAddresses_[i].locked = false;
+        storeModel_->setData(storeModel_->index(i, 4), false, Qt::EditRole);
+    }
+    QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection, 
+                              Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+}
+
+void MainWindow::onPrevAddressClicked() {
+    auto index = storeTreeView_->currentIndex();
+    if (!index.isValid()) return;
+    int row = index.row();
+    auto& wa = watchedAddresses_[row];
+    size_t size = MedUtil::scanTypeToSize(wa.type);
+    wa.address -= size;
+    storeModel_->setData(storeModel_->index(row, 1), QString::fromStdString(MedUtil::intToHex(wa.address)));
+    QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection, 
+                              Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+}
+
+void MainWindow::onNextAddressClicked() {
+    auto index = storeTreeView_->currentIndex();
+    if (!index.isValid()) return;
+    int row = index.row();
+    auto& wa = watchedAddresses_[row];
+    size_t size = MedUtil::scanTypeToSize(wa.type);
+    wa.address += size;
+    storeModel_->setData(storeModel_->index(row, 1), QString::fromStdString(MedUtil::intToHex(wa.address)));
+    QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection, 
+                              Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+}
+
+void MainWindow::onFileLoaded(const std::vector<WatchedAddress>& watched, const QString& notes) {
+    watchedAddresses_ = watched;
+    storeModel_->removeRows(0, storeModel_->rowCount());
+    if (notesEdit_) notesEdit_->setPlainText(notes);
+    
+    for (const auto& wa : watched) {
+        QList<QStandardItem*> items;
+        items << new QStandardItem(QString::fromStdString(wa.description));
+        items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(wa.address)));
+        items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(wa.type)));
+        items << new QStandardItem(QString::fromStdString(wa.value));
+        QStandardItem* lockItem = new QStandardItem();
+        lockItem->setData(wa.locked, Qt::EditRole);
+        items << lockItem;
+        storeModel_->appendRow(items);
+    }
+    statusBar()->showMessage(QString("Loaded %1 addresses").arg(watched.size()));
 }
 
 void MainWindow::onError(const QString& message) {

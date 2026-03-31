@@ -35,8 +35,10 @@ The current codebase suffers from a difficult-to-reproduce deadlock. The decisio
 - [ ] CLI main loop and user interaction. (Skip CLI, can be ignored)
 
 ### Phase 4: UI Layer (Qt)
-- [x] Port/Rewrite Qt UI components.
+- [x] Port/Rewrite Qt UI components (MainWindow, ProcessDialog).
 - [x] Connect UI to the new core logic via an event/listener (Worker QObject) pattern.
+- [x] Implement File IO (JSON Save/Load) and Notes support.
+- [x] Implement Address locking and periodic refreshing.
 - [x] Stress testing and deadlock verification (via architecture).
 
 ## 6. Verification & Validation

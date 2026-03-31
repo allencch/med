@@ -28,14 +28,18 @@ class MedWorker : public QObject {
 
 public:
     explicit MedWorker(QObject* parent = nullptr);
-    ~MedWorker();
+    virtual ~MedWorker();
+    void saveFile(const QString& filename, const QString& notes);
+    void loadFile(const QString& filename);
 
-signals:
+    signals:
     void scanCompleted(const std::vector<ScanResult>& results);
     void filterCompleted(const std::vector<ScanResult>& results);
     void watchedValuesRefreshed(const std::vector<WatchedAddress>& watched);
     void errorOccurred(const QString& message);
     void processListReady(const std::vector<Process>& processes);
+    void fileLoaded(const std::vector<WatchedAddress>& watched, const QString& notes);
+
 
 public slots:
     void setPid(pid_t pid);
@@ -47,12 +51,20 @@ public slots:
     
     void requestProcessList();
     void refreshWatchedValues();
+    void setProcessPaused(bool paused);
+    void setCanResume(bool canResume);
+    void setScopeStart(Address start);
+    void setScopeEnd(Address end);
 
 private:
     pid_t pid_ = 0;
     std::unique_ptr<MemScanner> scanner_;
     std::vector<WatchedAddress> watched_;
     QTimer* refreshTimer_;
+    bool isProcessPaused_ = false;
+    bool canResume_ = true;
+    Address scopeStart_ = 0;
+    Address scopeEnd_ = 0;
     
     void performLocks();
 };

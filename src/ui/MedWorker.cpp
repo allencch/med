@@ -1,4 +1,6 @@
 #include <QDebug>
+#include <fstream>
+#include <json/json.h>
 #include "ui/MedWorker.hpp"
 #include "med/MedException.hpp"
 #include "med/MemOperator.hpp"
@@ -15,6 +17,9 @@ MedWorker::~MedWorker() {}
 void MedWorker::setPid(pid_t pid) {
     pid_ = pid;
     scanner_ = std::make_unique<MemScanner>(pid_);
+    if (scopeStart_ || scopeEnd_) {
+        scanner_->setScope(scopeStart_, scopeEnd_);
+    }
 }
 
 void MedWorker::startScan(const QString& value, ScanType type, ScanParser::OpType op, bool fastScan, const std::vector<int>& lastDigits) {
@@ -33,6 +38,10 @@ void MedWorker::startScan(const QString& value, ScanType type, ScanParser::OpTyp
 
         auto results = scanner_->scan(params);
         emit scanCompleted(results);
+
+        if (!isProcessPaused_ && canResume_) {
+            Process(pid_, "").resume();
+        }
     } catch (const std::exception& e) {
         emit errorOccurred(QString::fromStdString(e.what()));
     }
@@ -49,6 +58,10 @@ void MedWorker::startFilter(const std::vector<ScanResult>& currentResults, const
 
         auto results = scanner_->filter(currentResults, params);
         emit filterCompleted(results);
+
+        if (!isProcessPaused_ && canResume_) {
+            Process(pid_, "").resume();
+        }
     } catch (const std::exception& e) {
         emit errorOccurred(QString::fromStdString(e.what()));
     }
@@ -78,6 +91,83 @@ void MedWorker::requestProcessList() {
     } catch (const std::exception& e) {
         emit errorOccurred(QString::fromStdString(e.what()));
     }
+}
+
+void MedWorker::setProcessPaused(bool paused) {
+    if (pid_ == 0) return;
+    isProcessPaused_ = paused;
+    if (isProcessPaused_) {
+        Process(pid_, "").stop();
+    } else {
+        Process(pid_, "").resume();
+    }
+}
+
+void MedWorker::setCanResume(bool canResume) {
+    canResume_ = canResume;
+}
+
+void MedWorker::setScopeStart(Address start) {
+    scopeStart_ = start;
+    if (scanner_) scanner_->setScope(scopeStart_, scopeEnd_);
+}
+
+void MedWorker::setScopeEnd(Address end) {
+    scopeEnd_ = end;
+    if (scanner_) scanner_->setScope(scopeStart_, scopeEnd_);
+}
+
+void MedWorker::saveFile(const QString& filename, const QString& notes) {
+    Json::Value root;
+    Json::Value addresses(Json::arrayValue);
+    
+    for (const auto& w : watched_) {
+        Json::Value item;
+        item["description"] = w.description;
+        item["address"] = MedUtil::intToHex(w.address);
+        item["type"] = MedUtil::scanTypeToString(w.type);
+        item["lock"] = w.locked;
+        item["lockValue"] = w.lockValue;
+        addresses.append(item);
+    }
+    root["addresses"] = addresses;
+    root["notes"] = notes.toStdString();
+
+    std::ofstream ofs(filename.toStdString());
+    if (!ofs.is_open()) {
+        emit errorOccurred("Failed to open file for saving: " + filename);
+        return;
+    }
+    ofs << root << std::endl;
+    ofs.close();
+}
+
+void MedWorker::loadFile(const QString& filename) {
+    std::ifstream ifs(filename.toStdString());
+    if (!ifs.is_open()) {
+        emit errorOccurred("Failed to open file for loading: " + filename);
+        return;
+    }
+
+    Json::Value root;
+    ifs >> root;
+    ifs.close();
+
+    std::vector<WatchedAddress> newWatched;
+    auto& addresses = root["addresses"];
+    for (int i = 0; i < (int)addresses.size(); ++i) {
+        WatchedAddress w;
+        w.description = addresses[i]["description"].asString();
+        w.address = MedUtil::hexToInt(addresses[i]["address"].asString());
+        w.type = MedUtil::stringToScanType(addresses[i]["type"].asString());
+        w.locked = addresses[i]["lock"].asBool();
+        w.lockValue = addresses[i].get("lockValue", "").asString();
+        newWatched.push_back(w);
+    }
+    
+    watched_ = newWatched;
+    QString notes = QString::fromStdString(root.get("notes", "").asString());
+    emit fileLoaded(watched_, notes);
 }
 
 void MedWorker::refreshWatchedValues() {
