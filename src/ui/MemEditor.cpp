@@ -48,8 +48,13 @@ void MemEditor::setupUi() {
     enterButton_ = widget->findChild<QPushButton*>("enterButton");
 
     QFont font("Monospace");
-    font.setStyleHint(QFont::TypeWriter);
-    if (memArea_) memArea_->setFont(font);
+    font.setStyleHint(QFont::Monospace);
+    font.setPixelSize(14);
+
+    if (memArea_) {
+      memArea_->setFont(font);
+      memArea_->setTextInteractionFlags(memArea_->textInteractionFlags() | Qt::TextSelectableByKeyboard);
+    }
     if (addrArea_) addrArea_->setFont(font);
     if (textArea_) textArea_->setFont(font);
 
