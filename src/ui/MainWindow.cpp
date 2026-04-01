@@ -389,9 +389,6 @@ void MainWindow::onAddAllToStoreClicked() {
 }
 
 void MainWindow::onScanTreeViewDoubleClicked(const QModelIndex& index) {
-    if (index.column() != 2) {
-        onAddToStoreClicked();
-    }
 }
 
 void MainWindow::onScanDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) {
