@@ -50,24 +50,23 @@ void MainWindow::setupUi() {
 
     QMainWindow* uiWindow = qobject_cast<QMainWindow*>(uiWidget);
     if (uiWindow) {
-        // --- 1. SYNC WINDOW PROPERTIES ---
-        // This ensures the 1024x768 size and window title from the XML are applied
-        this->setObjectName(uiWindow->objectName());
-        this->resize(uiWindow->size());
-        this->setMinimumSize(uiWindow->minimumSize());
-        this->setMaximumSize(uiWindow->maximumSize());
-        this->setWindowTitle(uiWindow->windowTitle());
-
-        // --- 2. MIGRATE THE COMPONENTS ---
-        // Take ownership of the central widget and internal structures
+        // Migration
         setCentralWidget(uiWindow->takeCentralWidget());
-        setMenuBar(uiWindow->menuBar());
-        setStatusBar(uiWindow->statusBar());
 
-        // Ensure the layout margins are consistent
-        if (centralWidget() && centralWidget()->layout()) {
-            centralWidget()->layout()->setContentsMargins(9, 9, 9, 9);
+        // Take the menu bar
+        QMenuBar* uiMenuBar = uiWindow->menuBar();
+        setMenuBar(uiMenuBar);
+
+        // IMPORTANT: Move all actions to this window so shortcuts/hotkeys work
+        QList<QAction*> allActions = uiWindow->findChildren<QAction*>();
+        for (QAction* action : allActions) {
+            action->setParent(this);
+            this->addAction(action);
+            action->setShortcutContext(Qt::WindowShortcut);
         }
+
+        setStatusBar(uiWindow->statusBar());
+        this->resize(uiWindow->size());
     } else {
         setCentralWidget(uiWidget);
         this->resize(uiWidget->size());
@@ -457,7 +456,7 @@ void MainWindow::onMemEditorTriggered() {
         memEditor_->show();
         memEditor_->raise();
         memEditor_->activateWindow();
-        
+
         // Center it
         auto geo = geometry();
         memEditor_->move(geo.center() - memEditor_->rect().center());

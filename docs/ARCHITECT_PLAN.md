@@ -55,12 +55,12 @@ The current codebase suffers from a difficult-to-reproduce deadlock. The decisio
 - [x] Scan area value should be editable
 - [x] Scan and Store area, the Type should be editable using dropdown, follow old code
 - [x] Process list should by reverse order. The process string contains box-like whitespace, including the end of line.
-- [ ] Process list should allow Enter key to select
-- [ ] Hotkey like Ctrl-Q doesn't work. Other hotkeys should follow the old code.
-- [ ] Address > Editor not showing
+- [x] Process list should allow Enter key to select
+- [x] Hotkey like Ctrl-Q should quit. Other hotkeys should follow the old code. (Connected basic ones)
+- [x] Address > Editor shouled trigger the memory editor
 - [ ] ICU encoding
 - [ ] Named scan
-- [ ] Scan area refresh whenever there is value, no need depends on Store area
+- [x] Scan area refresh whenever there is value, no need depends on Store area
 
 
 # Proposal for rewrite for resolving deadlock
