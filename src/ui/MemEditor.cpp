@@ -5,6 +5,7 @@
 #include <QFont>
 #include <QTextCursor>
 #include <QTextCharFormat>
+#include <QKeyEvent>
 
 #include "ui/MemEditor.hpp"
 #include "ui/MainWindow.hpp"
@@ -54,8 +55,12 @@ void MemEditor::setupUi() {
 
     if (refreshButton_) connect(refreshButton_, &QPushButton::clicked, this, &MemEditor::onRefreshButtonClicked);
     if (enterButton_) connect(enterButton_, &QPushButton::clicked, this, &MemEditor::onEnterClicked);
+    if (valueEdit_) connect(valueEdit_, &QLineEdit::returnPressed, this, &MemEditor::onEnterClicked);
     if (currAddressEdit_) connect(currAddressEdit_, &QLineEdit::editingFinished, this, &MemEditor::onCurrAddressEdited);
-    if (memArea_) connect(memArea_, &QPlainTextEdit::cursorPositionChanged, this, &MemEditor::onMemAreaCursorPositionChanged);
+    if (memArea_) {
+        connect(memArea_, &QPlainTextEdit::cursorPositionChanged, this, &MemEditor::onMemAreaCursorPositionChanged);
+        memArea_->installEventFilter(this);
+    }
 }
 
 void MemEditor::setBaseAddress(Address addr) {
@@ -66,7 +71,7 @@ void MemEditor::setBaseAddress(Address addr) {
 
 void MemEditor::refresh() {
     if (baseAddress_ == 0 || mainWindow_->getPid() == 0) return;
-    
+
     // Request memory from worker via mainWindow
     QMetaObject::invokeMethod(mainWindow_->getWorker(), "requestMemory", Qt::QueuedConnection,
                               Q_ARG(Address, baseAddress_),
@@ -75,6 +80,49 @@ void MemEditor::refresh() {
 
 void MemEditor::onRefreshButtonClicked() {
     refresh();
+}
+
+bool MemEditor::eventFilter(QObject* obj, QEvent* event) {
+    if (obj == memArea_ && event->type() == QEvent::KeyPress) {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        int key = keyEvent->key();
+        if ((key >= Qt::Key_0 && key <= Qt::Key_9) || (key >= Qt::Key_A && key <= Qt::Key_F)) {
+            int pos = memArea_->textCursor().position();
+            if (pos < (int)memHex_.size() && !std::isspace(memHex_[pos])) {
+                writeToProcessMemory(pos, (char)key);
+
+                // Move to next hex char
+                QTextCursor cursor = memArea_->textCursor();
+                int next = pos + 1;
+                if (next < (int)memHex_.size() && std::isspace(memHex_[next])) next++;
+                cursor.setPosition(next);
+                memArea_->setTextCursor(cursor);
+                return true;
+            }
+        }
+    }
+    return QWidget::eventFilter(obj, event);
+}
+
+void MemEditor::writeToProcessMemory(int position, char ch) {
+    // Get the 2-char hex string for the byte
+    int byteStart = (position / 3) * 3;
+    std::string hexByte = memHex_.substr(byteStart, 2);
+
+    // Update the character
+    hexByte[position % 3] = ch;
+
+    Address addr = baseAddress_ + (position / 3);
+
+    // Write as int8 (1 byte)
+    QMetaObject::invokeMethod(mainWindow_->getWorker(), "writeMemory", Qt::QueuedConnection,
+                              Q_ARG(Address, addr),
+                              Q_ARG(QString, QString::fromStdString(std::to_string(MedUtil::hexToInt(hexByte)))),
+                              Q_ARG(ScanType, ScanType::Int8));
+
+    // We don't refresh immediately to avoid flicker,
+    // but the local memHex_ should be updated for the next key press
+    memHex_[position] = ch;
 }
 
 void MemEditor::onCurrAddressEdited() {
@@ -87,11 +135,11 @@ void MemEditor::onCurrAddressEdited() {
 
 void MemEditor::onEnterClicked() {
     if (!valueEdit_ || !currAddressEdit_) return;
-    
+
     Address addr = MedUtil::hexToInt(currAddressEdit_->text().toStdString());
     QString val = valueEdit_->text();
     ScanType type = MedUtil::stringToScanType(scanTypeCombo_->currentText().toStdString());
-    
+
     QMetaObject::invokeMethod(mainWindow_->getWorker(), "writeMemory", Qt::QueuedConnection,
                               Q_ARG(Address, addr),
                               Q_ARG(QString, val),
@@ -99,22 +147,89 @@ void MemEditor::onEnterClicked() {
     refresh();
 }
 
-void MemEditor::onMemAreaCursorPositionChanged() {
-    // Port cursor position logic later
-}
-
 void MemEditor::onMemoryReady(Address addr, const SizedBytes& data) {
     if (addr != baseAddress_) return;
-    
-    if (memArea_) memArea_->setPlainText(QString::fromStdString(memoryToHex(data.getBytes(), data.getSize())));
+
+    rawMemorySize_ = data.getSize();
+    rawMemory_ = data.getBytePtr(); // share the pointer
+
+    memHex_ = memoryToHex(data.getBytes(), data.getSize());
+    if (memArea_) memArea_->setPlainText(QString::fromStdString(memHex_));
     if (textArea_) textArea_->setPlainText(QString::fromStdString(memoryToString(data.getBytes(), data.getSize())));
-    
+
     loadAddresses(addr);
-    
-    // Update view fields (simplified)
-    if (viewInt32_) viewInt32_->setText(QString::fromStdString(MemOperator::toString(data.getBytes(), ScanType::Int32)));
-    if (viewFloat32_) viewFloat32_->setText(QString::fromStdString(MemOperator::toString(data.getBytes(), ScanType::Float32)));
-    if (viewFloat64_) viewFloat64_->setText(QString::fromStdString(MemOperator::toString(data.getBytes(), ScanType::Float64)));
+    onMemAreaCursorPositionChanged();
+}
+
+void MemEditor::onMemAreaCursorPositionChanged() {
+    if (!memArea_ || !rawMemory_ || memHex_.empty()) return;
+
+    int pos = memArea_->textCursor().position();
+    if (pos >= (int)memHex_.size()) return;
+
+    // Each byte is "XX " (3 chars)
+    int byteOffset = pos / 3;
+    Address currAddr = baseAddress_ + byteOffset;
+
+    if (currAddressEdit_) {
+        currAddressEdit_->setText(QString::fromStdString(MedUtil::intToHex(currAddr)));
+    }
+
+    // Update value views based on the selected byte offset
+    if (byteOffset < (int)rawMemorySize_) {
+        const Byte* ptr = rawMemory_.get() + byteOffset;
+        size_t remaining = rawMemorySize_ - byteOffset;
+
+        if (valueEdit_) {
+            ScanType type = MedUtil::stringToScanType(scanTypeCombo_->currentText().toStdString());
+            if (remaining >= MedUtil::scanTypeToSize(type)) {
+                valueEdit_->setText(QString::fromStdString(MemOperator::toString(ptr, type)));
+            } else {
+                valueEdit_->setText("??");
+            }
+        }
+
+        if (viewInt32_) {
+            if (remaining >= 4) viewInt32_->setText(QString::fromStdString(MemOperator::toString(ptr, ScanType::Int32)));
+            else viewInt32_->setText("??");
+        }
+        if (viewFloat32_) {
+            if (remaining >= 4) viewFloat32_->setText(QString::fromStdString(MemOperator::toString(ptr, ScanType::Float32)));
+            else viewFloat32_->setText("??");
+        }
+        if (viewFloat64_) {
+            if (remaining >= 8) viewFloat64_->setText(QString::fromStdString(MemOperator::toString(ptr, ScanType::Float64)));
+            else viewFloat64_->setText("??");
+        }
+    }
+
+    // Bold current byte
+    QTextCursor cursor = memArea_->textCursor();
+    int start = byteOffset * 3;
+
+    // Simple way to clear bold: reset entire block?
+    // Or just re-apply normal to everything and bold one.
+    // For performance, maybe just track last bolded.
+
+    QTextCharFormat normalFormat;
+    normalFormat.setFontWeight(QFont::Normal);
+
+    QTextCharFormat boldFormat;
+    boldFormat.setFontWeight(QFont::Bold);
+    boldFormat.setBackground(Qt::yellow);
+
+    // This is a bit expensive for large text, but MEMORY_SIZE is small (384)
+    int currentPos = cursor.position();
+    cursor.select(QTextCursor::Document);
+    cursor.setCharFormat(normalFormat);
+
+    cursor.setPosition(start);
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 2);
+    cursor.setCharFormat(boldFormat);
+
+    // Restore original cursor position (without selection)
+    cursor.setPosition(currentPos);
+    memArea_->setTextCursor(cursor);
 }
 
 void MemEditor::loadAddresses(Address address) {

@@ -77,6 +77,7 @@ private:
     QTreeView* scanTreeView_;
     QTreeView* storeTreeView_;
     QLineEdit* scanValueEdit_;
+    QLineEdit* lastDigitEdit_;
     QComboBox* scanTypeCombo_;
     QLabel* foundLabel_;
     QPlainTextEdit* notesEdit_;

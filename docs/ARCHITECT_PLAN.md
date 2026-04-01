@@ -58,10 +58,20 @@ The current codebase suffers from a difficult-to-reproduce deadlock. The decisio
 - [x] Process list should allow Enter key to select
 - [x] Hotkey like Ctrl-Q should quit. Other hotkeys should follow the old code. (Connected basic ones)
 - [x] Address > Editor shouled trigger the memory editor
-- [ ] ICU encoding
-- [ ] Named scan
 - [x] Scan area refresh whenever there is value, no need depends on Store area
+- [x] Read/write JSON file
+  + [x] Window title should show the JSON file name, `mainWindow->setWindowTitle(MAIN_TITLE + ": " + filename)`
+- [ ] ICU encoding, Big5
+- [ ] Named scan
+- [x] Scan (last digit, allows comma separated)
+- [x] Scan area and store area should allow multiple rows selection
+- [x] Store area should be able to delete the row by Delete key
+- [x] Scan area listing, the Address, Type, and Value should be editable as well
 
+## 8. Memory editor
+
+- [x] The cursor should be able to update the Hex area.
+- [x] The Enter value should fill in the value.
 
 # Proposal for rewrite for resolving deadlock
 

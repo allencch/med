@@ -22,6 +22,9 @@ public:
     void setBaseAddress(Address addr);
     void refresh();
 
+protected:
+    bool eventFilter(QObject* obj, QEvent* event) override;
+
 public slots:
     void onCurrAddressEdited();
     void onRefreshButtonClicked();
@@ -33,10 +36,11 @@ private:
     void setupUi();
     void loadMemory(Address address);
     void loadAddresses(Address address);
-    
+    void writeToProcessMemory(int position, char ch);
+
     MainWindow* mainWindow_;
     Address baseAddress_ = 0;
-    
+
     QLineEdit* currAddressEdit_;
     QLineEdit* valueEdit_;
     QPlainTextEdit* memArea_;
@@ -48,7 +52,11 @@ private:
     QLineEdit* viewFloat32_;
     QLineEdit* viewFloat64_;
     QPushButton* enterButton_;
-    
+
+    std::string memHex_;
+    BytePtr rawMemory_;
+    size_t rawMemorySize_ = 0;
+
     static std::string memoryToHex(const Byte* memory, size_t size);
     static std::string memoryToString(const Byte* memory, size_t size);
 };
