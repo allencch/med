@@ -12,6 +12,7 @@
 #include "ui/MainWindow.hpp"
 #include "ui/ComboBoxDelegate.hpp"
 #include "ui/CheckBoxDelegate.hpp"
+#include "ui/MemEditor.hpp"
 #include "med/MedCommon.hpp"
 #include "med/MemOperator.hpp"
 
@@ -147,21 +148,29 @@ void MainWindow::setupUi() {
     QAction* actionReload = findChild<QAction*>("actionReload");
     QAction* actionNew = findChild<QAction*>("actionNewAddress");
     QAction* actionDelete = findChild<QAction*>("actionDeleteAddress");
+    QAction* actionMemEditor = findChild<QAction*>("actionMemEditor");
     QAction* actionUnlockAll = findChild<QAction*>("actionUnlockAll");
     QAction* actionShowNotes = findChild<QAction*>("actionShowNotes");
     QAction* actionFastScan = findChild<QAction*>("actionFastScan");
     QAction* actionCanResume = findChild<QAction*>("actionResumeProcess");
+    QAction* actionQuit = findChild<QAction*>("actionQuit");
+    QAction* actionRefresh = findChild<QAction*>("actionRefresh");
 
     if (actionOpen) connect(actionOpen, &QAction::triggered, this, &MainWindow::onOpenTriggered);
     if (actionSave) connect(actionSave, &QAction::triggered, this, &MainWindow::onSaveTriggered);
     if (actionSaveAs) connect(actionSaveAs, &QAction::triggered, this, &MainWindow::onSaveAsTriggered);
     if (actionReload) connect(actionReload, &QAction::triggered, this, &MainWindow::onReloadTriggered);
+    if (actionMemEditor) connect(actionMemEditor, &QAction::triggered, this, &MainWindow::onMemEditorTriggered);
+    if (actionQuit) connect(actionQuit, &QAction::triggered, this, &MainWindow::close);
+    if (actionRefresh) connect(actionRefresh, &QAction::triggered, this, &MainWindow::onRefreshRequested);
     if (actionNew) connect(actionNew, &QAction::triggered, this, &MainWindow::onNewAddressTriggered);
     if (actionDelete) connect(actionDelete, &QAction::triggered, this, &MainWindow::onDeleteAddressTriggered);
     if (actionUnlockAll) connect(actionUnlockAll, &QAction::triggered, this, &MainWindow::onUnlockAllTriggered);
     if (actionShowNotes) connect(actionShowNotes, &QAction::triggered, this, &MainWindow::onShowNotesTriggered);
     if (actionFastScan) connect(actionFastScan, &QAction::triggered, this, &MainWindow::onFastScanTriggered);
     if (actionCanResume) connect(actionCanResume, &QAction::triggered, this, &MainWindow::onCanResumeTriggered);
+
+    memEditor_ = new MemEditor(this);
 
     // Initial State
     if (notesEdit_) notesEdit_->hide();
@@ -172,8 +181,10 @@ void MainWindow::connectSignals() {
     connect(worker_, &MedWorker::scanCompleted, this, &MainWindow::onScanCompleted);
     connect(worker_, &MedWorker::filterCompleted, this, &MainWindow::onFilterCompleted);
     connect(worker_, &MedWorker::watchedValuesRefreshed, this, &MainWindow::onWatchedValuesRefreshed);
+    connect(worker_, &MedWorker::refreshRequested, this, &MainWindow::onRefreshRequested);
     connect(worker_, &MedWorker::processListReady, this, &MainWindow::onProcessListReady);
     connect(worker_, &MedWorker::fileLoaded, this, &MainWindow::onFileLoaded);
+    connect(worker_, &MedWorker::memoryReady, memEditor_, &MemEditor::onMemoryReady);
     connect(worker_, &MedWorker::errorOccurred, this, &MainWindow::onError);
 }
 
@@ -261,7 +272,9 @@ void MainWindow::onWatchedValuesRefreshed(const std::vector<WatchedAddress>& wat
             storeModel_->setData(index, QString::fromStdString(watched[i].value), Qt::DisplayRole);
         }
     }
+}
 
+void MainWindow::onRefreshRequested() {
     if (autoRefresh_ && !lastScanResults_.empty() && lastScanResults_.size() <= 800) {
         QMetaObject::invokeMethod(worker_, "refreshScanResults", Qt::QueuedConnection,
                                   Q_ARG(std::vector<ScanResult>, lastScanResults_));
@@ -437,6 +450,18 @@ void MainWindow::onReloadTriggered() {
 
 void MainWindow::onShowNotesTriggered(bool checked) {
     if (notesEdit_) notesEdit_->setVisible(checked);
+}
+
+void MainWindow::onMemEditorTriggered() {
+    if (memEditor_) {
+        memEditor_->show();
+        memEditor_->raise();
+        memEditor_->activateWindow();
+        
+        // Center it
+        auto geo = geometry();
+        memEditor_->move(geo.center() - memEditor_->rect().center());
+    }
 }
 
 void MainWindow::onNewAddressTriggered() {

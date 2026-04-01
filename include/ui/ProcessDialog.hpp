@@ -13,6 +13,9 @@ public:
     explicit ProcessDialog(QWidget* parent = nullptr);
     void setProcessList(const std::vector<Process>& processes);
 
+protected:
+    void keyPressEvent(QKeyEvent* event) override;
+
 signals:
     void processSelected(pid_t pid, const QString& name);
 

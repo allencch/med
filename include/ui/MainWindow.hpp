@@ -15,12 +15,16 @@
 #include "ui/MedWorker.hpp"
 #include "ui/ProcessDialog.hpp"
 
+class MemEditor;
+
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
+
+    pid_t getPid() const { return currentPid_; }
 
 private slots:
     // UI actions
@@ -46,6 +50,7 @@ private slots:
     void onSaveAsTriggered();
     void onReloadTriggered();
     void onShowNotesTriggered(bool checked);
+    void onMemEditorTriggered();
     
     void onNewAddressTriggered();
     void onDeleteAddressTriggered();
@@ -58,6 +63,7 @@ private slots:
     void onScanCompleted(const std::vector<ScanResult>& results);
     void onFilterCompleted(const std::vector<ScanResult>& results);
     void onWatchedValuesRefreshed(const std::vector<WatchedAddress>& watched);
+    void onRefreshRequested();
     void onProcessListReady(const std::vector<Process>& processes);
     void onFileLoaded(const std::vector<WatchedAddress>& watched, const QString& notes);
     void onError(const QString& message);
@@ -79,6 +85,7 @@ private:
     QStandardItemModel* storeModel_;
     
     ProcessDialog* processDialog_ = nullptr;
+    MemEditor* memEditor_ = nullptr;
     QString currentFilename_;
     
     std::vector<ScanResult> lastScanResults_;

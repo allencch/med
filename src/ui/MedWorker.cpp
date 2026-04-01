@@ -8,11 +8,16 @@
 
 MedWorker::MedWorker(QObject* parent) : QObject(parent) {
     refreshTimer_ = new QTimer(this);
-    connect(refreshTimer_, &QTimer::timeout, this, &MedWorker::refreshWatchedValues);
+    connect(refreshTimer_, &QTimer::timeout, this, &MedWorker::onTick);
     refreshTimer_->start(800);
 }
 
 MedWorker::~MedWorker() {}
+
+void MedWorker::onTick() {
+    emit refreshRequested();
+    refreshWatchedValues();
+}
 
 void MedWorker::setPid(pid_t pid) {
     pid_ = pid;
@@ -105,6 +110,17 @@ void MedWorker::refreshScanResults(const std::vector<ScanResult>& current) {
         } catch (...) {}
     }
     emit scanCompleted(updated);
+}
+
+void MedWorker::requestMemory(Address addr, size_t size) {
+    if (pid_ == 0) return;
+    try {
+        MemIO memio(pid_);
+        SizedBytes data = memio.read(addr, size);
+        emit memoryReady(addr, data);
+    } catch (const std::exception& e) {
+        emit errorOccurred(QString::fromStdString(e.what()));
+    }
 }
 
 void MedWorker::setProcessPaused(bool paused) {

@@ -31,11 +31,13 @@ set(ui_SRC
     src/ui/ProcessDialog.cpp
     src/ui/ComboBoxDelegate.cpp
     src/ui/CheckBoxDelegate.cpp
+    src/ui/MemEditor.cpp
     include/ui/MainWindow.hpp
     include/ui/MedWorker.hpp
     include/ui/ProcessDialog.hpp
     include/ui/ComboBoxDelegate.hpp
     include/ui/CheckBoxDelegate.hpp
+    include/ui/MemEditor.hpp
 )
 add_executable(med-ui ${ui_SRC})
 target_link_libraries(med-ui med_core Qt6::Widgets Qt6::UiTools Qt6::Gui Qt6::Core)

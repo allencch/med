@@ -1,5 +1,6 @@
 #include <QVBoxLayout>
 #include <QFile>
+#include <QKeyEvent>
 #include <QtUiTools/QUiLoader>
 #include "ui/ProcessDialog.hpp"
 
@@ -38,4 +39,15 @@ void ProcessDialog::onDoubleClicked(QTreeWidgetItem* item, int) {
     QString name = item->text(1);
     emit processSelected(pid, name);
     accept();
+}
+
+void ProcessDialog::keyPressEvent(QKeyEvent* event) {
+    if ((event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) && treeWidget_) {
+        QTreeWidgetItem* item = treeWidget_->currentItem();
+        if (item) {
+            onDoubleClicked(item, 0);
+            return;
+        }
+    }
+    QDialog::keyPressEvent(event);
 }
