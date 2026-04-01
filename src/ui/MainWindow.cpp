@@ -237,24 +237,38 @@ void MainWindow::onFilterClicked() {
 }
 
 void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
+    bool sizeChanged = (results.size() != lastScanResults_.size());
     lastScanResults_ = results;
-    scanModel_->removeRows(0, scanModel_->rowCount());
 
-    size_t count = std::min(results.size(), (size_t)800);
-    for (size_t i = 0; i < count; ++i) {
-        const auto& res = results[i];
-        QList<QStandardItem*> items;
-        items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(res.address)));
-        items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(res.type)));
-        QStandardItem* valItem = new QStandardItem(QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type)));
-        items << valItem;
+    if (sizeChanged) {
+        scanModel_->removeRows(0, scanModel_->rowCount());
+        size_t count = std::min(results.size(), (size_t)800);
+        for (size_t i = 0; i < count; ++i) {
+            const auto& res = results[i];
+            QList<QStandardItem*> items;
+            items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(res.address)));
+            items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(res.type)));
+            QStandardItem* valItem = new QStandardItem(QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type)));
+            items << valItem;
 
-        items[0]->setEditable(false);
-        items[1]->setEditable(false);
-        valItem->setEditable(true);
+            items[0]->setEditable(false);
+            items[1]->setEditable(false);
+            valItem->setEditable(true);
 
-        scanModel_->appendRow(items);
+            scanModel_->appendRow(items);
+        }
+    } else {
+        // Just update values
+        size_t count = std::min(results.size(), (size_t)800);
+        for (size_t i = 0; i < count; ++i) {
+            QString newVal = QString::fromStdString(MemOperator::toString(results[i].data.getBytes(), results[i].type));
+            auto index = scanModel_->index(i, 2);
+            if (scanModel_->data(index, Qt::EditRole).toString() != newVal) {
+                scanModel_->setData(index, newVal, Qt::DisplayRole);
+            }
+        }
     }
+
     if (foundLabel_) foundLabel_->setText(QString::number(results.size()));
     statusBar()->showMessage(QString("Found %1 addresses").arg(results.size()));
 }
