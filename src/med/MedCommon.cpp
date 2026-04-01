@@ -76,6 +76,10 @@ Address hexToInt(const std::string& str) {
     return ret;
 }
 
+Address addressRoundDown(Address addr) {
+    return addr - (addr % 16);
+}
+
 void stringToMemory(const std::string& str, ScanType type, Byte* buffer) {
     if (isHexString(str)) {
         return hexStringToMemory(str, type, buffer);

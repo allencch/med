@@ -12,6 +12,7 @@ namespace MedUtil {
 
     std::string intToHex(Address addr);
     Address hexToInt(const std::string& str);
+    Address addressRoundDown(Address addr);
 
     void stringToMemory(const std::string& str, ScanType type, Byte* buffer);
     void hexStringToMemory(const std::string& str, ScanType type, Byte* buffer);

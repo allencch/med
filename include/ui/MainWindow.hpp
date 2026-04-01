@@ -25,6 +25,7 @@ public:
     ~MainWindow();
 
     pid_t getPid() const { return currentPid_; }
+    MedWorker* getWorker() const { return worker_; }
 
 private slots:
     // UI actions

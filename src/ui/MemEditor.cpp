@@ -59,7 +59,7 @@ void MemEditor::setupUi() {
 }
 
 void MemEditor::setBaseAddress(Address addr) {
-    baseAddress_ = addr;
+    baseAddress_ = MedUtil::addressRoundDown(addr);
     if (currAddressEdit_) currAddressEdit_->setText(QString::fromStdString(MedUtil::intToHex(addr)));
     refresh();
 }
@@ -68,7 +68,7 @@ void MemEditor::refresh() {
     if (baseAddress_ == 0 || mainWindow_->getPid() == 0) return;
     
     // Request memory from worker via mainWindow
-    QMetaObject::invokeMethod(mainWindow_->findChild<MedWorker*>(), "requestMemory", Qt::QueuedConnection,
+    QMetaObject::invokeMethod(mainWindow_->getWorker(), "requestMemory", Qt::QueuedConnection,
                               Q_ARG(Address, baseAddress_),
                               Q_ARG(size_t, (size_t)MEMORY_SIZE));
 }
@@ -92,7 +92,7 @@ void MemEditor::onEnterClicked() {
     QString val = valueEdit_->text();
     ScanType type = MedUtil::stringToScanType(scanTypeCombo_->currentText().toStdString());
     
-    QMetaObject::invokeMethod(mainWindow_->findChild<MedWorker*>(), "writeMemory", Qt::QueuedConnection,
+    QMetaObject::invokeMethod(mainWindow_->getWorker(), "writeMemory", Qt::QueuedConnection,
                               Q_ARG(Address, addr),
                               Q_ARG(QString, val),
                               Q_ARG(ScanType, type));
