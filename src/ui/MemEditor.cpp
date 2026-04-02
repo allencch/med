@@ -111,6 +111,12 @@ bool MemEditor::eventFilter(QObject* obj, QEvent* event) {
                 }
                 cursor.setPosition(pos);
                 memArea_->setTextCursor(cursor);
+
+                if (textArea_) {
+                    textArea_->setPlainText(QString::fromStdString(memoryToString(rawMemory_.get(), rawMemorySize_)));
+                }
+                onMemAreaCursorPositionChanged();
+
                 return true;
             }
         } else if (key == Qt::Key_Right) {
@@ -166,13 +172,17 @@ void MemEditor::writeToProcessMemory(int position, char ch) {
     hexByte[position - startOfByteInHex] = ch;
 
     Address addr = baseAddress_ + byteOffset;
+    Byte byteVal = (Byte)MedUtil::hexToInt(hexByte);
 
     QMetaObject::invokeMethod(mainWindow_->getWorker(), "writeMemory", Qt::QueuedConnection,
                               Q_ARG(Address, addr),
-                              Q_ARG(QString, QString::fromStdString(std::to_string(MedUtil::hexToInt(hexByte)))),
+                              Q_ARG(QString, QString::number(byteVal)),
                               Q_ARG(ScanType, ScanType::Int8));
 
     memHex_[position] = ch;
+    if (rawMemory_ && (size_t)byteOffset < rawMemorySize_) {
+        rawMemory_[byteOffset] = byteVal;
+    }
 }
 
 void MemEditor::onCurrAddressEdited() {

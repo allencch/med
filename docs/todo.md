@@ -60,3 +60,13 @@ If the cursor navigates down to the last line, the memory should load the next l
 So that the cursor can always explore other memory addresses.
 
 
+# Task: Memory Editor - Value update
+
+Refer to MemoryEditor.cpp
+
+## Status
+Done
+
+## Goal
+
+After edit the value in the memArea, the `viewInt32_`, `viewFloat32_`, `viewFlaot64_`, and `valueEdit_` should have the value from the memory.
