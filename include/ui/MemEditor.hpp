@@ -56,6 +56,8 @@ private:
     std::string memHex_;
     BytePtr rawMemory_;
     size_t rawMemorySize_ = 0;
+    int lastCursorPos_ = -1;
+    bool isInsideCursorPositionChanged_ = false;
 
     static std::string memoryToHex(const Byte* memory, size_t size);
     static std::string memoryToString(const Byte* memory, size_t size);
