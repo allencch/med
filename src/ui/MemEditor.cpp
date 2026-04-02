@@ -134,7 +134,7 @@ bool MemEditor::eventFilter(QObject* obj, QEvent* event) {
                 return true;
             }
         } else if (key == Qt::Key_Up) {
-            if (cursor.blockNumber() == 0) {
+            if (cursor.blockNumber() <= 1) {
                 if (baseAddress_ >= 16) {
                     baseAddress_ -= 16;
                     lastCursorPos_ = pos;
@@ -143,7 +143,9 @@ bool MemEditor::eventFilter(QObject* obj, QEvent* event) {
                 }
             }
         } else if (key == Qt::Key_Down) {
-            if (cursor.blockNumber() == memArea_->document()->blockCount() - 1) {
+            int currentBlock = cursor.blockNumber();
+            int totalBlocks = memArea_->document()->blockCount();
+            if (cursor.blockNumber() >= totalBlocks - 3) { // second last line
                 baseAddress_ += 16;
                 lastCursorPos_ = pos;
                 refresh();
