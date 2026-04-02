@@ -70,3 +70,19 @@ Done
 ## Goal
 
 After edit the value in the memArea, the `viewInt32_`, `viewFloat32_`, `viewFlaot64_`, and `valueEdit_` should have the value from the memory.
+
+# Task: Scanner - Filter function
+
+Refer to MainWindow.cpp
+
+## Status
+Done
+
+## Goal
+
+The filter button should filter the list of the scan area.
+
+## Behaviour
+
+When filter, it just filter based on the addresses int the scan area.
+Meaning, if the filter change the type from int32 to float32, it should still work.

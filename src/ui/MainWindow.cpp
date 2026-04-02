@@ -241,11 +241,23 @@ void MainWindow::onFilterClicked() {
     ScanType type = MedUtil::stringToScanType(scanTypeCombo_->currentText().toStdString());
     ScanParser::OpType op = ScanParser::getOpType(val.toStdString());
 
+    std::vector<int> lastDigits;
+    if (lastDigitEdit_ && !lastDigitEdit_->text().isEmpty()) {
+        auto tokens = StringUtil::split(lastDigitEdit_->text().toStdString(), ',');
+        for (const auto& t : tokens) {
+            try {
+                lastDigits.push_back(std::stoi(t));
+            } catch (...) {}
+        }
+    }
+
     QMetaObject::invokeMethod(worker_, "startFilter", Qt::QueuedConnection,
                               Q_ARG(std::vector<ScanResult>, lastScanResults_),
                               Q_ARG(QString, val),
                               Q_ARG(ScanType, type),
-                              Q_ARG(ScanParser::OpType, op));
+                              Q_ARG(ScanParser::OpType, op),
+                              Q_ARG(bool, fastScan_),
+                              Q_ARG(std::vector<int>, lastDigits));
 
     statusBar()->showMessage("Filtering...");
 }
@@ -276,7 +288,22 @@ void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
         // Just update values
         size_t count = std::min(results.size(), (size_t)800);
         for (size_t i = 0; i < count; ++i) {
-            QString newVal = QString::fromStdString(MemOperator::toString(results[i].data.getBytes(), results[i].type));
+            const auto& res = results[i];
+
+            // Address
+            QString newAddr = QString::fromStdString(MedUtil::intToHex(res.address));
+            if (scanModel_->data(scanModel_->index(i, 0)).toString() != newAddr) {
+                scanModel_->setData(scanModel_->index(i, 0), newAddr, Qt::DisplayRole);
+            }
+
+            // Type
+            QString newType = QString::fromStdString(MedUtil::scanTypeToString(res.type));
+            if (scanModel_->data(scanModel_->index(i, 1)).toString() != newType) {
+                scanModel_->setData(scanModel_->index(i, 1), newType, Qt::DisplayRole);
+            }
+
+            // Value
+            QString newVal = QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type));
             auto index = scanModel_->index(i, 2);
             if (scanModel_->data(index, Qt::EditRole).toString() != newVal) {
                 scanModel_->setData(index, newVal, Qt::DisplayRole);

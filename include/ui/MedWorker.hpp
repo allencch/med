@@ -47,7 +47,7 @@ public:
 public slots:
     void setPid(pid_t pid);
     void startScan(const QString& value, ScanType type, ScanParser::OpType op, bool fastScan, const std::vector<int>& lastDigits);
-    void startFilter(const std::vector<ScanResult>& currentResults, const QString& value, ScanType type, ScanParser::OpType op);
+    void startFilter(const std::vector<ScanResult>& currentResults, const QString& value, ScanType type, ScanParser::OpType op, bool fastScan, const std::vector<int>& lastDigits);
     
     void updateWatchedAddresses(const std::vector<WatchedAddress>& watched);
     void writeMemory(Address addr, const QString& value, ScanType type);

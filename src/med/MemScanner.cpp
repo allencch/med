@@ -45,12 +45,29 @@ std::vector<ScanResult> MemScanner::filter(const std::vector<ScanResult>& list, 
         size_t end = std::min(i + CHUNK_SIZE, list.size());
         futures.emplace_back(threadPool_.enqueue([this, &list, i, end, &params, &newResults, &resultMutex] {
             for (size_t j = i; j < end; ++j) {
+                Address currentAddr = list[j].address;
+                size_t typeSize = MedUtil::scanTypeToSize(params.type);
+
+                // Fast scan check
+                if (params.fastScan && (currentAddr % typeSize != 0)) continue;
+
+                // Last digits check
+                if (!params.lastDigits.empty()) {
+                    bool match = false;
+                    for (int digit : params.lastDigits) {
+                        if (currentAddr % 16 == (Address)digit) {
+                            match = true;
+                            break;
+                        }
+                    }
+                    if (!match) continue;
+                }
+
                 try {
-                    size_t size = MedUtil::scanTypeToSize(params.type);
-                    SizedBytes data = memio_.read(list[j].address, size);
+                    SizedBytes data = memio_.read(currentAddr, typeSize);
                     if (MemOperator::compare(data.getBytes(), params.type, params.operands, params.op)) {
                         std::lock_guard<std::mutex> lock(resultMutex);
-                        newResults.push_back({list[j].address, params.type, data});
+                        newResults.push_back({currentAddr, params.type, data});
                     }
                 } catch (...) {}
             }

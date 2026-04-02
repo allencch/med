@@ -52,13 +52,15 @@ void MedWorker::startScan(const QString& value, ScanType type, ScanParser::OpTyp
     }
 }
 
-void MedWorker::startFilter(const std::vector<ScanResult>& currentResults, const QString& value, ScanType type, ScanParser::OpType op) {
+void MedWorker::startFilter(const std::vector<ScanResult>& currentResults, const QString& value, ScanType type, ScanParser::OpType op, bool fastScan, const std::vector<int>& lastDigits) {
     if (!scanner_) return;
 
     try {
         ScanParams params;
         params.type = type;
         params.op = op;
+        params.fastScan = fastScan;
+        params.lastDigits = lastDigits;
         params.operands = ScanParser::valueToOperands(value.toStdString(), type, op);
 
         auto results = scanner_->filter(currentResults, params);
