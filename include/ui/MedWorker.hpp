@@ -60,6 +60,7 @@ public slots:
     void setCanResume(bool canResume);
     void setScopeStart(Address start);
     void setScopeEnd(Address end);
+    void setEncoding(EncodingType encoding);
 
 private slots:
     void onTick();
@@ -73,6 +74,7 @@ private:
     bool canResume_ = true;
     Address scopeStart_ = 0;
     Address scopeEnd_ = 0;
+    EncodingType encoding_ = EncodingType::Default;
     
     void performLocks();
 };

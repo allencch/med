@@ -40,6 +40,10 @@ The current codebase suffers from a difficult-to-reproduce deadlock. The decisio
 - QTimer inside worker thread
 - No separate refresh thread
 
+## Compilation
+- Use `clang`, as `CC=/usr/bin/clang CXX=/usr/bin/clang++` to run `cmake`
+
+
 # Architecture
 
 

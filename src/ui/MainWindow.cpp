@@ -8,6 +8,7 @@
 #include <QAction>
 #include <QCheckBox>
 #include <QFileDialog>
+#include <QActionGroup>
 
 #include "ui/MainWindow.hpp"
 #include "ui/ComboBoxDelegate.hpp"
@@ -158,6 +159,8 @@ void MainWindow::setupUi() {
     QAction* actionCanResume = findChild<QAction*>("actionResumeProcess");
     QAction* actionQuit = findChild<QAction*>("actionQuit");
     QAction* actionRefresh = findChild<QAction*>("actionRefresh");
+    QAction* actionDefaultEncoding = findChild<QAction*>("actionDefaultEncoding");
+    QAction* actionBig5Encoding = findChild<QAction*>("actionBig5Encoding");
 
     if (actionOpen) connect(actionOpen, &QAction::triggered, this, &MainWindow::onOpenTriggered);
     if (actionSave) connect(actionSave, &QAction::triggered, this, &MainWindow::onSaveTriggered);
@@ -172,6 +175,17 @@ void MainWindow::setupUi() {
     if (actionShowNotes) connect(actionShowNotes, &QAction::triggered, this, &MainWindow::onShowNotesTriggered);
     if (actionFastScan) connect(actionFastScan, &QAction::triggered, this, &MainWindow::onFastScanTriggered);
     if (actionCanResume) connect(actionCanResume, &QAction::triggered, this, &MainWindow::onCanResumeTriggered);
+    if (actionDefaultEncoding) connect(actionDefaultEncoding, &QAction::triggered, this, &MainWindow::onDefaultEncodingTriggered);
+    if (actionBig5Encoding) connect(actionBig5Encoding, &QAction::triggered, this, &MainWindow::onBig5EncodingTriggered);
+
+    // Grouping the actions to ensure toggle behavior
+    if (actionDefaultEncoding && actionBig5Encoding) {
+        QActionGroup* encodingGroup = new QActionGroup(this);
+        encodingGroup->addAction(actionDefaultEncoding);
+        encodingGroup->addAction(actionBig5Encoding);
+        encodingGroup->setExclusive(true);
+        actionDefaultEncoding->setChecked(true);
+    }
 
     memEditor_ = new MemEditor(this);
 
@@ -274,7 +288,7 @@ void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
             QList<QStandardItem*> items;
             items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(res.address)));
             items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(res.type)));
-            QStandardItem* valItem = new QStandardItem(QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type)));
+            QStandardItem* valItem = new QStandardItem(QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type, encoding_)));
             items << valItem;
 
             items[0]->setEditable(true);
@@ -303,7 +317,7 @@ void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
             }
 
             // Value
-            QString newVal = QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type));
+            QString newVal = QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type, encoding_));
             auto index = scanModel_->index(i, 2);
             if (scanModel_->data(index, Qt::EditRole).toString() != newVal) {
                 scanModel_->setData(index, newVal, Qt::DisplayRole);
@@ -367,7 +381,7 @@ void MainWindow::onAddToStoreClicked() {
         wa.description = "New Address";
         wa.address = res.address;
         wa.type = res.type;
-        wa.value = MemOperator::toString(res.data.getBytes(), res.type);
+        wa.value = MemOperator::toString(res.data.getBytes(), res.type, encoding_);
         wa.locked = false;
         wa.lockValue = wa.value;
 
@@ -396,7 +410,7 @@ void MainWindow::onAddAllToStoreClicked() {
         wa.description = "New Address";
         wa.address = res.address;
         wa.type = res.type;
-        wa.value = MemOperator::toString(res.data.getBytes(), res.type);
+        wa.value = MemOperator::toString(res.data.getBytes(), res.type, encoding_);
         wa.locked = false;
         wa.lockValue = wa.value;
         watchedAddresses_.push_back(wa);
@@ -599,6 +613,22 @@ void MainWindow::onNextAddressClicked() {
     storeModel_->setData(storeModel_->index(row, 1), QString::fromStdString(MedUtil::intToHex(wa.address)));
     QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
                               Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+}
+
+void MainWindow::onDefaultEncodingTriggered(bool checked) {
+    if (checked) {
+        encoding_ = EncodingType::Default;
+        QMetaObject::invokeMethod(worker_, "setEncoding", Qt::QueuedConnection, Q_ARG(EncodingType, encoding_));
+        onRefreshRequested();
+    }
+}
+
+void MainWindow::onBig5EncodingTriggered(bool checked) {
+    if (checked) {
+        encoding_ = EncodingType::Big5;
+        QMetaObject::invokeMethod(worker_, "setEncoding", Qt::QueuedConnection, Q_ARG(EncodingType, encoding_));
+        onRefreshRequested();
+    }
 }
 
 void MainWindow::onFileLoaded(const std::vector<WatchedAddress>& watched, const QString& notes) {

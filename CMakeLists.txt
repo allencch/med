@@ -15,13 +15,14 @@ include_directories(include)
 find_package(PkgConfig REQUIRED)
 find_package(Qt6 COMPONENTS Core Widgets Gui UiTools REQUIRED)
 pkg_search_module(JSONCPP REQUIRED jsoncpp)
+pkg_search_module(ICU REQUIRED icu-uc icu-i18n)
 
-include_directories(include ${JSONCPP_INCLUDE_DIRS})
+include_directories(include ${JSONCPP_INCLUDE_DIRS} ${ICU_INCLUDE_DIRS})
 
 # Core Library
 file(GLOB med_SRC "src/med/*.cpp")
 add_library(med_core SHARED ${med_SRC})
-target_link_libraries(med_core pthread ${JSONCPP_LIBRARIES})
+target_link_libraries(med_core pthread ${JSONCPP_LIBRARIES} ${ICU_LIBRARIES})
 
 # UI
 set(ui_SRC

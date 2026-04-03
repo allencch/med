@@ -86,3 +86,15 @@ The filter button should filter the list of the scan area.
 
 When filter, it just filter based on the addresses int the scan area.
 Meaning, if the filter change the type from int32 to float32, it should still work.
+
+
+# Task: Encoding - Change encoding to Big5
+
+Refer to old EncodingManager.cpp
+
+## Status
+In progress
+
+## Goal
+Allows to change encoding to Big5 (as toggle)
+

@@ -39,7 +39,7 @@ void MedWorker::startScan(const QString& value, ScanType type, ScanParser::OpTyp
         params.op = op;
         params.fastScan = fastScan;
         params.lastDigits = lastDigits;
-        params.operands = ScanParser::valueToOperands(value.toStdString(), type, op);
+        params.operands = ScanParser::valueToOperands(value.toStdString(), type, op, encoding_);
 
         auto results = scanner_->scan(params);
         emit scanCompleted(results);
@@ -61,7 +61,7 @@ void MedWorker::startFilter(const std::vector<ScanResult>& currentResults, const
         params.op = op;
         params.fastScan = fastScan;
         params.lastDigits = lastDigits;
-        params.operands = ScanParser::valueToOperands(value.toStdString(), type, op);
+        params.operands = ScanParser::valueToOperands(value.toStdString(), type, op, encoding_);
 
         auto results = scanner_->filter(currentResults, params);
         emit filterCompleted(results);
@@ -84,7 +84,7 @@ void MedWorker::writeMemory(Address addr, const QString& value, ScanType type) {
         MemIO memio(pid_);
         size_t size = MedUtil::scanTypeToSize(type);
         SizedBytes sb = SizedBytes::create(size);
-        MedUtil::stringToMemory(value.toStdString(), type, sb.getBytes());
+        MedUtil::stringToMemory(value.toStdString(), type, sb.getBytes(), encoding_);
         memio.write(addr, sb);
     } catch (const std::exception& e) {
         emit errorOccurred(QString::fromStdString(e.what()));
@@ -111,6 +111,8 @@ void MedWorker::refreshScanResults(const std::vector<ScanResult>& current) {
             res.data = memio.read(res.address, size);
         } catch (...) {}
     }
+    // We don't need to do anything with encoding here, as ScanResult stores raw bytes.
+    // The conversion to string happens in MainWindow::onScanCompleted using MemOperator::toString.
     emit scanCompleted(updated);
 }
 
@@ -147,6 +149,10 @@ void MedWorker::setScopeStart(Address start) {
 void MedWorker::setScopeEnd(Address end) {
     scopeEnd_ = end;
     if (scanner_) scanner_->setScope(scopeStart_, scopeEnd_);
+}
+
+void MedWorker::setEncoding(EncodingType encoding) {
+    encoding_ = encoding;
 }
 
 void MedWorker::saveFile(const QString& filename, const QString& notes) {
@@ -213,7 +219,7 @@ void MedWorker::refreshWatchedValues() {
             size_t size = MedUtil::scanTypeToSize(w.type);
             try {
                 SizedBytes data = memio.read(w.address, size);
-                w.value = MemOperator::toString(data.getBytes(), w.type);
+                w.value = MemOperator::toString(data.getBytes(), w.type, encoding_);
             } catch (...) {
                 w.value = "??";
             }
@@ -230,7 +236,7 @@ void MedWorker::performLocks() {
             try {
                 size_t size = MedUtil::scanTypeToSize(w.type);
                 SizedBytes sb = SizedBytes::create(size);
-                MedUtil::stringToMemory(w.lockValue, w.type, sb.getBytes());
+                MedUtil::stringToMemory(w.lockValue, w.type, sb.getBytes(), encoding_);
                 memio.write(w.address, sb);
             } catch (...) {}
         }

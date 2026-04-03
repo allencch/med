@@ -6,9 +6,36 @@
 #include "med/MemScanner.hpp"
 #include "med/ScanParser.hpp"
 #include "med/MemOperator.hpp"
+#include "med/MedCommon.hpp"
+#include "med/Coder.hpp"
 
 class TestPhase2 : public CxxTest::TestSuite {
 public:
+    void testBig5Encoding() {
+        std::string taiwan = "臺灣";
+        std::string encoded = convertFromUtf8(taiwan, "big5");
+        
+        // TS_ASSERT_EQUALS(encoded.size(), 4);
+        
+        // Test round-trip
+        std::string decoded = convertToUtf8(encoded, "big5");
+        TS_ASSERT_EQUALS(decoded, taiwan);
+
+        // Test ScanParser with Big5
+        Operands ops = ScanParser::valueToOperands(taiwan, ScanType::String, ScanParser::OpType::Eq, EncodingType::Big5);
+        TS_ASSERT_EQUALS(ops.getFirstOperand().getSize(), encoded.size() + 1); // + null terminator
+        TS_ASSERT_SAME_DATA(ops.getFirstOperand().getBytes(), encoded.c_str(), encoded.size());
+
+        // Test MemOperator::toString with Big5
+        std::string res = MemOperator::toString((const Byte*)encoded.c_str(), ScanType::String, EncodingType::Big5);
+        TS_ASSERT_EQUALS(res, taiwan);
+
+        // Test MedUtil::stringToMemory with Big5
+        std::vector<Byte> buffer(encoded.size() + 1);
+        MedUtil::stringToMemory(taiwan, ScanType::String, buffer.data(), EncodingType::Big5);
+        TS_ASSERT_SAME_DATA(buffer.data(), encoded.c_str(), encoded.size());
+    }
+
     void testScanParser() {
         std::string input = ">= 1234";
         TS_ASSERT_EQUALS(ScanParser::getOpType(input), ScanParser::OpType::Ge);

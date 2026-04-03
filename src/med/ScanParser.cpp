@@ -5,6 +5,7 @@
 #include "med/ScanParser.hpp"
 #include "med/MedCommon.hpp"
 #include "med/MedException.hpp"
+#include "med/Coder.hpp"
 
 namespace StringUtil {
     std::string trim(const std::string& s) {
@@ -62,7 +63,7 @@ std::vector<std::string> getValues(const std::string& v, char delimiter) {
     return StringUtil::split(getValue(v), delimiter);
 }
 
-Operands valueToOperands(const std::string& v, ScanType type, OpType op) {
+Operands valueToOperands(const std::string& v, ScanType type, OpType op, EncodingType encoding) {
     std::vector<std::string> strValues;
     std::string valuePart = getValue(v);
     
@@ -86,8 +87,12 @@ Operands valueToOperands(const std::string& v, ScanType type, OpType op) {
     size_t elementSize = MedUtil::scanTypeToSize(type);
     
     if (type == ScanType::String) {
-        SizedBytes sb = SizedBytes::create(valuePart.size() + 1);
-        std::memcpy(sb.getBytes(), valuePart.c_str(), valuePart.size() + 1);
+        std::string encodedValue = valuePart;
+        if (encoding == EncodingType::Big5) {
+            encodedValue = convertFromUtf8(valuePart, "big5");
+        }
+        SizedBytes sb = SizedBytes::create(encodedValue.size() + 1);
+        std::memcpy(sb.getBytes(), encodedValue.c_str(), encodedValue.size() + 1);
         data.push_back(sb);
     } else {
         for (const auto& s : strValues) {

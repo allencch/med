@@ -7,6 +7,7 @@
 
 #include "med/MedCommon.hpp"
 #include "med/MedException.hpp"
+#include "med/Coder.hpp"
 
 namespace MedUtil {
 
@@ -80,9 +81,18 @@ Address addressRoundDown(Address addr) {
     return addr - (addr % 16);
 }
 
-void stringToMemory(const std::string& str, ScanType type, Byte* buffer) {
+void stringToMemory(const std::string& str, ScanType type, Byte* buffer, EncodingType encoding) {
     if (isHexString(str)) {
         return hexStringToMemory(str, type, buffer);
+    }
+
+    if (type == ScanType::String) {
+        std::string encodedValue = str;
+        if (encoding == EncodingType::Big5) {
+            encodedValue = convertFromUtf8(str, "big5");
+        }
+        std::memcpy(buffer, encodedValue.c_str(), std::min(encodedValue.size() + 1, (size_t)MAX_STRING_SIZE));
+        return;
     }
 
     std::stringstream ss(str);

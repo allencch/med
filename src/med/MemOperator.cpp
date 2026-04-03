@@ -3,6 +3,7 @@
 #include <cinttypes>
 #include "med/MemOperator.hpp"
 #include "med/MedException.hpp"
+#include "med/Coder.hpp"
 
 namespace MemOperator {
 
@@ -48,7 +49,7 @@ bool compare(const void* ptr, ScanType type, const Operands& operands, ScanParse
     }
 }
 
-std::string toString(const Byte* memory, ScanType type) {
+std::string toString(const Byte* memory, ScanType type, EncodingType encoding) {
     char str[MAX_STRING_SIZE];
     switch (type) {
         case ScanType::Int8: sprintf(str, "%" PRId8, *(const int8_t*)memory); break;
@@ -59,7 +60,13 @@ std::string toString(const Byte* memory, ScanType type) {
         case ScanType::Ptr64: sprintf(str, "0x%" PRIx64, *(const uint64_t*)memory); break;
         case ScanType::Float32: sprintf(str, "%f", *(const float*)memory); break;
         case ScanType::Float64: sprintf(str, "%lf", *(const double*)memory); break;
-        case ScanType::String: return std::string((const char*)memory);
+        case ScanType::String: {
+            std::string text = std::string((const char*)memory);
+            if (encoding == EncodingType::Big5) {
+                return convertBig5ToUtf8(text);
+            }
+            return text;
+        }
         default: return "Unknown";
     }
     return std::string(str);

@@ -12,7 +12,7 @@ namespace ScanParser {
     std::string getValue(const std::string& v);
     std::vector<std::string> getValues(const std::string& v, char delimiter = ',');
     
-    Operands valueToOperands(const std::string& v, ScanType type, OpType op);
+    Operands valueToOperands(const std::string& v, ScanType type, ScanParser::OpType op, EncodingType encoding = EncodingType::Default);
 }
 
 namespace StringUtil {

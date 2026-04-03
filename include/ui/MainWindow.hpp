@@ -26,6 +26,7 @@ public:
 
     pid_t getPid() const { return currentPid_; }
     MedWorker* getWorker() const { return worker_; }
+    EncodingType getEncoding() const { return encoding_; }
 
 private slots:
     // UI actions
@@ -59,6 +60,8 @@ private slots:
     
     void onPrevAddressClicked();
     void onNextAddressClicked();
+    void onDefaultEncodingTriggered(bool checked);
+    void onBig5EncodingTriggered(bool checked);
     
     // Worker responses
     void onScanCompleted(const std::vector<ScanResult>& results);
@@ -100,6 +103,7 @@ private:
     pid_t currentPid_ = 0;
     bool fastScan_ = true;
     bool autoRefresh_ = true;
+    EncodingType encoding_ = EncodingType::Default;
 };
 
 #endif

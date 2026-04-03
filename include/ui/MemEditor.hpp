@@ -60,7 +60,7 @@ private:
     bool isInsideCursorPositionChanged_ = false;
 
     static std::string memoryToHex(const Byte* memory, size_t size);
-    static std::string memoryToString(const Byte* memory, size_t size);
+    static std::string memoryToString(const Byte* memory, size_t size, EncodingType encoding = EncodingType::Default);
 };
 
 #endif

@@ -12,6 +12,7 @@
 #include "ui/MainWindow.hpp"
 #include "med/MedCommon.hpp"
 #include "med/MemOperator.hpp"
+#include "med/Coder.hpp"
 
 const int MEMORY_SIZE = 384;
 
@@ -113,7 +114,7 @@ bool MemEditor::eventFilter(QObject* obj, QEvent* event) {
                 memArea_->setTextCursor(cursor);
 
                 if (textArea_) {
-                    textArea_->setPlainText(QString::fromStdString(memoryToString(rawMemory_.get(), rawMemorySize_)));
+                    textArea_->setPlainText(QString::fromStdString(memoryToString(rawMemory_.get(), rawMemorySize_, mainWindow_->getEncoding())));
                 }
                 onMemAreaCursorPositionChanged();
 
@@ -225,7 +226,7 @@ void MemEditor::onMemoryReady(Address addr, const SizedBytes& data) {
             lastCursorPos_ = -1;
         }
     }
-    if (textArea_) textArea_->setPlainText(QString::fromStdString(memoryToString(data.getBytes(), data.getSize())));
+    if (textArea_) textArea_->setPlainText(QString::fromStdString(memoryToString(data.getBytes(), data.getSize(), mainWindow_->getEncoding())));
 
     loadAddresses(addr);
     onMemAreaCursorPositionChanged();
@@ -272,22 +273,22 @@ void MemEditor::onMemAreaCursorPositionChanged() {
         if (valueEdit_) {
             ScanType type = MedUtil::stringToScanType(scanTypeCombo_->currentText().toStdString());
             if (remaining >= MedUtil::scanTypeToSize(type)) {
-                valueEdit_->setText(QString::fromStdString(MemOperator::toString(ptr, type)));
+                valueEdit_->setText(QString::fromStdString(MemOperator::toString(ptr, type, mainWindow_->getEncoding())));
             } else {
                 valueEdit_->setText("??");
             }
         }
 
         if (viewInt32_) {
-            if (remaining >= 4) viewInt32_->setText(QString::fromStdString(MemOperator::toString(ptr, ScanType::Int32)));
+            if (remaining >= 4) viewInt32_->setText(QString::fromStdString(MemOperator::toString(ptr, ScanType::Int32, mainWindow_->getEncoding())));
             else viewInt32_->setText("??");
         }
         if (viewFloat32_) {
-            if (remaining >= 4) viewFloat32_->setText(QString::fromStdString(MemOperator::toString(ptr, ScanType::Float32)));
+            if (remaining >= 4) viewFloat32_->setText(QString::fromStdString(MemOperator::toString(ptr, ScanType::Float32, mainWindow_->getEncoding())));
             else viewFloat32_->setText("??");
         }
         if (viewFloat64_) {
-            if (remaining >= 8) viewFloat64_->setText(QString::fromStdString(MemOperator::toString(ptr, ScanType::Float64)));
+            if (remaining >= 8) viewFloat64_->setText(QString::fromStdString(MemOperator::toString(ptr, ScanType::Float64, mainWindow_->getEncoding())));
             else viewFloat64_->setText("??");
         }
     }
@@ -338,12 +339,15 @@ std::string MemEditor::memoryToHex(const Byte* memory, size_t size) {
     return res;
 }
 
-std::string MemEditor::memoryToString(const Byte* memory, size_t size) {
+std::string MemEditor::memoryToString(const Byte* memory, size_t size, EncodingType encoding) {
     std::string res;
     for (size_t i = 0; i < size; ++i) {
-        if (std::isprint(memory[i])) res += (char)memory[i];
-        else res += ".";
+        if (std::iscntrl(memory[i])) res += ".";
+        else res += (char)memory[i];
         if ((i + 1) % 16 == 0) res += "\n";
+    }
+    if (encoding == EncodingType::Big5) {
+        return convertBig5ToUtf8(res);
     }
     return res;
 }

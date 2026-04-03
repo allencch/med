@@ -32,7 +32,7 @@ namespace MemOperator {
         return val >= low && val <= high;
     }
 
-    std::string toString(const Byte* memory, ScanType type);
+    std::string toString(const Byte* memory, ScanType type, EncodingType encoding = EncodingType::Default);
 }
 
 #endif
