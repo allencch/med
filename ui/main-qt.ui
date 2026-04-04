@@ -103,17 +103,7 @@
           </item>
           <item>
            <property name="text">
-            <string>uint8</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>int16</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>uint16</string>
            </property>
           </item>
           <item>
@@ -123,17 +113,7 @@
           </item>
           <item>
            <property name="text">
-            <string>uint32</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>int64</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>uint64</string>
            </property>
           </item>
           <item>

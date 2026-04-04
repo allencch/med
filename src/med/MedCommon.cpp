@@ -12,10 +12,10 @@
 namespace MedUtil {
 
 ScanType stringToScanType(const std::string& scanType) {
-    if (scanType == ScanTypeString::Int8) return ScanType::Int8;
-    if (scanType == ScanTypeString::Int16) return ScanType::Int16;
-    if (scanType == ScanTypeString::Int32) return ScanType::Int32;
-    if (scanType == ScanTypeString::Int64) return ScanType::Int64;
+    if (scanType == ScanTypeString::Int8) return ScanType::UInt8;
+    if (scanType == ScanTypeString::Int16) return ScanType::UInt16;
+    if (scanType == ScanTypeString::Int32) return ScanType::UInt32;
+    if (scanType == ScanTypeString::Int64) return ScanType::UInt64;
     if (scanType == ScanTypeString::UInt8) return ScanType::UInt8;
     if (scanType == ScanTypeString::UInt16) return ScanType::UInt16;
     if (scanType == ScanTypeString::UInt32) return ScanType::UInt32;
@@ -35,10 +35,10 @@ std::string scanTypeToString(const ScanType& scanType) {
         case ScanType::Int16: return ScanTypeString::Int16;
         case ScanType::Int32: return ScanTypeString::Int32;
         case ScanType::Int64: return ScanTypeString::Int64;
-        case ScanType::UInt8: return ScanTypeString::UInt8;
-        case ScanType::UInt16: return ScanTypeString::UInt16;
-        case ScanType::UInt32: return ScanTypeString::UInt32;
-        case ScanType::UInt64: return ScanTypeString::UInt64;
+        case ScanType::UInt8: return ScanTypeString::Int8;
+        case ScanType::UInt16: return ScanTypeString::Int16;
+        case ScanType::UInt32: return ScanTypeString::Int32;
+        case ScanType::UInt64: return ScanTypeString::Int64;
         case ScanType::Float32: return ScanTypeString::Float32;
         case ScanType::Float64: return ScanTypeString::Float64;
         case ScanType::String: return ScanTypeString::String;

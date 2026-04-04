@@ -6,13 +6,9 @@ ComboBoxDelegate::ComboBoxDelegate(QObject* parent) : QStyledItemDelegate(parent
 QWidget* ComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const {
     QComboBox* editor = new QComboBox(parent);
     editor->addItem(QString::fromStdString(ScanTypeString::Int8));
-    editor->addItem(QString::fromStdString(ScanTypeString::UInt8));
     editor->addItem(QString::fromStdString(ScanTypeString::Int16));
-    editor->addItem(QString::fromStdString(ScanTypeString::UInt16));
     editor->addItem(QString::fromStdString(ScanTypeString::Int32));
-    editor->addItem(QString::fromStdString(ScanTypeString::UInt32));
     editor->addItem(QString::fromStdString(ScanTypeString::Int64));
-    editor->addItem(QString::fromStdString(ScanTypeString::UInt64));
     editor->addItem(QString::fromStdString(ScanTypeString::Float32));
     editor->addItem(QString::fromStdString(ScanTypeString::Float64));
     editor->addItem(QString::fromStdString(ScanTypeString::Ptr32));

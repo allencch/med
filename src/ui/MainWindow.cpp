@@ -205,8 +205,8 @@ void MainWindow::setupUi() {
 
     // Initial State
     if (notesEdit_) notesEdit_->hide();
-    if (scanTypeCombo_) scanTypeCombo_->setCurrentText("uint32");
-}
+    if (scanTypeCombo_) scanTypeCombo_->setCurrentText("int32");
+    }
 
 void MainWindow::connectSignals() {
     connect(worker_, &MedWorker::scanCompleted, this, &MainWindow::onScanCompleted);
