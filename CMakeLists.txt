@@ -65,4 +65,8 @@ if(CXXTEST_FOUND)
     CXXTEST_ADD_TEST(TestNamedScans TestNamedScans.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestNamedScans.hpp)
     target_link_libraries(TestNamedScans med_core)
+
+    CXXTEST_ADD_TEST(TestArrayScan TestArrayScan.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestArrayScan.hpp)
+    target_link_libraries(TestArrayScan med_core)
 endif()
