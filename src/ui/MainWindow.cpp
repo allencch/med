@@ -187,6 +187,20 @@ void MainWindow::setupUi() {
         actionDefaultEncoding->setChecked(true);
     }
 
+    // Named Scans
+    namedScanCombo_ = findChild<QComboBox*>("namedScans");
+    namedScanNameEdit_ = findChild<QLineEdit*>("namedScan_name");
+    namedScanAddBtn_ = findChild<QPushButton*>("namedScan_add");
+    namedScanDeleteBtn_ = findChild<QPushButton*>("namedScan_delete");
+    
+    if (namedScanAddBtn_) connect(namedScanAddBtn_, &QPushButton::clicked, this, &MainWindow::onNamedScanAddClicked);
+    if (namedScanDeleteBtn_) connect(namedScanDeleteBtn_, &QPushButton::clicked, this, &MainWindow::onNamedScanDeleteClicked);
+    if (namedScanCombo_) {
+        connect(namedScanCombo_, &QComboBox::currentIndexChanged, this, &MainWindow::onNamedScanComboBoxChanged);
+        namedScanCombo_->clear();
+        namedScanCombo_->addItem(med::NamedScans::DEFAULT_NAME);
+    }
+
     memEditor_ = new MemEditor(this);
 
     // Initial State
@@ -238,6 +252,8 @@ void MainWindow::onScanClicked() {
         }
     }
 
+    namedScans_.setActiveType(type);
+
     QMetaObject::invokeMethod(worker_, "startScan", Qt::QueuedConnection,
                               Q_ARG(QString, val),
                               Q_ARG(ScanType, type),
@@ -265,8 +281,10 @@ void MainWindow::onFilterClicked() {
         }
     }
 
+    namedScans_.setActiveType(type);
+
     QMetaObject::invokeMethod(worker_, "startFilter", Qt::QueuedConnection,
-                              Q_ARG(std::vector<ScanResult>, lastScanResults_),
+                              Q_ARG(std::vector<ScanResult>, namedScans_.getActiveResults()),
                               Q_ARG(QString, val),
                               Q_ARG(ScanType, type),
                               Q_ARG(ScanParser::OpType, op),
@@ -277,27 +295,11 @@ void MainWindow::onFilterClicked() {
 }
 
 void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
-    bool sizeChanged = (results.size() != lastScanResults_.size());
-    lastScanResults_ = results;
+    bool sizeChanged = (results.size() != namedScans_.getActiveResults().size());
+    namedScans_.setActiveResults(results);
 
     if (sizeChanged) {
-        scanModel_->removeRows(0, scanModel_->rowCount());
-        size_t count = std::min(results.size(), (size_t)800);
-        for (size_t i = 0; i < count; ++i) {
-            const auto& res = results[i];
-            QList<QStandardItem*> items;
-            items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(res.address)));
-            items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(res.type)));
-            QStandardItem* valItem = new QStandardItem(QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type, encoding_)));
-            items << valItem;
-
-            items[0]->setEditable(true);
-            items[1]->setEditable(true);
-            valItem->setEditable(true);
-
-            scanModel_->appendRow(items);
-        }
-
+        updateScanModel(results);
     } else {
         // Just update values
         size_t count = std::min(results.size(), (size_t)800);
@@ -344,9 +346,9 @@ void MainWindow::onWatchedValuesRefreshed(const std::vector<WatchedAddress>& wat
 }
 
 void MainWindow::onRefreshRequested() {
-    if (autoRefresh_ && !lastScanResults_.empty() && lastScanResults_.size() <= 800) {
+    if (autoRefresh_ && !namedScans_.getActiveResults().empty() && namedScans_.getActiveResults().size() <= 800) {
         QMetaObject::invokeMethod(worker_, "refreshScanResults", Qt::QueuedConnection,
-                                  Q_ARG(std::vector<ScanResult>, lastScanResults_));
+                                  Q_ARG(std::vector<ScanResult>, namedScans_.getActiveResults()));
     }
 }
 
@@ -356,7 +358,7 @@ void MainWindow::onProcessListReady(const std::vector<Process>& processes) {
 }
 
 void MainWindow::onScanClearClicked() {
-    lastScanResults_.clear();
+    namedScans_.getActiveResults().clear();
     scanModel_->clear();
     scanModel_->setHorizontalHeaderLabels({"Address", "Type", "Value"});
     if (foundLabel_) foundLabel_->setText("0");
@@ -373,9 +375,9 @@ void MainWindow::onAddToStoreClicked() {
     std::sort(rows.begin(), rows.end());
 
     for (int row : rows) {
-        if (row >= (int)lastScanResults_.size()) continue;
+        if (row >= (int)namedScans_.getActiveResults().size()) continue;
 
-        const auto& res = lastScanResults_[row];
+        const auto& res = namedScans_.getActiveResults()[row];
 
         WatchedAddress wa;
         wa.description = "New Address";
@@ -384,7 +386,6 @@ void MainWindow::onAddToStoreClicked() {
         wa.value = MemOperator::toString(res.data.getBytes(), res.type, encoding_);
         wa.locked = false;
         wa.lockValue = wa.value;
-
         watchedAddresses_.push_back(wa);
 
         QList<QStandardItem*> items;
@@ -392,11 +393,9 @@ void MainWindow::onAddToStoreClicked() {
         items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(wa.address)));
         items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(wa.type)));
         items << new QStandardItem(QString::fromStdString(wa.value));
-
         QStandardItem* lockItem = new QStandardItem();
         lockItem->setData(false, Qt::EditRole);
         items << lockItem;
-
         storeModel_->appendRow(items);
     }
 
@@ -405,7 +404,7 @@ void MainWindow::onAddToStoreClicked() {
 }
 
 void MainWindow::onAddAllToStoreClicked() {
-    for (const auto& res : lastScanResults_) {
+    for (const auto& res : namedScans_.getActiveResults()) {
         WatchedAddress wa;
         wa.description = "New Address";
         wa.address = res.address;
@@ -425,18 +424,20 @@ void MainWindow::onAddAllToStoreClicked() {
         items << lockItem;
         storeModel_->appendRow(items);
     }
+
     QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
                               Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
 }
+
 
 void MainWindow::onScanTreeViewDoubleClicked(const QModelIndex& index) {
 }
 
 void MainWindow::onScanDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) {
     for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
-        if (row >= (int)lastScanResults_.size()) continue;
+        if (row >= (int)namedScans_.getActiveResults().size()) continue;
 
-        auto& res = lastScanResults_[row];
+        auto& res = namedScans_.getActiveResults()[row];
 
         if (topLeft.column() == 0) { // Address changed
             try {
@@ -629,6 +630,68 @@ void MainWindow::onBig5EncodingTriggered(bool checked) {
         QMetaObject::invokeMethod(worker_, "setEncoding", Qt::QueuedConnection, Q_ARG(EncodingType, encoding_));
         onRefreshRequested();
     }
+}
+
+void MainWindow::updateScanModel(const std::vector<ScanResult>& results) {
+    scanModel_->removeRows(0, scanModel_->rowCount());
+    size_t count = std::min(results.size(), (size_t)800);
+    for (size_t i = 0; i < count; ++i) {
+        const auto& res = results[i];
+        QList<QStandardItem*> items;
+        items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(res.address)));
+        items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(res.type)));
+        QStandardItem* valItem = new QStandardItem(QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type, encoding_)));
+        items << valItem;
+
+        items[0]->setEditable(true);
+        items[1]->setEditable(true);
+        valItem->setEditable(true);
+
+        scanModel_->appendRow(items);
+    }
+    if (foundLabel_) foundLabel_->setText(QString::number(results.size()));
+}
+
+void MainWindow::onNamedScanAddClicked() {
+    if (!namedScanNameEdit_) return;
+    QString name = namedScanNameEdit_->text().trimmed();
+    if (name.isEmpty()) return;
+    
+    std::string sName = name.toStdString();
+    namedScans_.addNewScan(sName, MedUtil::stringToScanType(scanTypeCombo_->currentText().toStdString()));
+    
+    if (namedScanCombo_) {
+        if (namedScanCombo_->findText(name) == -1) {
+            namedScanCombo_->addItem(name);
+            namedScanCombo_->setCurrentText(name);
+        }
+    }
+    namedScanNameEdit_->clear();
+}
+
+void MainWindow::onNamedScanDeleteClicked() {
+    if (!namedScanCombo_) return;
+    QString name = namedScanCombo_->currentText();
+    if (name == med::NamedScans::DEFAULT_NAME) return;
+    
+    if (namedScans_.remove(name.toStdString())) {
+        int index = namedScanCombo_->currentIndex();
+        namedScanCombo_->setCurrentIndex(0);
+        namedScanCombo_->removeItem(index);
+    }
+}
+
+void MainWindow::onNamedScanComboBoxChanged(int) {
+    if (!namedScanCombo_) return;
+    QString name = namedScanCombo_->currentText();
+    namedScans_.setActiveName(name.toStdString());
+    
+    // Update Scan Type Combo
+    if (scanTypeCombo_) {
+        scanTypeCombo_->setCurrentText(QString::fromStdString(MedUtil::scanTypeToString(namedScans_.getActiveType())));
+    }
+    
+    updateScanModel(namedScans_.getActiveResults());
 }
 
 void MainWindow::onFileLoaded(const std::vector<WatchedAddress>& watched, const QString& notes) {

@@ -61,4 +61,8 @@ if(CXXTEST_FOUND)
     CXXTEST_ADD_TEST(TestPhase2 TestPhase2.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestPhase2.hpp)
     target_link_libraries(TestPhase2 med_core)
+
+    CXXTEST_ADD_TEST(TestNamedScans TestNamedScans.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestNamedScans.hpp)
+    target_link_libraries(TestNamedScans med_core)
 endif()

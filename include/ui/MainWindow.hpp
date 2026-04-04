@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QPlainTextEdit>
+#include "med/NamedScans.hpp"
 #include "ui/MedWorker.hpp"
 #include "ui/ProcessDialog.hpp"
 
@@ -63,6 +64,10 @@ private slots:
     void onDefaultEncodingTriggered(bool checked);
     void onBig5EncodingTriggered(bool checked);
     
+    void onNamedScanAddClicked();
+    void onNamedScanDeleteClicked();
+    void onNamedScanComboBoxChanged(int index);
+    
     // Worker responses
     void onScanCompleted(const std::vector<ScanResult>& results);
     void onFilterCompleted(const std::vector<ScanResult>& results);
@@ -75,6 +80,7 @@ private slots:
 private:
     void setupUi();
     void connectSignals();
+    void updateScanModel(const std::vector<ScanResult>& results);
     
     // UI elements from .ui
     QTreeView* scanTreeView_;
@@ -86,6 +92,11 @@ private:
     QPlainTextEdit* notesEdit_;
     QLineEdit* selectedProcessEdit_;
     
+    QComboBox* namedScanCombo_;
+    QLineEdit* namedScanNameEdit_;
+    QPushButton* namedScanAddBtn_;
+    QPushButton* namedScanDeleteBtn_;
+    
     QStandardItemModel* scanModel_;
     QStandardItemModel* storeModel_;
     
@@ -93,7 +104,7 @@ private:
     MemEditor* memEditor_ = nullptr;
     QString currentFilename_;
     
-    std::vector<ScanResult> lastScanResults_;
+    med::NamedScans namedScans_;
     std::vector<WatchedAddress> watchedAddresses_;
 
     // Threading

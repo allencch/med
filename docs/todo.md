@@ -93,8 +93,18 @@ Meaning, if the filter change the type from int32 to float32, it should still wo
 Refer to old EncodingManager.cpp
 
 ## Status
-In progress
+Done
 
 ## Goal
 Allows to change encoding to Big5 (as toggle)
 
+
+# Task: Named scan
+
+Refer to old NamedScans.cpp and NamedScansController.cpp
+
+## Status
+In progress
+
+## Goal
+Allows named scan, so that we can store the scan result temporary in the memory
