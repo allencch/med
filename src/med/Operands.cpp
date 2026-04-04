@@ -21,7 +21,22 @@ const SizedBytes& Operands::getSecondOperand() const {
     return data_[1];
 }
 
+const SizedBytes& Operands::getOperand(size_t index) const {
+    if (index >= data_.size()) {
+        throw MedException("Operand index out of bounds");
+    }
+    return data_[index];
+}
+
 size_t Operands::getFirstSize() const {
     if (data_.empty()) return 0;
     return data_[0].getSize();
+}
+
+size_t Operands::getTotalSize() const {
+    size_t total = 0;
+    for (const auto& sb : data_) {
+        total += sb.getSize();
+    }
+    return total;
 }

@@ -13,7 +13,9 @@ public:
     size_t count() const;
     const SizedBytes& getFirstOperand() const;
     const SizedBytes& getSecondOperand() const;
+    const SizedBytes& getOperand(size_t index) const;
     size_t getFirstSize() const;
+    size_t getTotalSize() const;
 
 private:
     std::vector<SizedBytes> data_;

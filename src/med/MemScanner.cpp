@@ -44,9 +44,12 @@ std::vector<ScanResult> MemScanner::filter(const std::vector<ScanResult>& list, 
     for (size_t i = 0; i < list.size(); i += CHUNK_SIZE) {
         size_t end = std::min(i + CHUNK_SIZE, list.size());
         futures.emplace_back(threadPool_.enqueue([this, &list, i, end, &params, &newResults, &resultMutex] {
+            size_t typeSize = MedUtil::scanTypeToSize(params.type);
+            size_t totalSize = params.operands.getTotalSize();
+            if (totalSize == 0) return;
+
             for (size_t j = i; j < end; ++j) {
                 Address currentAddr = list[j].address;
-                size_t typeSize = MedUtil::scanTypeToSize(params.type);
 
                 // Fast scan check
                 if (params.fastScan && (currentAddr % typeSize != 0)) continue;
@@ -64,7 +67,7 @@ std::vector<ScanResult> MemScanner::filter(const std::vector<ScanResult>& list, 
                 }
 
                 try {
-                    SizedBytes data = memio_.read(currentAddr, typeSize);
+                    SizedBytes data = memio_.read(currentAddr, totalSize);
                     if (MemOperator::compare(data.getBytes(), params.type, params.operands, params.op)) {
                         std::lock_guard<std::mutex> lock(resultMutex);
                         newResults.push_back({currentAddr, params.type, data});
@@ -96,7 +99,8 @@ void MemScanner::clearScope() {
 void MemScanner::scanMap(const AddressPair& map, const ScanParams& params, std::vector<ScanResult>& results, std::mutex& resultMutex) {
     size_t pageSize = getpagesize();
     size_t typeSize = MedUtil::scanTypeToSize(params.type);
-    if (typeSize == 0) return;
+    size_t totalSize = params.operands.getTotalSize();
+    if (totalSize == 0) return;
 
     for (Address addr = map.first; addr < map.second; addr += pageSize) {
         size_t currentReadSize = std::min((size_t)pageSize, (size_t)(map.second - addr));
@@ -105,7 +109,7 @@ void MemScanner::scanMap(const AddressPair& map, const ScanParams& params, std::
             SizedBytes page = memio_.read(addr, currentReadSize);
             const Byte* pageData = page.getBytes();
 
-            for (size_t offset = 0; offset <= currentReadSize - typeSize; ++offset) {
+            for (size_t offset = 0; offset <= currentReadSize - totalSize; ++offset) {
                 Address currentAddr = addr + offset;
 
                 // Fast scan check
@@ -127,7 +131,7 @@ void MemScanner::scanMap(const AddressPair& map, const ScanParams& params, std::
                     std::lock_guard<std::mutex> lock(resultMutex);
                     // For the result, we can either store the bytes or re-read
                     // Storing here is faster for small types
-                    results.push_back({currentAddr, params.type, SizedBytes(pageData + offset, typeSize)});
+                    results.push_back({currentAddr, params.type, SizedBytes(pageData + offset, totalSize)});
                 }
             }
         } catch (...) {

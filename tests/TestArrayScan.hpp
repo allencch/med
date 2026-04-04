@@ -16,15 +16,16 @@ public:
         // Confirm it parsed into 3 operands
         TS_ASSERT_EQUALS(ops.count(), 3);
         
-        // Current implementation only compares the first element
-        // So this will pass
+        // Proper array scan should match the full sequence
         TS_ASSERT(MemOperator::compare(&data[0], ScanType::Int32, ops, ScanParser::OpType::Eq));
         
-        // And this will also pass even though the sequence is wrong
+        // This should now FAIL because the sequence is wrong
         int32_t wrongData[] = {1, 0, 0};
-        TS_ASSERT(MemOperator::compare(&wrongData[0], ScanType::Int32, ops, ScanParser::OpType::Eq));
+        TS_ASSERT(!MemOperator::compare(&wrongData[0], ScanType::Int32, ops, ScanParser::OpType::Eq));
         
-        // If it were a proper array scan, the second one should fail.
+        // Partial match at the end
+        int32_t partialData[] = {1, 2, 0};
+        TS_ASSERT(!MemOperator::compare(&partialData[0], ScanType::Int32, ops, ScanParser::OpType::Eq));
     }
 
     void testStringComma() {

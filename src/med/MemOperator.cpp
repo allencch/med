@@ -20,14 +20,19 @@ bool compare(const void* ptr1, const void* ptr2, size_t size, ScanParser::OpType
 
 template<typename T>
 bool compareTypedDispatch(const void* ptr, const Operands& operands, ScanParser::OpType op) {
-    T val = *reinterpret_cast<const T*>(ptr);
     if (op == ScanParser::OpType::Within || op == ScanParser::OpType::Around) {
+        T val = *reinterpret_cast<const T*>(ptr);
         T low = *reinterpret_cast<const T*>(operands.getFirstOperand().getBytes());
         T high = *reinterpret_cast<const T*>(operands.getSecondOperand().getBytes());
         return withinTyped(val, low, high);
     } else {
-        T opVal = *reinterpret_cast<const T*>(operands.getFirstOperand().getBytes());
-        return compareTyped(val, opVal, op);
+        const Byte* bytePtr = reinterpret_cast<const Byte*>(ptr);
+        for (size_t i = 0; i < operands.count(); ++i) {
+            T val = *reinterpret_cast<const T*>(bytePtr + i * sizeof(T));
+            T opVal = *reinterpret_cast<const T*>(operands.getOperand(i).getBytes());
+            if (!compareTyped(val, opVal, op)) return false;
+        }
+        return true;
     }
 }
 
@@ -42,8 +47,14 @@ bool compare(const void* ptr, ScanType type, const Operands& operands, ScanParse
         case ScanType::Ptr32: return compareTypedDispatch<uint32_t>(ptr, operands, op);
         case ScanType::Ptr64: return compareTypedDispatch<uint64_t>(ptr, operands, op);
         case ScanType::String: {
-            const SizedBytes& opBytes = operands.getFirstOperand();
-            return compare(ptr, opBytes.getBytes(), opBytes.getSize(), op);
+            const Byte* bytePtr = reinterpret_cast<const Byte*>(ptr);
+            size_t offset = 0;
+            for (size_t i = 0; i < operands.count(); ++i) {
+                const SizedBytes& opBytes = operands.getOperand(i);
+                if (!compare(bytePtr + offset, opBytes.getBytes(), opBytes.getSize(), op)) return false;
+                offset += opBytes.getSize();
+            }
+            return true;
         }
         default: return false;
     }
