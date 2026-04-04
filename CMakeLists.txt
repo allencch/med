@@ -43,6 +43,11 @@ set(ui_SRC
 add_executable(med-ui ${ui_SRC})
 target_link_libraries(med-ui med_core Qt6::Widgets Qt6::UiTools Qt6::Gui Qt6::Core)
 
+# testfile
+set(testfile_SRC
+    src/testfile.cpp)
+add_executable(testfile ${testfile_SRC})
+
 # Testing
 find_package(CxxTest)
 if(CXXTEST_FOUND)
