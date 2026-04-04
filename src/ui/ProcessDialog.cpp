@@ -7,7 +7,11 @@
 ProcessDialog::ProcessDialog(QWidget* parent) : QDialog(parent) {
     QUiLoader loader;
     QFile file("ui/process.ui");
-    file.open(QFile::ReadOnly);
+    if (!file.open(QFile::ReadOnly)) {
+        // Handle the error, e.g., log it or show a message box
+        qWarning() << "Could not open file for reading:" << file.errorString();
+        return;
+    }
     QWidget* widget = loader.load(&file, this);
     file.close();
 
