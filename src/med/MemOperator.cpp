@@ -42,6 +42,10 @@ bool compare(const void* ptr, ScanType type, const Operands& operands, ScanParse
         case ScanType::Int16: return compareTypedDispatch<int16_t>(ptr, operands, op);
         case ScanType::Int32: return compareTypedDispatch<int32_t>(ptr, operands, op);
         case ScanType::Int64: return compareTypedDispatch<int64_t>(ptr, operands, op);
+        case ScanType::UInt8: return compareTypedDispatch<uint8_t>(ptr, operands, op);
+        case ScanType::UInt16: return compareTypedDispatch<uint16_t>(ptr, operands, op);
+        case ScanType::UInt32: return compareTypedDispatch<uint32_t>(ptr, operands, op);
+        case ScanType::UInt64: return compareTypedDispatch<uint64_t>(ptr, operands, op);
         case ScanType::Float32: return compareTypedDispatch<float>(ptr, operands, op);
         case ScanType::Float64: return compareTypedDispatch<double>(ptr, operands, op);
         case ScanType::Ptr32: return compareTypedDispatch<uint32_t>(ptr, operands, op);
@@ -67,6 +71,10 @@ std::string toString(const Byte* memory, ScanType type, EncodingType encoding) {
         case ScanType::Int16: sprintf(str, "%" PRId16, *(const int16_t*)memory); break;
         case ScanType::Int32: sprintf(str, "%" PRId32, *(const int32_t*)memory); break;
         case ScanType::Int64: sprintf(str, "%" PRId64, *(const int64_t*)memory); break;
+        case ScanType::UInt8: sprintf(str, "%" PRIu8, *(const uint8_t*)memory); break;
+        case ScanType::UInt16: sprintf(str, "%" PRIu16, *(const uint16_t*)memory); break;
+        case ScanType::UInt32: sprintf(str, "%" PRIu32, *(const uint32_t*)memory); break;
+        case ScanType::UInt64: sprintf(str, "%" PRIu64, *(const uint64_t*)memory); break;
         case ScanType::Ptr32: sprintf(str, "0x%" PRIx32, *(const uint32_t*)memory); break;
         case ScanType::Ptr64: sprintf(str, "0x%" PRIx64, *(const uint64_t*)memory); break;
         case ScanType::Float32: sprintf(str, "%f", *(const float*)memory); break;

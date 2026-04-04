@@ -4,7 +4,7 @@
 namespace med {
 
 NamedScans::NamedScans() : activeName_(DEFAULT_NAME) {
-    data_[DEFAULT_NAME] = { {}, ScanType::Int32 };
+    data_[DEFAULT_NAME] = { {}, ScanType::UInt32 };
 }
 
 void NamedScans::addNewScan(const std::string& name, ScanType type) {
@@ -41,7 +41,7 @@ ScanType NamedScans::getActiveType() const {
     if (it != data_.end()) {
         return it->second.type;
     }
-    return ScanType::Int32;
+    return ScanType::UInt32;
 }
 
 void NamedScans::setActiveType(ScanType type) {

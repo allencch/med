@@ -14,6 +14,10 @@ enum class ScanType {
     Int16,
     Int32,
     Int64,
+    UInt8,
+    UInt16,
+    UInt32,
+    UInt64,
     Float32,
     Float64,
     String,
@@ -30,6 +34,10 @@ namespace ScanTypeString {
     const std::string Int16 = "int16";
     const std::string Int32 = "int32";
     const std::string Int64 = "int64";
+    const std::string UInt8 = "uint8";
+    const std::string UInt16 = "uint16";
+    const std::string UInt32 = "uint32";
+    const std::string UInt64 = "uint64";
     const std::string Float32 = "float32";
     const std::string Float64 = "float64";
     const std::string String = "string";

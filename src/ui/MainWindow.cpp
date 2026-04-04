@@ -205,7 +205,7 @@ void MainWindow::setupUi() {
 
     // Initial State
     if (notesEdit_) notesEdit_->hide();
-    if (scanTypeCombo_) scanTypeCombo_->setCurrentText("int32");
+    if (scanTypeCombo_) scanTypeCombo_->setCurrentText("uint32");
 }
 
 void MainWindow::connectSignals() {
@@ -549,7 +549,7 @@ void MainWindow::onNewAddressTriggered() {
     WatchedAddress wa;
     wa.description = "New Address";
     wa.address = 0;
-    wa.type = ScanType::Int32;
+    wa.type = ScanType::UInt32;
     wa.value = "0";
     wa.locked = false;
 

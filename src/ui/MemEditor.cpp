@@ -280,7 +280,7 @@ void MemEditor::onMemAreaCursorPositionChanged() {
         }
 
         if (viewInt32_) {
-            if (remaining >= 4) viewInt32_->setText(QString::fromStdString(MemOperator::toString(ptr, ScanType::Int32, mainWindow_->getEncoding())));
+            if (remaining >= 4) viewInt32_->setText(QString::fromStdString(MemOperator::toString(ptr, ScanType::UInt32, mainWindow_->getEncoding())));
             else viewInt32_->setText("??");
         }
         if (viewFloat32_) {

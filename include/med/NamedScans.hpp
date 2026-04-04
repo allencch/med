@@ -14,7 +14,7 @@ public:
 
     NamedScans();
     
-    void addNewScan(const std::string& name, ScanType type = ScanType::Int32);
+    void addNewScan(const std::string& name, ScanType type = ScanType::UInt32);
     bool remove(const std::string& name);
     
     void setActiveName(const std::string& name);

@@ -16,6 +16,10 @@ ScanType stringToScanType(const std::string& scanType) {
     if (scanType == ScanTypeString::Int16) return ScanType::Int16;
     if (scanType == ScanTypeString::Int32) return ScanType::Int32;
     if (scanType == ScanTypeString::Int64) return ScanType::Int64;
+    if (scanType == ScanTypeString::UInt8) return ScanType::UInt8;
+    if (scanType == ScanTypeString::UInt16) return ScanType::UInt16;
+    if (scanType == ScanTypeString::UInt32) return ScanType::UInt32;
+    if (scanType == ScanTypeString::UInt64) return ScanType::UInt64;
     if (scanType == ScanTypeString::Float32) return ScanType::Float32;
     if (scanType == ScanTypeString::Float64) return ScanType::Float64;
     if (scanType == ScanTypeString::String) return ScanType::String;
@@ -31,6 +35,10 @@ std::string scanTypeToString(const ScanType& scanType) {
         case ScanType::Int16: return ScanTypeString::Int16;
         case ScanType::Int32: return ScanTypeString::Int32;
         case ScanType::Int64: return ScanTypeString::Int64;
+        case ScanType::UInt8: return ScanTypeString::UInt8;
+        case ScanType::UInt16: return ScanTypeString::UInt16;
+        case ScanType::UInt32: return ScanTypeString::UInt32;
+        case ScanType::UInt64: return ScanTypeString::UInt64;
         case ScanType::Float32: return ScanTypeString::Float32;
         case ScanType::Float64: return ScanTypeString::Float64;
         case ScanType::String: return ScanTypeString::String;
@@ -43,11 +51,15 @@ std::string scanTypeToString(const ScanType& scanType) {
 
 size_t scanTypeToSize(const ScanType& type) {
     switch (type) {
-        case ScanType::Int8: return sizeof(int8_t);
-        case ScanType::Int16: return sizeof(int16_t);
+        case ScanType::Int8:
+        case ScanType::UInt8: return sizeof(uint8_t);
+        case ScanType::Int16:
+        case ScanType::UInt16: return sizeof(uint16_t);
         case ScanType::Int32:
+        case ScanType::UInt32:
         case ScanType::Ptr32: return sizeof(uint32_t);
         case ScanType::Int64:
+        case ScanType::UInt64:
         case ScanType::Ptr64: return sizeof(uint64_t);
         case ScanType::Float32: return sizeof(float);
         case ScanType::Float64: return sizeof(double);
@@ -103,13 +115,26 @@ void stringToMemory(const std::string& str, ScanType type, Byte* buffer, Encodin
             *(int8_t*)buffer = (int8_t)temp;
             break;
         }
+        case ScanType::UInt8: {
+            uint32_t temp;
+            ss >> std::dec >> temp;
+            *(uint8_t*)buffer = (uint8_t)temp;
+            break;
+        }
         case ScanType::Int16: {
             int16_t temp;
             ss >> std::dec >> temp;
             *(int16_t*)buffer = temp;
             break;
         }
+        case ScanType::UInt16: {
+            uint16_t temp;
+            ss >> std::dec >> temp;
+            *(uint16_t*)buffer = temp;
+            break;
+        }
         case ScanType::Int32:
+        case ScanType::UInt32:
         case ScanType::Ptr32: {
             uint32_t temp;
             ss >> std::dec >> temp;
@@ -117,6 +142,7 @@ void stringToMemory(const std::string& str, ScanType type, Byte* buffer, Encodin
             break;
         }
         case ScanType::Int64:
+        case ScanType::UInt64:
         case ScanType::Ptr64: {
             uint64_t temp;
             ss >> std::dec >> temp;
@@ -158,19 +184,22 @@ void hexStringToMemory(const std::string& str, ScanType type, Byte* buffer) {
     ss << std::hex;
 
     switch (type) {
-        case ScanType::Int8: {
+        case ScanType::Int8:
+        case ScanType::UInt8: {
             int temp;
             ss >> temp;
-            *(int8_t*)buffer = (int8_t)temp;
+            *(uint8_t*)buffer = (uint8_t)temp;
             break;
         }
-        case ScanType::Int16: {
+        case ScanType::Int16:
+        case ScanType::UInt16: {
             uint16_t temp;
             ss >> temp;
             *(uint16_t*)buffer = temp;
             break;
         }
         case ScanType::Int32:
+        case ScanType::UInt32:
         case ScanType::Ptr32: {
             uint32_t temp;
             ss >> temp;
@@ -178,6 +207,7 @@ void hexStringToMemory(const std::string& str, ScanType type, Byte* buffer) {
             break;
         }
         case ScanType::Int64:
+        case ScanType::UInt64:
         case ScanType::Ptr64: {
             uint64_t temp;
             ss >> temp;
