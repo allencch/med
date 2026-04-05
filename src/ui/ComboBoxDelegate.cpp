@@ -51,3 +51,10 @@ void ComboBoxDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     // Draw the actual text
     QApplication::style()->drawControl(QStyle::CE_ComboBoxLabel, &comboBoxOption, painter);
 }
+
+QSize ComboBoxDelegate::sizeHint(const QStyleOptionViewItem &option,
+                                 const QModelIndex &index) const {
+    QComboBox combo;
+    return combo.sizeHint(); //Fix the height issue
+    //return QStyledItemDelegate::sizeHint(option, index);
+}
