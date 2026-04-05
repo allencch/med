@@ -15,8 +15,16 @@ MedWorker::MedWorker(QObject* parent) : QObject(parent) {
 MedWorker::~MedWorker() {}
 
 void MedWorker::onTick() {
-    emit refreshRequested();
-    refreshWatchedValues();
+    if (autoRefresh_) {
+        emit refreshRequested();
+    }
+    if (forceResume_ && !isProcessPaused_ && pid_ != 0) {
+        try {
+            Process(pid_, "").resume();
+        } catch (...) {
+            // Ignore errors during periodic resume (e.g. process died)
+        }
+    }
 }
 
 void MedWorker::setPid(pid_t pid) {
@@ -139,6 +147,14 @@ void MedWorker::setProcessPaused(bool paused) {
 
 void MedWorker::setCanResume(bool canResume) {
     canResume_ = canResume;
+}
+
+void MedWorker::setAutoRefresh(bool autoRefresh) {
+    autoRefresh_ = autoRefresh;
+}
+
+void MedWorker::setForceResume(bool forceResume) {
+    forceResume_ = forceResume;
 }
 
 void MedWorker::setScopeStart(Address start) {

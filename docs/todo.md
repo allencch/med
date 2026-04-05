@@ -137,3 +137,18 @@ Done
 
 ## Goal
 Refer to "Shifting memory address" section in README.md
+
+
+# Task: Auto Refresh and Force Resume
+
+Menu item `actionAutoRefresh` and `actionForceResume` are not implemented.
+Should refer to the old code.
+
+## Status
+Done
+
+## Goal
+
+Auto refresh by default is enabled. If it is off, then refresh will not work, user needs to press F5 to refresh.
+Force resume is a special case that, some games may be halted (like Ctrl+Z) due to memory scanning. By enable Force Resume, the game will be resume to non sleep.
+Take note that, "Pause" has the higher precendence than Force Resume. Meaning, if the game or process "Paused" by this application, then Force Resume should not wake the process up.

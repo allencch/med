@@ -46,6 +46,8 @@ private slots:
 
     void onPauseClicked(bool checked);
     void onCanResumeTriggered(bool checked);
+    void onAutoRefreshTriggered(bool checked);
+    void onForceResumeTriggered(bool checked);
     void onFastScanTriggered(bool checked);
     
     void onOpenTriggered();
@@ -121,6 +123,7 @@ private:
     pid_t currentPid_ = 0;
     bool fastScan_ = true;
     bool autoRefresh_ = true;
+    bool forceResume_ = false;
     EncodingType encoding_ = EncodingType::Default;
 };
 

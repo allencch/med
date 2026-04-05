@@ -57,6 +57,8 @@ public slots:
     void requestMemory(Address addr, size_t size);
     void setProcessPaused(bool paused);
     void setCanResume(bool canResume);
+    void setAutoRefresh(bool autoRefresh);
+    void setForceResume(bool forceResume);
     void setScopeStart(Address start);
     void setScopeEnd(Address end);
     void setEncoding(EncodingType encoding);
@@ -71,6 +73,8 @@ private:
     QTimer* refreshTimer_;
     bool isProcessPaused_ = false;
     bool canResume_ = true;
+    bool autoRefresh_ = true;
+    bool forceResume_ = false;
     Address scopeStart_ = 0;
     Address scopeEnd_ = 0;
     EncodingType encoding_ = EncodingType::Default;

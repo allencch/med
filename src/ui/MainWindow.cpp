@@ -180,6 +180,8 @@ void MainWindow::setupUi() {
     QAction* actionShowNotes = findChild<QAction*>("actionShowNotes");
     QAction* actionFastScan = findChild<QAction*>("actionFastScan");
     QAction* actionCanResume = findChild<QAction*>("actionResumeProcess");
+    QAction* actionAutoRefresh = findChild<QAction*>("actionAutoRefresh");
+    QAction* actionForceResume = findChild<QAction*>("actionForceResume");
     QAction* actionQuit = findChild<QAction*>("actionQuit");
     QAction* actionRefresh = findChild<QAction*>("actionRefresh");
     QAction* actionDefaultEncoding = findChild<QAction*>("actionDefaultEncoding");
@@ -199,6 +201,8 @@ void MainWindow::setupUi() {
     if (actionShowNotes) connect(actionShowNotes, &QAction::triggered, this, &MainWindow::onShowNotesTriggered);
     if (actionFastScan) connect(actionFastScan, &QAction::triggered, this, &MainWindow::onFastScanTriggered);
     if (actionCanResume) connect(actionCanResume, &QAction::triggered, this, &MainWindow::onCanResumeTriggered);
+    if (actionAutoRefresh) connect(actionAutoRefresh, &QAction::triggered, this, &MainWindow::onAutoRefreshTriggered);
+    if (actionForceResume) connect(actionForceResume, &QAction::triggered, this, &MainWindow::onForceResumeTriggered);
     if (actionDefaultEncoding) connect(actionDefaultEncoding, &QAction::triggered, this, &MainWindow::onDefaultEncodingTriggered);
     if (actionBig5Encoding) connect(actionBig5Encoding, &QAction::triggered, this, &MainWindow::onBig5EncodingTriggered);
     if (actionStoreClear) connect(actionStoreClear, &QAction::triggered, this, &MainWindow::onStoreClearTriggered);
@@ -371,10 +375,11 @@ void MainWindow::onWatchedValuesRefreshed(const std::vector<WatchedAddress>& wat
 }
 
 void MainWindow::onRefreshRequested() {
-    if (autoRefresh_ && !namedScans_.getActiveResults().empty() && namedScans_.getActiveResults().size() <= 800) {
+    if (!namedScans_.getActiveResults().empty() && namedScans_.getActiveResults().size() <= 800) {
         QMetaObject::invokeMethod(worker_, "refreshScanResults", Qt::QueuedConnection,
                                   Q_ARG(std::vector<ScanResult>, namedScans_.getActiveResults()));
     }
+    QMetaObject::invokeMethod(worker_, "refreshWatchedValues", Qt::QueuedConnection);
 }
 
 void MainWindow::onProcessListReady(const std::vector<Process>& processes) {
@@ -513,6 +518,16 @@ void MainWindow::onPauseClicked(bool checked) {
 
 void MainWindow::onCanResumeTriggered(bool checked) {
     QMetaObject::invokeMethod(worker_, "setCanResume", Qt::QueuedConnection, Q_ARG(bool, checked));
+}
+
+void MainWindow::onAutoRefreshTriggered(bool checked) {
+    autoRefresh_ = checked;
+    QMetaObject::invokeMethod(worker_, "setAutoRefresh", Qt::QueuedConnection, Q_ARG(bool, checked));
+}
+
+void MainWindow::onForceResumeTriggered(bool checked) {
+    forceResume_ = checked;
+    QMetaObject::invokeMethod(worker_, "setForceResume", Qt::QueuedConnection, Q_ARG(bool, checked));
 }
 
 void MainWindow::onFastScanTriggered(bool checked) {
