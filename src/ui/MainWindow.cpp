@@ -724,7 +724,7 @@ void MainWindow::onFileLoaded(const std::vector<WatchedAddress>& watched, const 
         items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(wa.type)));
         items << new QStandardItem(QString::fromStdString(wa.value));
         QStandardItem* lockItem = new QStandardItem();
-        lockItem->setData(wa.locked, Qt::EditRole);
+        lockItem->setData(false, Qt::EditRole); // Always unlock when loaded
         items << lockItem;
         storeModel_->appendRow(items);
     }
