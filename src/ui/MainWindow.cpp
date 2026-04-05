@@ -17,6 +17,8 @@
 #include "med/MedCommon.hpp"
 #include "med/MemOperator.hpp"
 
+const QString MAIN_TITLE = "Med UI";
+
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     setupUi();
 
@@ -73,7 +75,7 @@ void MainWindow::setupUi() {
         this->resize(uiWidget->size());
     }
 
-    setWindowTitle("Med UI");
+    setWindowTitle(MAIN_TITLE);
 
     // Finding components
     scanTreeView_ = findChild<QTreeView*>("scanTreeView");
@@ -474,6 +476,9 @@ void MainWindow::onStoreDataChanged(const QModelIndex& topLeft, const QModelInde
 
         auto& wa = watchedAddresses_[row];
         wa.description = storeModel_->data(storeModel_->index(row, 0)).toString().toStdString();
+        try {
+            wa.address = MedUtil::hexToInt(storeModel_->data(storeModel_->index(row, 1)).toString().toStdString());
+        } catch (...) {}
         wa.type = MedUtil::stringToScanType(storeModel_->data(storeModel_->index(row, 2)).toString().toStdString());
 
         if (topLeft.column() == 3) { // Value changed
@@ -521,7 +526,7 @@ void MainWindow::onSaveTriggered() {
     } else {
         QString notes = notesEdit_ ? notesEdit_->toPlainText() : "";
         QMetaObject::invokeMethod(worker_, "saveFile", Qt::QueuedConnection, Q_ARG(QString, currentFilename_), Q_ARG(QString, notes));
-        setWindowTitle("Med UI: " + currentFilename_);
+        setWindowTitle(MAIN_TITLE + ": " + currentFilename_);
     }
 }
 
@@ -573,6 +578,9 @@ void MainWindow::onNewAddressTriggered() {
     lockItem->setData(false, Qt::EditRole);
     items << lockItem;
     storeModel_->appendRow(items);
+
+    QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
+                              Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
 }
 
 void MainWindow::onDeleteAddressTriggered() {
@@ -723,7 +731,7 @@ void MainWindow::onFileLoaded(const std::vector<WatchedAddress>& watched, const 
     statusBar()->showMessage(QString("Loaded %1 addresses").arg(watched.size()));
 
     if (!currentFilename_.isEmpty()) {
-        setWindowTitle("Med UI: " + currentFilename_);
+        setWindowTitle(MAIN_TITLE + ": " + currentFilename_);
     }
 }
 

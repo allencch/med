@@ -30,10 +30,8 @@ class MedWorker : public QObject {
 public:
     explicit MedWorker(QObject* parent = nullptr);
     virtual ~MedWorker();
-    void saveFile(const QString& filename, const QString& notes);
-    void loadFile(const QString& filename);
 
-    signals:
+signals:
     void scanCompleted(const std::vector<ScanResult>& results);
     void filterCompleted(const std::vector<ScanResult>& results);
     void watchedValuesRefreshed(const std::vector<WatchedAddress>& watched);
@@ -43,8 +41,9 @@ public:
     void fileLoaded(const std::vector<WatchedAddress>& watched, const QString& notes);
     void memoryReady(Address addr, const SizedBytes& data);
 
-
 public slots:
+    void saveFile(const QString& filename, const QString& notes);
+    void loadFile(const QString& filename);
     void setPid(pid_t pid);
     void startScan(const QString& value, ScanType type, ScanParser::OpType op, bool fastScan, const std::vector<int>& lastDigits);
     void startFilter(const std::vector<ScanResult>& currentResults, const QString& value, ScanType type, ScanParser::OpType op, bool fastScan, const std::vector<int>& lastDigits);

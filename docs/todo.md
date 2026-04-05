@@ -108,3 +108,13 @@ In progress
 
 ## Goal
 Allows named scan, so that we can store the scan result temporary in the memory
+
+
+# Task: File save
+
+## Status
+Done
+
+## Goal
+Save the store data into JSON file.
+Also, the save file should be loadable, and Ctrl+R allows to reload the save file as an approch to revert the changes.
