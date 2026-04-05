@@ -61,6 +61,9 @@ private slots:
     
     void onPrevAddressClicked();
     void onNextAddressClicked();
+    void onStoreShiftClicked();
+    void onStoreUnshiftClicked();
+    void onMoveAddressClicked();
     void onDefaultEncodingTriggered(bool checked);
     void onBig5EncodingTriggered(bool checked);
     
@@ -92,6 +95,8 @@ private:
     QLabel* foundLabel_;
     QPlainTextEdit* notesEdit_;
     QLineEdit* selectedProcessEdit_;
+    QLineEdit* shiftFromEdit_;
+    QLineEdit* shiftToEdit_;
     
     QComboBox* namedScanCombo_;
     QLineEdit* namedScanNameEdit_;

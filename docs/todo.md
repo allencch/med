@@ -118,3 +118,22 @@ Done
 ## Goal
 Save the store data into JSON file.
 Also, the save file should be loadable, and Ctrl+R allows to reload the save file as an approch to revert the changes.
+
+
+# Task: Next and Prev buttons
+
+## Status
+Done
+
+## Goal
+Next button should make a copy of the currently selected address to the "next" address.
+Same as Prev button for previous address (current address - byte size).
+
+
+# Task: Shift/Unshift and Move
+
+## Status
+Done
+
+## Goal
+Refer to "Shifting memory address" section in README.md

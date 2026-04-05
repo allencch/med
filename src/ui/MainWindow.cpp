@@ -88,6 +88,8 @@ void MainWindow::setupUi() {
     foundLabel_ = findChild<QLabel*>("found");
     notesEdit_ = findChild<QPlainTextEdit*>("notes");
     selectedProcessEdit_ = findChild<QLineEdit*>("selectedProcess");
+    shiftFromEdit_ = findChild<QLineEdit*>("shiftFrom");
+    shiftToEdit_ = findChild<QLineEdit*>("shiftTo");
 
     QPushButton* scanButton = findChild<QPushButton*>("scanButton");
     QPushButton* filterButton = findChild<QPushButton*>("filterButton");
@@ -97,6 +99,10 @@ void MainWindow::setupUi() {
     QPushButton* scanClearButton = findChild<QPushButton*>("scanClear");
     QCheckBox* pauseCheckbox = findChild<QCheckBox*>("pauseCheckbox");
 
+    QPushButton* storeShiftButton = findChild<QPushButton*>("storeShift");
+    QPushButton* storeUnshiftButton = findChild<QPushButton*>("storeUnshift");
+    QPushButton* moveAddressButton = findChild<QPushButton*>("moveAddress");
+
     if (scanButton) connect(scanButton, &QPushButton::clicked, this, &MainWindow::onScanClicked);
     if (filterButton) connect(filterButton, &QPushButton::clicked, this, &MainWindow::onFilterClicked);
     if (processButton) connect(processButton, &QPushButton::clicked, this, &MainWindow::onSelectProcessClicked);
@@ -104,6 +110,10 @@ void MainWindow::setupUi() {
     if (scanAddAllButton) connect(scanAddAllButton, &QPushButton::clicked, this, &MainWindow::onAddAllToStoreClicked);
     if (scanClearButton) connect(scanClearButton, &QPushButton::clicked, this, &MainWindow::onScanClearClicked);
     if (pauseCheckbox) connect(pauseCheckbox, &QCheckBox::clicked, this, &MainWindow::onPauseClicked);
+
+    if (storeShiftButton) connect(storeShiftButton, &QPushButton::clicked, this, &MainWindow::onStoreShiftClicked);
+    if (storeUnshiftButton) connect(storeUnshiftButton, &QPushButton::clicked, this, &MainWindow::onStoreUnshiftClicked);
+    if (moveAddressButton) connect(moveAddressButton, &QPushButton::clicked, this, &MainWindow::onMoveAddressClicked);
 
     QPushButton* prevButton = findChild<QPushButton*>("prevAddress");
     QPushButton* nextButton = findChild<QPushButton*>("nextAddress");
@@ -204,7 +214,7 @@ void MainWindow::setupUi() {
     namedScanNameEdit_ = findChild<QLineEdit*>("namedScan_name");
     namedScanAddBtn_ = findChild<QPushButton*>("namedScan_add");
     namedScanDeleteBtn_ = findChild<QPushButton*>("namedScan_delete");
-    
+
     if (namedScanAddBtn_) connect(namedScanAddBtn_, &QPushButton::clicked, this, &MainWindow::onNamedScanAddClicked);
     if (namedScanDeleteBtn_) connect(namedScanDeleteBtn_, &QPushButton::clicked, this, &MainWindow::onNamedScanDeleteClicked);
     if (namedScanCombo_) {
@@ -638,6 +648,82 @@ void MainWindow::onNextAddressClicked() {
                               Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
 }
 
+void MainWindow::onStoreShiftClicked() {
+    auto selection = storeTreeView_->selectionModel()->selectedRows();
+    if (selection.isEmpty()) return;
+
+    QString fromText = shiftFromEdit_->text();
+    QString toText = shiftToEdit_->text();
+    if (fromText.isEmpty() || toText.isEmpty()) return;
+
+    try {
+        Address from = MedUtil::hexToInt(fromText.toStdString());
+        Address to = MedUtil::hexToInt(toText.toStdString());
+
+        for (const auto& index : selection) {
+            int row = index.row();
+            if (row >= (int)watchedAddresses_.size()) continue;
+            watchedAddresses_[row].address = watchedAddresses_[row].address - from + to;
+            storeModel_->setData(storeModel_->index(row, 1), QString::fromStdString(MedUtil::intToHex(watchedAddresses_[row].address)), Qt::EditRole);
+        }
+
+        QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
+                                  Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+    } catch (...) {
+        QMessageBox::warning(this, "Shift", "Invalid hexadecimal address");
+    }
+}
+
+void MainWindow::onStoreUnshiftClicked() {
+    auto selection = storeTreeView_->selectionModel()->selectedRows();
+    if (selection.isEmpty()) return;
+
+    QString fromText = shiftFromEdit_->text();
+    QString toText = shiftToEdit_->text();
+    if (fromText.isEmpty() || toText.isEmpty()) return;
+
+    try {
+        Address from = MedUtil::hexToInt(fromText.toStdString());
+        Address to = MedUtil::hexToInt(toText.toStdString());
+
+        for (const auto& index : selection) {
+            int row = index.row();
+            if (row >= (int)watchedAddresses_.size()) continue;
+            watchedAddresses_[row].address = watchedAddresses_[row].address - to + from;
+            storeModel_->setData(storeModel_->index(row, 1), QString::fromStdString(MedUtil::intToHex(watchedAddresses_[row].address)), Qt::EditRole);
+        }
+
+        QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
+                                  Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+    } catch (...) {
+        QMessageBox::warning(this, "Unshift", "Invalid hexadecimal address");
+    }
+}
+
+void MainWindow::onMoveAddressClicked() {
+    auto selection = storeTreeView_->selectionModel()->selectedRows();
+    if (selection.isEmpty()) return;
+
+    QString bytesText = shiftToEdit_->text();
+    if (bytesText.isEmpty()) return;
+
+    try {
+        long long offset = std::stoll(bytesText.toStdString(), nullptr, 0);
+
+        for (const auto& index : selection) {
+            int row = index.row();
+            if (row >= (int)watchedAddresses_.size()) continue;
+            watchedAddresses_[row].address += offset;
+            storeModel_->setData(storeModel_->index(row, 1), QString::fromStdString(MedUtil::intToHex(watchedAddresses_[row].address)), Qt::EditRole);
+        }
+
+        QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
+                                  Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+    } catch (...) {
+        QMessageBox::warning(this, "Move", "Invalid offset value (should be a number)");
+    }
+}
+
 void MainWindow::onDefaultEncodingTriggered(bool checked) {
     if (checked) {
         encoding_ = EncodingType::Default;
@@ -678,10 +764,10 @@ void MainWindow::onNamedScanAddClicked() {
     if (!namedScanNameEdit_) return;
     QString name = namedScanNameEdit_->text().trimmed();
     if (name.isEmpty()) return;
-    
+
     std::string sName = name.toStdString();
     namedScans_.addNewScan(sName, MedUtil::stringToScanType(scanTypeCombo_->currentText().toStdString()));
-    
+
     if (namedScanCombo_) {
         if (namedScanCombo_->findText(name) == -1) {
             namedScanCombo_->addItem(name);
@@ -695,7 +781,7 @@ void MainWindow::onNamedScanDeleteClicked() {
     if (!namedScanCombo_) return;
     QString name = namedScanCombo_->currentText();
     if (name == med::NamedScans::DEFAULT_NAME) return;
-    
+
     if (namedScans_.remove(name.toStdString())) {
         int index = namedScanCombo_->currentIndex();
         namedScanCombo_->setCurrentIndex(0);
@@ -707,12 +793,12 @@ void MainWindow::onNamedScanComboBoxChanged(int) {
     if (!namedScanCombo_) return;
     QString name = namedScanCombo_->currentText();
     namedScans_.setActiveName(name.toStdString());
-    
+
     // Update Scan Type Combo
     if (scanTypeCombo_) {
         scanTypeCombo_->setCurrentText(QString::fromStdString(MedUtil::scanTypeToString(namedScans_.getActiveType())));
     }
-    
+
     updateScanModel(namedScans_.getActiveResults());
 }
 
