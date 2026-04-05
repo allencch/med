@@ -81,6 +81,7 @@ private:
     void setupUi();
     void connectSignals();
     void updateScanModel(const std::vector<ScanResult>& results);
+    void addWatchedAddress(const WatchedAddress& wa);
     
     // UI elements from .ui
     QTreeView* scanTreeView_;

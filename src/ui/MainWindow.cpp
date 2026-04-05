@@ -377,6 +377,20 @@ void MainWindow::onScanClearClicked() {
     statusBar()->showMessage("Scan cleared");
 }
 
+void MainWindow::addWatchedAddress(const WatchedAddress& wa) {
+    watchedAddresses_.push_back(wa);
+
+    QList<QStandardItem*> items;
+    items << new QStandardItem(QString::fromStdString(wa.description));
+    items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(wa.address)));
+    items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(wa.type)));
+    items << new QStandardItem(QString::fromStdString(wa.value));
+    QStandardItem* lockItem = new QStandardItem();
+    lockItem->setData(wa.locked, Qt::EditRole);
+    items << lockItem;
+    storeModel_->appendRow(items);
+}
+
 void MainWindow::onAddToStoreClicked() {
     auto selection = scanTreeView_->selectionModel()->selectedRows();
     if (selection.isEmpty()) return;
@@ -398,17 +412,7 @@ void MainWindow::onAddToStoreClicked() {
         wa.value = MemOperator::toString(res.data.getBytes(), res.type, encoding_);
         wa.locked = false;
         wa.lockValue = wa.value;
-        watchedAddresses_.push_back(wa);
-
-        QList<QStandardItem*> items;
-        items << new QStandardItem(QString::fromStdString(wa.description));
-        items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(wa.address)));
-        items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(wa.type)));
-        items << new QStandardItem(QString::fromStdString(wa.value));
-        QStandardItem* lockItem = new QStandardItem();
-        lockItem->setData(false, Qt::EditRole);
-        items << lockItem;
-        storeModel_->appendRow(items);
+        addWatchedAddress(wa);
     }
 
     QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
@@ -424,17 +428,7 @@ void MainWindow::onAddAllToStoreClicked() {
         wa.value = MemOperator::toString(res.data.getBytes(), res.type, encoding_);
         wa.locked = false;
         wa.lockValue = wa.value;
-        watchedAddresses_.push_back(wa);
-
-        QList<QStandardItem*> items;
-        items << new QStandardItem(QString::fromStdString(wa.description));
-        items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(wa.address)));
-        items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(wa.type)));
-        items << new QStandardItem(QString::fromStdString(wa.value));
-        QStandardItem* lockItem = new QStandardItem();
-        lockItem->setData(false, Qt::EditRole);
-        items << lockItem;
-        storeModel_->appendRow(items);
+        addWatchedAddress(wa);
     }
 
     QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
@@ -567,17 +561,9 @@ void MainWindow::onNewAddressTriggered() {
     wa.type = ScanType::UInt32;
     wa.value = "0";
     wa.locked = false;
+    wa.lockValue = wa.value;
 
-    watchedAddresses_.push_back(wa);
-    QList<QStandardItem*> items;
-    items << new QStandardItem(QString::fromStdString(wa.description));
-    items << new QStandardItem("0x0");
-    items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(wa.type)));
-    items << new QStandardItem(QString::fromStdString(wa.value));
-    QStandardItem* lockItem = new QStandardItem();
-    lockItem->setData(false, Qt::EditRole);
-    items << lockItem;
-    storeModel_->appendRow(items);
+    addWatchedAddress(wa);
 
     QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
                               Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
@@ -611,25 +597,43 @@ void MainWindow::onUnlockAllTriggered() {
 }
 
 void MainWindow::onPrevAddressClicked() {
-    auto index = storeTreeView_->currentIndex();
-    if (!index.isValid()) return;
-    int row = index.row();
-    auto& wa = watchedAddresses_[row];
-    size_t size = MedUtil::scanTypeToSize(wa.type);
-    wa.address -= size;
-    storeModel_->setData(storeModel_->index(row, 1), QString::fromStdString(MedUtil::intToHex(wa.address)));
+    auto selection = storeTreeView_->selectionModel()->selectedRows();
+    if (selection.isEmpty()) return;
+
+    std::vector<int> rows;
+    for (const auto& index : selection) rows.push_back(index.row());
+    std::sort(rows.begin(), rows.end());
+
+    for (int row : rows) {
+        if (row >= (int)watchedAddresses_.size()) continue;
+        const auto& sourceWa = watchedAddresses_[row];
+        WatchedAddress wa = sourceWa;
+        size_t size = MedUtil::scanTypeToSize(wa.type);
+        wa.address -= size;
+        wa.locked = false;
+        addWatchedAddress(wa);
+    }
     QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
                               Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
 }
 
 void MainWindow::onNextAddressClicked() {
-    auto index = storeTreeView_->currentIndex();
-    if (!index.isValid()) return;
-    int row = index.row();
-    auto& wa = watchedAddresses_[row];
-    size_t size = MedUtil::scanTypeToSize(wa.type);
-    wa.address += size;
-    storeModel_->setData(storeModel_->index(row, 1), QString::fromStdString(MedUtil::intToHex(wa.address)));
+    auto selection = storeTreeView_->selectionModel()->selectedRows();
+    if (selection.isEmpty()) return;
+
+    std::vector<int> rows;
+    for (const auto& index : selection) rows.push_back(index.row());
+    std::sort(rows.begin(), rows.end());
+
+    for (int row : rows) {
+        if (row >= (int)watchedAddresses_.size()) continue;
+        const auto& sourceWa = watchedAddresses_[row];
+        WatchedAddress wa = sourceWa;
+        size_t size = MedUtil::scanTypeToSize(wa.type);
+        wa.address += size;
+        wa.locked = false;
+        addWatchedAddress(wa);
+    }
     QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
                               Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
 }
