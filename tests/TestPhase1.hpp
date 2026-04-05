@@ -50,7 +50,7 @@ public:
     }
 
     void testMedUtil() {
-        TS_ASSERT_EQUALS(MedUtil::stringToScanType("int32"), ScanType::Int32);
+        TS_ASSERT_EQUALS(MedUtil::stringToScanType("int32"), ScanType::UInt32);
         TS_ASSERT_EQUALS(MedUtil::scanTypeToString(ScanType::Float64), "float64");
         TS_ASSERT_EQUALS(MedUtil::scanTypeToSize(ScanType::Int16), 2);
 

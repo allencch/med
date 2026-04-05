@@ -28,7 +28,7 @@ public:
         
         ns.setActiveName(NamedScans::DEFAULT_NAME);
         TS_ASSERT_EQUALS(ns.getActiveResults().size(), 0);
-        TS_ASSERT_EQUALS(ns.getActiveType(), ScanType::Int32);
+        TS_ASSERT_EQUALS(ns.getActiveType(), ScanType::UInt32);
         
         ns.remove("Scan1");
         TS_ASSERT_EQUALS(ns.getNames().size(), 1);
