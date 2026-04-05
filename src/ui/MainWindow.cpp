@@ -1,3 +1,4 @@
+#include <iostream>
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QInputDialog>
@@ -826,5 +827,6 @@ void MainWindow::onFileLoaded(const std::vector<WatchedAddress>& watched, const 
 }
 
 void MainWindow::onError(const QString& message) {
-    QMessageBox::warning(this, "Error", message);
+    // QMessageBox::warning(this, "Error", message);
+    std::cout << message.toStdString() << std::endl;
 }
