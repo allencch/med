@@ -58,6 +58,7 @@ private slots:
     void onNewAddressTriggered();
     void onDeleteAddressTriggered();
     void onUnlockAllTriggered();
+    void onStoreClearTriggered();
     
     void onPrevAddressClicked();
     void onNextAddressClicked();

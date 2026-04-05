@@ -184,6 +184,7 @@ void MainWindow::setupUi() {
     QAction* actionRefresh = findChild<QAction*>("actionRefresh");
     QAction* actionDefaultEncoding = findChild<QAction*>("actionDefaultEncoding");
     QAction* actionBig5Encoding = findChild<QAction*>("actionBig5Encoding");
+    QAction* actionStoreClear = findChild<QAction*>("actionStoreClear");
 
     if (actionOpen) connect(actionOpen, &QAction::triggered, this, &MainWindow::onOpenTriggered);
     if (actionSave) connect(actionSave, &QAction::triggered, this, &MainWindow::onSaveTriggered);
@@ -200,6 +201,7 @@ void MainWindow::setupUi() {
     if (actionCanResume) connect(actionCanResume, &QAction::triggered, this, &MainWindow::onCanResumeTriggered);
     if (actionDefaultEncoding) connect(actionDefaultEncoding, &QAction::triggered, this, &MainWindow::onDefaultEncodingTriggered);
     if (actionBig5Encoding) connect(actionBig5Encoding, &QAction::triggered, this, &MainWindow::onBig5EncodingTriggered);
+    if (actionStoreClear) connect(actionStoreClear, &QAction::triggered, this, &MainWindow::onStoreClearTriggered);
 
     // Grouping the actions to ensure toggle behavior
     if (actionDefaultEncoding && actionBig5Encoding) {
@@ -596,6 +598,15 @@ void MainWindow::onDeleteAddressTriggered() {
 
     QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
                               Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+}
+
+void MainWindow::onStoreClearTriggered() {
+    watchedAddresses_.clear();
+    storeModel_->clear();
+    storeModel_->setHorizontalHeaderLabels({"Description", "Address", "Type", "Value", "Lock"});
+    QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
+                              Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+    statusBar()->showMessage("Store cleared");
 }
 
 void MainWindow::onUnlockAllTriggered() {
