@@ -116,7 +116,11 @@ void MainWindow::setupUi() {
         scanTreeView_->setItemDelegateForColumn(1, new ComboBoxDelegate(this));
         connect(scanTreeView_, &QTreeView::doubleClicked, this, &MainWindow::onScanTreeViewDoubleClicked);
         connect(scanModel_, &QStandardItemModel::dataChanged, this, &MainWindow::onScanDataChanged);
-        scanTreeView_->setEditTriggers(QAbstractItemView::CurrentChanged | QAbstractItemView::SelectedClicked);
+        connect(scanTreeView_, &QTreeView::clicked, this, [this](const QModelIndex& index) {
+            if (index.column() == 1) { // Type column
+                scanTreeView_->edit(index);
+            }
+        });
     }
 
     storeModel_ = new QStandardItemModel(this);
@@ -126,7 +130,11 @@ void MainWindow::setupUi() {
         storeTreeView_->setItemDelegateForColumn(2, new ComboBoxDelegate(this));
         storeTreeView_->setItemDelegateForColumn(4, new CheckBoxDelegate(this));
         connect(storeModel_, &QStandardItemModel::dataChanged, this, &MainWindow::onStoreDataChanged);
-        storeTreeView_->setEditTriggers(QAbstractItemView::CurrentChanged | QAbstractItemView::SelectedClicked);
+        connect(storeTreeView_, &QTreeView::clicked, this, [this](const QModelIndex& index) {
+            if (index.column() == 2) { // Type column
+                storeTreeView_->edit(index);
+            }
+        });
     }
 
     processDialog_ = new ProcessDialog(this);
