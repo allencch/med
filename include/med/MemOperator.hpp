@@ -12,6 +12,9 @@ namespace MemOperator {
     
     // Generic comparison for different ScanTypes
     bool compare(const void* ptr, ScanType type, const Operands& operands, ScanParser::OpType op);
+    
+    // Comparison for two memory pointers of the same ScanType
+    bool compare(const void* ptr1, const void* ptr2, ScanType type, ScanParser::OpType op);
 
     // Template based comparison for better performance and correctness
     template<typename T>

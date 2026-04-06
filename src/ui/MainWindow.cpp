@@ -348,7 +348,8 @@ void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
             }
 
             // Value
-            QString newVal = QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type, encoding_));
+            const SizedBytes& displayData = res.liveData.isEmpty() ? res.data : res.liveData;
+            QString newVal = QString::fromStdString(MemOperator::toString(displayData.getBytes(), res.type, encoding_));
             auto index = scanModel_->index(i, 2);
             if (scanModel_->data(index, Qt::EditRole).toString() != newVal) {
                 scanModel_->setData(index, newVal, Qt::DisplayRole);
@@ -357,7 +358,11 @@ void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
     }
 
     if (foundLabel_) foundLabel_->setText(QString::number(results.size()));
-    statusBar()->showMessage(QString("Found %1 addresses").arg(results.size()));
+    if (results.empty() && scanValueEdit_->text().contains("?")) {
+        statusBar()->showMessage("Snapshot saved");
+    } else {
+        statusBar()->showMessage(QString("Found %1 addresses").arg(results.size()));
+    }
 }
 
 void MainWindow::onFilterCompleted(const std::vector<ScanResult>& results) {
@@ -775,7 +780,8 @@ void MainWindow::updateScanModel(const std::vector<ScanResult>& results) {
         QList<QStandardItem*> items;
         items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(res.address)));
         items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(res.type)));
-        QStandardItem* valItem = new QStandardItem(QString::fromStdString(MemOperator::toString(res.data.getBytes(), res.type, encoding_)));
+        const SizedBytes& displayData = res.liveData.isEmpty() ? res.data : res.liveData;
+        QStandardItem* valItem = new QStandardItem(QString::fromStdString(MemOperator::toString(displayData.getBytes(), res.type, encoding_)));
         items << valItem;
 
         items[0]->setEditable(true);

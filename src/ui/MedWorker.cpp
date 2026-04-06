@@ -116,7 +116,7 @@ void MedWorker::refreshScanResults(const std::vector<ScanResult>& current) {
     for (auto& res : updated) {
         try {
             size_t size = MedUtil::scanTypeToSize(res.type);
-            res.data = memio.read(res.address, size);
+            res.liveData = memio.read(res.address, size);
         } catch (...) {}
     }
     // We don't need to do anything with encoding here, as ScanResult stores raw bytes.

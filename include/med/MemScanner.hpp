@@ -13,7 +13,8 @@
 struct ScanResult {
     Address address;
     ScanType type;
-    SizedBytes data;
+    SizedBytes data; // Comparison baseline
+    SizedBytes liveData; // Current display value
 };
 
 struct ScanParams {
@@ -22,6 +23,11 @@ struct ScanParams {
     ScanParser::OpType op;
     bool fastScan = false;
     std::vector<int> lastDigits;
+};
+
+struct SnapshotBlock {
+    Address address;
+    SizedBytes data;
 };
 
 class MemScanner {
@@ -34,13 +40,17 @@ public:
     void setScope(Address start, Address end);
     void clearScope();
 
+    void saveSnapshot();
+
 private:
     void scanMap(const AddressPair& map, const ScanParams& params, std::vector<ScanResult>& results, std::mutex& resultMutex);
+    std::vector<ScanResult> filterSnapshot(const ScanParams& params);
 
     pid_t pid_;
     MemIO memio_;
     ThreadPool threadPool_;
     AddressPair scope_ = {0, 0};
+    std::vector<SnapshotBlock> snapshotBlocks_;
 };
 
 #endif

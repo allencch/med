@@ -32,7 +32,7 @@ namespace StringUtil {
 
 namespace ScanParser {
 
-const char* OP_REGEX = "^(>=|<=|<>|!=|=|>|<|\\?|~)";
+const char* OP_REGEX = "^(>=|<=|<>|!=|!|=|>|<|\\?|~)";
 
 OpType getOpType(const std::string& v) {
     std::string value = StringUtil::trim(v);
@@ -67,14 +67,18 @@ Operands valueToOperands(const std::string& v, ScanType type, OpType op, Encodin
     std::vector<std::string> strValues;
     std::string valuePart = getValue(v);
     
+    if (valuePart.empty()) {
+        if (op == OpType::SnapshotSave || op == OpType::Eq || op == OpType::Neq || 
+            op == OpType::Gt || op == OpType::Lt || op == OpType::Ge || op == OpType::Le) {
+            return Operands();
+        }
+        throw MedException("Scan value is empty");
+    }
+
     if (op == OpType::Within || op == OpType::Around) {
         strValues = StringUtil::split(valuePart, ' ');
     } else {
         strValues = StringUtil::split(valuePart, ',');
-    }
-
-    if (strValues.empty()) {
-        throw MedException("Scan value is empty");
     }
 
     if (op == OpType::Around) {

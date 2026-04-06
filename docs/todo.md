@@ -152,3 +152,15 @@ Done
 Auto refresh by default is enabled. If it is off, then refresh will not work, user needs to press F5 to refresh.
 Force resume is a special case that, some games may be halted (like Ctrl+Z) due to memory scanning. By enable Force Resume, the game will be resume to non sleep.
 Take note that, "Pause" has the higher precendence than Force Resume. Meaning, if the game or process "Paused" by this application, then Force Resume should not wake the process up.
+
+
+# Task: Unknown scan and filter
+
+## Status
+Done
+
+## Goal
+
+Refer to READMD.md "Search for unknown value" section.
+Furthermore, the requirement for "at least one address in the store" should be removed.
+Also, in my older code, even without initial save snapshot scan ("?"), these operators "<", ">", "!", and "=" are working, due to the address in the Scan area and the memory of the process are different storage.

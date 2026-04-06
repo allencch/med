@@ -36,6 +36,13 @@ bool compareTypedDispatch(const void* ptr, const Operands& operands, ScanParser:
     }
 }
 
+template<typename T>
+bool compareTypedPointers(const void* ptr1, const void* ptr2, ScanParser::OpType op) {
+    T val1 = *reinterpret_cast<const T*>(ptr1);
+    T val2 = *reinterpret_cast<const T*>(ptr2);
+    return compareTyped(val1, val2, op);
+}
+
 bool compare(const void* ptr, ScanType type, const Operands& operands, ScanParser::OpType op) {
     switch (type) {
         case ScanType::Int8: return compareTypedDispatch<int8_t>(ptr, operands, op);
@@ -59,6 +66,32 @@ bool compare(const void* ptr, ScanType type, const Operands& operands, ScanParse
                 offset += opBytes.getSize();
             }
             return true;
+        }
+        default: return false;
+    }
+}
+
+bool compare(const void* ptr1, const void* ptr2, ScanType type, ScanParser::OpType op) {
+    switch (type) {
+        case ScanType::Int8: return compareTypedPointers<int8_t>(ptr1, ptr2, op);
+        case ScanType::Int16: return compareTypedPointers<int16_t>(ptr1, ptr2, op);
+        case ScanType::Int32: return compareTypedPointers<int32_t>(ptr1, ptr2, op);
+        case ScanType::Int64: return compareTypedPointers<int64_t>(ptr1, ptr2, op);
+        case ScanType::UInt8: return compareTypedPointers<uint8_t>(ptr1, ptr2, op);
+        case ScanType::UInt16: return compareTypedPointers<uint16_t>(ptr1, ptr2, op);
+        case ScanType::UInt32: return compareTypedPointers<uint32_t>(ptr1, ptr2, op);
+        case ScanType::UInt64: return compareTypedPointers<uint64_t>(ptr1, ptr2, op);
+        case ScanType::Float32: return compareTypedPointers<float>(ptr1, ptr2, op);
+        case ScanType::Float64: return compareTypedPointers<double>(ptr1, ptr2, op);
+        case ScanType::Ptr32: return compareTypedPointers<uint32_t>(ptr1, ptr2, op);
+        case ScanType::Ptr64: return compareTypedPointers<uint64_t>(ptr1, ptr2, op);
+        case ScanType::String: {
+            if (op == ScanParser::OpType::Eq) {
+                return std::strncmp((const char*)ptr1, (const char*)ptr2, MAX_STRING_SIZE) == 0;
+            } else if (op == ScanParser::OpType::Neq) {
+                return std::strncmp((const char*)ptr1, (const char*)ptr2, MAX_STRING_SIZE) != 0;
+            }
+            return false;
         }
         default: return false;
     }
