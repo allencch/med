@@ -24,7 +24,7 @@ MemEditor::~MemEditor() {}
 
 void MemEditor::setupUi() {
     QUiLoader loader;
-    QFile file("ui/mem-editor.ui");
+    QFile file(":/ui/mem-editor.ui");
     if (!file.open(QFile::ReadOnly)) {
         return;
     }

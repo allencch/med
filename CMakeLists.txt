@@ -39,6 +39,7 @@ set(ui_SRC
     include/ui/ComboBoxDelegate.hpp
     include/ui/CheckBoxDelegate.hpp
     include/ui/MemEditor.hpp
+    med.qrc
 )
 add_executable(med-ui ${ui_SRC})
 target_link_libraries(med-ui med_core Qt6::Widgets Qt6::UiTools Qt6::Gui Qt6::Core)
@@ -47,6 +48,23 @@ target_link_libraries(med-ui med_core Qt6::Widgets Qt6::UiTools Qt6::Gui Qt6::Co
 set(testfile_SRC
     src/testfile.cpp)
 add_executable(testfile ${testfile_SRC})
+
+# Installation
+include(GNUInstallDirs)
+
+install(TARGETS med-ui
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+install(TARGETS med_core
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+# Set RPATH for med-ui so it can find med_core in ../lib
+set_target_properties(med-ui PROPERTIES
+    INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}"
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+)
 
 # Testing
 find_package(CxxTest)

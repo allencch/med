@@ -39,7 +39,7 @@ MainWindow::~MainWindow() {
 
 void MainWindow::setupUi() {
     QUiLoader loader;
-    QFile file("ui/main-qt.ui");
+    QFile file(":/ui/main-qt.ui");
     if (!file.open(QFile::ReadOnly)) {
         QMessageBox::critical(this, "Error", "Could not open UI file");
         return;

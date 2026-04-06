@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>ui/main-qt.ui</file>
+    <file>ui/mem-editor.ui</file>
+    <file>ui/process.ui</file>
+</qresource>
+</RCC>
