@@ -1,65 +1,3 @@
-# Introduction
-
-I am rewriting the code with the AI.
-Old code are backed up as `src_old`, `include_old`, and `CMakeLists.txt_old`.
-
----
-
-# Task: Memory Editor - Character Editing
-
-Refer to MemoryEditor.cpp
-
-## Status
-Done
-
-## Goal
-
-In the MemoryEditor, when the caret editing the digit, it should reflects in the UI and update the memory. Eg,
-
-## Behaviour
-
-```
-10 24
-^
-```
-
-If the caret at `1`, enter `2`, it should becomes `20 24`, and it means `0x20 0x24` in memory.
-
-## Constraints
-- Must go through worker thread (no direct memory write)
-- UI must not block
-
-## Notes
-- Format: "10 24" → maps to bytes [0x10, 0x24]
-
----
-
-# Task: Memory Editor - Navigation
-
-Refer to MemoryEditor.cpp
-
-## Status
-Done
-
-## Goal
-
-Navigtion should always skip the whitespace. Eg,
-
-```
-10 24
-^
-```
-
-When I move right once, it should go to `0`. Move right again, should go to `2`.
-Furthermore, editing the value should go to next non-whitespace character.
-
-## Navigation up and down
-
-If the cursor navigates up to the first line, the memory should load the previous line and update the UI.
-If the cursor navigates down to the last line, the memory should load the next line and update the UI.
-So that the cursor can always explore other memory addresses.
-
-
 # Task: Memory Editor - Value update
 
 Refer to MemoryEditor.cpp
@@ -161,6 +99,17 @@ Done
 
 ## Goal
 
-Refer to READMD.md "Search for unknown value" section.
+Refer to README.md "Search for unknown value" section.
 Furthermore, the requirement for "at least one address in the store" should be removed.
 Also, in my older code, even without initial save snapshot scan ("?"), these operators "<", ">", "!", and "=" are working, due to the address in the Scan area and the memory of the process are different storage.
+
+
+# Task: Custom search
+
+## Status
+Done
+
+## Goal
+
+Refer to README.md "Custom search seaction" and old code SubCommand.
+It should allow various scan type.

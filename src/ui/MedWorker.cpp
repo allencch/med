@@ -47,7 +47,11 @@ void MedWorker::startScan(const QString& value, ScanType type, ScanParser::OpTyp
         params.op = op;
         params.fastScan = fastScan;
         params.lastDigits = lastDigits;
-        params.operands = ScanParser::valueToOperands(value.toStdString(), type, op, encoding_);
+        if (type == ScanType::Custom) {
+            params.customScan = ScanCommand(value.toStdString(), type, encoding_);
+        } else {
+            params.operands = ScanParser::valueToOperands(value.toStdString(), type, op, encoding_);
+        }
 
         auto results = scanner_->scan(params);
         emit scanCompleted(results);
@@ -69,7 +73,11 @@ void MedWorker::startFilter(const std::vector<ScanResult>& currentResults, const
         params.op = op;
         params.fastScan = fastScan;
         params.lastDigits = lastDigits;
-        params.operands = ScanParser::valueToOperands(value.toStdString(), type, op, encoding_);
+        if (type == ScanType::Custom) {
+            params.customScan = ScanCommand(value.toStdString(), type, encoding_);
+        } else {
+            params.operands = ScanParser::valueToOperands(value.toStdString(), type, op, encoding_);
+        }
 
         auto results = scanner_->filter(currentResults, params);
         emit filterCompleted(results);
@@ -235,7 +243,7 @@ void MedWorker::refreshWatchedValues() {
             size_t size = MedUtil::scanTypeToSize(w.type);
             try {
                 SizedBytes data = memio.read(w.address, size);
-                w.value = MemOperator::toString(data.getBytes(), w.type, encoding_);
+                w.value = MemOperator::toString(data.getBytes(), size, w.type, encoding_);
             } catch (...) {
                 w.value = "??";
             }

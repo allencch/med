@@ -349,7 +349,7 @@ void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
 
             // Value
             const SizedBytes& displayData = res.liveData.isEmpty() ? res.data : res.liveData;
-            QString newVal = QString::fromStdString(MemOperator::toString(displayData.getBytes(), res.type, encoding_));
+            QString newVal = QString::fromStdString(MemOperator::toString(displayData.getBytes(), displayData.getSize(), res.type, encoding_));
             auto index = scanModel_->index(i, 2);
             if (scanModel_->data(index, Qt::EditRole).toString() != newVal) {
                 scanModel_->setData(index, newVal, Qt::DisplayRole);
@@ -432,7 +432,7 @@ void MainWindow::onAddToStoreClicked() {
         wa.description = "New Address";
         wa.address = res.address;
         wa.type = res.type;
-        wa.value = MemOperator::toString(res.data.getBytes(), res.type, encoding_);
+        wa.value = MemOperator::toString(res.data.getBytes(), res.data.getSize(), res.type, encoding_);
         wa.locked = false;
         wa.lockValue = wa.value;
         addWatchedAddress(wa);
@@ -448,7 +448,7 @@ void MainWindow::onAddAllToStoreClicked() {
         wa.description = "New Address";
         wa.address = res.address;
         wa.type = res.type;
-        wa.value = MemOperator::toString(res.data.getBytes(), res.type, encoding_);
+        wa.value = MemOperator::toString(res.data.getBytes(), res.data.getSize(), res.type, encoding_);
         wa.locked = false;
         wa.lockValue = wa.value;
         addWatchedAddress(wa);
@@ -781,7 +781,7 @@ void MainWindow::updateScanModel(const std::vector<ScanResult>& results) {
         items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(res.address)));
         items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(res.type)));
         const SizedBytes& displayData = res.liveData.isEmpty() ? res.data : res.liveData;
-        QStandardItem* valItem = new QStandardItem(QString::fromStdString(MemOperator::toString(displayData.getBytes(), res.type, encoding_)));
+        QStandardItem* valItem = new QStandardItem(QString::fromStdString(MemOperator::toString(displayData.getBytes(), displayData.getSize(), res.type, encoding_)));
         items << valItem;
 
         items[0]->setEditable(true);

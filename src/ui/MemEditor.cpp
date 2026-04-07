@@ -272,8 +272,9 @@ void MemEditor::onMemAreaCursorPositionChanged() {
 
         if (valueEdit_) {
             ScanType type = MedUtil::stringToScanType(scanTypeCombo_->currentText().toStdString());
-            if (remaining >= MedUtil::scanTypeToSize(type)) {
-                valueEdit_->setText(QString::fromStdString(MemOperator::toString(ptr, type, mainWindow_->getEncoding())));
+            size_t typeSize = MedUtil::scanTypeToSize(type);
+            if (remaining >= typeSize) {
+                valueEdit_->setText(QString::fromStdString(MemOperator::toString(ptr, typeSize, type, mainWindow_->getEncoding())));
             } else {
                 valueEdit_->setText("??");
             }

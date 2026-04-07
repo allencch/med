@@ -9,6 +9,7 @@
 #include "med/ThreadPool.hpp"
 #include "med/Operands.hpp"
 #include "med/ScanParser.hpp"
+#include "med/ScanCommand.hpp"
 
 struct ScanResult {
     Address address;
@@ -23,6 +24,7 @@ struct ScanParams {
     ScanParser::OpType op;
     bool fastScan = false;
     std::vector<int> lastDigits;
+    ScanCommand customScan;
 };
 
 struct SnapshotBlock {

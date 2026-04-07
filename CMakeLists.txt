@@ -87,4 +87,8 @@ if(CXXTEST_FOUND)
     CXXTEST_ADD_TEST(TestArrayScan TestArrayScan.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestArrayScan.hpp)
     target_link_libraries(TestArrayScan med_core)
+
+    CXXTEST_ADD_TEST(TestCustomSearch TestCustomSearch.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestCustomSearch.hpp)
+    target_link_libraries(TestCustomSearch med_core)
 endif()

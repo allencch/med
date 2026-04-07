@@ -36,6 +36,7 @@ namespace MemOperator {
     }
 
     std::string toString(const Byte* memory, ScanType type, EncodingType encoding = EncodingType::Default);
+    std::string toString(const Byte* memory, size_t size, ScanType type, EncodingType encoding = EncodingType::Default);
 }
 
 #endif

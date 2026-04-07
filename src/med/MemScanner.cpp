@@ -68,8 +68,10 @@ std::vector<ScanResult> MemScanner::filter(const std::vector<ScanResult>& list, 
     for (size_t i = 0; i < list.size(); i += CHUNK_SIZE) {
         size_t end = std::min(i + CHUNK_SIZE, list.size());
         futures.emplace_back(threadPool_.enqueue([this, &list, i, end, &params, &newResults, &resultMutex] {
-            size_t typeSize = MedUtil::scanTypeToSize(params.type);
-            size_t totalSize = params.operands.count() > 0 ? params.operands.getTotalSize() : typeSize;
+            size_t typeSize = (params.type == ScanType::Custom) ? params.customScan.getFirstSize() : MedUtil::scanTypeToSize(params.type);
+            if (typeSize == 0) typeSize = 1;
+            size_t totalSize = (params.type == ScanType::Custom) ? params.customScan.getSize() : 
+                               (params.operands.count() > 0 ? params.operands.getTotalSize() : typeSize);
             if (totalSize == 0) return;
 
             for (size_t j = i; j < end; ++j) {
@@ -80,20 +82,22 @@ std::vector<ScanResult> MemScanner::filter(const std::vector<ScanResult>& list, 
 
                 // Last digits check
                 if (!params.lastDigits.empty()) {
-                    bool match = false;
+                    bool matchDigit = false;
                     for (int digit : params.lastDigits) {
                         if (currentAddr % 16 == (Address)digit) {
-                            match = true;
+                            matchDigit = true;
                             break;
                         }
                     }
-                    if (!match) continue;
+                    if (!matchDigit) continue;
                 }
 
                 try {
                     SizedBytes data = memio_.read(currentAddr, totalSize);
                     bool match = false;
-                    if (params.operands.count() > 0) {
+                    if (params.type == ScanType::Custom) {
+                        match = params.customScan.match(data.getBytes());
+                    } else if (params.operands.count() > 0) {
                         match = MemOperator::compare(data.getBytes(), params.type, params.operands, params.op);
                     } else {
                         match = MemOperator::compare(data.getBytes(), list[j].data.getBytes(), params.type, params.op);
@@ -213,8 +217,9 @@ void MemScanner::clearScope() {
 
 void MemScanner::scanMap(const AddressPair& map, const ScanParams& params, std::vector<ScanResult>& results, std::mutex& resultMutex) {
     size_t pageSize = getpagesize();
-    size_t typeSize = MedUtil::scanTypeToSize(params.type);
-    size_t totalSize = params.operands.getTotalSize();
+    size_t typeSize = (params.type == ScanType::Custom) ? params.customScan.getFirstSize() : MedUtil::scanTypeToSize(params.type);
+    if (typeSize == 0) typeSize = 1;
+    size_t totalSize = (params.type == ScanType::Custom) ? params.customScan.getSize() : params.operands.getTotalSize();
     if (totalSize == 0) return;
 
     for (Address addr = map.first; addr < map.second; addr += pageSize) {
@@ -232,17 +237,24 @@ void MemScanner::scanMap(const AddressPair& map, const ScanParams& params, std::
 
                 // Last digits check
                 if (!params.lastDigits.empty()) {
-                    bool match = false;
+                    bool matchDigit = false;
                     for (int digit : params.lastDigits) {
                         if (currentAddr % 16 == (Address)digit) {
-                            match = true;
+                            matchDigit = true;
                             break;
                         }
                     }
-                    if (!match) continue;
+                    if (!matchDigit) continue;
                 }
 
-                if (MemOperator::compare(pageData + offset, params.type, params.operands, params.op)) {
+                bool match = false;
+                if (params.type == ScanType::Custom) {
+                    match = params.customScan.match(pageData + offset);
+                } else {
+                    match = MemOperator::compare(pageData + offset, params.type, params.operands, params.op);
+                }
+
+                if (match) {
                     std::lock_guard<std::mutex> lock(resultMutex);
                     SizedBytes data(pageData + offset, totalSize);
                     results.push_back({currentAddr, params.type, data, data});

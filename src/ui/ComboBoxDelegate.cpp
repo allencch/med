@@ -15,6 +15,7 @@ QWidget* ComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
     editor->addItem(QString::fromStdString(ScanTypeString::Ptr32));
     editor->addItem(QString::fromStdString(ScanTypeString::Ptr64));
     editor->addItem(QString::fromStdString(ScanTypeString::String));
+    editor->addItem(QString::fromStdString(ScanTypeString::Custom));
 
     connect(editor, &QComboBox::activated, this, [this, editor]() {
         emit const_cast<ComboBoxDelegate*>(this)->commitData(editor);
