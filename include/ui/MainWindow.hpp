@@ -105,6 +105,8 @@ private:
     QLineEdit* namedScanNameEdit_;
     QPushButton* namedScanAddBtn_;
     QPushButton* namedScanDeleteBtn_;
+    QPushButton* scanButton_;
+    QPushButton* filterButton_;
     
     QStandardItemModel* scanModel_;
     QStandardItemModel* storeModel_;

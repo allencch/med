@@ -65,7 +65,10 @@ void MedWorker::startScan(const QString& value, ScanType type, ScanParser::OpTyp
 }
 
 void MedWorker::startFilter(const std::vector<ScanResult>& currentResults, const QString& value, ScanType type, ScanParser::OpType op, bool fastScan, const std::vector<int>& lastDigits) {
-    if (!scanner_) return;
+    if (!scanner_) {
+        emit errorOccurred("No process selected");
+        return;
+    }
 
     try {
         ScanParams params;

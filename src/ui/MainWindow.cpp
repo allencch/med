@@ -92,8 +92,8 @@ void MainWindow::setupUi() {
     shiftFromEdit_ = findChild<QLineEdit*>("shiftFrom");
     shiftToEdit_ = findChild<QLineEdit*>("shiftTo");
 
-    QPushButton* scanButton = findChild<QPushButton*>("scanButton");
-    QPushButton* filterButton = findChild<QPushButton*>("filterButton");
+    scanButton_ = findChild<QPushButton*>("scanButton");
+    filterButton_ = findChild<QPushButton*>("filterButton");
     QPushButton* processButton = findChild<QPushButton*>("process");
     QPushButton* scanAddButton = findChild<QPushButton*>("scanAdd");
     QPushButton* scanAddAllButton = findChild<QPushButton*>("scanAddAll");
@@ -104,8 +104,8 @@ void MainWindow::setupUi() {
     QPushButton* storeUnshiftButton = findChild<QPushButton*>("storeUnshift");
     QPushButton* moveAddressButton = findChild<QPushButton*>("moveAddress");
 
-    if (scanButton) connect(scanButton, &QPushButton::clicked, this, &MainWindow::onScanClicked);
-    if (filterButton) connect(filterButton, &QPushButton::clicked, this, &MainWindow::onFilterClicked);
+    if (scanButton_) connect(scanButton_, &QPushButton::clicked, this, &MainWindow::onScanClicked);
+    if (filterButton_) connect(filterButton_, &QPushButton::clicked, this, &MainWindow::onFilterClicked);
     if (processButton) connect(processButton, &QPushButton::clicked, this, &MainWindow::onSelectProcessClicked);
     if (scanAddButton) connect(scanAddButton, &QPushButton::clicked, this, &MainWindow::onAddToStoreClicked);
     if (scanAddAllButton) connect(scanAddAllButton, &QPushButton::clicked, this, &MainWindow::onAddAllToStoreClicked);
@@ -290,6 +290,8 @@ void MainWindow::onScanClicked() {
                               Q_ARG(bool, fastScan_),
                               Q_ARG(std::vector<int>, lastDigits));
 
+    if (scanButton_) scanButton_->setEnabled(false);
+    if (filterButton_) filterButton_->setEnabled(false);
     statusBar()->showMessage("Scanning...");
 }
 
@@ -320,6 +322,8 @@ void MainWindow::onFilterClicked() {
                               Q_ARG(bool, fastScan_),
                               Q_ARG(std::vector<int>, lastDigits));
 
+    if (scanButton_) scanButton_->setEnabled(false);
+    if (filterButton_) filterButton_->setEnabled(false);
     statusBar()->showMessage("Filtering...");
 }
 
@@ -363,6 +367,9 @@ void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
     } else {
         statusBar()->showMessage(QString("Found %1 addresses").arg(results.size()));
     }
+
+    if (scanButton_) scanButton_->setEnabled(true);
+    if (filterButton_) filterButton_->setEnabled(true);
 }
 
 void MainWindow::onFilterCompleted(const std::vector<ScanResult>& results) {
@@ -861,4 +868,6 @@ void MainWindow::onFileLoaded(const std::vector<WatchedAddress>& watched, const 
 void MainWindow::onError(const QString& message) {
     // QMessageBox::warning(this, "Error", message);
     std::cout << message.toStdString() << std::endl;
+    if (scanButton_) scanButton_->setEnabled(true);
+    if (filterButton_) filterButton_->setEnabled(true);
 }
