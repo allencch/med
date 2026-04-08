@@ -8,8 +8,9 @@
 MemScanner::MemScanner(pid_t pid) : pid_(pid), memio_(pid) {}
 
 std::vector<ScanResult> MemScanner::scan(const ScanParams& params) {
+    ScanLock lock(isScanning_);
     if (params.op == ScanParser::OpType::SnapshotSave) {
-        saveSnapshot();
+        saveSnapshotInternal();
         return {};
     }
 
@@ -41,8 +42,9 @@ std::vector<ScanResult> MemScanner::scan(const ScanParams& params) {
 }
 
 std::vector<ScanResult> MemScanner::filter(const std::vector<ScanResult>& list, const ScanParams& params) {
+    ScanLock lock(isScanning_);
     if (params.op == ScanParser::OpType::SnapshotSave) {
-        saveSnapshot();
+        saveSnapshotInternal();
         // If we have a list, we might want to refresh it as well
         if (list.empty()) return {};
         
@@ -124,6 +126,11 @@ std::vector<ScanResult> MemScanner::filter(const std::vector<ScanResult>& list, 
 }
 
 void MemScanner::saveSnapshot() {
+    ScanLock lock(isScanning_);
+    saveSnapshotInternal();
+}
+
+void MemScanner::saveSnapshotInternal() {
     snapshotBlocks_.clear();
     Process proc(pid_, "");
     Maps maps = proc.getMaps();
