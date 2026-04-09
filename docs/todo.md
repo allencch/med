@@ -113,3 +113,14 @@ Done
 
 Refer to README.md "Custom search seaction" and old code SubCommand.
 It should allow various scan type.
+
+
+# Task: Scanning and filtering progress
+
+## Status
+In progress
+
+## Goal
+When it is scanning or filtering, the button of scan and filter should be disabled to avoid multiple scan or filter.
+
+And it is used as an indicator that the scan or filter is completed.
