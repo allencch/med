@@ -9,9 +9,13 @@
 #include <functional>
 #include <future>
 
+inline size_t default_thread_count() {
+    return std::min(std::thread::hardware_concurrency(), 4u); // max to 4
+}
+
 class ThreadPool {
 public:
-    explicit ThreadPool(size_t threads = std::thread::hardware_concurrency());
+    explicit ThreadPool(size_t threads = default_thread_count());
     ~ThreadPool();
 
     template<class F, class... Args>
