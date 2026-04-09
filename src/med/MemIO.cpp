@@ -11,9 +11,16 @@
 
 MemIO::MemIO(pid_t pid) : pid_(pid) {}
 
+MemIO::~MemIO() {
+    closeFd();
+}
+
 void MemIO::setPid(pid_t pid) {
     std::lock_guard<std::mutex> lock(mutex_);
-    pid_ = pid;
+    if (pid_ != pid) {
+        closeFd();
+        pid_ = pid;
+    }
 }
 
 pid_t MemIO::getPid() const {
@@ -22,8 +29,13 @@ pid_t MemIO::getPid() const {
 }
 
 SizedBytes MemIO::read(Address addr, size_t size) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (pid_ == 0) {
+    pid_t currentPid;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        currentPid = pid_;
+    }
+
+    if (currentPid == 0) {
         return readDirect(addr, size);
     }
     return readProcess(addr, size);
@@ -56,28 +68,45 @@ SizedBytes MemIO::readProcess(Address addr, size_t size) {
     remote[0].iov_base = (void*)addr;
     remote[0].iov_len = size;
 
-    ssize_t nread = process_vm_readv(pid_, local, 1, remote, 1, 0);
+    pid_t currentPid;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        currentPid = pid_;
+    }
+
+    ssize_t nread = process_vm_readv(currentPid, local, 1, remote, 1, 0);
     if (nread == -1) {
         // Fallback to /proc/[pid]/mem if process_vm_readv fails (e.g. permissions)
-        std::string filename = "/proc/" + std::to_string(pid_) + "/mem";
-        int fd = open(filename.c_str(), O_RDONLY);
+        int fd = getFd();
         if (fd == -1) {
-            throw MedException("Failed to open " + filename);
+            throw MedException("Failed to open /proc/pid/mem");
         }
-        if (lseek(fd, addr, SEEK_SET) == -1) {
-            close(fd);
-            throw MedException("Failed to lseek in " + filename);
+        if (pread(fd, res.getBytes(), size, addr) == -1) {
+            throw MedException("Failed to read from /proc/pid/mem at " + std::to_string(addr));
         }
-        if (::read(fd, res.getBytes(), size) == -1) {
-            close(fd);
-            throw MedException("Failed to read from " + filename);
-        }
-        close(fd);
     } else if ((size_t)nread != size) {
         throw MedException("Partial read from process memory");
     }
 
     return res;
+}
+
+int MemIO::getFd() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (fd_ != -1) return fd_;
+    if (pid_ == 0) return -1;
+
+    std::string filename = "/proc/" + std::to_string(pid_) + "/mem";
+    fd_ = open(filename.c_str(), O_RDONLY);
+    return fd_;
+}
+
+void MemIO::closeFd() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (fd_ != -1) {
+        close(fd_);
+        fd_ = -1;
+    }
 }
 
 void MemIO::writeDirect(Address addr, const Byte* data, size_t size) {

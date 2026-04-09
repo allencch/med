@@ -9,6 +9,7 @@
 class MemIO {
 public:
     explicit MemIO(pid_t pid = 0);
+    ~MemIO();
 
     void setPid(pid_t pid);
     pid_t getPid() const;
@@ -24,7 +25,11 @@ private:
     void writeDirect(Address addr, const Byte* data, size_t size);
     void writeProcess(Address addr, const Byte* data, size_t size);
 
+    int getFd();
+    void closeFd();
+
     pid_t pid_ = 0;
+    int fd_ = -1;
     mutable std::mutex mutex_;
 };
 

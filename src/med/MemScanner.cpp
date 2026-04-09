@@ -76,6 +76,8 @@ std::vector<ScanResult> MemScanner::filter(const std::vector<ScanResult>& list, 
                                (params.operands.count() > 0 ? params.operands.getTotalSize() : typeSize);
             if (totalSize == 0) return;
 
+            std::vector<ScanResult> localResults;
+
             for (size_t j = i; j < end; ++j) {
                 Address currentAddr = list[j].address;
 
@@ -106,10 +108,14 @@ std::vector<ScanResult> MemScanner::filter(const std::vector<ScanResult>& list, 
                     }
 
                     if (match) {
-                        std::lock_guard<std::mutex> lock(resultMutex);
-                        newResults.push_back({currentAddr, params.type, data, data});
+                        localResults.push_back({currentAddr, params.type, data, data});
                     }
                 } catch (...) {}
+            }
+
+            if (!localResults.empty()) {
+                std::lock_guard<std::mutex> lock(resultMutex);
+                newResults.insert(newResults.end(), localResults.begin(), localResults.end());
             }
         }));
     }
@@ -140,17 +146,21 @@ void MemScanner::saveSnapshotInternal() {
 
     std::mutex snapshotMutex;
     std::vector<std::future<void>> futures;
+    const size_t CHUNK_SIZE = 1024 * 1024; // 1MB chunks for snapshot
 
     for (size_t i = 0; i < maps.size(); ++i) {
-        futures.emplace_back(threadPool_.enqueue([this, map = maps[i], &snapshotMutex] {
-            size_t pageSize = getpagesize();
-            for (Address addr = map.first; addr < map.second; addr += pageSize) {
-                size_t currentReadSize = std::min((size_t)pageSize, (size_t)(map.second - addr));
+        futures.emplace_back(threadPool_.enqueue([this, map = maps[i], &snapshotMutex, CHUNK_SIZE] {
+            std::vector<SnapshotBlock> localBlocks;
+            for (Address addr = map.first; addr < map.second; addr += CHUNK_SIZE) {
+                size_t currentReadSize = std::min(CHUNK_SIZE, (size_t)(map.second - addr));
                 try {
                     SizedBytes data = memio_.read(addr, currentReadSize);
-                    std::lock_guard<std::mutex> lock(snapshotMutex);
-                    snapshotBlocks_.push_back({addr, data});
+                    localBlocks.push_back({addr, data});
                 } catch (...) {}
+            }
+            if (!localBlocks.empty()) {
+                std::lock_guard<std::mutex> lock(snapshotMutex);
+                snapshotBlocks_.insert(snapshotBlocks_.end(), localBlocks.begin(), localBlocks.end());
             }
         }));
     }
@@ -175,6 +185,8 @@ std::vector<ScanResult> MemScanner::filterSnapshot(const ScanParams& params) {
                 const Byte* oldPtr = block.data.getBytes();
                 const Byte* newPtr = currentData.getBytes();
 
+                std::vector<ScanResult> localResults;
+
                 for (size_t offset = 0; offset <= block.data.getSize() - typeSize; ++offset) {
                     Address currentAddr = block.address + offset;
 
@@ -194,10 +206,14 @@ std::vector<ScanResult> MemScanner::filterSnapshot(const ScanParams& params) {
                     }
 
                     if (MemOperator::compare(newPtr + offset, oldPtr + offset, params.type, params.op)) {
-                        std::lock_guard<std::mutex> lock(resultMutex);
                         SizedBytes newData(newPtr + offset, typeSize);
-                        results.push_back({currentAddr, params.type, newData, newData});
+                        localResults.push_back({currentAddr, params.type, newData, newData});
                     }
+                }
+
+                if (!localResults.empty()) {
+                    std::lock_guard<std::mutex> lock(resultMutex);
+                    results.insert(results.end(), localResults.begin(), localResults.end());
                 }
             } catch (...) {}
         }));
@@ -223,20 +239,29 @@ void MemScanner::clearScope() {
 }
 
 void MemScanner::scanMap(const AddressPair& map, const ScanParams& params, std::vector<ScanResult>& results, std::mutex& resultMutex) {
-    size_t pageSize = getpagesize();
+    const size_t CHUNK_SIZE = 256 * 1024; // 256KB chunks for better throughput
     size_t typeSize = (params.type == ScanType::Custom) ? params.customScan.getFirstSize() : MedUtil::scanTypeToSize(params.type);
     if (typeSize == 0) typeSize = 1;
     size_t totalSize = (params.type == ScanType::Custom) ? params.customScan.getSize() : params.operands.getTotalSize();
     if (totalSize == 0) return;
 
-    for (Address addr = map.first; addr < map.second; addr += pageSize) {
-        size_t currentReadSize = std::min((size_t)pageSize, (size_t)(map.second - addr));
-        try {
-            // Read one page at a time to be efficient and thread-safe via MemIO
-            SizedBytes page = memio_.read(addr, currentReadSize);
-            const Byte* pageData = page.getBytes();
+    for (Address addr = map.first; addr < map.second; addr += CHUNK_SIZE) {
+        size_t currentChunkSize = std::min(CHUNK_SIZE, (size_t)(map.second - addr));
+        // To handle cross-boundary matches, we need to read slightly more than CHUNK_SIZE
+        // if there's more data in the map.
+        size_t readSize = currentChunkSize;
+        if (addr + readSize + totalSize - 1 <= map.second) {
+            readSize += totalSize - 1;
+        }
 
-            for (size_t offset = 0; offset <= currentReadSize - totalSize; ++offset) {
+        try {
+            SizedBytes page = memio_.read(addr, readSize);
+            const Byte* pageData = page.getBytes();
+            size_t limit = page.getSize() >= totalSize ? page.getSize() - totalSize : 0;
+
+            std::vector<ScanResult> localResults;
+
+            for (size_t offset = 0; offset <= limit; ++offset) {
                 Address currentAddr = addr + offset;
 
                 // Fast scan check
@@ -262,13 +287,16 @@ void MemScanner::scanMap(const AddressPair& map, const ScanParams& params, std::
                 }
 
                 if (match) {
-                    std::lock_guard<std::mutex> lock(resultMutex);
                     SizedBytes data(pageData + offset, totalSize);
-                    results.push_back({currentAddr, params.type, data, data});
+                    localResults.push_back({currentAddr, params.type, data, data});
                 }
             }
+
+            if (!localResults.empty()) {
+                std::lock_guard<std::mutex> lock(resultMutex);
+                results.insert(results.end(), localResults.begin(), localResults.end());
+            }
         } catch (...) {
-            // Ignore pages that fail to read (could be unmapped or permissions changed)
             continue;
         }
     }
