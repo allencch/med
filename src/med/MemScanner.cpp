@@ -16,7 +16,7 @@ std::vector<ScanResult> MemScanner::scan(const ScanParams& params) {
 
     Process proc(pid_, "");
     Maps maps = proc.getMaps();
-    if (scope_.first && scope_.second) {
+    if (scope_.first > 0 || scope_.second > 0) {
         maps.trimByScope(scope_);
     }
 
@@ -140,7 +140,7 @@ void MemScanner::saveSnapshotInternal() {
     snapshotBlocks_.clear();
     Process proc(pid_, "");
     Maps maps = proc.getMaps();
-    if (scope_.first && scope_.second) {
+    if (scope_.first > 0 || scope_.second > 0) {
         maps.trimByScope(scope_);
     }
 

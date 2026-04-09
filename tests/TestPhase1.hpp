@@ -39,14 +39,38 @@ public:
         TS_ASSERT_EQUALS(maps[0].first, 0x1000);
         TS_ASSERT(maps.hasPair({0x3000, 0x4000}));
 
-        maps.trimByScope({0x1500, 0x3500});
-        // 0x1000-0x2000 -> 0x1500-0x2000
-        // 0x3000-0x4000 -> 0x3000-0x3500
-        TS_ASSERT_EQUALS(maps.size(), 2);
-        TS_ASSERT_EQUALS(maps[0].first, 0x1500);
-        TS_ASSERT_EQUALS(maps[0].second, 0x2000);
-        TS_ASSERT_EQUALS(maps[1].first, 0x3000);
-        TS_ASSERT_EQUALS(maps[1].second, 0x3500);
+        Maps maps1 = maps;
+        maps1.trimByScope({0x1500, 0x3500});
+        TS_ASSERT_EQUALS(maps1.size(), 2);
+        TS_ASSERT_EQUALS(maps1[0].first, 0x1500);
+        TS_ASSERT_EQUALS(maps1[0].second, 0x2000);
+        TS_ASSERT_EQUALS(maps1[1].first, 0x3000);
+        TS_ASSERT_EQUALS(maps1[1].second, 0x3500);
+
+        // Test start only (end = 0)
+        Maps maps2 = maps;
+        maps2.trimByScope({0x1500, 0});
+        TS_ASSERT_EQUALS(maps2.size(), 2);
+        TS_ASSERT_EQUALS(maps2[0].first, 0x1500);
+        TS_ASSERT_EQUALS(maps2[0].second, 0x2000);
+        TS_ASSERT_EQUALS(maps2[1].first, 0x3000);
+        TS_ASSERT_EQUALS(maps2[1].second, 0x4000);
+
+        // Test end only (start = 0)
+        Maps maps3 = maps;
+        maps3.trimByScope({0, 0x3500});
+        TS_ASSERT_EQUALS(maps3.size(), 2);
+        TS_ASSERT_EQUALS(maps3[0].first, 0x1000);
+        TS_ASSERT_EQUALS(maps3[0].second, 0x2000);
+        TS_ASSERT_EQUALS(maps3[1].first, 0x3000);
+        TS_ASSERT_EQUALS(maps3[1].second, 0x3500);
+        
+        // Test no trim (both 0)
+        Maps maps4 = maps;
+        maps4.trimByScope({0, 0});
+        TS_ASSERT_EQUALS(maps4.size(), 2);
+        TS_ASSERT_EQUALS(maps4[0].first, 0x1000);
+        TS_ASSERT_EQUALS(maps4[0].second, 0x2000);
     }
 
     void testMedUtil() {

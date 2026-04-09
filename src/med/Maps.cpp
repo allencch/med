@@ -38,7 +38,10 @@ void Maps::trimByScope(const AddressPair& scope) {
     AddressPairs newMaps;
     for (const auto& p : maps_) {
         Address start = std::max(p.first, scope.first);
-        Address end = std::min(p.second, scope.second);
+        Address end = p.second;
+        if (scope.second > 0) {
+            end = std::min(p.second, scope.second);
+        }
         if (start < end) {
             newMaps.emplace_back(start, end);
         }

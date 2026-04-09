@@ -157,13 +157,21 @@ void MainWindow::setupUi() {
     QLineEdit* scopeEndEdit = findChild<QLineEdit*>("scopeEnd");
     if (scopeStartEdit) connect(scopeStartEdit, &QLineEdit::editingFinished, this, [this, scopeStartEdit]() {
         try {
-            Address start = MedUtil::hexToInt(scopeStartEdit->text().toStdString());
+            Address start = 0;
+            QString text = scopeStartEdit->text().trimmed();
+            if (!text.isEmpty()) {
+                start = MedUtil::hexToInt(text.toStdString());
+            }
             QMetaObject::invokeMethod(worker_, "setScopeStart", Qt::QueuedConnection, Q_ARG(Address, start));
         } catch (...) {}
     });
     if (scopeEndEdit) connect(scopeEndEdit, &QLineEdit::editingFinished, this, [this, scopeEndEdit]() {
         try {
-            Address end = MedUtil::hexToInt(scopeEndEdit->text().toStdString());
+            Address end = 0;
+            QString text = scopeEndEdit->text().trimmed();
+            if (!text.isEmpty()) {
+                end = MedUtil::hexToInt(text.toStdString());
+            }
             QMetaObject::invokeMethod(worker_, "setScopeEnd", Qt::QueuedConnection, Q_ARG(Address, end));
         } catch (...) {}
     });
