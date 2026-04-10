@@ -73,16 +73,25 @@ Maps Process::getMaps() const {
         throw MedException("Failed to open maps: " + filename);
     }
 
-    char line[256];
+    char line[512];
     while (fgets(line, sizeof(line), file)) {
         unsigned long start, end;
-        char rd, wr;
+        char perms[5];
+        unsigned long offset;
+        unsigned int dev_major, dev_minor;
+        unsigned long inode;
+        char backing[256] = "";
+
         // Example line: 559902f43000-559902f45000 r--p 00000000 00:1c 19280145                   /usr/bin/cat
-        if (sscanf(line, "%lx-%lx %c%c", &start, &end, &rd, &wr) < 4) {
+        if (sscanf(line, "%lx-%lx %4s %lx %x:%x %lu %255s", &start, &end, perms, &offset, &dev_major, &dev_minor, &inode, backing) < 7) {
             continue;
         }
 
-        if (rd == 'r' && wr == 'w' && (end > start)) {
+        if (perms[0] == 'r' && perms[1] == 'w' && (end > start)) {
+            std::string backingStr(backing);
+            if (!backingStr.empty() && backingStr[0] == '/') continue;
+            if (backingStr == "[vvar]" || backingStr == "[vsyscall]" || backingStr == "[vdso]") continue;
+
             maps.push({(Address)start, (Address)end});
         }
     }

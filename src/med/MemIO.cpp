@@ -12,13 +12,18 @@
 MemIO::MemIO(pid_t pid) : pid_(pid) {}
 
 MemIO::~MemIO() {
-    closeFd();
+    if (fd_ != -1) {
+        close(fd_);
+    }
 }
 
 void MemIO::setPid(pid_t pid) {
     std::lock_guard<std::mutex> lock(mutex_);
     if (pid_ != pid) {
-        closeFd();
+        if (fd_ != -1) {
+            close(fd_);
+            fd_ = -1;
+        }
         pid_ = pid;
     }
 }
@@ -77,11 +82,16 @@ SizedBytes MemIO::readProcess(Address addr, size_t size) {
     ssize_t nread = process_vm_readv(currentPid, local, 1, remote, 1, 0);
     if (nread == -1) {
         // Fallback to /proc/[pid]/mem if process_vm_readv fails (e.g. permissions)
-        int fd = getFd();
-        if (fd == -1) {
+        // HOLD the lock for the ENTIRE fallback: open + pread atomically
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (fd_ == -1 && pid_ != 0) {
+            std::string filename = "/proc/" + std::to_string(pid_) + "/mem";
+            fd_ = open(filename.c_str(), O_RDONLY);
+        }
+        if (fd_ == -1) {
             throw MedException("Failed to open /proc/pid/mem");
         }
-        if (pread(fd, res.getBytes(), size, addr) == -1) {
+        if (pread(fd_, res.getBytes(), size, addr) == -1) {
             throw MedException("Failed to read from /proc/pid/mem at " + std::to_string(addr));
         }
     } else if ((size_t)nread != size) {
