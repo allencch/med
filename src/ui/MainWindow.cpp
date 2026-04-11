@@ -137,7 +137,7 @@ void MainWindow::setupUi() {
     }
 
     storeModel_ = new QStandardItemModel(this);
-    storeModel_->setHorizontalHeaderLabels({"Description", "Address", "Type", "Value", "Lock"});
+    storeModel_->setHorizontalHeaderLabels({"Description +", "Address +", "Type", "Value", "Lock"});
     if (storeTreeView_) {
         storeTreeView_->setModel(storeModel_);
         storeTreeView_->setItemDelegateForColumn(2, new ComboBoxDelegate(this));
