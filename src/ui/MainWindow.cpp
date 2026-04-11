@@ -1,4 +1,6 @@
 #include <iostream>
+#include <algorithm>
+#include <QDebug>
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QInputDialog>
@@ -148,6 +150,8 @@ void MainWindow::setupUi() {
                 storeTreeView_->edit(index);
             }
         });
+        storeTreeView_->header()->setSectionsClickable(true);
+        connect(storeTreeView_->header(), &QHeaderView::sectionClicked, this, &MainWindow::onStoreHeaderClicked);
     }
 
     processDialog_ = new ProcessDialog(this);
@@ -385,11 +389,28 @@ void MainWindow::onFilterCompleted(const std::vector<ScanResult>& results) {
 }
 
 void MainWindow::onWatchedValuesRefreshed(const std::vector<WatchedAddress>& watched) {
+    bool structureChanged = (watched.size() != watchedAddresses_.size());
+    if (!structureChanged) {
+        for (int i = 0; i < (int)watched.size(); ++i) {
+            if (watched[i].address != watchedAddresses_[i].address ||
+                watched[i].type != watchedAddresses_[i].type ||
+                watched[i].description != watchedAddresses_[i].description) {
+                structureChanged = true;
+                break;
+            }
+        }
+    }
+
     watchedAddresses_ = watched;
-    for (int i = 0; i < (int)watched.size(); ++i) {
-        auto index = storeModel_->index(i, 3);
-        if (storeModel_->data(index, Qt::EditRole).toString() != QString::fromStdString(watched[i].value)) {
-            storeModel_->setData(index, QString::fromStdString(watched[i].value), Qt::DisplayRole);
+
+    if (structureChanged) {
+        updateStoreModel();
+    } else {
+        for (int i = 0; i < (int)watched.size(); ++i) {
+            auto index = storeModel_->index(i, 3);
+            if (storeModel_->data(index, Qt::EditRole).toString() != QString::fromStdString(watched[i].value)) {
+                storeModel_->setData(index, QString::fromStdString(watched[i].value), Qt::DisplayRole);
+            }
         }
     }
 }
@@ -532,6 +553,39 @@ void MainWindow::onStoreDataChanged(const QModelIndex& topLeft, const QModelInde
                               Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
 }
 
+void MainWindow::onStoreHeaderClicked(int logicalIndex) {
+    qDebug() << "Header clicked: " << logicalIndex;
+    if (logicalIndex == 0) { // Description
+        std::sort(watchedAddresses_.begin(), watchedAddresses_.end(), [](const WatchedAddress& a, const WatchedAddress& b) {
+            return a.description < b.description;
+        });
+    } else if (logicalIndex == 1) { // Address
+        std::sort(watchedAddresses_.begin(), watchedAddresses_.end(), [](const WatchedAddress& a, const WatchedAddress& b) {
+            return a.address < b.address;
+        });
+    } else {
+        return;
+    }
+    updateStoreModel();
+    QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
+                              Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
+}
+
+void MainWindow::updateStoreModel() {
+    storeModel_->removeRows(0, storeModel_->rowCount());
+    for (const auto& wa : watchedAddresses_) {
+        QList<QStandardItem*> items;
+        items << new QStandardItem(QString::fromStdString(wa.description));
+        items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(wa.address)));
+        items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(wa.type)));
+        items << new QStandardItem(QString::fromStdString(wa.value));
+        QStandardItem* lockItem = new QStandardItem();
+        lockItem->setData(wa.locked, Qt::EditRole);
+        items << lockItem;
+        storeModel_->appendRow(items);
+    }
+}
+
 void MainWindow::onPauseClicked(bool checked) {
     QMetaObject::invokeMethod(worker_, "setProcessPaused", Qt::QueuedConnection, Q_ARG(bool, checked));
 }
@@ -637,8 +691,7 @@ void MainWindow::onDeleteAddressTriggered() {
 
 void MainWindow::onStoreClearTriggered() {
     watchedAddresses_.clear();
-    storeModel_->clear();
-    storeModel_->setHorizontalHeaderLabels({"Description", "Address", "Type", "Value", "Lock"});
+    updateStoreModel();
     QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
                               Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
     statusBar()->showMessage("Store cleared");
@@ -852,21 +905,10 @@ void MainWindow::onNamedScanComboBoxChanged(int) {
 
 void MainWindow::onFileLoaded(const std::vector<WatchedAddress>& watched, const QString& notes) {
     watchedAddresses_ = watched;
-    storeModel_->removeRows(0, storeModel_->rowCount());
+    for (auto& wa : watchedAddresses_) wa.locked = false; // Always unlock when loaded
     if (notesEdit_) notesEdit_->setPlainText(notes);
-
-    for (const auto& wa : watched) {
-        QList<QStandardItem*> items;
-        items << new QStandardItem(QString::fromStdString(wa.description));
-        items << new QStandardItem(QString::fromStdString(MedUtil::intToHex(wa.address)));
-        items << new QStandardItem(QString::fromStdString(MedUtil::scanTypeToString(wa.type)));
-        items << new QStandardItem(QString::fromStdString(wa.value));
-        QStandardItem* lockItem = new QStandardItem();
-        lockItem->setData(false, Qt::EditRole); // Always unlock when loaded
-        items << lockItem;
-        storeModel_->appendRow(items);
-    }
-    statusBar()->showMessage(QString("Loaded %1 addresses").arg(watched.size()));
+    updateStoreModel();
+    statusBar()->showMessage(QString("Loaded %1 addresses").arg(watchedAddresses_.size()));
 
     if (!currentFilename_.isEmpty()) {
         setWindowTitle(MAIN_TITLE + ": " + currentFilename_);

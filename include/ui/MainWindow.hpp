@@ -67,6 +67,7 @@ private slots:
     void onStoreShiftClicked();
     void onStoreUnshiftClicked();
     void onMoveAddressClicked();
+    void onStoreHeaderClicked(int logicalIndex);
     void onDefaultEncodingTriggered(bool checked);
     void onBig5EncodingTriggered(bool checked);
     
@@ -88,6 +89,7 @@ private:
     void connectSignals();
     void updateScanModel(const std::vector<ScanResult>& results);
     void addWatchedAddress(const WatchedAddress& wa);
+    void updateStoreModel();
     
     // UI elements from .ui
     QTreeView* scanTreeView_;

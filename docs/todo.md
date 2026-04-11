@@ -118,9 +118,42 @@ It should allow various scan type.
 # Task: Scanning and filtering progress
 
 ## Status
-In progress
+Done
 
 ## Goal
 When it is scanning or filtering, the button of scan and filter should be disabled to avoid multiple scan or filter.
 
 And it is used as an indicator that the scan or filter is completed.
+
+
+# Task: Sort by store header
+
+## Status
+
+In progress
+
+## Description
+
+Refer to old code,
+
+```
+void MedUi::onStoreHeaderClicked(int logicalIndex) {
+  if (logicalIndex == STORE_COL_DESCRIPTION) {
+    storeUpdateMutex.lock();
+    storeModel->sortByDescription();
+    storeUpdateMutex.unlock();
+  }
+  else if (logicalIndex == STORE_COL_ADDRESS) {
+    storeUpdateMutex.lock();
+    storeModel->sortByAddress();
+    storeUpdateMutex.unlock();
+  }
+}
+```
+
+The UI store area hader, for the Description and Address should be clickable.
+Once click, it will sort the list of watched addresses in ascending order.
+ONLY ascending order.
+
+This should affect the saving to the JSON. Meaning, technically the sorting should happen on the `std::vector<WatchedAddress>` directly.
+
