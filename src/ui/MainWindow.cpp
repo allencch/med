@@ -536,6 +536,7 @@ void MainWindow::onStoreDataChanged(const QModelIndex& topLeft, const QModelInde
 
         if (topLeft.column() == 3) { // Value changed
             QString newVal = storeModel_->data(storeModel_->index(row, 3)).toString();
+            if (newVal == "??") continue;
             wa.value = newVal.toStdString();
             if (wa.locked) wa.lockValue = wa.value;
             QMetaObject::invokeMethod(worker_, "writeMemory", Qt::QueuedConnection,
@@ -661,7 +662,7 @@ void MainWindow::onNewAddressTriggered() {
     wa.description = "New Address";
     wa.address = 0;
     wa.type = ScanType::UInt32;
-    wa.value = "0";
+    wa.value = "??";
     wa.locked = false;
     wa.lockValue = wa.value;
 
@@ -764,7 +765,11 @@ void MainWindow::onStoreShiftClicked() {
             int row = index.row();
             if (row >= (int)watchedAddresses_.size()) continue;
             watchedAddresses_[row].address = watchedAddresses_[row].address - from + to;
+            watchedAddresses_[row].locked = false;
+            watchedAddresses_[row].value = "??";
             storeModel_->setData(storeModel_->index(row, 1), QString::fromStdString(MedUtil::intToHex(watchedAddresses_[row].address)), Qt::EditRole);
+            storeModel_->setData(storeModel_->index(row, 3), "??", Qt::EditRole);
+            storeModel_->setData(storeModel_->index(row, 4), false, Qt::EditRole);
         }
 
         QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
@@ -790,7 +795,11 @@ void MainWindow::onStoreUnshiftClicked() {
             int row = index.row();
             if (row >= (int)watchedAddresses_.size()) continue;
             watchedAddresses_[row].address = watchedAddresses_[row].address - to + from;
+            watchedAddresses_[row].locked = false;
+            watchedAddresses_[row].value = "??";
             storeModel_->setData(storeModel_->index(row, 1), QString::fromStdString(MedUtil::intToHex(watchedAddresses_[row].address)), Qt::EditRole);
+            storeModel_->setData(storeModel_->index(row, 3), "??", Qt::EditRole);
+            storeModel_->setData(storeModel_->index(row, 4), false, Qt::EditRole);
         }
 
         QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
@@ -814,7 +823,11 @@ void MainWindow::onMoveAddressClicked() {
             int row = index.row();
             if (row >= (int)watchedAddresses_.size()) continue;
             watchedAddresses_[row].address += offset;
+            watchedAddresses_[row].locked = false;
+            watchedAddresses_[row].value = "??";
             storeModel_->setData(storeModel_->index(row, 1), QString::fromStdString(MedUtil::intToHex(watchedAddresses_[row].address)), Qt::EditRole);
+            storeModel_->setData(storeModel_->index(row, 3), "??", Qt::EditRole);
+            storeModel_->setData(storeModel_->index(row, 4), false, Qt::EditRole);
         }
 
         QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
