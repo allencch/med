@@ -130,7 +130,7 @@ And it is used as an indicator that the scan or filter is completed.
 
 ## Status
 
-In progress
+Done
 
 ## Description
 
@@ -157,3 +157,13 @@ ONLY ascending order.
 
 This should affect the saving to the JSON. Meaning, technically the sorting should happen on the `std::vector<WatchedAddress>` directly.
 
+
+
+# Task: Shift/unshift and move should not write to memory
+
+## Status
+Done
+
+## Description
+There is a bug that when the address is shift/unshift or move, the values from the exiting stored address will write to the new address, instead of read.
+When shift/unshift/move, there should no write to the memory, but only read from the memory.
