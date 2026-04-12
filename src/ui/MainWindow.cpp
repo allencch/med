@@ -340,6 +340,7 @@ void MainWindow::onFilterClicked() {
 }
 
 void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
+    isProgrammaticUpdate_ = true;
     bool sizeChanged = (results.size() != namedScans_.getActiveResults().size());
     namedScans_.setActiveResults(results);
 
@@ -382,6 +383,7 @@ void MainWindow::onScanCompleted(const std::vector<ScanResult>& results) {
 
     if (scanButton_) scanButton_->setEnabled(true);
     if (filterButton_) filterButton_->setEnabled(true);
+    isProgrammaticUpdate_ = false;
 }
 
 void MainWindow::onFilterCompleted(const std::vector<ScanResult>& results) {
@@ -389,6 +391,7 @@ void MainWindow::onFilterCompleted(const std::vector<ScanResult>& results) {
 }
 
 void MainWindow::onWatchedValuesRefreshed(const std::vector<WatchedAddress>& watched) {
+    isProgrammaticUpdate_ = true;
     bool structureChanged = (watched.size() != watchedAddresses_.size());
     if (!structureChanged) {
         for (int i = 0; i < (int)watched.size(); ++i) {
@@ -413,6 +416,7 @@ void MainWindow::onWatchedValuesRefreshed(const std::vector<WatchedAddress>& wat
             }
         }
     }
+    isProgrammaticUpdate_ = false;
 }
 
 void MainWindow::onRefreshRequested() {
@@ -499,6 +503,7 @@ void MainWindow::onScanTreeViewDoubleClicked(const QModelIndex& index) {
 }
 
 void MainWindow::onScanDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) {
+    if (isProgrammaticUpdate_) return;
     for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
         if (row >= (int)namedScans_.getActiveResults().size()) continue;
 
@@ -524,6 +529,7 @@ void MainWindow::onStoreTreeViewDoubleClicked(const QModelIndex& index) {
 }
 
 void MainWindow::onStoreDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) {
+    if (isProgrammaticUpdate_) return;
     for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
         if (row >= (int)watchedAddresses_.size()) continue;
 
@@ -573,6 +579,7 @@ void MainWindow::onStoreHeaderClicked(int logicalIndex) {
 }
 
 void MainWindow::updateStoreModel() {
+    isProgrammaticUpdate_ = true;
     storeModel_->removeRows(0, storeModel_->rowCount());
     for (const auto& wa : watchedAddresses_) {
         QList<QStandardItem*> items;
@@ -585,6 +592,7 @@ void MainWindow::updateStoreModel() {
         items << lockItem;
         storeModel_->appendRow(items);
     }
+    isProgrammaticUpdate_ = false;
 }
 
 void MainWindow::onPauseClicked(bool checked) {
@@ -854,6 +862,7 @@ void MainWindow::onBig5EncodingTriggered(bool checked) {
 }
 
 void MainWindow::updateScanModel(const std::vector<ScanResult>& results) {
+    isProgrammaticUpdate_ = true;
     scanModel_->removeRows(0, scanModel_->rowCount());
     size_t count = std::min(results.size(), (size_t)800);
     for (size_t i = 0; i < count; ++i) {
@@ -872,6 +881,7 @@ void MainWindow::updateScanModel(const std::vector<ScanResult>& results) {
         scanModel_->appendRow(items);
     }
     if (foundLabel_) foundLabel_->setText(QString::number(results.size()));
+    isProgrammaticUpdate_ = false;
 }
 
 void MainWindow::onNamedScanAddClicked() {
@@ -929,6 +939,9 @@ void MainWindow::onFileLoaded(const std::vector<WatchedAddress>& watched, const 
     if (!currentFilename_.isEmpty()) {
         setWindowTitle(MAIN_TITLE + ": " + currentFilename_);
     }
+
+    QMetaObject::invokeMethod(worker_, "updateWatchedAddresses", Qt::QueuedConnection,
+                              Q_ARG(std::vector<WatchedAddress>, watchedAddresses_));
 }
 
 void MainWindow::onError(const QString& message) {

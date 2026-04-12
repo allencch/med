@@ -101,10 +101,10 @@ void MedWorker::writeMemory(Address addr, const QString& value, ScanType type) {
     if (pid_ == 0) return;
     try {
         MemIO memio(pid_);
-        size_t size = MedUtil::scanTypeToSize(type);
-        SizedBytes sb = SizedBytes::create(size);
-        MedUtil::stringToMemory(value.toStdString(), type, sb.getBytes(), encoding_);
-        memio.write(addr, sb);
+        size_t maxSize = MedUtil::scanTypeToSize(type);
+        SizedBytes sb = SizedBytes::create(maxSize);
+        size_t actualSize = MedUtil::stringToMemory(value.toStdString(), type, sb.getBytes(), encoding_);
+        memio.write(addr, sb.getBytes(), actualSize);
     } catch (const std::exception& e) {
         emit errorOccurred(QString::fromStdString(e.what()));
     }
@@ -261,10 +261,10 @@ void MedWorker::performLocks() {
     for (const auto& w : watched_) {
         if (w.locked) {
             try {
-                size_t size = MedUtil::scanTypeToSize(w.type);
-                SizedBytes sb = SizedBytes::create(size);
-                MedUtil::stringToMemory(w.lockValue, w.type, sb.getBytes(), encoding_);
-                memio.write(w.address, sb);
+                size_t maxSize = MedUtil::scanTypeToSize(w.type);
+                SizedBytes sb = SizedBytes::create(maxSize);
+                size_t actualSize = MedUtil::stringToMemory(w.lockValue, w.type, sb.getBytes(), encoding_);
+                memio.write(w.address, sb.getBytes(), actualSize);
             } catch (...) {}
         }
     }

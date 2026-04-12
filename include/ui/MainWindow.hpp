@@ -128,6 +128,7 @@ private:
     bool fastScan_ = true;
     bool autoRefresh_ = true;
     bool forceResume_ = false;
+    bool isProgrammaticUpdate_ = false;
     EncodingType encoding_ = EncodingType::Default;
 };
 

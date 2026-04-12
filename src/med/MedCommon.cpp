@@ -93,7 +93,7 @@ Address addressRoundDown(Address addr) {
     return addr - (addr % 16);
 }
 
-void stringToMemory(const std::string& str, ScanType type, Byte* buffer, EncodingType encoding) {
+size_t stringToMemory(const std::string& str, ScanType type, Byte* buffer, EncodingType encoding) {
     if (isHexString(str)) {
         return hexStringToMemory(str, type, buffer);
     }
@@ -103,11 +103,13 @@ void stringToMemory(const std::string& str, ScanType type, Byte* buffer, Encodin
         if (encoding == EncodingType::Big5) {
             encodedValue = convertFromUtf8(str, "big5");
         }
-        std::memcpy(buffer, encodedValue.c_str(), std::min(encodedValue.size() + 1, (size_t)MAX_STRING_SIZE));
-        return;
+        size_t size = std::min(encodedValue.size() + 1, (size_t)MAX_STRING_SIZE);
+        std::memcpy(buffer, encodedValue.c_str(), size);
+        return size;
     }
 
     std::stringstream ss(str);
+    size_t size = scanTypeToSize(type);
     switch (type) {
         case ScanType::Int8: {
             int temp;
@@ -167,15 +169,17 @@ void stringToMemory(const std::string& str, ScanType type, Byte* buffer, Encodin
     if (ss.fail()) {
         throw MedException("Failed to convert string to memory: " + str);
     }
+    return size;
 }
 
-void hexStringToMemory(const std::string& str, ScanType type, Byte* buffer) {
+size_t hexStringToMemory(const std::string& str, ScanType type, Byte* buffer) {
     std::string sanitized = str;
     if (sanitized.find("0x") == 0 || sanitized.find("0X") == 0) {
         sanitized = sanitized.substr(2);
     }
 
-    size_t length = scanTypeToSize(type) * 2;
+    size_t size = scanTypeToSize(type);
+    size_t length = size * 2;
     if (sanitized.length() > length) {
         sanitized = sanitized.substr(sanitized.length() - length);
     }
@@ -215,9 +219,6 @@ void hexStringToMemory(const std::string& str, ScanType type, Byte* buffer) {
             break;
         }
         case ScanType::Float32: {
-            // Hex to float is tricky with stringstream. 
-            // We might need a different approach if we want literal hex to float.
-            // But usually hex strings are for integers or pointers.
             uint32_t temp;
             ss >> temp;
             std::memcpy(buffer, &temp, sizeof(float));
@@ -235,6 +236,7 @@ void hexStringToMemory(const std::string& str, ScanType type, Byte* buffer) {
     if (ss.fail()) {
         throw MedException("Failed to convert hex string to memory: " + str);
     }
+    return size;
 }
 
 bool isHexString(const std::string& str) {

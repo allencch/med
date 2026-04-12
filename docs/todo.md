@@ -167,3 +167,17 @@ Done
 ## Description
 There is a bug that when the address is shift/unshift or move, the values from the exiting stored address will write to the new address, instead of read.
 When shift/unshift/move, there should no write to the memory, but only read from the memory.
+
+
+# Task: Debug attached process crash
+
+## Status
+Done
+
+## Description
+There is a bug when the scan type is String. I can reproduce it.
+Let's say when I start a new game (attached process), then the Med (this application) open a saved file, because the memory address is changed in the new game (dynamically allocated memory), the watched address is different from the attached process, then the game will be crashed later.
+
+So, I think the memory is written by the Med, which it should not do that.
+
+Similarly, let's say the address was saved as Int32, and load the JSON file, then after game attached, I change the combobox scan type to String, the game also crashed. Changing scan type should not write to memory.
