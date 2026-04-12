@@ -918,7 +918,10 @@ void MainWindow::onNamedScanComboBoxChanged(int) {
 
 void MainWindow::onFileLoaded(const std::vector<WatchedAddress>& watched, const QString& notes) {
     watchedAddresses_ = watched;
-    for (auto& wa : watchedAddresses_) wa.locked = false; // Always unlock when loaded
+    for (auto& wa : watchedAddresses_) {
+        wa.value = "??";
+        wa.locked = false; // Always unlock when loaded
+    }
     if (notesEdit_) notesEdit_->setPlainText(notes);
     updateStoreModel();
     statusBar()->showMessage(QString("Loaded %1 addresses").arg(watchedAddresses_.size()));
