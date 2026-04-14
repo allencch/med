@@ -288,7 +288,7 @@ void MainWindow::onScanClicked() {
         auto tokens = StringUtil::split(lastDigitEdit_->text().toStdString(), ',');
         for (const auto& t : tokens) {
             try {
-                lastDigits.push_back(std::stoi(t));
+                lastDigits.push_back((int)MedUtil::hexToInt(t));
             } catch (...) {}
         }
     }
@@ -319,7 +319,7 @@ void MainWindow::onFilterClicked() {
         auto tokens = StringUtil::split(lastDigitEdit_->text().toStdString(), ',');
         for (const auto& t : tokens) {
             try {
-                lastDigits.push_back(std::stoi(t));
+                lastDigits.push_back((int)MedUtil::hexToInt(t));
             } catch (...) {}
         }
     }
