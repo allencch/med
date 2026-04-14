@@ -91,4 +91,8 @@ if(CXXTEST_FOUND)
     CXXTEST_ADD_TEST(TestCustomSearch TestCustomSearch.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestCustomSearch.hpp)
     target_link_libraries(TestCustomSearch med_core)
+
+    CXXTEST_ADD_TEST(TestLastDigitScope TestLastDigitScope.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestLastDigitScope.hpp)
+    target_link_libraries(TestLastDigitScope med_core)
 endif()
