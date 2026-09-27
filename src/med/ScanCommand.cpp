@@ -1,6 +1,7 @@
 #include <regex>
 #include <algorithm>
 #include <cstring>
+#include <sstream>
 #include "med/ScanCommand.hpp"
 #include "med/MemOperator.hpp"
 #include "med/MedCommon.hpp"
