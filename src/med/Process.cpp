@@ -6,6 +6,7 @@
 #include <iostream>
 #include <regex>
 #include <signal.h>
+#include <sstream>
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 #include <unistd.h>
