@@ -9,4 +9,4 @@ To resolve the dead lock issue.
 ## 2026-10-01
 
 Update to version 4.0.1.
-Fix issue when building with newer gcc versions.
+Fix an issue when building with newer GCC versions.
