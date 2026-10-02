@@ -5,3 +5,8 @@
 Update to version 4.0.0.
 Re-write everything with Gemini, also assisted with Claude for planning.
 To resolve the dead lock issue.
+
+## 2026-10-01
+
+Update to version 4.0.1.
+Fix an issue when building with newer GCC versions.
