@@ -66,7 +66,7 @@ std::string Process::getName(pid_t pid) {
     return ret;
 }
 
-Maps Process::getMaps() const {
+Maps Process::getMaps(bool includeFileBacked) const {
     Maps maps;
     std::string filename = "/proc/" + std::to_string(pid_) + "/maps";
     FILE* file = fopen(filename.c_str(), "r");
@@ -88,9 +88,9 @@ Maps Process::getMaps() const {
             continue;
         }
 
-        if (perms[0] == 'r' && perms[1] == 'w' && (end > start)) {
+        if (perms[0] == 'r' && perms[1] == 'w' && end > start) {
             std::string backingStr(backing);
-            if (!backingStr.empty() && backingStr[0] == '/') continue;
+            if (!includeFileBacked && !backingStr.empty() && backingStr[0] == '/') continue;
             if (backingStr == "[vvar]" || backingStr == "[vsyscall]" || backingStr == "[vdso]") continue;
 
             maps.push({(Address)start, (Address)end});

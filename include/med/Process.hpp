@@ -18,7 +18,7 @@ public:
     static std::vector<Process> listAll();
     static std::string getName(pid_t pid);
 
-    Maps getMaps() const;
+    Maps getMaps(bool includeFileBacked = false) const;
 
     bool isSuspended() const;
     void resume() const;

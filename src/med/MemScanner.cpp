@@ -7,6 +7,15 @@
 
 MemScanner::MemScanner(pid_t pid) : pid_(pid), memio_(pid) {}
 
+Maps MemScanner::getScanMaps() const {
+    Process proc(pid_, "");
+    Maps maps = proc.getMaps(includeFileBackedInScope_);
+    if (scope_.first > 0 || scope_.second > 0) {
+        maps.trimByScope(scope_);
+    }
+    return maps;
+}
+
 std::vector<ScanResult> MemScanner::scan(const ScanParams& params) {
     ScanLock lock(isScanning_);
     if (params.op == ScanParser::OpType::SnapshotSave) {
@@ -14,11 +23,7 @@ std::vector<ScanResult> MemScanner::scan(const ScanParams& params) {
         return {};
     }
 
-    Process proc(pid_, "");
-    Maps maps = proc.getMaps();
-    if (scope_.first > 0 || scope_.second > 0) {
-        maps.trimByScope(scope_);
-    }
+    Maps maps = getScanMaps();
 
     std::vector<ScanResult> results;
     std::mutex resultMutex;
@@ -137,12 +142,8 @@ void MemScanner::saveSnapshot() {
 }
 
 void MemScanner::saveSnapshotInternal() {
+    Maps maps = getScanMaps();
     snapshotBlocks_.clear();
-    Process proc(pid_, "");
-    Maps maps = proc.getMaps();
-    if (scope_.first > 0 || scope_.second > 0) {
-        maps.trimByScope(scope_);
-    }
 
     std::mutex snapshotMutex;
     std::vector<std::future<void>> futures;
@@ -236,6 +237,10 @@ void MemScanner::setScope(Address start, Address end) {
 
 void MemScanner::clearScope() {
     scope_ = {0, 0};
+}
+
+void MemScanner::setIncludeFileBackedInScope(bool enabled) {
+    includeFileBackedInScope_ = enabled;
 }
 
 void MemScanner::scanMap(const AddressPair& map, const ScanParams& params, std::vector<ScanResult>& results, std::mutex& resultMutex) {

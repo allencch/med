@@ -30,9 +30,8 @@ void MedWorker::onTick() {
 void MedWorker::setPid(pid_t pid) {
     pid_ = pid;
     scanner_ = std::make_unique<MemScanner>(pid_);
-    if (scopeStart_ || scopeEnd_) {
-        scanner_->setScope(scopeStart_, scopeEnd_);
-    }
+    scanner_->setScope(scopeStart_, scopeEnd_);
+    scanner_->setIncludeFileBackedInScope(includeFileBackedInScope_);
 }
 
 void MedWorker::startScan(const QString& value, ScanType type, ScanParser::OpType op, bool fastScan, const std::vector<int>& lastDigits) {
@@ -176,6 +175,11 @@ void MedWorker::setScopeStart(Address start) {
 void MedWorker::setScopeEnd(Address end) {
     scopeEnd_ = end;
     if (scanner_) scanner_->setScope(scopeStart_, scopeEnd_);
+}
+
+void MedWorker::setIncludeFileBackedInScope(bool enabled) {
+    includeFileBackedInScope_ = enabled;
+    if (scanner_) scanner_->setIncludeFileBackedInScope(enabled);
 }
 
 void MedWorker::setEncoding(EncodingType encoding) {

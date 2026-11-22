@@ -61,6 +61,7 @@ public slots:
     void setForceResume(bool forceResume);
     void setScopeStart(Address start);
     void setScopeEnd(Address end);
+    void setIncludeFileBackedInScope(bool enabled);
     void setEncoding(EncodingType encoding);
 
 private slots:
@@ -77,6 +78,7 @@ private:
     bool forceResume_ = false;
     Address scopeStart_ = 0;
     Address scopeEnd_ = 0;
+    bool includeFileBackedInScope_ = false;
     EncodingType encoding_ = EncodingType::Default;
     
     void performLocks();

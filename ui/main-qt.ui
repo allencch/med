@@ -454,6 +454,7 @@
      <string>&amp;Option</string>
     </property>
     <addaction name="actionFastScan"/>
+    <addaction name="actionIncludeFileBackedInScope"/>
     <addaction name="actionForceResume"/>
    </widget>
    <addaction name="menuFile"/>
@@ -592,6 +593,17 @@
    </property>
    <property name="text">
     <string>&amp;Fast Scan</string>
+   </property>
+  </action>
+  <action name="actionIncludeFileBackedInScope">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Include Writable File-Backed Memory</string>
+   </property>
+   <property name="statusTip">
+    <string>Include readable and writable file-backed mappings. Scope Start and Scope End are optional.</string>
    </property>
   </action>
   <action name="actionStoreClear">

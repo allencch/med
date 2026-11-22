@@ -250,6 +250,9 @@ void MainWindow::setupUi() {
     }
 
 void MainWindow::connectSignals() {
+    if (auto* action = findChild<QAction*>("actionIncludeFileBackedInScope")) {
+        connect(action, &QAction::toggled, worker_, &MedWorker::setIncludeFileBackedInScope, Qt::QueuedConnection);
+    }
     connect(worker_, &MedWorker::scanCompleted, this, &MainWindow::onScanCompleted);
     connect(worker_, &MedWorker::filterCompleted, this, &MainWindow::onFilterCompleted);
     connect(worker_, &MedWorker::watchedValuesRefreshed, this, &MainWindow::onWatchedValuesRefreshed);

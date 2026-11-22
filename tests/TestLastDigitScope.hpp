@@ -1,5 +1,6 @@
 #include <cxxtest/TestSuite.h>
 #include <unistd.h>
+#include <sys/mman.h>
 #include <vector>
 #include <algorithm>
 #include "med/MemScanner.hpp"
@@ -7,6 +8,54 @@
 
 class TestLastDigitScope : public CxxTest::TestSuite {
 public:
+    void testIncludeWritableFileBackedMemory() {
+        int fd = memfd_create("med-scan-test", MFD_CLOEXEC);
+        TS_ASSERT(fd >= 0);
+        if (fd < 0) return;
+
+        int32_t target = 0x12345678;
+        ssize_t written = write(fd, &target, sizeof(target));
+        void* mapping = mmap(nullptr, sizeof(target), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        close(fd);
+        TS_ASSERT_EQUALS(written, sizeof(target));
+        TS_ASSERT_DIFFERS(mapping, MAP_FAILED);
+        if (mapping == MAP_FAILED) return;
+
+        Address start = reinterpret_cast<Address>(mapping);
+        MemScanner scanner(getpid());
+        ScanParams params;
+        params.type = ScanType::Int32;
+        params.op = ScanParser::OpType::Eq;
+        params.operands = Operands({SizedBytes(reinterpret_cast<Byte*>(&target), sizeof(target))});
+
+        scanner.setScope(start, start + sizeof(target));
+        TS_ASSERT(scanner.scan(params).empty());
+
+        scanner.setIncludeFileBackedInScope(true);
+        auto results = scanner.scan(params);
+        TS_ASSERT_EQUALS(results.size(), 1);
+        if (!results.empty()) TS_ASSERT_EQUALS(results.front().address, start);
+
+        scanner.clearScope();
+        params.fastScan = true;
+        results = scanner.scan(params);
+        TS_ASSERT(std::any_of(results.begin(), results.end(), [start](const ScanResult& result) {
+            return result.address == start;
+        }));
+
+        scanner.setScope(0, start);
+        results = scanner.scan(params);
+        TS_ASSERT(std::none_of(results.begin(), results.end(), [start](const ScanResult& result) {
+            return result.address >= start;
+        }));
+
+        scanner.setScope(start, start + sizeof(target));
+        int protectResult = mprotect(mapping, sizeof(target), PROT_READ);
+        TS_ASSERT_EQUALS(protectResult, 0);
+        TS_ASSERT(scanner.scan(params).empty());
+        munmap(mapping, sizeof(target));
+    }
+
     void testLastDigitScope() {
         volatile int32_t val1 = 0x12345678;
         volatile int32_t val2 = 0x12345678;

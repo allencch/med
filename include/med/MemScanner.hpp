@@ -43,10 +43,12 @@ public:
 
     void setScope(Address start, Address end);
     void clearScope();
+    void setIncludeFileBackedInScope(bool enabled);
 
     void saveSnapshot();
 
 private:
+    Maps getScanMaps() const;
     void saveSnapshotInternal();
     class ScanLock {
     public:
@@ -69,6 +71,7 @@ private:
     MemIO memio_;
     ThreadPool threadPool_;
     AddressPair scope_ = {0, 0};
+    bool includeFileBackedInScope_ = false;
     std::vector<SnapshotBlock> snapshotBlocks_;
     std::atomic<bool> isScanning_{false};
 };
