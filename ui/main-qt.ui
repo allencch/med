@@ -173,11 +173,11 @@
          </sizepolicy>
         </property>
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <widget class="QSplitter" name="splitter">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <widget class="QWidget" name="layoutWidget">
           <layout class="QVBoxLayout" name="verticalLayout">
@@ -400,7 +400,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -454,8 +454,8 @@
      <string>&amp;Option</string>
     </property>
     <addaction name="actionFastScan"/>
-    <addaction name="actionIncludeFileBackedInScope"/>
     <addaction name="actionForceResume"/>
+    <addaction name="actionIncludeFileBackedInScope"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -603,7 +603,7 @@
     <string>Include Writable File-Backed Memory</string>
    </property>
    <property name="statusTip">
-    <string>Include readable and writable file-backed mappings. Scope Start and Scope End are optional.</string>
+    <string>Include readable and writable file-backed mappings, work for PCSX2</string>
    </property>
   </action>
   <action name="actionStoreClear">
